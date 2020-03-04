@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 
 class ObjectsConfig(AppConfig):
-    name = 'objects'
+    name = 'apps.objects'
+
+    def ready(self):
+        import apps.objects.signals

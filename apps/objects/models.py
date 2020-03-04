@@ -4,6 +4,7 @@ from django.db import models
 from apps.customer.models import Customer
 
 from apps.accounts.models import Profile
+from django.db.models.signals import post_save
 
 
 class TraktOrLine(models.Model):
@@ -61,45 +62,44 @@ class TypeOfLocation(models.Model):
 
 class LineType(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	_id = models.CharField('Индекс', max_length=100, blank=True, null=True)
+
 
 	class Meta:
 		verbose_name = 'Тип линии'
 		verbose_name_plural = 'Типы линии'
 
 	def __str__(self):
-		return f'{self.name}, {self._id}'
+		return f'{self.name}, {self.id}'
 
 class Category(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	_id = models.CharField('Индекс', max_length=100, blank=True, null=True)
+	# _id = models.CharField('Индекс', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Категория'
 		verbose_name_plural = 'Категории'
 
 	def __str__(self):
-		return self._id
+		return f'{self.name}, {self.id}'
 
 class System(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	_id = models.CharField('Индекс', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Вид системы'
 		verbose_name_plural = 'Вид системы'
 
 	def __str__(self):
-		return self.name	
+		return f'{self.name}, {self.id}'
 
 
 class Outfit(models.Model):
-	id_outfit = models.CharField('Индекс', max_length=100, blank=True, null=True)
+
 	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
 	adding = models.CharField('Название', max_length=100, blank=True, null=True)
 	num_outfit = models.CharField('Номер', max_length=100, blank=True, null=True)
-	tpo = models.ForeignKey('TPO', on_delete=models.CASCADE, db_constraint=False)
-	type_outfit = models.ForeignKey('TypeOfLocation', db_constraint=False, related_name='out_tpo', on_delete=models.CASCADE, blank=True,
+	tpo = models.ForeignKey('TPO', on_delete=models.CASCADE, db_constraint=False, blank=True, null=True)
+	type_outfit = models.ForeignKey(TypeOfLocation, related_name='out_tpo', on_delete=models.CASCADE, blank=True,
 									null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -116,13 +116,11 @@ class Outfit(models.Model):
 class Point(models.Model):
 	point = models.CharField('ИП', max_length=100, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	id_outfit = models.ForeignKey('Outfit', db_constraint=False, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
+	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey('TPO', db_constraint=False, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
-
 
 	def __str__(self):
 		return self.point
-
 
 class Trassa(models.Model):
 	name = models.CharField(max_length=1000, blank=True, null=True)
@@ -139,7 +137,7 @@ class Trassa(models.Model):
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
 	trassa = models.ForeignKey(Trassa, related_name='object_trasa', on_delete=models.CASCADE, blank=True, null=True)
-	id_object = models.CharField(max_length=100, blank=True, null=True)
+	# id_object = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 	COreceive = models.CharField('КО прием', max_length=100, blank=True, null=True)
@@ -179,7 +177,7 @@ class Object(models.Model):
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
 
 	def __str__(self):
-		return f'{self.id_object}, {self.name}'
+		return self.name
 
 class IP(models.Model):
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, blank=True, null=True)
@@ -195,7 +193,6 @@ class IP(models.Model):
 
 
 class TransitObject(models.Model):
-	_id = models.CharField(max_length=100, blank=True, null=True)
 	id_complex_object = models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_complex_obj')
 	id_object = models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_transit_obj')
 	num = models.CharField(max_length=100, blank=True, null=True)

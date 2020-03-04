@@ -12,7 +12,7 @@ class IpInline(admin.StackedInline):
 @admin.register(Point)
 class PointAdmin(admin.ModelAdmin):
     inlines = (IpInline,)
-    list_display = ('point', 'name', 'tpo', 'id_outfit')
+    list_display = ('id', 'point', 'name', 'tpo', 'id_outfit')
     search_fields = ('point',)
 
 

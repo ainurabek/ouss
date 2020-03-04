@@ -7,14 +7,14 @@ from apps.accounts.models import Profile
 
 
 class Measure(models.Model):
-	index = models.CharField('Индекс', max_length=100, blank=True, null=True)
+
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
 	def __str__(self):
-		return f'{self.name}, {self.index}'
+		return f'{self.name}, {self.id}'
 
 class Speed(models.Model):
-	index = models.CharField('Индекс', max_length=100, blank=True, null=True)
+
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
 	class Meta:
@@ -22,38 +22,39 @@ class Speed(models.Model):
 		verbose_name_plural = 'Скорость'
 
 	def __str__(self):
-		return self.name
+		return f'{self.name}, {self.id}'
 
 class Type(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	_id = models.CharField('Индекс', max_length=100, blank=True, null=True)
+
 
 	class Meta:
 		verbose_name = 'Тип коммуникации'
 		verbose_name_plural = 'Типы коммуникации'
 
 	def __str__(self):
-		return f'{self.name}, {self._id}'
+		return f'{self.name}, {self.id}'
 
 class Mode(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	_id = models.CharField('Индекс', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Режим'
 		verbose_name_plural = 'Режимы'
 
 	def __str__(self):
-		return self.name
+		return f'{self.name}, {self.id}'
 
 
 class SubsRoutes(models.Model):
-	_id = models.CharField(max_length=100, blank=True, null=True)
 	route = models.CharField(max_length=100, blank=True, null=True)
+
+	def __str__(self):
+		return f'{self.route}, {self.id}'
 
 class Circuit(models.Model):
 	"""Каналы"""
-	id_circuit = models.CharField(max_length=100, blank=True, null=True)
+	# id_circuit = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Circuit', on_delete=models.CASCADE, blank=True, null=True)
 	num_circuit = models.CharField(max_length=100, blank=True, null=True)
 	name = models.CharField(max_length=100, blank=True, null=True)
@@ -90,7 +91,7 @@ class Circuit(models.Model):
 		verbose_name_plural = 'Каналы'
 
 class Bypass(models.Model):
-	_id = models.CharField(max_length=100, blank=True, null=True)
+
 	num = models.CharField(max_length=100, blank=True, null=True)
 	num_p = models.CharField(max_length=100, blank=True, null=True)
 	id_main = models.ForeignKey(Circuit, on_delete=models.CASCADE, blank=True, null=True, related_name='bypass_id_main')
@@ -98,7 +99,7 @@ class Bypass(models.Model):
 
 
 class AssignPart(models.Model):
-	_id = models.CharField(max_length=100, blank=True, null=True)
+
 	id_object_main =  models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_obj_main')
 	id_object_part =  models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_obj_part')
 

@@ -3,7 +3,6 @@ from django.db import models
 # Create your models here.
 
 class Customer(models.Model):
-	id_customer = models.CharField('Индекс', max_length=100, blank=True, null=True)
 	customer = models.CharField('Название', max_length=250, blank=True, null=True)
 	abr = models.CharField('Абревиатура', max_length=100, blank=True, null=True)
 	address = models.CharField('Адрес', max_length=250, blank=True, null=True)
