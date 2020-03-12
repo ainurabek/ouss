@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
 from apps.objects.serializers import LPSerializer,  TPOSerializer,\
-    OutfitSerializer, PointSerializer, IPSerializer
+    OutfitSerializer, PointSerializer, IPSerializer, ObjectSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -274,6 +274,61 @@ class TraktListView(APIView):
     #         return HttpResponse(objects)
     #     else:
     #         return HttpResponse("у этой линии передачи нет тракта")
+
+
+# ПГ ВГ ТГ ЧГ РГ 
+
+class ObjectCreateView(APIView):
+    """"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        parent = Object.objects.get(pk=pk)
+        serializer = ObjectSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                id_parent=parent, 
+                type_line=parent.type_line,
+                created_by=self.request.user.profile
+                )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ObjectDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    
+    def get_object(self, pk):
+        try:
+            return Object.objects.get(pk=pk)
+        except Object.DoesNotExist:
+            raise Http404
+
+    def delete(self, request, pk):
+        obj = self.get_object(pk)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ObjectEditView(APIView):
+    
+    def get_object(self, pk):
+        try:
+            return Object.objects.get(pk=pk)
+        except Object.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        obj = self.get_object(pk)
+        serializer = ObjectSerializer(obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 def trassa(request):
     data = []

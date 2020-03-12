@@ -3,7 +3,8 @@ from django.urls import path, include
 from rest_framework import routers
 from . import views
 from .views import LPListView, TraktListView, LPCreateView, LPEditView, TPOCreateView, \
-    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView
+    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView, \
+    ObjectDeleteView, ObjectCreateView, ObjectEditView
 
 app_name = 'objects'
 
@@ -42,6 +43,9 @@ urlpatterns = [
 
     url(r'collect_trassa/$', views.trassa, name='trassa'),
     path('trakt/<int:pk>/', TraktListView.as_view(), name='trakt_list'),
+    path('lp/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),
+    path('lp/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
+    path('lp/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
 
 
 
