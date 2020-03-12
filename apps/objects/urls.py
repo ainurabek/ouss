@@ -2,14 +2,17 @@ from django.conf.urls import url
 from django.urls import path, include
 from rest_framework import routers
 from . import views
-from .views import ObjectsLPListView, TraktListView, LPCreateView, LPEditView, TPOCreateView, \
-    TPOEditView, OutfitCreateView, OutfitEditView
+from .views import LPListView, TraktListView, LPCreateView, LPEditView, TPOCreateView, \
+    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView
 
 app_name = 'objects'
 
 router = routers.DefaultRouter()
 router.register('tpo', views.TPOListView, basename='tpo_list')
 router.register('outfit', views.OutfitsListView, basename='outfit_list')
+router.register('point', views.PointListView, basename='point_list')
+router.register('ip', views.IPListView, basename='ip_list')
+router.register('lp', views.LPListView, basename='lp_list')
 
 
 
@@ -24,11 +27,23 @@ urlpatterns = [
     url(r'^outfit/edit/(?P<pk>\S+)/$', OutfitEditView.as_view()),
     url(r'^outfit/delete/(?P<outfit_id>\S+)/$', views.outfit_delete_view, name='outfit_delete'),
 
-    url(r'collect_trassa/$', views.trassa, name='trassa'),
-    path('lp/', ObjectsLPListView.as_view({'get': 'list'}), name='objects_lp'),
-    path('lp/<int:pk>/', TraktListView.as_view(), name='objects_trakts'),
+    path('point/create/', PointCreateView.as_view(), name='point_create'),
+    url(r'^point/edit/(?P<pk>\S+)/$', PointEditView.as_view()),
+    url(r'^point/delete/(?P<pk>\S+)/$', views.point_delete_view, name='point_delete'),
+
+    path('ip/create/', IPCreateView.as_view(), name='ip_create'),
+    url(r'^ip/edit/(?P<pk>\S+)/$', IPEditView.as_view()),
+    url(r'^ip/delete/(?P<pk>\S+)/$', views.ip_delete_view, name='ip_delete'),
+
     path('lp/create/', LPCreateView.as_view(), name='lp_create'),
     url(r'^lp/edit/(?P<pk>\S+)/$', LPEditView.as_view(), name='lp_edit'),
+    url(r'^lp/delete/(?P<pk>\S+)/$', views.lp_delete_view, name='lp_delete'),
+
+
+    url(r'collect_trassa/$', views.trassa, name='trassa'),
+    path('trakt/<int:pk>/', TraktListView.as_view(), name='trakt_list'),
+
+
 
     # path('lp/trakt/<int:pk>/', views.get_pg, name='objects_pg'),
     # path('lp/trakt/vg/<int:pk>/', views.get_vg, name='objects_vg'),

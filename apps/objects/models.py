@@ -39,7 +39,7 @@ class TPO(models.Model):
 		verbose_name_plural = 'ТПО'
 
 	def __str__(self):
-		return str(self.id)
+		return f'{self.name},{self.index}, {self.id}'
 
 
 class TypeOfTrakt(models.Model):
@@ -179,9 +179,9 @@ class Object(models.Model):
 		return f'{self.name} ==== {self.id}'
 
 class IP(models.Model):
-	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, blank=True, null=True)
-	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True)
-	tpo_id = models.ForeignKey(TPO, on_delete=models.CASCADE, blank=True, null=True)
+	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True)
+	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, null=True, blank=True)
+	tpo_id = models.ForeignKey(TPO, on_delete=models.CASCADE, null=True, blank=True)
 
 	class Meta:
 		verbose_name = 'ИП'
