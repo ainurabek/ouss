@@ -7,6 +7,9 @@ from apps.accounts.models import Profile
 from django.db.models.signals import post_save
 
 
+
+
+
 class TraktOrLine(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -18,6 +21,8 @@ class TraktOrLine(models.Model):
 		verbose_name_plural = 'Линия/Тракт'
 
 
+
+
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -27,31 +32,31 @@ class InOut(models.Model):
 
 class TPO(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True) #название ТПО
-	tpo = models.CharField('Индекс', max_length=100, blank=True, null=True) #номер ТПО
+	index = models.CharField('Индекс', max_length=100, blank=True, null=True) #номер ТПО
 
 	class Meta:
 		verbose_name = 'ТПО'
 		verbose_name_plural = 'ТПО'
 
 	def __str__(self):
-		return f'{self.name}, {self.tpo}'
+		return str(self.id)
 
 
 class TypeOfTrakt(models.Model):
-	index = models.CharField('Индекс', max_length=100, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	group = models.CharField('Группа', max_length=100, blank=True, null=True)
+
 
 	class Meta:
-		verbose_name = 'Тип тракта'
-		verbose_name_plural = 'Тип тракта'
+		verbose_name = 'ПГ/ВГ/ТГ/ЧГ/РГ'
+		verbose_name_plural = 'ПГ/ВГ/ТГ/ЧГ/РГ'
 
 	def __str__(self):
 		return self.name
 
 
 class TypeOfLocation(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+
+	name = models.CharField('Название', max_length=100)
 
 	class Meta:
 		verbose_name = 'Тип принадлежности'
@@ -94,13 +99,11 @@ class System(models.Model):
 
 
 class Outfit(models.Model):
-
 	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
 	adding = models.CharField('Название', max_length=100, blank=True, null=True)
 	num_outfit = models.CharField('Номер', max_length=100, blank=True, null=True)
-	tpo = models.ForeignKey('TPO', on_delete=models.CASCADE, db_constraint=False, blank=True, null=True)
-	type_outfit = models.ForeignKey(TypeOfLocation, related_name='out_tpo', on_delete=models.CASCADE, blank=True,
-									null=True)
+	tpo = models.ForeignKey('TPO', null = True, on_delete=models.CASCADE)
+	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.CASCADE)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
@@ -117,15 +120,13 @@ class Point(models.Model):
 	point = models.CharField('ИП', max_length=100, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
-	tpo = models.ForeignKey('TPO', db_constraint=False, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
+	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
 		return self.point
 
 class Trassa(models.Model):
-	name = models.CharField(max_length=1000, blank=True, null=True)
-	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
-	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Трасса'
@@ -149,11 +150,9 @@ class Object(models.Model):
 	tpo2 = models.ForeignKey(TPO, related_name='obj_tpo2', on_delete=models.CASCADE, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.CASCADE, blank=True, null=True)
 	category = models.ForeignKey(Category, related_name='obj_category', on_delete=models.CASCADE, blank=True, null=True)
-	trakt = models.BooleanField(blank=True, null=True)
+	trakt_line = models.ForeignKey(TraktOrLine, related_name='obj_traktorline', on_delete=models.CASCADE, blank=True, null=True)
 	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)
 	system = models.ForeignKey(System, related_name='obj_system', on_delete=models.CASCADE, blank=True, null=True)
-	main = models.BooleanField()
-	_complex = models.BooleanField()
 	type_transit1 = models.CharField('Тип транзита1', max_length=100, blank=True, null=True)
 	type_transit2 = models.CharField('Тип транзита2', max_length=100, blank=True, null=True)
 	id_transit1 = models.ForeignKey('Object', related_name='transit_obj', on_delete=models.CASCADE, blank=True, null=True)
@@ -165,7 +164,7 @@ class Object(models.Model):
 	destination2 = models.ForeignKey('IP', related_name='obj_dest2', on_delete=models.CASCADE, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.CASCADE, blank=True, null=True)
 	amount_channels = models.CharField('Количество каналов', max_length=100, blank=True, null=True)
-	not_in_use = models.BooleanField('Активный/Нет')
+	not_in_use = models.BooleanField('Активный/Нет', blank=True, null=True)
 	type_line = models.ForeignKey(LineType, related_name='obj_type_line',on_delete=models.CASCADE, blank=True, null=True)
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.CASCADE, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
@@ -177,7 +176,7 @@ class Object(models.Model):
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
 
 	def __str__(self):
-		return self.name
+		return f'{self.name} ==== {self.id}'
 
 class IP(models.Model):
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, blank=True, null=True)
@@ -198,6 +197,5 @@ class TransitObject(models.Model):
 	num = models.CharField(max_length=100, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-
 
 

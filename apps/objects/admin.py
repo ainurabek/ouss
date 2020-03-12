@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import *
+from .models import Object, IP, Point, Outfit, TraktOrLine, Trassa, TransitObject, System, InOut, LineType, TPO, TypeOfLocation, TypeOfTrakt, Category
 
 
 class IpInline(admin.StackedInline):
@@ -11,10 +11,14 @@ class IpInline(admin.StackedInline):
 
 @admin.register(Point)
 class PointAdmin(admin.ModelAdmin):
-    inlines = (IpInline,)
+    inline = IpInline
     list_display = ('id', 'point', 'name', 'tpo', 'id_outfit')
     search_fields = ('point',)
 
+@admin.register(TPO)
+class TPOAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'index')
+    search_fields = ('name',)
 
 class PointInline(admin.StackedInline):
     model = Point
@@ -23,17 +27,30 @@ class PointInline(admin.StackedInline):
     extra = 0
 
 
+@admin.register(Outfit)
+class OutfitAdmin(admin.ModelAdmin):
+    list_display = ('id', 'outfit', 'adding', 'tpo', 'type_outfit')
+    search_fields = ('outfit',)
+
+@admin.register(Object)
+class ObjectAdmin(admin.ModelAdmin):
+    list_display = ('id', 'id_parent', 'name', 'point1', 'point2', 'trassa')
+    search_fields = ('name',)
+
+@admin.register(Trassa)
+class TrassaAdmin(admin.ModelAdmin):
+    list_display = ('id',)
+    search_fields = ('id',)
+
 admin.site.register(TraktOrLine)
 admin.site.register(InOut)
-admin.site.register(TPO)
+# admin.site.register(TPO)
 admin.site.register(TypeOfTrakt)
 admin.site.register(TypeOfLocation)
 admin.site.register(LineType)
 admin.site.register(Category)
 admin.site.register(System)
-# admin.site.register(Point)
-admin.site.register(Object)
+# admin.site.register(Object)
 admin.site.register(IP)
 admin.site.register(TransitObject)
-admin.site.register(Trassa)
-admin.site.register(Outfit)
+# admin.site.register(Trassa)

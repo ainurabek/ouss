@@ -1,3 +1,188 @@
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from rest_framework.decorators import api_view, permission_classes
 
 # Create your views here.
+from apps.objects.models import Object, TPO, Outfit
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from knox.auth import TokenAuthentication
+
+from apps.objects.serializers import ObjectListSerializer, LPCreateSerializer, TPOSerializer, OutfitSerializer
+from rest_framework import permissions, viewsets, status, generics
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+import xlwt
+
+
+
+class TPOListView(viewsets.ModelViewSet):
+    queryset = TPO.objects.all()
+    serializer_class = TPOSerializer
+    lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ('name', 'index')
+    filterset_fields = ('name', 'index')
+
+    def export_csv(request):
+        if 'csv' in request.GET:
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="tpo.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('TPO')
+            # Sheet header, first row
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['ID', 'Название', 'Индекс']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            rows = TPO.objects.all()
+            if 'name' in request.GET and request.GET.get('name', None):
+                rows = rows.filter(name=request.GET.get('name'))
+            if 'index' in request.GET and request.GET.get('index', None):
+                rows = rows.filter(tpo=request.GET['index'])
+
+            for row in rows:
+                row_num += 1
+                item = []
+                item.append(row.id)
+                item.append(row.name)
+                item.append(row.index)
+                for col_num in range(len(item)):
+                    ws.write(row_num, col_num, item[col_num], font_style)
+            wb.save(response)
+            return response
+
+class TPOCreateView(generics.CreateAPIView):
+    queryset=TPO.objects.all()
+    serializer_class = TPOSerializer
+
+
+class TPOEditView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = TPO.objects.all()
+    serializer_class = TPOSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def perform_update(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+@api_view(['DELETE',])
+@permission_classes((IsAuthenticated,))
+def tpo_delete_view(request, tpo_id):
+    try:
+        tpo=TPO.objects.get(id=tpo_id)
+    except tpo.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "DELETE":
+        operation = tpo.delete()
+        data = {}
+        if operation:
+            data["success"] = "TPO успешно удален"
+        else:
+            data["failure"] = "TPO не удален"
+        return Response(data=data)
+
+class OutfitsListView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Outfit.objects.all()
+    lookup_field = 'pk'
+    serializer_class = OutfitSerializer
+
+class OutfitCreateView(generics.CreateAPIView):
+    queryset=Outfit.objects.all()
+    serializer_class = OutfitSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+class OutfitEditView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = Outfit.objects.all()
+    serializer_class = OutfitSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def perform_update(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+@api_view(['DELETE',])
+@permission_classes((IsAuthenticated,))
+def outfit_delete_view(request, outfit_id):
+    outfit=Outfit.objects.get(id=outfit_id)
+    try:
+        outfit
+    except outfit.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "DELETE":
+        operation = outfit.delete()
+        data = {}
+        if operation:
+            data["success"] = "Предприятие успешно удалено"
+        else:
+            data["failure"] = "Предприятие не удалено"
+        return Response(data=data)
+
+class ObjectsLPListView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Object.objects.filter(id_parent=None)
+    lookup_field = 'pk'
+    serializer_class = ObjectListSerializer
+
+class TraktListView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        lp = Object.objects.get(pk=pk)
+        trakt = Object.objects.filter(id_parent=lp.pk)
+        data = ObjectListSerializer(trakt, many=True).data
+        return Response(data)
+    # for obj in objects:
+    #     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
+    #         print(objects)
+    #         return HttpResponse(objects)
+    #     else:
+    #         return HttpResponse("у этой линии передачи нет тракта")
+
+class LPCreateView(generics.CreateAPIView):
+    queryset = Object.objects.all()
+    serializer_class = LPCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+
+class LPEditView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = Object.objects.all()
+    serializer_class = LPCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def perform_update(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+def trassa(request):
+    data = []
+    objects = Object.objects.all()
+    for obj in objects:
+        data.append({'ip1': obj.point1,  'name': obj.name, 'ip2': obj.point2,'id_transit1': [], 'id_transit2': []})
+        if obj.id_transit1 !=None:
+            data.append({'id_transit1': obj.id_transit1})
+        elif obj.id_transit2 != None:
+            data.append({'id_transit2': obj.id_transit2})
+    return JsonResponse({'data': data})
