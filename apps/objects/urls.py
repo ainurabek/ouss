@@ -43,9 +43,9 @@ urlpatterns = [
 
     url(r'collect_trassa/$', views.trassa, name='trassa'),
     path('trakt/<int:pk>/', TraktListView.as_view(), name='trakt_list'),
-    path('lp/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),
-    path('lp/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
-    path('lp/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
+    path('trakt/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),
+    path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
+    path('trakt/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
 
 
 

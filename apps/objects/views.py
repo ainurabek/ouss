@@ -263,6 +263,12 @@ class TraktListView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
+    def get_object(self, pk):
+        try:
+            return Object.objects.get(pk=pk)
+        except Object.DoesNotExist:
+            raise Http404
+
     def get(self, request, pk):
         lp = Object.objects.get(pk=pk)
         trakt = Object.objects.filter(id_parent=lp.pk)
@@ -282,6 +288,12 @@ class ObjectCreateView(APIView):
     """"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    def get_object(self, pk):
+        try:
+            return Object.objects.get(pk=pk)
+        except Object.DoesNotExist:
+            raise Http404
 
     def post(self, request, pk):
         parent = Object.objects.get(pk=pk)

@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'yd*e9ez+7kcg7sogu&%*63tv_a572fen+-(=rss^ul^37hnv01'
 # SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = (os.environ.get('DEBUG_VALUE') == 'True')
+DEBUG = True#(os.environ.get('DEBUG_VALUE') == 'True')
 
 ALLOWED_HOSTS = ['telekom.herokuapp.com', '127.0.0.1', 'localhost']
 
