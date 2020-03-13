@@ -312,6 +312,7 @@ class ObjectCreateView(APIView):
                 id_parent=parent, 
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
+                our=parent.our,
                 created_by=self.request.user.profile
                 )
             return Response(serializer.data, status=status.HTTP_201_CREATED)

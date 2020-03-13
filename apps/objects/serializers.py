@@ -102,6 +102,6 @@ class ObjectSerializer(serializers.ModelSerializer):
         read_only=False, queryset=TypeOfTrakt.objects.all())
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line')
+        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line', 'our', 'num')
         depth = 1
 
