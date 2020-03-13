@@ -89,3 +89,16 @@ class LPSerializer(serializers.ModelSerializer):
                   'comments', 'created_by', 'created_at')
         depth = 1
 
+class ObjectSerializer(serializers.ModelSerializer):
+    tpo1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TPO.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+         read_only=False, queryset=Point.objects.all())
+    tpo2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TPO.objects.all())
+    point2 = serializers.PrimaryKeyRelatedField(
+         read_only=False, queryset=Point.objects.all())
+    class Meta:
+        model = Object
+        fields = ('id','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line')
+        depth = 1
