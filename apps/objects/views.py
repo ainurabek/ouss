@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
+from django.http import Http404
 
 # Create your views here.
 from apps.objects.models import Object, TPO, Outfit, Point, IP
@@ -101,7 +102,7 @@ class OutfitsListView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = OutfitSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('outfit', 'adding', 'tpo', 'num_outfit','type_outfit')
+    search_fields = ('outfit', 'adding', 'tpo__index', 'tpo__name', 'num_outfit','type_outfit__name')
     filterset_fields = ('outfit', 'adding', 'tpo', 'num_outfit','type_outfit')
 
 class OutfitCreateView(generics.CreateAPIView):
@@ -147,7 +148,7 @@ class PointListView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = PointSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('point', 'name', 'tpo', 'id_outfit')
+    search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
 
 class PointCreateView(generics.CreateAPIView):
@@ -259,9 +260,12 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
-class TraktListView(APIView):
-    permission_classes = (IsAuthenticated,)
+class ObjectListView(APIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
+    filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
 
     def get_object(self, pk):
         try:
@@ -272,7 +276,7 @@ class TraktListView(APIView):
     def get(self, request, pk):
         lp = Object.objects.get(pk=pk)
         trakt = Object.objects.filter(id_parent=lp.pk)
-        data = LPSerializer(trakt, many=True).data
+        data = ObjectSerializer(trakt, many=True).data
         return Response(data)
     # for obj in objects:
     #     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ

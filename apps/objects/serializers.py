@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, TraktOrLine, LineType
+from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, TraktOrLine, LineType, TypeOfTrakt
 
 User = get_user_model()
 
@@ -61,8 +61,7 @@ class IPSerializer(serializers.ModelSerializer):
         read_only=False, queryset=TPO.objects.all())
     point_id = serializers.PrimaryKeyRelatedField(
          read_only=False, queryset=Point.objects.all())
-    # object_id = serializers.PrimaryKeyRelatedField(
-    #     read_only=False, queryset=Object.objects.all())
+
     class Meta:
         model = IP
         fields = ('id', 'point_id', 'object_id', 'tpo_id')
@@ -85,11 +84,12 @@ class LPSerializer(serializers.ModelSerializer):
         read_only=False, queryset=LineType.objects.all())
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt_line', 'type_line',
+        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt_line', 'type_line', 'our',
                   'comments', 'created_by', 'created_at')
         depth = 1
 
 class ObjectSerializer(serializers.ModelSerializer):
+    id_parent=LPSerializer()
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     point1 = serializers.PrimaryKeyRelatedField(
@@ -98,7 +98,10 @@ class ObjectSerializer(serializers.ModelSerializer):
         read_only=False, queryset=TPO.objects.all())
     point2 = serializers.PrimaryKeyRelatedField(
          read_only=False, queryset=Point.objects.all())
+    type_of_trakt = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfTrakt.objects.all())
     class Meta:
         model = Object
-        fields = ('id','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line')
+        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line')
         depth = 1
+
