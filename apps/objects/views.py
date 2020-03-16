@@ -260,11 +260,6 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
-
-class TraktListView(APIView):
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
-
 class ObjectListView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
