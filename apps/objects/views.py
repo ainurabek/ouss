@@ -260,6 +260,11 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
+
+class TraktListView(APIView):
+    # permission_classes = (IsAuthenticated,)
+    # authentication_classes = (TokenAuthentication,)
+
 class ObjectListView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -306,6 +311,8 @@ class ObjectCreateView(APIView):
             serializer.save(
                 id_parent=parent, 
                 type_line=parent.type_line,
+                id_outfit=parent.id_outfit,
+                our=parent.our,
                 created_by=self.request.user.profile
                 )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -329,7 +336,9 @@ class ObjectDeleteView(APIView):
 
 
 class ObjectEditView(APIView):
-    
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Object.objects.get(pk=pk)
