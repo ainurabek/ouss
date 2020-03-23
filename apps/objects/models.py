@@ -176,7 +176,7 @@ class Object(models.Model):
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
 
 	def __str__(self):
-		return f'{self.name} ==== {self.id}'
+		return self.name
 
 class IP(models.Model):
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True)

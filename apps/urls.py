@@ -5,6 +5,7 @@ from apps.accounts import urls as accounts_urls
 from apps.objects import urls as objects_urls
 from apps.circuits import urls as circuits_urls
 from apps.customer import urls as customer_urls
+from apps.management import urls as management_urls
 
 
 router = DefaultRouter()
@@ -19,6 +20,7 @@ urlpatterns = [
     path('objects/', include(objects_urls, namespace='objects')),
     path('circuits/', include(circuits_urls, namespace='circuits')),
     path('customer/', include(customer_urls, namespace='customer')),
+    path('management/', include(management_urls, namespace='management_url')),
     path('', include(router.urls)),
 
 ]
