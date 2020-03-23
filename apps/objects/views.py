@@ -264,25 +264,26 @@ def lp_delete_view(request, pk):
 class TraktListView(APIView):
     # permission_classes = (IsAuthenticated,)
     # authentication_classes = (TokenAuthentication,)
+    pass
 
 class ObjectListView(APIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
-    filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
+	permission_classes = (IsAuthenticatedOrReadOnly,)
+	authentication_classes = (TokenAuthentication,)
+	filter_backends = (SearchFilter, DjangoFilterBackend)
+	search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
+	filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
+	
+	def get_object(self, pk):
+		try:
+			return Object.objects.get(pk=pk)
+		except Object.DoesNotExist:
+			raise Http404
 
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        lp = Object.objects.get(pk=pk)
-        trakt = Object.objects.filter(id_parent=lp.pk)
-        data = ObjectSerializer(trakt, many=True).data
-        return Response(data)
+	def get(self, request, pk):
+		lp = Object.objects.get(pk=pk)
+		trakt = Object.objects.filter(id_parent=lp.pk)
+		data = ObjectSerializer(trakt, many=True).data
+		return Response(data)
     # for obj in objects:
     #     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
     #         print(objects)
