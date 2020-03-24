@@ -1,0 +1,85 @@
+{% extends 'management/base.html' %}
+
+{% block content %}
+<table class="table table-bordered" width="100%" cellspacing="0">
+  <thead>
+    <tr>
+      <th>
+        <h2>ИП от</h2>
+        <h3>{{ obj.point1 }}</h3>
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>ИП от</th>
+              <th>Название</th>
+              <th>ИП до</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lp in ip_ot %}
+              <tr>
+                <td>{{lp.point1}}</td>
+                <td><a href="{% url 'apps:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td>{{lp.point2}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </th>
+
+      <th>
+        <h2>Трасса</h2>
+        <h3></h3>
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>ИП от</th>
+              <th>Название</th>
+              <th>ИП до</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lp in trassa_list1 %}
+            <tr>
+                <td>{{lp.point1}}</td>
+                <td><a href="{% url 'apps:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td>{{lp.point2}}</td>
+            </tr>
+            {% endfor %}
+            {% for lp in trassa_list2 %}
+            <tr>
+                <td>{{lp.point1}}</td>
+                <td><a href="{% url 'apps:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td>{{lp.point2}}</td>
+            </tr>
+            {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </th>
+      <th>
+        <h2>ИП до</h2>
+        <h3>{{ obj.point2 }}</h3>
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>ИП от</th>
+              <th>Название</th>
+              <th>ИП до</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lp in ip_do %}
+              <tr>
+                <td>{{lp.point1}}</td>
+                <td><a href="{% url 'apps:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td>{{lp.point2}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </th>
+  </thead>
+</table>
+
+{% endblock %}
