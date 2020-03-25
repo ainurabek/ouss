@@ -109,6 +109,7 @@ class Point(models.Model):
 	def __str__(self):
 		return self.point
 
+
 class Trassa(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -160,6 +161,9 @@ class Object(models.Model):
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
+
+	def to_json(self):
+		return {'id':self.id, 'name':self.name, 'point1':self.point1.name, 'point2': self.point2.name}
 
 	def __str__(self):
 		return self.name

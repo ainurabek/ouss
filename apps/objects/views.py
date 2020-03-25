@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from django.http import Http404
@@ -17,6 +17,11 @@ from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 import xlwt
+
+from django.db.models import Q
+from django.utils import timezone
+
+
 
 
 #TPO
@@ -280,7 +285,7 @@ class ObjectListView(APIView):
 			raise Http404
 
 	def get(self, request, pk):
-		lp = Object.objects.get(pk=pk)
+		lp = self.get_object(pk)
 		trakt = Object.objects.filter(id_parent=lp.pk)
 		data = ObjectSerializer(trakt, many=True).data
 		return Response(data)
@@ -306,7 +311,7 @@ class ObjectCreateView(APIView):
             raise Http404
 
     def post(self, request, pk):
-        parent = Object.objects.get(pk=pk)
+        parent = self.get_object(pk)
         serializer = ObjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(
@@ -366,3 +371,96 @@ def trassa(request):
         elif obj.id_transit2 != None:
             data.append({'id_transit2': obj.id_transit2})
     return JsonResponse({'data': data})
+
+
+def select_lp(request, main_pk):
+    main_obj = Object.objects.get(pk=main_pk)
+    ip_ot = Object.objects.filter(Q(point1=main_obj.point1) | Q(point2=main_obj.point1))
+    ip_ot = ip_ot.filter(id_parent=None)
+    ip_do = Object.objects.filter(Q(point1=main_obj.point2) | Q(point2=main_obj.point2))
+    ip_do = ip_do.filter(id_parent=None)
+
+    trassa_list1 = main_obj.transit.all().order_by('-add_time')
+    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+
+    response = {
+        'main_obj': main_obj.to_json(),
+        'trassa_list1': [m.to_json() for m in trassa_list1],
+        'trassa_list2': [m.to_json() for m in trassa_list2],
+        'ip_ot': [m.to_json() for m in ip_ot],
+        'ip_do': [m.to_json() for m in ip_do]
+    }
+
+    return JsonResponse(response)
+
+
+def select_object(request, lp_pk):
+    objects = Object.objects.filter(id_parent=lp_pk)
+
+    response = {
+        'objects': [m.to_json() for m in objects],     
+    }
+    return JsonResponse(response)
+
+
+def left_trassa(request, pk, id):
+    main_obj = Object.objects.get(pk=pk)
+    obj = Object.objects.get(pk=id)
+
+
+    if main_obj.transit.filter(pk=id).exists():
+        main_obj.transit.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+    else:
+        main_obj.transit.add(obj)
+        Object.objects.filter(pk=id).update(add_time=timezone.now())
+
+    response = {
+        'main_obj': main_obj.to_json(),
+        'obj': obj.to_json(),    
+    }
+    return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
+
+
+def right_trassa(request, pk, id):
+    main_obj = Object.objects.get(pk=pk)
+    obj = Object.objects.get(pk=id) 
+
+    if main_obj.transit2.filter(pk=id).exists():
+        main_obj.transit2.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+    else:
+        main_obj.transit2.add(obj)
+        Object.objects.filter(pk=id).update(add_time=timezone.now())
+
+
+    response = {
+        'main_obj': main_obj.to_json(),
+        'obj': obj.to_json(),     
+    }  
+
+    return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
+
+
+def save_trassa(request, pk):
+    main_obj = Object.objects.get(pk=pk)
+
+    for i in main_obj.transit.all():
+        if main_obj.transit.all() not in i.transit.all():
+            i.transit.add(*main_obj.transit.all())
+        if main_obj.transit2.all() not in i.transit2.all():
+            i.transit2.add(*main_obj.transit2.all())
+
+    for i in main_obj.transit2.all():
+        if main_obj.transit2.all() not in i.transit2.all():
+            i.transit2.add(*main_obj.transit2.all())
+        if main_obj.transit.all() not in i.transit.all():
+            i.transit.add(*main_obj.transit.all())
+
+    response = {'success': 'Трасса создано успешно'}
+
+    return JsonResponse(response)
+
+
