@@ -1,5 +1,4 @@
 {% load static %}
-{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,14 +10,17 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Kyrgyz Telekom - Создание ЛП</title>
+  <title>SKyrgyz Telekom - ТПО</title>
 
-  <!-- Custom fonts for this template-->
+  <!-- Custom fonts for this template -->
   <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-  <!-- Custom styles for this template-->
+  <!-- Custom styles for this template -->
   <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+  <!-- Custom styles for this page -->
+  <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 
 </head>
 
@@ -27,7 +29,7 @@
   <!-- Page Wrapper -->
   <div id="wrapper">
 
-    <!-- Sidebar -->
+        <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" >
       <img src="{% static 'img/logo2.gif' %}" style="height: 140px; width: 225px; margin-left: 0px">
 
@@ -38,7 +40,6 @@
         </div>
         <div class="sidebar-brand-text mx-3">Kyrgyz Telecom <sup>CRM</sup></div>
       </a>
-
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
@@ -90,12 +91,15 @@
     </ul>
     <!-- End of Sidebar -->
 
-      <!-- Content Wrapper -->
+    <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
+
       <!-- Main Content -->
       <div id="content">
+
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="height: 40px;">
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
           <!-- Sidebar Toggle (Topbar) -->
           <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
             <i class="fa fa-bars"></i>
@@ -103,64 +107,36 @@
         </nav>
         <!-- End of Topbar -->
 
+
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Создание тракта</h1>
-
-
+          <h1 class="h3 mb-2 text-gray-800">Создать трассы </h1>
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
 
             <div class="card-body">
-
+                 <button type="submit" class="btn btn-primary btn-default btn-flat btn-block">
+                  {% for lp in trassa_list1 %}
+                    ({{ lp.point1 }})
+                    {{ lp.name }}
+                    ({{ lp.point2 }})
+                  {% endfor  %}
+                  {% for lp in trassa_list2 %}
+                    ({{ lp.point1 }})
+                    {{ lp.name }}
+                    ({{ lp.point2 }})
+                  {% endfor  %}
+                </button>
 
               {% block content %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="box box-info">
-                            <form method="post">{% csrf_token %}
-                                <div class="box-body">
-                                    <div class="form-group">
 
-                                        <label>{{ form.name.label }}</label>
-                                        {% render_field form.name class="form-control" %}
-                                        <label>{{ form.id_outfit.label }}</label>
-                                        {% render_field form.id_outfit class="form-control" %}
-                                        <label>{{ form.tpo1.label }}</label>
-                                        {% render_field form.tpo1 class="form-control" %}
-                                        <label>{{ form.point1.label }}</label>
-                                        {% render_field form.point1 class="form-control" %}
-                                        <label>{{ form.tpo2.label }}</label>
-                                        {% render_field form.tpo2 class="form-control" %}
-                                        <label>{{ form.point2.label }}</label>
-                                        {% render_field form.point2 class="form-control" %}
-                                        <label>{{ form.trakt.label }}</label>
-                                        {% render_field form.trakt class="form-control" %}
-                                        <label>{{ form.type_line.label }}</label>
-                                        {% render_field form.type_line class="form-control" %}
-                                        <label>{{ form.type_of_trakt.label }}</label>
-                                        {% render_field form.type_of_trakt class="form-control" %}
-                                        <label>{{ form.amount_channels.label }}</label>
-                                        {% render_field form.amount_channels class="form-control" %}
-
-
-                                    </div>
-                                </div>
-                                <div class="box-footer clearfix">
-                                    <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
-
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endblock %}
-
+              {% endblock %}
+              <a href="{% url 'apps:management:save_trassa' obj.id %}" class="btn btn-default btn-flat btn-block">
+                      <button type="submit" class="btn btn-primary">Сохранит трассу</button>
+                  </a> 
             </div>
-
           </div>
 
         </div>
@@ -174,8 +150,6 @@
     </div>
     <!-- End of Content Wrapper -->
 
-
-
   </div>
   <!-- End of Page Wrapper -->
 
@@ -183,6 +157,7 @@
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
+
 
 
   <!-- Bootstrap core JavaScript-->
@@ -196,11 +171,11 @@
   <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 
   <!-- Page level plugins -->
-  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+  <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 
   <!-- Page level custom scripts -->
-  <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
-  <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>
+  <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
 
 </body>
 

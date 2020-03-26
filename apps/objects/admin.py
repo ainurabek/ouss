@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Object, IP, Point, Outfit, TraktOrLine, Trassa, TransitObject, System, InOut, LineType, TPO, TypeOfLocation, TypeOfTrakt, Category
+from .models import Object, IP, Point, Outfit, Trassa, TransitObject, System, InOut, LineType, TPO, TypeOfLocation, TypeOfTrakt, Category
 
 
 class IpInline(admin.StackedInline):
@@ -42,7 +42,6 @@ class TrassaAdmin(admin.ModelAdmin):
     list_display = ('id',)
     search_fields = ('id',)
 
-admin.site.register(TraktOrLine)
 admin.site.register(InOut)
 # admin.site.register(TPO)
 admin.site.register(TypeOfTrakt)

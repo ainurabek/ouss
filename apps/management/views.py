@@ -3,6 +3,8 @@ from apps.objects.models import TPO, Outfit, Point, Object
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm
+from django.db.models import Q
+from django.utils import timezone
 
 
 
@@ -106,7 +108,7 @@ def lp_delete(request, pk=None):
         return redirect('apps:management:lp')
 
 def trakt_list(request, lp_id):
-    obj = Object.objects.get(pk=lp_id)
+    parent = Object.objects.get(pk=lp_id)
     trakts= Object.objects.filter(id_parent=lp_id)
     filter_form = ObjectFilterForm(request.GET or None)
     if filter_form.is_valid():
@@ -139,7 +141,22 @@ def trakt_list(request, lp_id):
             trakts = trakts.filter(
                 amount_channels=filter_form.cleaned_data.get('amount_channels')
             )
-    return render(request, 'management/trakt.html', {'trakts': trakts, 'obj': obj, 'filter_form':filter_form})
+
+    if int(trakts.count()) > 0:
+        obj = trakts[0]
+        context = {
+            'trakts': trakts, 
+            'obj': obj, 
+            'filter_form':filter_form,
+            'parent': parent
+            }
+    else:
+        context = {
+            'trakts': trakts, 
+            'parent': parent, 
+            'filter_form':filter_form           
+        }
+    return render(request, 'management/trakt.html', context)
 
 def trakt_create(request, lp_id):
     lp = get_object_or_404(Object, id=lp_id)
@@ -169,6 +186,102 @@ def trakt_delete(request, pk):
         trakt = Object.objects.get(id=pk)
         trakt.delete()
         return redirect('apps:management:trakt', lp_id=trakt.id_parent.pk)
+
+
+def select_obj(request, pk):
+    obj = Object.objects.get(pk=pk)
+    ip_ot = Object.objects.filter(Q(point1=obj.point1) | Q(point2=obj.point1))
+    ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
+
+
+    trassa_list1 = obj.transit.all().order_by('-add_time')
+    trassa_list2 = obj.transit2.all().order_by('add_time')
+
+    context = {
+        'obj': obj,
+        'trassa_list1': trassa_list1,
+        'trassa_list2': trassa_list2,
+        'ip_ot': ip_ot,
+        'ip_do': ip_do
+    }
+
+
+    return render(request, 'management/select_obj.html', context)
+
+
+def left_trassa(request, pk, id):
+    main_obj = Object.objects.get(pk=pk)
+    obj = Object.objects.get(pk=id)
+
+    ip_ot = Object.objects.filter(Q(point1=obj.point1) | Q(point2=obj.point1))
+    ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
+
+    if main_obj.transit.filter(pk=id).exists():
+        main_obj.transit.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+    else:
+        main_obj.transit.add(obj)
+        Object.objects.filter(pk=id).update(add_time=timezone.now())
+
+    trassa_list1 = main_obj.transit.all().order_by('-add_time')
+    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+
+    context = {
+        'obj': main_obj,
+        'trassa_list1': trassa_list1,
+        'trassa_list2': trassa_list2,
+        'ip_ot': ip_ot,
+        'ip_do': ip_do
+    }
+    return render(request, 'management/trassa.html', context)
+
+
+def right_trassa(request, pk, id):
+    main_obj = Object.objects.get(pk=pk)
+    obj = Object.objects.get(pk=id) 
+
+    ip_ot = Object.objects.filter(Q(point1=obj.point1) | Q(point2=obj.point1))
+    ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
+
+    if main_obj.transit2.filter(pk=id).exists():
+        main_obj.transit2.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+    else:
+        main_obj.transit2.add(obj)
+        Object.objects.filter(pk=id).update(add_time=timezone.now())
+
+    trassa_list1 = main_obj.transit.all().order_by('-add_time')
+    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+
+    context = {
+        'obj': main_obj,
+        'trassa_list1': trassa_list1,
+        'trassa_list2': trassa_list2,
+        'ip_ot': ip_ot,
+        'ip_do': ip_do
+    }   
+
+    return render(request, 'management/trassa.html', context)
+
+
+def save_trassa(request, pk):
+    main_obj = Object.objects.get(pk=pk)
+
+    for i in main_obj.transit.all():
+        if main_obj.transit.all() not in i.transit.all():
+            i.transit.add(*main_obj.transit.all())
+        if main_obj.transit2.all() not in i.transit2.all():
+            i.transit2.add(*main_obj.transit2.all())
+
+    for i in main_obj.transit2.all():
+        if main_obj.transit2.all() not in i.transit2.all():
+            i.transit2.add(*main_obj.transit2.all())
+        if main_obj.transit.all() not in i.transit.all():
+            i.transit.add(*main_obj.transit.all())
+
+    return redirect('apps:management:trakt', lp_id=main_obj.id_parent.pk)
 
 
 

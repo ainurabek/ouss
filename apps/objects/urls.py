@@ -4,7 +4,9 @@ from rest_framework import routers
 from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView, \
-    ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView
+    ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView, select_lp, \
+    select_object, left_trassa, right_trassa, save_trassa
+
 
 app_name = 'objects'
 
@@ -47,9 +49,14 @@ urlpatterns = [
     path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
     path('trakt/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
 
+    path('trakt/select-lp/<int:main_pk>/', select_lp, name='select_lp'),
+    path('trakt/select-object/<int:lp_pk>/', select_object, name='select_obj'),
+    path('trakt/left-trassa/<int:pk>/<int:id>/', left_trassa, name='left_trassa'),
+    path('trakt/right-trassa/<int:pk>/<int:id>/', right_trassa, name='right_trassa'),
+    path('trakt/save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
+
+
     url(r'collect_trassa/$', views.trassa, name='trassa'),
-    # path('lp/trakt/<int:pk>/', views.get_pg, name='objects_pg'),
-    # path('lp/trakt/vg/<int:pk>/', views.get_vg, name='objects_vg'),
 
     path('', include(router.urls))
 

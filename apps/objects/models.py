@@ -7,22 +7,6 @@ from apps.accounts.models import Profile
 from django.db.models.signals import post_save
 
 
-
-
-
-class TraktOrLine(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
-
-	def __str__(self):
-		return self.name
-
-	class Meta:
-		verbose_name = 'Линия/Тракт'
-		verbose_name_plural = 'Линия/Тракт'
-
-
-
-
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -125,6 +109,7 @@ class Point(models.Model):
 	def __str__(self):
 		return self.point
 
+
 class Trassa(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -150,13 +135,13 @@ class Object(models.Model):
 	tpo2 = models.ForeignKey(TPO, related_name='obj_tpo2', on_delete=models.CASCADE, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.CASCADE, blank=True, null=True)
 	category = models.ForeignKey(Category, related_name='obj_category', on_delete=models.CASCADE, blank=True, null=True)
-	trakt_line = models.ForeignKey(TraktOrLine, related_name='obj_traktorline', on_delete=models.CASCADE, blank=True, null=True)
+	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
 	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)
 	system = models.ForeignKey(System, related_name='obj_system', on_delete=models.CASCADE, blank=True, null=True)
 	type_transit1 = models.CharField('Тип транзита1', max_length=100, blank=True, null=True)
 	type_transit2 = models.CharField('Тип транзита2', max_length=100, blank=True, null=True)
-	id_transit1 = models.ForeignKey('Object', related_name='transit_obj', on_delete=models.CASCADE, blank=True, null=True)
-	id_transit2 = models.ForeignKey('Object', related_name='transit2_obj', on_delete=models.CASCADE, blank=True, null=True)
+	transit = models.ManyToManyField('Object', related_name='transit_obj1', blank=True)
+	transit2 = models.ManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
 	handel_add_path1 = models.CharField('Начало', max_length=100, blank=True, null=True)
 	handel_add_path2 = models.CharField('Конец', max_length=100, blank=True, null=True)
@@ -170,10 +155,15 @@ class Object(models.Model):
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+	add_time = models.DateTimeField(blank=True, null=True)
+
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
+
+	def to_json(self):
+		return {'id':self.id, 'name':self.name, 'point1':self.point1.name, 'point2': self.point2.name}
 
 	def __str__(self):
 		return self.name

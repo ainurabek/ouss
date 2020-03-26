@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, TraktOrLine, LineType, TypeOfTrakt
+from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt
 
 User = get_user_model()
 
@@ -78,13 +78,11 @@ class LPSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Point.objects.all())
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
-    trakt_line = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TraktOrLine.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt_line', 'type_line', 'our',
+        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
                   'comments', 'created_by', 'created_at')
         depth = 1
 
