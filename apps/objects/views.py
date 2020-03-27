@@ -409,9 +409,7 @@ def left_trassa(request, pk, id):
 
 
     if main_obj.transit.filter(pk=id).exists():
-        main_obj.transit.remove(obj)
-        obj.transit2.clear()
-        obj.transit.clear()
+        pass
     else:
         main_obj.transit.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now())
@@ -428,9 +426,7 @@ def right_trassa(request, pk, id):
     obj = Object.objects.get(pk=id) 
 
     if main_obj.transit2.filter(pk=id).exists():
-        main_obj.transit2.remove(obj)
-        obj.transit2.clear()
-        obj.transit.clear()
+        pass
     else:
         main_obj.transit2.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now())
@@ -464,3 +460,20 @@ def save_trassa(request, pk):
     return JsonResponse(response)
 
 
+def delete_trassa(request, main_pk, pk):
+    main_obj = Object.objects.get(pk=main_obj)
+    obj = Object.objects.get(pk=pk)
+
+    if main_obj.transit.filter(pk=id).exists():
+        main_obj.transit.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+
+    if main_obj.transit2.filter(pk=id).exists():
+        main_obj.transit2.remove(obj)
+        obj.transit2.clear()
+        obj.transit.clear()
+
+    response = {'success': 'Трасса удалена успешно'}
+
+    return JsonResponse(response)
