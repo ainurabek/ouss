@@ -5,7 +5,7 @@ from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView, \
     ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView, select_lp, \
-    select_object, left_trassa, right_trassa, save_trassa
+    select_object, left_trassa, right_trassa, save_trassa, delete_trassa
 
 
 app_name = 'objects'
@@ -54,6 +54,7 @@ urlpatterns = [
     path('trakt/left-trassa/<int:pk>/<int:id>/', left_trassa, name='left_trassa'),
     path('trakt/right-trassa/<int:pk>/<int:id>/', right_trassa, name='right_trassa'),
     path('trakt/save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
+    path('trakt/delete-trass/<int:main_pk>/<int:pk>/', delete_trassa, name='delete_trassa'),
 
 
     url(r'collect_trassa/$', views.trassa, name='trassa'),
