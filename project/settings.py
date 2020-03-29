@@ -94,9 +94,9 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'telekom',
-        'USER': 'ainura',
-        'PASSWORD': 'ainura123',
+        'NAME': 'tk',
+        'USER': 'admin',
+        'PASSWORD': 'qwerty',
         'HOST': 'localhost',
         'PORT': '5432',
     }

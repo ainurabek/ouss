@@ -20,7 +20,7 @@ def create_track(sender, instance, created, update_fields, **kwargs):
 			elif instance.id_parent.type_of_trakt.name == 'РГ':
 				type_obj = TypeOfTrakt.objects.get(name='ЧГ')
 				sender.objects.filter(pk=instance.pk).update(type_of_trakt=type_obj)
-
+		if instance.id_parent != None:
 			main_name = instance.id_parent.name
 			name = instance.name
 
