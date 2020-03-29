@@ -1,8 +1,9 @@
 from apps.accounts.models import User, DepartmentKT
-from apps.objects.models import TPO, Outfit, Point, Object
+from apps.objects.models import TPO, Outfit, Point, Object, Trassa
+from apps.form51.models import Region, Form51
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
-from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm
+from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form
 from django.db.models import Q
 from django.utils import timezone
 
@@ -267,21 +268,97 @@ def right_trassa(request, pk, id):
 
 
 def save_trassa(request, pk):
+    user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
-
     for i in main_obj.transit.all():
         if main_obj.transit.all() not in i.transit.all():
             i.transit.add(*main_obj.transit.all())
+
         if main_obj.transit2.all() not in i.transit2.all():
             i.transit2.add(*main_obj.transit2.all())
-
     for i in main_obj.transit2.all():
         if main_obj.transit2.all() not in i.transit2.all():
             i.transit2.add(*main_obj.transit2.all())
         if main_obj.transit.all() not in i.transit.all():
-            i.transit.add(*main_obj.transit.all())
+           i.transit.add(*main_obj.transit.all())
 
-    return redirect('apps:management:trakt', lp_id=main_obj.id_parent.pk)
+    trassa_list1 = main_obj.transit.all().order_by('-add_time')
+    trassa_list2 = main_obj.transit2.all().order_by('add_time')
 
+    items1 = []
+    for name in trassa_list1:
+        trassa = {}
+        trassa['point1'] = name.point1.point
+        trassa['name'] = name.name
+        trassa['point2'] = name.point2.point
+        items1.append(trassa)
+    point1 = [item['point1'] for item in items1]
+    name = [item['name'] for item in items1]
+    point2 = [item['point2'] for item in items1]
+    items1_trassa=point1+name+point2
+    fin_trassa1=(' '.join(str(x) for x in items1_trassa))
 
+    items2 = []
+    for name in trassa_list2:
+        trassa = {}
+        trassa['point1'] = name.point1.point
+        trassa['name'] = name.name
+        trassa['point2'] = name.point2.point
+        items2.append(trassa)
 
+    point1 = [item['point1'] for item in items2]
+    name = [item['name'] for item in items2]
+    point2 = [item['point2'] for item in items2]
+    items2_trassa = point1 + name + point2
+    fin_trassa2 = (' '.join(str(x) for x in items2_trassa))
+
+    name = '('+fin_trassa1+')'+'('+fin_trassa2+')'
+    trassa_saved = Trassa.objects.create(name=name, created_by=user)
+    trassa_saved.save()
+
+        # return redirect('apps:management:trakt', lp_id=main_obj.id_parent.pk)
+    return render(request, 'management/trassa_list.html', {'obj':main_obj, 'trassa_saved': trassa_saved})
+
+def region_list(request):
+    return render(request, 'management/region_list.html', {
+        'regions': Region.objects.all()
+    })
+
+def form51_list(request, slug):
+    region = get_object_or_404(Region, slug=slug)
+    forms=Form51.objects.filter(region=region)
+    return render(request, 'management/form51.html', {
+        'region': region,
+        'forms': forms
+    })
+
+def form51_create(request, slug):
+    region = get_object_or_404(Region, slug=slug)
+    form = Form51Form(request.POST or None)
+    if form.is_valid():
+        form51=form.save(commit=False)
+        form51.region=region
+        form51.save()
+        return redirect('apps:management:form51', slug=slug)
+    return render(request, 'management/form51_create.html', {'form': form,
+                                                             'region':region })
+
+def form51_edit(request, slug, pk):
+    region = Region.objects.get(slug=slug)
+    if pk:
+        form51 = Form51.objects.get(id=pk)
+        form = Form51Form(request.POST or None, instance=form51)
+        if request.method == 'POST':
+            form = Form51Form(request.POST or None, instance=form51)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.region = region
+                instance.save()
+                return redirect('apps:management:form51', slug=slug)
+        return render(request, 'management/form51_create.html', {'form': form})
+
+def form51_delete(request, pk):
+    if pk:
+        form51 = Form51.objects.get(id=pk)
+        form51.delete()
+        return redirect('apps:management:form51', slug=form51.region.slug)

@@ -461,7 +461,7 @@ def save_trassa(request, pk):
 
 
 def delete_trassa(request, main_pk, pk):
-    main_obj = Object.objects.get(pk=main_obj)
+    main_obj = Object.objects.get(pk=main_pk)
     obj = Object.objects.get(pk=pk)
 
     if main_obj.transit.filter(pk=id).exists():

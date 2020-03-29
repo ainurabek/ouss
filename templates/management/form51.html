@@ -1,4 +1,5 @@
 {% load static %}
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +11,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SKyrgyz Telekom - ТПО</title>
+  <title>SKyrgyz Telekom - Список простых обьектов</title>
 
   <!-- Custom fonts for this template -->
   <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -29,7 +30,8 @@
   <!-- Page Wrapper -->
   <div id="wrapper">
 
-        <!-- Sidebar -->
+    <!-- Sidebar -->
+    <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" >
       <img src="{% static 'img/logo2.gif' %}" style="height: 140px; width: 225px; margin-left: 0px">
 
@@ -42,6 +44,7 @@
       </a>
 
       <!-- Divider -->
+<!-- Divider -->
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Dashboard -->
@@ -74,7 +77,7 @@
           <span>Список сохраненных трасс</span></a>
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{% url 'apps:management:region_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Форма 5.1.</span></a>
       </li>
@@ -111,45 +114,66 @@
         </nav>
         <!-- End of Topbar -->
 
-
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
-          <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Список Предприятий</h1>
-
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
+            <div class="row">
 
+                    <div class="col-md-2">
+                        <a href=""
+                           class="btn btn-flat btn-primary btn-block">
+                            {{ region.name }}
+                        </a>
+                    </div>
+                <br>
+                <a href="{% url 'apps:management:form51_create' region.slug %}" class="btn btn-default btn-flat btn-block">
+                      <button type="submit" class="btn btn-primary">Добавить</button>
+                </a>
+                <br>
+            </div>
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
-                        <th>Название</th>
-                        <th>Аббревиатура</th>
-                        <th>Номер</th>
-                        <th>ТПО</th>
-                        <th>Вид принадлежности</th>
-
+                        <th>ID</th>
+                        <th>ЛП</th>
+                        <th>Трасса</th>
+                        <th>№ лямды</th>
+                        <th>Напраление основного пути</th>
+                        <th>Потребитель</th>
+                        <th>Монтированные каналы</th>
+                        <th>Задейтвованные каналы</th>
+                        <th>Наличие резерва</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                      {% for outfit in outfits %}
-                        <tr>
-                          <td>{{outfit.outfit}}</td>
-                          <td>{{outfit.adding}}</td>
-                          <td>{{outfit.num}}</td>
-                          <td>{{outfit.tpo.index}}</td>
-                          <td>{{outfit.type_outfit}}</td>
-                        </tr>
-                       {% endfor %}
+                      {% for form in forms %}
+                          <tr>
+                              <td><a href="">{{form.id}}</a></td>
+                              <td>{{form.object}}</td>
+                              <td>{{form.trassa}}</td>
+                              <td>{{form.num}}</td>
+                              <td>{{form.direction}}</td>
+                              <td>{{form.customer}}</td>
+                              <td>{{form.amount_inst_channels}}</td>
+                              <td>{{form.amount_inv_channels}}</td>
+                              <td>{{form.reserve}}</td>
+                              <td><button class="btn"><a href="{% url 'apps:management:form51_edit' region.slug form.id %}"><i class="fa fa-edit"></i></a>
+                            </button></td>
+                              <td><button class="btn"> <a href="{% url 'apps:management:form51_delete' form.id %}"><i class="fa fa-trash"></i></a></button></td>
+                          </tr>
+                      {% endfor %}
                   </tbody>
+
                 </table>
               </div>
             </div>
           </div>
-
         </div>
         <!-- /.container-fluid -->
 
@@ -165,9 +189,7 @@
   <!-- End of Page Wrapper -->
 
   <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
+
 
 
 

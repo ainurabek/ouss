@@ -1,6 +1,7 @@
 from django import forms
 
 from apps.objects.models import TPO, Outfit, Point, Object
+from apps.form51.models import Form51
 
 class ObjectForm(forms.ModelForm):
     class Meta:
@@ -42,3 +43,11 @@ class ObjectFilterForm(forms.ModelForm):
         super(ObjectFilterForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].required = False
+
+class Form51Form(forms.ModelForm):
+
+    class Meta:
+        model = Form51
+        fields = ('trassa', 'num', 'direction', 'customer',
+                  'object', 'amount_inst_channels', 'amount_inv_channels', 'year',
+                  'order', 'schema', 'reserve', )

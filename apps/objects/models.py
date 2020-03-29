@@ -109,20 +109,22 @@ class Point(models.Model):
 	def __str__(self):
 		return self.point
 
-
 class Trassa(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+	name = models.CharField('Трасса', max_length=1000000, blank=True, null=True)
+	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
 	class Meta:
+
 		verbose_name = 'Трасса'
 		verbose_name_plural = 'Трасса'
 
 	def __str__(self):
-		return self.name
+		return str(self.name)
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
-	trassa = models.ForeignKey(Trassa, related_name='object_trasa', on_delete=models.CASCADE, blank=True, null=True)
+
 	# id_object = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
@@ -187,5 +189,4 @@ class TransitObject(models.Model):
 	num = models.CharField(max_length=100, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-
 

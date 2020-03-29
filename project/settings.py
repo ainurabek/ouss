@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.circuits',
     'apps.customer',
+    'apps.form51',
     'knox',
     'rest_framework',
     'django_filters',

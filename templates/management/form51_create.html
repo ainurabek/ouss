@@ -1,4 +1,5 @@
 {% load static %}
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,17 +11,14 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SKyrgyz Telekom - ТПО</title>
+  <title>Kyrgyz Telekom - Создание ЛП</title>
 
-  <!-- Custom fonts for this template -->
+  <!-- Custom fonts for this template-->
   <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-  <!-- Custom styles for this template -->
+  <!-- Custom styles for this template-->
   <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
-
-  <!-- Custom styles for this page -->
-  <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 
 </head>
 
@@ -29,7 +27,7 @@
   <!-- Page Wrapper -->
   <div id="wrapper">
 
-        <!-- Sidebar -->
+    <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" >
       <img src="{% static 'img/logo2.gif' %}" style="height: 140px; width: 225px; margin-left: 0px">
 
@@ -40,6 +38,7 @@
         </div>
         <div class="sidebar-brand-text mx-3">Kyrgyz Telecom <sup>CRM</sup></div>
       </a>
+
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
@@ -95,15 +94,12 @@
     </ul>
     <!-- End of Sidebar -->
 
-    <!-- Content Wrapper -->
+      <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
-
       <!-- Main Content -->
       <div id="content">
-
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="height: 40px;">
           <!-- Sidebar Toggle (Topbar) -->
           <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
             <i class="fa fa-bars"></i>
@@ -111,43 +107,59 @@
         </nav>
         <!-- End of Topbar -->
 
-
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Список Предприятий</h1>
+          <h1 class="h3 mb-2 text-gray-800">Создание тракта</h1>
+
 
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
-
             <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                  <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>Аббревиатура</th>
-                        <th>Номер</th>
-                        <th>ТПО</th>
-                        <th>Вид принадлежности</th>
+              {% block content %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="box box-info">
+                            <form method="post">{% csrf_token %}
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label>{{ form.trassa.label }}</label>
+                                        {% render_field form.trassa class="form-control" %}
+                                        <label>{{ form.num.label }}</label>
+                                        {% render_field form.num class="form-control" %}
+                                        <label>{{ form.direction.label }}</label>
+                                        {% render_field form.direction class="form-control" %}
+                                        <label>{{ form.customer.label }}</label>
+                                        {% render_field form.customer class="form-control" %}
+                                        <label>{{ form.object.label }}</label>
+                                        {% render_field form.object class="form-control" %}
+                                        <label>{{ form.amount_inst_channels.label }}</label>
+                                        {% render_field form.amount_inst_channels class="form-control" %}
+                                        <label>{{ form.amount_inv_channels.label }}</label>
+                                        {% render_field form.amount_inv_channels class="form-control" %}
+                                        <label>{{ form.year.label }}</label>
+                                        {% render_field form.year class="form-control" %}
+                                        <label>{{ form.order.label }}</label>
+                                        {% render_field form.order class="form-control" %}
+                                        <label>{{ form.schema.label }}</label>
+                                        {% render_field form.schema class="form-control" %}
+                                        <label>{{ form.reserve.label }}</label>
+                                        {% render_field form.reserve class="form-control" %}
 
-                    </tr>
-                  </thead>
-                  <tbody>
-                      {% for outfit in outfits %}
-                        <tr>
-                          <td>{{outfit.outfit}}</td>
-                          <td>{{outfit.adding}}</td>
-                          <td>{{outfit.num}}</td>
-                          <td>{{outfit.tpo.index}}</td>
-                          <td>{{outfit.type_outfit}}</td>
-                        </tr>
-                       {% endfor %}
-                  </tbody>
-                </table>
-              </div>
+                                    </div>
+                                </div>
+                                <div class="box-footer clearfix">
+                                    <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+
             </div>
+
           </div>
 
         </div>
@@ -161,6 +173,8 @@
     </div>
     <!-- End of Content Wrapper -->
 
+
+
   </div>
   <!-- End of Page Wrapper -->
 
@@ -168,7 +182,6 @@
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
-
 
 
   <!-- Bootstrap core JavaScript-->
@@ -182,11 +195,11 @@
   <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 
   <!-- Page level plugins -->
-  <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
-  <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
 
   <!-- Page level custom scripts -->
-  <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
+  <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
+  <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>
 
 </body>
 
