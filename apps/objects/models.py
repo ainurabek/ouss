@@ -62,7 +62,6 @@ class LineType(models.Model):
 
 class Category(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
-	# _id = models.CharField('Индекс', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Категория'
@@ -124,8 +123,6 @@ class Trassa(models.Model):
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
-
-	# id_object = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 	COreceive = models.CharField('КО прием', max_length=100, blank=True, null=True)
@@ -136,7 +133,7 @@ class Object(models.Model):
 	point1 = models.ForeignKey(Point, related_name='obj_point', verbose_name='ИП приема', on_delete=models.CASCADE, blank=True, null=True)
 	tpo2 = models.ForeignKey(TPO, related_name='obj_tpo2', on_delete=models.CASCADE, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.CASCADE, blank=True, null=True)
-	category = models.ForeignKey(Category, related_name='obj_category', on_delete=models.CASCADE, blank=True, null=True)
+	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.CASCADE, blank=True, null=True)
 	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
 	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)
 	system = models.ForeignKey(System, related_name='obj_system', on_delete=models.CASCADE, blank=True, null=True)

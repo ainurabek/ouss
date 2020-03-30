@@ -59,7 +59,7 @@ class Circuit(models.Model):
 	num_circuit = models.CharField(max_length=100, blank=True, null=True)
 	name = models.CharField(max_length=100, blank=True, null=True)
 	type_using = models.CharField(max_length=100, blank=True, null=True)#######
-	category = models.ForeignKey(Category, related_name='circ_category', on_delete=models.CASCADE, blank=True, null=True) ###
+	category = models.ForeignKey(Category, related_name='circ_cat',on_delete=models.CASCADE, blank=True, null=True) ###
 	num_order = models.CharField(max_length=100, blank=True, null=True)
 	date_order = models.CharField(max_length=100, blank=True, null=True)
 	num_arenda = models.CharField(max_length=100, blank=True, null=True)
