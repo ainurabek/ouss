@@ -69,9 +69,7 @@
           <span>Список ИП</span></a>
       </li>
       <li class="nav-item active">
-          {% for lp in lps %}
-        <a class="nav-link" href="{% url 'apps:management:save_trassa' lp.pk %}">
-            {% endfor %}
+        <a class="nav-link" href="{% url 'apps:management:trassa_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Список сохраненных трасс</span></a>
       </li>

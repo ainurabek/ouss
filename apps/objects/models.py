@@ -153,6 +153,7 @@ class Object(models.Model):
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.CASCADE, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+	maker_trassa = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='maker', blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
 
@@ -160,6 +161,7 @@ class Object(models.Model):
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
+		
 
 	def to_json(self):
 		return {'id':self.id, 'name':self.name, 'point1':self.point1.name, 'point2': self.point2.name}
