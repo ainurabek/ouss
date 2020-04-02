@@ -5,7 +5,7 @@ from apps.management import views
 
 from apps.management.views import tpo_list, outfit_list, point_list, lp_list, trakt_list,\
    lp_create, trakt_create, trakt_delete, lp_delete, trakt_edit, lp_edit, select_obj,\
-   save_trassa, left_trassa, right_trassa, region_list, form51_delete
+   save_trassa, left_trassa, right_trassa, region_list, form51_delete, trassa_list
 
 
 
@@ -29,6 +29,7 @@ urlpatterns = [
     path('create-trassa/<int:pk>/<int:id>/', left_trassa, name='left_trassa'),
     path('trassa/<int:pk>/<int:id>/', right_trassa, name='right_trassa'),
     path('save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
+    path('trassa-list/', trassa_list, name='trassa_list'),
 
     path('region', region_list, name='region_list'),
     url(r'^(?P<slug>\S+)/list/$', views.form51_list, name='form51'),
