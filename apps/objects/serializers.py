@@ -11,95 +11,105 @@ class TPOSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'index')
         depth = 1
 
-# class OutfitSerializer(serializers.Serializer):
-#
-#
-#     outfit = serializers.CharField(max_length=120)
-#     adding = serializers.CharField()
-#     num_outfit = serializers.CharField()
-#     tpo_id = serializers.IntegerField()
-#     type_outfit_id = serializers.IntegerField()
-#
-#     def create(self, validated_data):
-#         return Outfit.objects.create(**validated_data)
-#
-#     def update(self, instance, validated_data):
-#         instance.outfit = validated_data.get('outfit', instance.outfit)
-#         instance.adding = validated_data.get('adding', instance.adding)
-#         instance.num_outfit = validated_data.get('num_outfit', instance.num_outfit)
-#         instance.tpo_id = validated_data.get('tpo_id', instance.tpo_id)
-#         instance.type_outfit_id = validated_data.get('type_outfit_id', instance.type_outfit_id)
-#         instance.save()
-#         return instance
 
+class TypeOfLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeOfLocation
+        fields = ('name',)
+
+
+class TypeOfTraktSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeOfTrakt
+        fields = ('name',)
+
+
+class TypeLineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineType
+        fields = ('name',)
 
 
 class OutfitSerializer(serializers.ModelSerializer):
-    # tpo = TPOSerializer()
-    # tpo_id = serializers.RelatedField(source="out_tpo.id", read_only=True)
-    tpo = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    type_outfit = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=TypeOfLocation.objects.all())
+    tpo = TPOSerializer()
+    type_outfit = TypeOfLocationSerializer()
+
     class Meta:
         model = Outfit
         fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
         depth = 1
 
+
 class PointSerializer(serializers.ModelSerializer):
-    tpo = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    id_outfit = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Outfit.objects.all())
+    tpo = TPOSerializer()
+    id_outfit = OutfitSerializer()
     class Meta:
         model = Point
         fields = ('id', 'point', 'name', 'id_outfit', 'tpo')
         depth = 1
 
+
 class IPSerializer(serializers.ModelSerializer):
-    tpo_id = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    point_id = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=Point.objects.all())
+    tpo_id = TPOSerializer()
+    point_id = PointSerializer()
 
     class Meta:
         model = IP
         fields = ('id', 'point_id', 'object_id', 'tpo_id')
         depth = 1
 
+
+
+class ParentSerializer(serializers.ModelSerializer):
+    point1 = PointSerializer()
+    point2 = PointSerializer()
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2')
+
+
+class TransitSerializer(serializers.ModelSerializer):
+    point1 = PointSerializer()
+    point2 = PointSerializer()
+
+    class Meta:
+        model = Object
+        fields = ('point1', 'name', 'point2')
+
+
+
 class LPSerializer(serializers.ModelSerializer):
-    tpo1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    tpo2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    point1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Point.objects.all())
-    point2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Point.objects.all())
-    id_outfit = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Outfit.objects.all())
-    type_line = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=LineType.objects.all())
+    tpo1 = TPOSerializer()
+    tpo2 = TPOSerializer()
+    point1 = PointSerializer()
+    point2 = PointSerializer()
+    id_outfit = OutfitSerializer()
+    type_line = TypeLineSerializer()
+    transit = TransitSerializer(many=True, read_only=True)
+    transit2 = TransitSerializer(many=True, read_only=True)
+
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments', 'created_by', 'created_at')
+                  'comments', 'created_by', 'created_at', 'transit', 'transit2')
         depth = 1
 
+
+
 class ObjectSerializer(serializers.ModelSerializer):
-    id_parent=LPSerializer()
-    tpo1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    point1 = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=Point.objects.all())
-    tpo2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
-    point2 = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=Point.objects.all())
-    type_of_trakt = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeOfTrakt.objects.all())
+    id_parent=ParentSerializer()
+    tpo1 = TPOSerializer()
+    point1 = PointSerializer()
+    tpo2 = TPOSerializer()
+    point2 = PointSerializer()
+    type_of_trakt = TypeOfTraktSerializer()
+    id_outfit = OutfitSerializer()
+    transit = TransitSerializer(many=True, read_only=True)
+    transit2 = TransitSerializer(many=True, read_only=True)
+
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line', 'our', 'num')
-        depth = 1
+        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line', 'our', 'num', 'transit', 'transit2')
+
 
