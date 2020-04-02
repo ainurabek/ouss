@@ -3,7 +3,7 @@ from apps.objects.models import TPO, Outfit, Point, Object, Trassa
 from apps.form51.models import Region, Form51
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
-from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form
+from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
 from django.db.models import Q
 from django.utils import timezone
 
@@ -44,6 +44,13 @@ def point_list(request):
         'points': points
 
     })
+
+def base(request):
+    lps = Object.objects.filter(id_parent=None)
+    context = {
+        'lps': lps
+    }
+    return render(request, 'management/base.html', context)
 
 def lp_list(request):
     lps = Object.objects.filter(id_parent=None)
@@ -327,9 +334,43 @@ def region_list(request):
 def form51_list(request, slug):
     region = get_object_or_404(Region, slug=slug)
     forms=Form51.objects.filter(region=region)
+    filter_form = Form51FilterForm(request.GET or None)
+    if filter_form.is_valid():
+        if filter_form.cleaned_data.get('trassa', None):
+            forms = forms.filter(trassa=filter_form.cleaned_data.get('trassa'))
+        if filter_form.cleaned_data.get('num', None):
+            forms = forms.filter(
+                num=filter_form.cleaned_data.get('num')
+            )
+        if filter_form.cleaned_data.get('direction', None):
+            forms = forms.filter(
+                direction=filter_form.cleaned_data.get('direction')
+            )
+        if filter_form.cleaned_data.get('customer', None):
+            forms = forms.filter(
+                customer=filter_form.cleaned_data.get('customer')
+            )
+        if filter_form.cleaned_data.get('object', None):
+            forms = forms.filter(
+                object=filter_form.cleaned_data.get('object')
+            )
+        if filter_form.cleaned_data.get('amount_inst_channels', None):
+            forms = forms.filter(
+                amount_inst_channels=filter_form.cleaned_data.get('amount_inst_channels')
+            )
+
+        if filter_form.cleaned_data.get('amount_inv_channels', None):
+            forms = forms.filter(
+                amount_inv_channels=filter_form.cleaned_data.get('amount_inv_channels')
+            )
+        if filter_form.cleaned_data.get('reserve', None):
+            forms = forms.filter(
+                reserve=filter_form.cleaned_data.get('reserve')
+            )
     return render(request, 'management/form51.html', {
         'region': region,
-        'forms': forms
+        'forms': forms,
+        'filter_form':filter_form
     })
 
 def form51_create(request, slug):

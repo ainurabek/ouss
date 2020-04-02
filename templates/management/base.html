@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -71,13 +72,13 @@
       <li class="nav-item active">
           {% for lp in lps %}
         <a class="nav-link" href="{% url 'apps:management:save_trassa' lp.pk %}">
-            {% endfor %}
+           {% endfor %}
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Список сохраненных трасс</span></a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{% url 'apps:management:region_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Форма 5.1.</span></a>
       </li>
@@ -118,8 +119,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
-          <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Создать трассу </h1>
+
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
 

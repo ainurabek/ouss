@@ -45,9 +45,14 @@ class ObjectFilterForm(forms.ModelForm):
             self.fields[field].required = False
 
 class Form51Form(forms.ModelForm):
-
     class Meta:
         model = Form51
         fields = ('trassa', 'num', 'direction', 'customer',
                   'object', 'amount_inst_channels', 'amount_inv_channels', 'year',
                   'order', 'schema', 'reserve', )
+
+class Form51FilterForm(forms.ModelForm):
+    class Meta:
+        model = Form51
+        fields = ('trassa', 'num', 'direction', 'customer',
+                  'object', 'amount_inst_channels', 'amount_inv_channels', 'reserve',)
