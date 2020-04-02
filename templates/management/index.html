@@ -1,5 +1,56 @@
 {% extends 'management/base.html' %}
 {% load widget_tweaks %}
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <h1 class="h3 mb-2 text-gray-800">Список простых обьектов</h1>
+
+
+          <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+
+            <div class="card-body">
+              <div class="box-footer clearfix" style="padding-bottom: 20px; ">
+                  <a href="{% url 'apps:management:lp_create' %}" class="btn btn-default btn-flat btn-block">
+                      <button type="submit" class="btn btn-primary">Добавить ЛП</button>
+                  </a>
+                </div>
+
+              <div class="table-responsive">
+
+                <table class="table table-bordered" id="dataTable" style="width: 1400px" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>ТПО №1</th>
+                        <th>ИП от</th>
+                        <th>ТПО №1</th>
+                        <th>ИП до</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for lp in lps %}
+                          <tr>
+                              <td><a href="{% url 'apps:management:trakt' lp.id %}">{{lp.name}}</a></td>
+                              <td>{{lp.tpo1.index}}</td>
+                              <td>{{lp.point1.point}}</td>
+                              <td>{{lp.tpo2.index}}</td>
+                              <td>{{lp.point2.point}}</td>
+                            <td><button class="btn"><a href="{% url 'apps:management:lp_delete' lp.id %}"><i class="fa fa-trash"></i></a>
+                            </button>
+                            </td>
+                            <td><button class="btn"> <a href="{% url 'apps:management:lp_edit' lp.id %}"><i class="fa fa-edit"></i></a>
+                                            </button>
+
+                              </td>
+                          </tr>
+                      {% endfor %}
+                  </tbody>
+
 {% block content %}
 <!-- Page Heading -->
 <h1 class="h3 mb-2 text-gray-800">Список простых обьектов</h1>

@@ -218,6 +218,7 @@ def select_obj(request, pk):
 
 
 def left_trassa(request, pk, id):
+    user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
     obj = Object.objects.get(pk=id)
 
@@ -230,7 +231,7 @@ def left_trassa(request, pk, id):
         obj.transit.clear()
     else:
         main_obj.transit.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now())
+        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
     trassa_list1 = main_obj.transit.all().order_by('-add_time')
     trassa_list2 = main_obj.transit2.all().order_by('add_time')
@@ -246,6 +247,7 @@ def left_trassa(request, pk, id):
 
 
 def right_trassa(request, pk, id):
+    user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
     obj = Object.objects.get(pk=id) 
 
@@ -258,7 +260,7 @@ def right_trassa(request, pk, id):
         obj.transit.clear()
     else:
         main_obj.transit2.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now())
+        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
     trassa_list1 = main_obj.transit.all().order_by('-add_time')
     trassa_list2 = main_obj.transit2.all().order_by('add_time')
@@ -275,56 +277,37 @@ def right_trassa(request, pk, id):
 
 
 def save_trassa(request, pk):
-    user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
+
     for i in main_obj.transit.all():
         if main_obj.transit.all() not in i.transit.all():
             i.transit.add(*main_obj.transit.all())
 
         if main_obj.transit2.all() not in i.transit2.all():
             i.transit2.add(*main_obj.transit2.all())
+
     for i in main_obj.transit2.all():
         if main_obj.transit2.all() not in i.transit2.all():
             i.transit2.add(*main_obj.transit2.all())
         if main_obj.transit.all() not in i.transit.all():
            i.transit.add(*main_obj.transit.all())
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    return redirect('apps:management:trassa_list')
 
-    items1 = []
-    for name in trassa_list1:
-        trassa = {}
-        trassa['point1'] = name.point1.point
-        trassa['name'] = name.name
-        trassa['point2'] = name.point2.point
-        items1.append(trassa)
-    point1 = [item['point1'] for item in items1]
-    name = [item['name'] for item in items1]
-    point2 = [item['point2'] for item in items1]
-    items1_trassa=point1+name+point2
-    fin_trassa1=(' '.join(str(x) for x in items1_trassa))
 
-    items2 = []
-    for name in trassa_list2:
-        trassa = {}
-        trassa['point1'] = name.point1.point
-        trassa['name'] = name.name
-        trassa['point2'] = name.point2.point
-        items2.append(trassa)
+def trassa_list(request):
+    trassa_list = Object.objects.exclude(transit=None, transit2=None)
+    _list = []
+    for i in trassa_list:
+        _list.append({'name': i.name, 
+            'transit': i.transit.order_by('-add_time'), 
+            'transit2': i.transit2.order_by('add_time'),
+            'maker_trassa': i.maker_trassa,
+            'add_time': i.add_time,
+            'id': i.pk})
+        
+    return render(request, 'management/trassa_list.html', {'trassa_list': _list})
 
-    point1 = [item['point1'] for item in items2]
-    name = [item['name'] for item in items2]
-    point2 = [item['point2'] for item in items2]
-    items2_trassa = point1 + name + point2
-    fin_trassa2 = (' '.join(str(x) for x in items2_trassa))
-
-    name = '('+fin_trassa1+')'+'('+fin_trassa2+')'
-    trassa_saved = Trassa.objects.create(name=name, created_by=user)
-    trassa_saved.save()
-
-        # return redirect('apps:management:trakt', lp_id=main_obj.id_parent.pk)
-    return render(request, 'management/trassa_list.html', {'obj':main_obj, 'trassa_saved': trassa_saved})
 
 def region_list(request):
     return render(request, 'management/region_list.html', {
