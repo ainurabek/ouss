@@ -1,7 +1,10 @@
 from django import forms
 
 from apps.objects.models import TPO, Outfit, Point, Object
+from django.forms import inlineformset_factory, modelformset_factory
+
 from apps.form51.models import Form51
+
 
 class ObjectForm(forms.ModelForm):
     class Meta:
@@ -48,11 +51,13 @@ class Form51Form(forms.ModelForm):
     class Meta:
         model = Form51
         fields = ('trassa', 'num', 'direction', 'customer',
-                  'object', 'amount_inst_channels', 'amount_inv_channels', 'year',
+                  'object', 'point1', 'point2', 'type_line', 'amount_inst_channels', 'amount_inv_channels', 'year',
                   'order', 'schema', 'reserve', )
+
 
 class Form51FilterForm(forms.ModelForm):
     class Meta:
         model = Form51
         fields = ('trassa', 'num', 'direction', 'customer',
-                  'object', 'amount_inst_channels', 'amount_inv_channels', 'reserve',)
+                  'object', 'point1', 'point2', 'type_line', 'amount_inst_channels', 'amount_inv_channels', 'year',
+                  'order', 'schema', 'reserve', )

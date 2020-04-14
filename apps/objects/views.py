@@ -11,8 +11,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
-from apps.objects.serializers import LPSerializer,  TPOSerializer,\
-    OutfitSerializer, PointSerializer, IPSerializer, ObjectSerializer
+from apps.objects.serializers import LPSerializer, TPOSerializer, \
+    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer,\
+    ObjectSerializer, LPCreateSerializer, \
+    ObjectCreateSerializer, IPCreateSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,9 +24,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 
-
-
-#TPO
+# TPO
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
@@ -68,8 +68,9 @@ class TPOListView(viewsets.ModelViewSet):
             wb.save(response)
             return response
 
+
 class TPOCreateView(generics.CreateAPIView):
-    queryset=TPO.objects.all()
+    queryset = TPO.objects.all()
     serializer_class = TPOSerializer
 
 
@@ -83,11 +84,12 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
-@api_view(['DELETE',])
+
+@api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def tpo_delete_view(request, tpo_id):
     try:
-        tpo=TPO.objects.get(id=tpo_id)
+        tpo = TPO.objects.get(id=tpo_id)
     except tpo.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "DELETE":
@@ -99,20 +101,22 @@ def tpo_delete_view(request, tpo_id):
             data["failure"] = "TPO не удален"
         return Response(data=data)
 
-#Предприятия
+
+# Предприятия
 class OutfitsListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     queryset = Outfit.objects.all()
     lookup_field = 'pk'
-    serializer_class = OutfitSerializer
+    serializer_class = OutfitListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('outfit', 'adding', 'tpo__index', 'tpo__name', 'num_outfit','type_outfit__name')
-    filterset_fields = ('outfit', 'adding', 'tpo', 'num_outfit','type_outfit')
+    search_fields = ('outfit', 'adding', 'tpo__index', 'tpo__name', 'num_outfit', 'type_outfit__name')
+    filterset_fields = ('outfit', 'adding', 'tpo', 'num_outfit', 'type_outfit')
+
 
 class OutfitCreateView(generics.CreateAPIView):
-    queryset=Outfit.objects.all()
-    serializer_class = OutfitSerializer
+    queryset = Outfit.objects.all()
+    serializer_class = OutfitCreateSerializer
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
@@ -121,17 +125,18 @@ class OutfitCreateView(generics.CreateAPIView):
 class OutfitEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = Outfit.objects.all()
-    serializer_class = OutfitSerializer
+    serializer_class = OutfitCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
-@api_view(['DELETE',])
+
+@api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def outfit_delete_view(request, outfit_id):
-    outfit=Outfit.objects.get(id=outfit_id)
+    outfit = Outfit.objects.get(id=outfit_id)
     try:
         outfit
     except outfit.DoesNotExist:
@@ -145,32 +150,36 @@ def outfit_delete_view(request, outfit_id):
             data["failure"] = "Предприятие не удалено"
         return Response(data=data)
 
-#ИПы
+
+# ИПы
 class PointListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     queryset = Point.objects.all()
     lookup_field = 'pk'
-    serializer_class = PointSerializer
+    serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
 
+
 class PointCreateView(generics.CreateAPIView):
-    queryset=Point.objects.all()
-    serializer_class = PointSerializer
+    queryset = Point.objects.all()
+    serializer_class = PointCreateSerializer
+
 
 class PointEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = Point.objects.all()
-    serializer_class = PointSerializer
+    serializer_class = PointCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-@api_view(['DELETE',])
+
+@api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def point_delete_view(request, pk):
-    point=Point.objects.get(id=pk)
+    point = Point.objects.get(id=pk)
     try:
         point
     except point.DoesNotExist:
@@ -184,28 +193,32 @@ def point_delete_view(request, pk):
             data["failure"] = "Point не удален"
         return Response(data=data)
 
+
 class IPListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     queryset = IP.objects.all()
     lookup_field = 'pk'
-    serializer_class = IPSerializer
+    serializer_class = IPListSerializer
+
 
 class IPCreateView(generics.CreateAPIView):
-    queryset=IP.objects.all()
-    serializer_class = IPSerializer
+    queryset = IP.objects.all()
+    serializer_class = IPCreateSerializer
+
 
 class IPEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = IP.objects.all()
-    serializer_class = IPSerializer
+    serializer_class = IPCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-@api_view(['DELETE',])
+
+@api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def ip_delete_view(request, pk):
-    ip=IP.objects.get(id=pk)
+    ip = IP.objects.get(id=pk)
     try:
         ip
     except ip.DoesNotExist:
@@ -218,9 +231,13 @@ def ip_delete_view(request, pk):
         else:
             data["failure"] = "ИП не удален"
         return Response(data=data)
+
+
 '''
 Линии передачи
 '''
+
+
 class LPListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -228,29 +245,32 @@ class LPListView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = LPSerializer
 
+
 class LPCreateView(generics.CreateAPIView):
     queryset = Object.objects.all()
-    serializer_class = LPSerializer
+    serializer_class = LPCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
+
 class LPEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = Object.objects.all()
-    serializer_class = LPSerializer
+    serializer_class = LPCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
-@api_view(['DELETE',])
+
+@api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def lp_delete_view(request, pk):
-    lp=Object.objects.get(id=pk)
+    lp = Object.objects.get(id=pk)
     try:
         lp
     except lp.DoesNotExist:
@@ -265,42 +285,45 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
-
 class TraktListView(APIView):
     # permission_classes = (IsAuthenticated,)
     # authentication_classes = (TokenAuthentication,)
     pass
 
+
 class ObjectListView(APIView):
-	permission_classes = (IsAuthenticatedOrReadOnly,)
-	authentication_classes = (TokenAuthentication,)
-	filter_backends = (SearchFilter, DjangoFilterBackend)
-	search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
-	filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
-	
-	def get_object(self, pk):
-		try:
-			return Object.objects.get(pk=pk)
-		except Object.DoesNotExist:
-			raise Http404
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
+    filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
 
-	def get(self, request, pk):
-		lp = self.get_object(pk)
-		trakt = Object.objects.filter(id_parent=lp.pk)
-		data = ObjectSerializer(trakt, many=True).data
-		return Response(data)
-    # for obj in objects:
-    #     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
-    #         print(objects)
-    #         return HttpResponse(objects)
-    #     else:
-    #         return HttpResponse("у этой линии передачи нет тракта")
+    def get_object(self, pk):
+        try:
+            return Object.objects.get(pk=pk)
+        except Object.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        lp = self.get_object(pk)
+        trakt = Object.objects.filter(id_parent=lp.pk)
+        data = ObjectSerializer(trakt, many=True).data
+        return Response(data)
 
 
-# ПГ ВГ ТГ ЧГ РГ 
+# for obj in objects:
+#     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
+#         print(objects)
+#         return HttpResponse(objects)
+#     else:
+#         return HttpResponse("у этой линии передачи нет тракта")
+
+
+# ПГ ВГ ТГ ЧГ РГ
 
 class ObjectCreateView(APIView):
     """"""
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -312,15 +335,15 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = self.get_object(pk)
-        serializer = ObjectSerializer(data=request.data)
+        serializer = ObjectCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(
-                id_parent=parent, 
+                id_parent=parent,
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
                 our=parent.our,
                 created_by=self.request.user.profile
-                )
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -328,7 +351,7 @@ class ObjectCreateView(APIView):
 class ObjectDeleteView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    
+
     def get_object(self, pk):
         try:
             return Object.objects.get(pk=pk)
@@ -353,20 +376,19 @@ class ObjectEditView(APIView):
 
     def put(self, request, pk):
         obj = self.get_object(pk)
-        serializer = ObjectSerializer(obj, data=request.data)
+        serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 def trassa(request):
     data = []
     objects = Object.objects.all()
     for obj in objects:
-        data.append({'ip1': obj.point1,  'name': obj.name, 'ip2': obj.point2,'id_transit1': [], 'id_transit2': []})
-        if obj.id_transit1 !=None:
+        data.append({'ip1': obj.point1, 'name': obj.name, 'ip2': obj.point2, 'id_transit1': [], 'id_transit2': []})
+        if obj.id_transit1 != None:
             data.append({'id_transit1': obj.id_transit1})
         elif obj.id_transit2 != None:
             data.append({'id_transit2': obj.id_transit2})
@@ -398,7 +420,7 @@ def select_object(request, lp_pk):
     objects = Object.objects.filter(id_parent=lp_pk)
 
     response = {
-        'objects': [m.to_json() for m in objects],     
+        'objects': [m.to_json() for m in objects],
     }
     return JsonResponse(response)
 
@@ -407,35 +429,33 @@ def left_trassa(request, pk, id):
     main_obj = Object.objects.get(pk=pk)
     obj = Object.objects.get(pk=id)
 
-
     if main_obj.transit.filter(pk=id).exists():
         pass
     else:
         main_obj.transit.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now())
+        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),
-        'obj': obj.to_json(),    
+        'obj': obj.to_json(),
     }
     return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
 
 
 def right_trassa(request, pk, id):
     main_obj = Object.objects.get(pk=pk)
-    obj = Object.objects.get(pk=id) 
+    obj = Object.objects.get(pk=id)
 
     if main_obj.transit2.filter(pk=id).exists():
         pass
     else:
         main_obj.transit2.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now())
-
+        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),
-        'obj': obj.to_json(),     
-    }  
+        'obj': obj.to_json(),
+    }
 
     return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
 
@@ -474,6 +494,6 @@ def delete_trassa(request, main_pk, pk):
         obj.transit2.clear()
         obj.transit.clear()
 
-    response = {'success': 'Трасса удалена успешно'}
+    response = {'success': 'Объект удалена успешно'}
 
     return JsonResponse(response)

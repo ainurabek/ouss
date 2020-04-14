@@ -15,16 +15,23 @@
                     <form method="post">{% csrf_token %}
                         <div class="box-body">
                             <div class="form-group">
+                                <label>{{ form.object.label }}</label>
+                                {% render_field form.object class="form-control" %}
                                 <label>{{ form.trassa.label }}</label>
                                 {% render_field form.trassa class="form-control" %}
+                                <label>{{ form.point1.label }}</label>
+                                {% render_field form.point1 class="form-control" %}
+                                <label>{{ form.point2.label }}</label>
+                                {% render_field form.point2 class="form-control" %}
+                                <label>{{ form.type_line.label }}</label>
+                                {% render_field form.type_line class="form-control" %}
                                 <label>{{ form.num.label }}</label>
                                 {% render_field form.num class="form-control" %}
                                 <label>{{ form.direction.label }}</label>
                                 {% render_field form.direction class="form-control" %}
                                 <label>{{ form.customer.label }}</label>
                                 {% render_field form.customer class="form-control" %}
-                                <label>{{ form.object.label }}</label>
-                                {% render_field form.object class="form-control" %}
+
                                 <label>{{ form.amount_inst_channels.label }}</label>
                                 {% render_field form.amount_inst_channels class="form-control" %}
                                 <label>{{ form.amount_inv_channels.label }}</label>
@@ -37,6 +44,7 @@
                                 {% render_field form.schema class="form-control" %}
                                 <label>{{ form.reserve.label }}</label>
                                 {% render_field form.reserve class="form-control" %}
+
                             </div>
                         </div>
                         <div class="box-footer clearfix">

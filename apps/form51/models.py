@@ -6,7 +6,7 @@ from apps.objects.models import Trassa, Object
 
 from apps.accounts.models import Profile
 
-
+from apps.objects.models import LineType, TPO, Point
 
 
 class Region(models.Model):
@@ -34,6 +34,14 @@ class Form51(models.Model):
 	schema= models.ImageField('Схема', upload_to='object/schema/', blank=True)
 	reserve = models.BooleanField('Наличие резерва', blank=True, null=True)
 	region=models.ForeignKey(Region, on_delete=models.CASCADE, blank=True, null=True, related_name='region_form51' )
+	tpo1 = models.ForeignKey(TPO, related_name='form51_tpo', on_delete=models.CASCADE, blank=True, null=True)
+	point1 = models.ForeignKey(Point, related_name='form51_point', verbose_name='ИП приема', on_delete=models.CASCADE,
+							   blank=True, null=True)
+	tpo2 = models.ForeignKey(TPO, related_name='form51_tpo2', on_delete=models.CASCADE, blank=True, null=True)
+	point2 = models.ForeignKey(Point, related_name='form51_point2', verbose_name='ИП пер', on_delete=models.CASCADE,
+							   blank=True, null=True)
+	type_line = models.ForeignKey(LineType, related_name='form51_type_line', on_delete=models.CASCADE, blank=True,
+								  null=True)
 
 
 	class Meta:
@@ -41,4 +49,4 @@ class Form51(models.Model):
 		verbose_name_plural = 'Форма 5.1.'
 
 	def __str__(self):
-		return self.trassa
+		return str(self.id)

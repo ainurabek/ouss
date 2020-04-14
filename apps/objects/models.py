@@ -7,6 +7,8 @@ from apps.accounts.models import Profile
 from django.db.models.signals import post_save
 
 
+
+
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -121,6 +123,8 @@ class Trassa(models.Model):
 	def __str__(self):
 		return str(self.name)
 
+
+
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
@@ -158,6 +162,7 @@ class Object(models.Model):
 	add_time = models.DateTimeField(blank=True, null=True)
 
 
+
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
@@ -167,7 +172,7 @@ class Object(models.Model):
 		return {'id':self.id, 'name':self.name, 'point1':self.point1.name, 'point2': self.point2.name}
 
 	def __str__(self):
-		return self.name
+		return str(self.name)
 
 class IP(models.Model):
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True)

@@ -1,6 +1,6 @@
 from apps.accounts.models import User, DepartmentKT
 from apps.objects.models import TPO, Outfit, Point, Object, Trassa
-from apps.form51.models import Region, Form51
+
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
@@ -19,7 +19,7 @@ from django.utils import timezone
 #         'departments':departments,
 #         'lps': lps
 #     })
-
+from ..form51.models import Region, Form51
 
 
 def tpo_list(request):
@@ -277,6 +277,7 @@ def right_trassa(request, pk, id):
 
 
 def save_trassa(request, pk):
+    user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
 
     for i in main_obj.transit.all():
@@ -292,6 +293,38 @@ def save_trassa(request, pk):
         if main_obj.transit.all() not in i.transit.all():
            i.transit.add(*main_obj.transit.all())
 
+    trassa_list1 = main_obj.transit.all().order_by('-add_time')
+    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+
+    items1 = []
+    for name in trassa_list1:
+        trassa = {}
+        trassa['point1'] = name.point1.point
+        trassa['name'] = name.name
+        trassa['point2'] = name.point2.point
+        items1.append(trassa)
+    point1 = [item['point1'] for item in items1]
+    name = [item['name'] for item in items1]
+    point2 = [item['point2'] for item in items1]
+    items1_trassa = point1 + name + point2
+    fin_trassa1 = (' '.join(str(x) for x in items1_trassa))
+
+    items2 = []
+    for name in trassa_list2:
+        trassa = {}
+        trassa['point1'] = name.point1.point
+        trassa['name'] = name.name
+        trassa['point2'] = name.point2.point
+        items2.append(trassa)
+    point1 = [item['point1'] for item in items2]
+    name = [item['name'] for item in items2]
+    point2 = [item['point2'] for item in items2]
+    items2_trassa = point1 + name + point2
+    fin_trassa2 = (' '.join(str(x) for x in items2_trassa))
+    name = '(' + fin_trassa1 + ')' + '(' + fin_trassa2 + ')'
+    trassa_saved = Trassa.objects.create(name=name, created_by=user)
+    trassa_saved.save()
+
     return redirect('apps:management:trassa_list')
 
 
@@ -305,7 +338,7 @@ def trassa_list(request):
             'maker_trassa': i.maker_trassa,
             'add_time': i.add_time,
             'id': i.pk})
-        
+
     return render(request, 'management/trassa_list.html', {'trassa_list': _list})
 
 
@@ -316,7 +349,7 @@ def region_list(request):
 
 def form51_list(request, slug):
     region = get_object_or_404(Region, slug=slug)
-    forms=Form51.objects.filter(region=region)
+    forms = Form51.objects.filter(region=region)
     filter_form = Form51FilterForm(request.GET or None)
     if filter_form.is_valid():
         if filter_form.cleaned_data.get('trassa', None):
@@ -363,9 +396,10 @@ def form51_create(request, slug):
         form51=form.save(commit=False)
         form51.region=region
         form51.save()
+
         return redirect('apps:management:form51', slug=slug)
     return render(request, 'management/form51_create.html', {'form': form,
-                                                             'region':region })
+                                                             'region':region})
 
 def form51_edit(request, slug, pk):
     region = Region.objects.get(slug=slug)
