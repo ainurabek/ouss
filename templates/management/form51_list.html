@@ -1,0 +1,74 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+
+<div class="container-fluid">
+
+	<!-- Page Heading -->
+	<h1 class="h3 mb-2 text-gray-800">Список сохраненных трасс</h1>
+
+	<!-- DataTales Example -->
+	<div class="card shadow mb-4">
+
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+							<th>Объекты</th>
+							<th>Трасса</th>
+							<th>ИП от</th>
+							<th>ИП до</th>
+							<th>Тип линии</th>
+							<th>Напров основного пути</th>
+							<th>Потребитель</th>
+							<th>Монтир-каналы</th>
+							<th>Задейственые-каналы</th>
+							<th>Наличие резерва</th>
+							<th>Год</th>
+							<th>№ расп</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for obj in objects %}
+						<tr>
+							<td>
+								{% for i in obj.object.transit.all %}
+									{{ i.name }} -
+								{% endfor %}
+								{% for i in obj.transit2.all %}
+									{{ i.name }} -
+								{% endfor %}
+							</td>
+							<td>
+								{% for i in obj.object.transit.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+								{% for i in obj.object.transit2.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+							</td>
+							<td>{{obj.object.point1}}</td>
+							<td>{{obj.object.point2}}</td>
+							<td>{{obj.object.type_line}}</td>
+							<td>{{obj.direction}}</td>
+							<td>{{obj.customer}}</td>
+							<td>{{obj.amount_inst_channels}}</td>
+							<td>{{obj.amount_inv_channels}}</td>
+							<td>{{obj.reserve}}</td>
+							<td>{{obj.year}}</td>
+							<td>{{obj.order}}</td>
+						</tr>
+
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

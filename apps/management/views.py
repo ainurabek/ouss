@@ -1,8 +1,7 @@
 from apps.accounts.models import User, DepartmentKT
 from apps.objects.models import TPO, Outfit, Point, Object, Trassa
 
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
 from django.db.models import Q
 from django.utils import timezone
@@ -19,7 +18,7 @@ from django.utils import timezone
 #         'departments':departments,
 #         'lps': lps
 #     })
-from ..form51.models import Region, Form51
+from ..form51.models import Region, Form51, Form51Location
 
 
 def tpo_list(request):
@@ -172,6 +171,9 @@ def trakt_create(request, lp_id):
     if form.is_valid():
         trakt = form.save(commit=False)
         trakt.id_parent = lp
+        trakt.name = str(lp.name)+'-'+str(trakt.name)
+        if trakt.type_line == None:
+            trakt.type_line = lp.type_line 
         trakt.save()
         return redirect('apps:management:trakt', lp_id=lp_id)
     return render(request, 'management/trakt_form.html', {'form': form})
@@ -202,9 +204,8 @@ def select_obj(request, pk):
     ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
 
 
-    trassa_list1 = obj.transit.all().order_by('-add_time')
-    trassa_list2 = obj.transit2.all().order_by('add_time')
-
+    trassa_list1 = obj.transit.all().reverse()
+    trassa_list2 = obj.transit2.all()
     context = {
         'obj': obj,
         'trassa_list1': trassa_list1,
@@ -233,8 +234,8 @@ def left_trassa(request, pk, id):
         main_obj.transit.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     context = {
         'obj': main_obj,
@@ -262,8 +263,8 @@ def right_trassa(request, pk, id):
         main_obj.transit2.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     context = {
         'obj': main_obj,
@@ -293,8 +294,8 @@ def save_trassa(request, pk):
         if main_obj.transit.all() not in i.transit.all():
            i.transit.add(*main_obj.transit.all())
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     items1 = []
     for name in trassa_list1:
@@ -333,8 +334,8 @@ def trassa_list(request):
     _list = []
     for i in trassa_list:
         _list.append({'name': i.name, 
-            'transit': i.transit.order_by('-add_time'), 
-            'transit2': i.transit2.order_by('add_time'),
+            'transit': i.transit.all().reverse(), 
+            'transit2': i.transit2,
             'maker_trassa': i.maker_trassa,
             'add_time': i.add_time,
             'id': i.pk})
@@ -347,9 +348,18 @@ def region_list(request):
         'regions': Region.objects.all()
     })
 
-def form51_list(request, slug):
+
+def form51_location_list(request, slug):
     region = get_object_or_404(Region, slug=slug)
-    forms = Form51.objects.filter(region=region)
+    locations=Form51Location.objects.filter(region=region)
+    return render(request, 'management/location_list.html', {
+        'region': region,
+        'locations': locations
+    })
+
+def form51_list(request, location_id):
+    location = get_object_or_404(Form51Location, id=location_id)
+    forms = Form51.objects.filter(category=location)
     filter_form = Form51FilterForm(request.GET or None)
     if filter_form.is_valid():
         if filter_form.cleaned_data.get('trassa', None):
@@ -384,25 +394,25 @@ def form51_list(request, slug):
                 reserve=filter_form.cleaned_data.get('reserve')
             )
     return render(request, 'management/form51.html', {
-        'region': region,
+        'location': location,
         'forms': forms,
         'filter_form':filter_form
     })
 
-def form51_create(request, slug):
-    region = get_object_or_404(Region, slug=slug)
+def form51_create(request, location_id):
+    location = get_object_or_404(Form51Location, id=location_id)
     form = Form51Form(request.POST or None)
     if form.is_valid():
         form51=form.save(commit=False)
-        form51.region=region
+        form51.category=location
         form51.save()
 
-        return redirect('apps:management:form51', slug=slug)
+        return redirect('apps:management:form51', location_id=location.id)
     return render(request, 'management/form51_create.html', {'form': form,
-                                                             'region':region})
+                                                             'location':location})
 
-def form51_edit(request, slug, pk):
-    region = Region.objects.get(slug=slug)
+def form51_edit(request, location_id, pk):
+    location = Form51Location.objects.get(id=location_id)
     if pk:
         form51 = Form51.objects.get(id=pk)
         form = Form51Form(request.POST or None, instance=form51)
@@ -410,13 +420,13 @@ def form51_edit(request, slug, pk):
             form = Form51Form(request.POST or None, instance=form51)
             if form.is_valid():
                 instance = form.save(commit=False)
-                instance.region = region
+                instance.category = location
                 instance.save()
-                return redirect('apps:management:form51', slug=slug)
+                return redirect('apps:management:form51', location_id=location.id)
         return render(request, 'management/form51_create.html', {'form': form})
 
 def form51_delete(request, pk):
     if pk:
         form51 = Form51.objects.get(id=pk)
         form51.delete()
-        return redirect('apps:management:form51', slug=form51.region.slug)
+        return redirect('apps:management:form51', location_id=form51.category.id)

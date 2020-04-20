@@ -32,9 +32,10 @@ urlpatterns = [
     path('trassa-list/', trassa_list, name='trassa_list'),
 
     path('region', region_list, name='region_list'),
-    url(r'^(?P<slug>\S+)/list/$', views.form51_list, name='form51'),
-    url(r'^(?P<slug>\S+)/form51/create/$', views.form51_create, name='form51_create'),
-    url(r'^(?P<slug>\S+)/form51/edit/(?P<pk>\d+)/$', views.form51_edit, name='form51_edit'),
+    url(r'^(?P<slug>\S+)/locations/$', views.form51_location_list, name='location_list'),
+    url(r'^(?P<location_id>\S+)/list/$', views.form51_list, name='form51'),
+    url(r'^(?P<location_id>\S+)/form51/create/$', views.form51_create, name='form51_create'),
+    url(r'^(?P<location_id>\S+)/form51/edit/(?P<pk>\d+)/$', views.form51_edit, name='form51_edit'),
     path('form51/delete/<int:pk>/', form51_delete, name='form51_delete'),
 
 ]
