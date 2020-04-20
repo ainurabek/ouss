@@ -433,7 +433,7 @@ def left_trassa(request, pk, id):
         pass
     else:
         main_obj.transit.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
+        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),
@@ -450,7 +450,7 @@ def right_trassa(request, pk, id):
         pass
     else:
         main_obj.transit2.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
+        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),

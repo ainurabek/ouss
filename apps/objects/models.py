@@ -5,6 +5,7 @@ from apps.customer.models import Customer
 
 from apps.accounts.models import Profile
 from django.db.models.signals import post_save
+from sortedm2m.fields import SortedManyToManyField
 
 
 
@@ -143,8 +144,8 @@ class Object(models.Model):
 	system = models.ForeignKey(System, related_name='obj_system', on_delete=models.CASCADE, blank=True, null=True)
 	type_transit1 = models.CharField('Тип транзита1', max_length=100, blank=True, null=True)
 	type_transit2 = models.CharField('Тип транзита2', max_length=100, blank=True, null=True)
-	transit = models.ManyToManyField('Object', related_name='transit_obj1', blank=True)
-	transit2 = models.ManyToManyField('Object', related_name='transit_obj2', blank=True)
+	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
+	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
 	handel_add_path1 = models.CharField('Начало', max_length=100, blank=True, null=True)
 	handel_add_path2 = models.CharField('Конец', max_length=100, blank=True, null=True)
@@ -160,7 +161,6 @@ class Object(models.Model):
 	maker_trassa = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='maker', blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
-
 
 
 	class Meta:
