@@ -70,12 +70,7 @@
           <span>Список ИП</span></a>
       </li>
       <li class="nav-item active">
-          {% for lp in lps %}
-        <a class="nav-link" href="{% url 'apps:management:save_trassa' lp.pk %}">
-          {% endfor %} </a>
-
         <a class="nav-link" href="{% url 'apps:management:trassa_list' %}">
-
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Список сохраненных трасс</span></a>
       </li>
@@ -84,6 +79,12 @@
         <a class="nav-link" href="{% url 'apps:management:region_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Форма 5.1.</span></a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url 'apps:forma51_v2:list_region' %}">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Форма 5.1. v2.0</span></a>
       </li>
 
       <li class="nav-item active">

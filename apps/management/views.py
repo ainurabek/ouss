@@ -1,8 +1,7 @@
 from apps.accounts.models import User, DepartmentKT
 from apps.objects.models import TPO, Outfit, Point, Object, Trassa
 
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
 from django.db.models import Q
 from django.utils import timezone
@@ -172,6 +171,9 @@ def trakt_create(request, lp_id):
     if form.is_valid():
         trakt = form.save(commit=False)
         trakt.id_parent = lp
+        trakt.name = str(lp.name)+'-'+str(trakt.name)
+        if trakt.type_line == None:
+            trakt.type_line = lp.type_line 
         trakt.save()
         return redirect('apps:management:trakt', lp_id=lp_id)
     return render(request, 'management/trakt_form.html', {'form': form})
@@ -202,9 +204,8 @@ def select_obj(request, pk):
     ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
 
 
-    trassa_list1 = obj.transit.all().order_by('-add_time')
-    trassa_list2 = obj.transit2.all().order_by('add_time')
-
+    trassa_list1 = obj.transit.all().reverse()
+    trassa_list2 = obj.transit2.all()
     context = {
         'obj': obj,
         'trassa_list1': trassa_list1,
@@ -233,8 +234,8 @@ def left_trassa(request, pk, id):
         main_obj.transit.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     context = {
         'obj': main_obj,
@@ -262,8 +263,8 @@ def right_trassa(request, pk, id):
         main_obj.transit2.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     context = {
         'obj': main_obj,
@@ -293,8 +294,8 @@ def save_trassa(request, pk):
         if main_obj.transit.all() not in i.transit.all():
            i.transit.add(*main_obj.transit.all())
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all().reverse()
+    trassa_list2 = main_obj.transit2.all()
 
     items1 = []
     for name in trassa_list1:
@@ -348,7 +349,7 @@ def region_list(request):
     })
 
 def form51_list(request, slug):
-    region = get_object_or_404(Region, slug=slug)
+    
     forms = Form51.objects.filter(region=region)
     filter_form = Form51FilterForm(request.GET or None)
     if filter_form.is_valid():

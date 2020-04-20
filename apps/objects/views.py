@@ -402,8 +402,8 @@ def select_lp(request, main_pk):
     ip_do = Object.objects.filter(Q(point1=main_obj.point2) | Q(point2=main_obj.point2))
     ip_do = ip_do.filter(id_parent=None)
 
-    trassa_list1 = main_obj.transit.all().order_by('-add_time')
-    trassa_list2 = main_obj.transit2.all().order_by('add_time')
+    trassa_list1 = main_obj.transit.all()
+    trassa_list2 = main_obj.transit2.all()
 
     response = {
         'main_obj': main_obj.to_json(),
@@ -433,7 +433,7 @@ def left_trassa(request, pk, id):
         pass
     else:
         main_obj.transit.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
+        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),
@@ -450,7 +450,7 @@ def right_trassa(request, pk, id):
         pass
     else:
         main_obj.transit2.add(obj)
-        Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=request.user.profile)
+        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
 
     response = {
         'main_obj': main_obj.to_json(),

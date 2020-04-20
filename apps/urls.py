@@ -7,6 +7,7 @@ from apps.circuits import urls as circuits_urls
 from apps.customer import urls as customer_urls
 from apps.management import urls as management_urls
 from apps.form51 import urls as form51_urls
+from apps.forma51_v2 import urls as forma51_v2_urls
 
 
 router = DefaultRouter()
@@ -23,6 +24,7 @@ urlpatterns = [
     path('customer/', include(customer_urls, namespace='customer')),
     path('form51/', include(form51_urls, namespace='form51')),
     path('management/', include(management_urls, namespace='management_url')),
+    path('form51-v2/', include(forma51_v2_urls, namespace='forma51_v2')),
     path('', include(router.urls)),
 
 ]

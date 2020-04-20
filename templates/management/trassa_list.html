@@ -19,6 +19,7 @@
                         <th>Трасса</th>
                         <th>Создан</th>
                         <th>Дата</th>
+                        <th>Форма 5.1</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -41,6 +42,9 @@
                           </td>
                           <td>{{trassa.maker_trassa}}</td>
                           <td>{{trassa.add_time}}</td>
+                          <td>
+                            <a href="{% url 'apps:forma51_v2:create_form51' trassa.id %}">Создать Form5.1</a>
+                          </td>
                         </tr>
                       {% endfor %}
                   </tbody>
