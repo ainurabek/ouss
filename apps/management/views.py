@@ -348,7 +348,6 @@ def region_list(request):
         'regions': Region.objects.all()
     })
 
-
 def form51_location_list(request, slug):
     region = get_object_or_404(Region, slug=slug)
     locations=Form51Location.objects.filter(region=region)
