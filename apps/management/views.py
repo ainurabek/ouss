@@ -19,7 +19,7 @@ from django.utils import timezone
 #         'departments':departments,
 #         'lps': lps
 #     })
-from ..form51.models import Region, Form51
+from ..form51.models import Region, Form51, Form51Location
 
 
 def tpo_list(request):
@@ -347,9 +347,17 @@ def region_list(request):
         'regions': Region.objects.all()
     })
 
-def form51_list(request, slug):
+def form51_location_list(request, slug):
     region = get_object_or_404(Region, slug=slug)
-    forms = Form51.objects.filter(region=region)
+    locations=Form51Location.objects.filter(region=region)
+    return render(request, 'management/location_list.html', {
+        'region': region,
+        'locations': locations
+    })
+
+def form51_list(request, location_id):
+    location = get_object_or_404(Form51Location, id=location_id)
+    forms = Form51.objects.filter(category=location)
     filter_form = Form51FilterForm(request.GET or None)
     if filter_form.is_valid():
         if filter_form.cleaned_data.get('trassa', None):
@@ -384,25 +392,25 @@ def form51_list(request, slug):
                 reserve=filter_form.cleaned_data.get('reserve')
             )
     return render(request, 'management/form51.html', {
-        'region': region,
+        'location': location,
         'forms': forms,
         'filter_form':filter_form
     })
 
-def form51_create(request, slug):
-    region = get_object_or_404(Region, slug=slug)
+def form51_create(request, location_id):
+    location = get_object_or_404(Form51Location, id=location_id)
     form = Form51Form(request.POST or None)
     if form.is_valid():
         form51=form.save(commit=False)
-        form51.region=region
+        form51.category=location
         form51.save()
 
-        return redirect('apps:management:form51', slug=slug)
+        return redirect('apps:management:form51', location_id=location.id)
     return render(request, 'management/form51_create.html', {'form': form,
-                                                             'region':region})
+                                                             'location':location})
 
-def form51_edit(request, slug, pk):
-    region = Region.objects.get(slug=slug)
+def form51_edit(request, location_id, pk):
+    location = Form51Location.objects.get(id=location_id)
     if pk:
         form51 = Form51.objects.get(id=pk)
         form = Form51Form(request.POST or None, instance=form51)
@@ -410,13 +418,13 @@ def form51_edit(request, slug, pk):
             form = Form51Form(request.POST or None, instance=form51)
             if form.is_valid():
                 instance = form.save(commit=False)
-                instance.region = region
+                instance.category = location
                 instance.save()
-                return redirect('apps:management:form51', slug=slug)
+                return redirect('apps:management:form51', location_id=location.id)
         return render(request, 'management/form51_create.html', {'form': form})
 
 def form51_delete(request, pk):
     if pk:
         form51 = Form51.objects.get(id=pk)
         form51.delete()
-        return redirect('apps:management:form51', slug=form51.region.slug)
+        return redirect('apps:management:form51', location_id=form51.category.id)

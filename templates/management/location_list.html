@@ -2,7 +2,13 @@
 {% block content %}
 {% load widget_tweaks %}
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Список сохраненных трасс </h1>
+
+<div class="col-md-2">
+    <a href="{% url 'apps:management:region_list' %}"
+       class="btn btn-flat btn-primary btn-block">
+        Категории {{ region.name }}
+    </a>
+</div>
 <div class="table-responsive">
   <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
     <thead>
@@ -11,9 +17,9 @@
       </tr>
     </thead>
     <tbody>
-        {% for region in regions %}
+        {% for location in locations %}
             <tr>
-                <td><a href="{% url 'apps:management:location_list' region.slug %}">{{region.name}}</a></td>
+                <td><a href="{% url 'apps:management:form51' location.id %}">{{location.name}}</a></td>
             </tr>
         {% endfor %}
     </tbody>
