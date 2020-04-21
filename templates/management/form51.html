@@ -13,6 +13,12 @@
     <a href="{% url 'apps:management:form51_create' location.id %}" class="btn btn-default btn-flat btn-block">
           <button type="submit" class="btn btn-primary">Добавить</button>
     </a>
+
+    <a href="?csv&{{ request.GET.urlencode }}" class="btn btn-danger btn-flat btn-block">
+    Импортировать в Excel
+    </a>
+
+
     <br>
 </div>
 <div class="card-body">

@@ -5,6 +5,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
 from django.db.models import Q
 from django.utils import timezone
+from django.http import HttpResponse
+import xlwt
+import csv
 
 
 
@@ -392,6 +395,51 @@ def form51_list(request, location_id):
             forms = forms.filter(
                 reserve=filter_form.cleaned_data.get('reserve')
             )
+
+    items = []
+    for form in forms:
+        item = {}
+        item['id'] = form.id
+        item['object'] = form.object.name
+        item['trassa'] = form.trassa.name
+        item['point1'] = form.point1.name
+        item['point2'] = form.point2.name
+        item['type_line'] = form.type_line.name
+        item['num'] = form.num
+        item['direction'] = form.direction
+        item['customer'] = form.customer.abr
+        item['amount_inst_channels'] = form.amount_inst_channels
+        item['amount_inv_channels'] = form.amount_inv_channels
+        item['reserve'] = form.reserve
+        items.append(item)
+    if 'csv' in request.GET:
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="form51.xls"'
+
+        wb = xlwt.Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Форма 5.1')
+
+        row_num = 0
+
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+
+        columns = ['ID', 'ЛП', 'Трасса', 'ИП от', 'ИП до', 'Тип линии', '№ лямды', 'Напраление основного пути',
+               'Потребитель', 'Монтированные каналы', 'Задейтвованные каналы', 'Наличие резерва', 'Год ввода']
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_style)
+
+        font_style = xlwt.XFStyle()
+
+        for item in items:
+            row_num += 1
+
+            for col_num in range(len(list(item.keys()))):
+                ws.write(row_num, col_num, item[list(item.keys())[col_num]], font_style)
+
+        wb.save(response)
+        return response
     return render(request, 'management/form51.html', {
         'location': location,
         'forms': forms,
