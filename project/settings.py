@@ -42,12 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sortedm2m',
+
     'apps.objects.apps.ObjectsConfig',
     'apps.accounts',
     'apps.circuits',
     'apps.customer',
     'apps.form51',
     'apps.forma51_v2',
+    'apps.alarm_log',
+
     'knox',
     'rest_framework',
     'django_filters',

@@ -7,9 +7,6 @@ from apps.accounts.models import Profile
 from django.db.models.signals import post_save
 from sortedm2m.fields import SortedManyToManyField
 
-
-
-
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -52,6 +49,7 @@ class TypeOfLocation(models.Model):
 	def __str__(self):
 		return self.name
 
+
 class LineType(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -63,6 +61,7 @@ class LineType(models.Model):
 	def __str__(self):
 		return f'{self.name}, {self.id}'
 
+
 class Category(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
@@ -72,6 +71,7 @@ class Category(models.Model):
 
 	def __str__(self):
 		return f'{self.name}, {self.id}'
+
 
 class System(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
@@ -111,6 +111,7 @@ class Point(models.Model):
 	def __str__(self):
 		return self.point
 
+
 class Trassa(models.Model):
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField('Трасса', max_length=1000000, blank=True, null=True)
@@ -123,7 +124,6 @@ class Trassa(models.Model):
 
 	def __str__(self):
 		return str(self.name)
-
 
 
 class Object(models.Model):

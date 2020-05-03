@@ -4,14 +4,17 @@ from apps.forma51_v2.models import Forma
 from apps.forma51_v2.forms import Forma51Form
 from apps.objects.models import Object
 
+
 def region_list(request):
 	regions = Region.objects.all()
 	return render(request, 'management/list_region.html', {'regions': regions})
+
 
 def form51_list(request, slug):
 	region = get_object_or_404(Region, slug=slug)
 	objects = Forma.objects.filter(region=region)
 	return render(request, 'management/form51_list.html', {'objects': objects})
+
 
 def create_form51(request, pk):
 	obj = get_object_or_404(Object, pk=pk)
