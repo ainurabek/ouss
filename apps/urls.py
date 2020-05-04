@@ -8,6 +8,7 @@ from apps.customer import urls as customer_urls
 from apps.management import urls as management_urls
 from apps.form51 import urls as form51_urls
 from apps.forma51_v2 import urls as forma51_v2_urls
+from apps.alarm_log import urls as alarm_log_urls
 
 
 router = DefaultRouter()
@@ -25,6 +26,7 @@ urlpatterns = [
     path('form51/', include(form51_urls, namespace='form51')),
     path('management/', include(management_urls, namespace='management_url')),
     path('form51-v2/', include(forma51_v2_urls, namespace='forma51_v2')),
+    path('alarm-log/', include(alarm_log_urls, namespace='alarm_log')),
     path('', include(router.urls)),
 
 ]

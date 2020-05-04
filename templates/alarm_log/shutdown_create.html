@@ -1,0 +1,43 @@
+{% extends 'alarm_log/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Создание отключения</h1>
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <form method="post">{% csrf_token %}
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label>{{ form.shutdown_type.label }}</label>
+                                {% render_field form.shutdown_type class="form-control" %}
+                                <label>{{ form.address.label }}</label>
+                                {% render_field form.address class="form-control" %}
+                                <label>{{ form.region.label }}</label>
+                                {% render_field form.region class="form-control" %}
+                                <label>{{ form.status.label }}</label>
+                                {% render_field form.status class="form-control" %}
+                                <label>{{ form.shutdown_periods_from.label }}</label>
+                                {% render_field form.shutdown_periods_from class="form-control" %}
+                                <label>{{ form.shutdown_periods_to.label }}</label>
+                                {% render_field form.shutdown_periods_to class="form-control" %}
+                                <label>{{ form.сause.label }}</label>
+                                {% render_field form.сause class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="box-footer clearfix">
+                            <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

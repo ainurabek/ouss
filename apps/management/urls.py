@@ -31,7 +31,7 @@ urlpatterns = [
     path('save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
     path('trassa-list/', trassa_list, name='trassa_list'),
 
-    path('region', region_list, name='region_list'),
+    path('region/', region_list, name='region_list'),
     url(r'^(?P<slug>\S+)/locations/$', views.form51_location_list, name='location_list'),
     url(r'^(?P<location_id>\S+)/list/$', views.form51_list, name='form51'),
     url(r'^(?P<location_id>\S+)/form51/create/$', views.form51_create, name='form51_create'),
