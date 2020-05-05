@@ -6,9 +6,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
-from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, DepartmentSerializer
+from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
+    DepartmentSerializer, SubdepartmentSerializer
 from django.http.response import HttpResponse, JsonResponse
-from .models import Profile, DepartmentKT
+from .models import Profile, DepartmentKT, SubdepartmentKT
 User = get_user_model()
 
 class Register(APIView):
@@ -16,18 +17,22 @@ class Register(APIView):
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username', False)
+        print(username)
         password = request.data.get('password', False)
         role = request.data.get('role', False)
+        print(role)
         department = request.data.get('department', False)
+        subdepartment = request.data.get('subdepartment', False)
 
-        if username and password and role and department:
+        if username and password and role and department and subdepartment:
             user = User.objects.filter(username=username)
             if user.exists():
                 return Response({'status': False,
                                  'detail': 'Email already have account associated. Kindly try forgot password'})
             else:
 
-                Temp_data = {'username': username, 'password': password, 'role': role, 'department':department}
+                Temp_data = {'username': username, 'password': password, 'role': role, 'department':department,
+                             'subdeparment':subdepartment}
                 serializer = CreateUserSerializer(data=Temp_data)
                 serializer.is_valid(raise_exception=True)
                 user = serializer.save()
@@ -120,6 +125,29 @@ def department_view(request, department_id):
     else:
         return JsonResponse({'success': 'Success'}, status=202)
 
+'''
+Данная функция позволяет создать подотделы КТ
+'''
+class SubdepartmentKTAPIView(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = SubdepartmentKT.objects.all()
+    lookup_field = 'pk'
+    serializer_class = SubdepartmentSerializer
+
+def subdepartment_view(request, department_id, subdepartment_id):
+    department = DepartmentKT.objects.get(id=department_id)
+    subdepartment= SubdepartmentKT.objects.get(department=department, id=subdepartment_id)
+    print(department.id)
+    print(subdepartment.id)
+    user = request.user
+    print(user)
+    if user.department.id != department.id and user.subdeparment.id != subdepartment.id:
+        print(user.department.id)
+        print(user.subdepartment.id)
+        return JsonResponse({'error': 'Вы не имеете право зайти в этот отдел'}, status=401)
+    else:
+        return JsonResponse({'success': 'Success'}, status=202)
 
 
 

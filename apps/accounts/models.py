@@ -27,8 +27,21 @@ class DepartmentKT(models.Model):
     def __str__(self):
         return self.name
 
+class SubdepartmentKT(models.Model):
+    department = models.ForeignKey(DepartmentKT, verbose_name='Подотдел',
+                                  null=True, blank=True, related_name='supdepartment',
+                                  on_delete=models.CASCADE)
+    name = models.CharField('Подотдел', max_length=30, blank=True)
+
+    class Meta:
+        verbose_name = 'Подотдел'
+        verbose_name_plural = 'Подотделы'
+
+    def __str__(self):
+        return self.name
+
 class UserManager(BaseUserManager):
-    def create_user(self, username, role=None, department=None, password=None, is_staff=False, is_active=True, is_admin=False):
+    def create_user(self, username, role=None, department=None, subdepartment=None, password=None, is_staff=False, is_active=True, is_admin=False):
         if not username:
             raise ValueError('users must have a username')
         if not password:
@@ -45,6 +58,7 @@ class UserManager(BaseUserManager):
         user_obj.active = is_active
         user_obj.role = role
         user_obj.department = department
+        user_obj.subdepartment = subdepartment
         user_obj.save(using=self._db)
         return user_obj
 
@@ -86,6 +100,9 @@ class User(AbstractBaseUser):
                                   on_delete=models.CASCADE)
     department = models.ForeignKey(DepartmentKT, verbose_name='Отдел пользователя',
                                   null=True, blank=True, related_name='users_department',
+                                  on_delete=models.CASCADE)
+    subdepartment = models.ForeignKey(SubdepartmentKT, verbose_name='Подотдел пользователя',
+                                  null=True, blank=True, related_name='users_subdepartment',
                                   on_delete=models.CASCADE)
 
     USERNAME_FIELD = 'username'

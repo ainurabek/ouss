@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 
-from .models import Profile, DepartmentKT
+from .models import Profile, DepartmentKT, SubdepartmentKT
 
 User = get_user_model()
 
@@ -9,18 +9,18 @@ User = get_user_model()
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'password', 'role', 'department')
+        fields = ('username', 'password', 'role', 'department', 'subdepartment')
         extra_kwargs = {'password': {'write_only': True}, }
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create(**validated_data)
 
         return user
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'role', 'department', 'password')
+        fields = ('id', 'username', 'role', 'department', 'subdepartment', 'password')
 
 
 class LoginUserSerializer(serializers.Serializer):
@@ -54,6 +54,11 @@ class LoginUserSerializer(serializers.Serializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = DepartmentKT
+        fields = '__all__'
+
+class SubdepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubdepartmentKT
         fields = '__all__'
 
 class ProfileListSerializer(serializers.ModelSerializer):

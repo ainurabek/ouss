@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-from .models import Profile, Role, DepartmentKT
+from .models import Profile, Role, DepartmentKT, SubdepartmentKT
 from .forms import UserAdminChangeForm, UserAdminCreationForm
 
 
@@ -24,16 +24,16 @@ class ProfileInline(admin.StackedInline):
 
 class CustomUserAdmin(UserAdmin):
     inlines = (ProfileInline, )
-    list_display = ('username', 'role', 'department', 'admin', 'staff', 'active', )
+    list_display = ('username', 'role', 'department', 'subdepartment', 'admin', 'staff', 'active', )
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
 
-    list_filter = ('username', 'role', 'department')
+    list_filter = ('username', 'role', 'department', 'subdepartment',)
     fieldsets = (
-        (None, {'fields': ('username', 'password', 'role', 'department')}),
+        (None, {'fields': ('username', 'password', 'role', 'department', 'subdepartment')}),
         ('Personal info', {'fields': ()}),
         ('Permissions', {'fields': ('admin', 'staff', 'active')}),
     )
@@ -42,7 +42,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'role', 'department', 'password1', 'password2')}
+            'fields': ('username', 'role', 'department', 'subdepartment', 'password1', 'password2')}
          ),
     )
     search_fields = ('username',)
@@ -82,4 +82,5 @@ class ProfileAdmin(admin.ModelAdmin):
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(DepartmentKT)
+admin.site.register(SubdepartmentKT)
 admin.site.register(Role)
