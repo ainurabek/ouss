@@ -43,19 +43,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sortedm2m',
 
-    'apps.objects.apps.ObjectsConfig',
+    'apps.opu.objects.apps.ObjectsConfig',
     'apps.accounts',
-    'apps.circuits',
-    'apps.customer',
-    'apps.form51',
-    'apps.forma51_v2',
-    'apps.alarm_log',
+    'apps.opu',
+    'apps.opu.circuits',
+    'apps.opu.customer',
+    'apps.opu.form51',
+    'apps.opu.forma51_v2',
+    'apps.dispatching',
 
     'knox',
     'rest_framework',
     'django_filters',
     'simple_history',
-    'apps.management',
+    'apps.opu.management',
     'widget_tweaks',
 
 ]

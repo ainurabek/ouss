@@ -13,7 +13,7 @@
     <tbody>
         {% for region in regions %}
             <tr>
-                <td><a href="{% url 'apps:management:location_list' region.slug %}">{{region.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:location_list' region.slug %}">{{region.name}}</a></td>
             </tr>
         {% endfor %}
     </tbody>

@@ -4,7 +4,7 @@
 <!-- Page Heading -->
 
 <div class="col-md-2">
-    <a href="{% url 'apps:management:region_list' %}"
+    <a href="{% url 'apps:opu:management:region_list' %}"
        class="btn btn-flat btn-primary btn-block">
         Категории {{ region.name }}
     </a>
@@ -19,7 +19,7 @@
     <tbody>
         {% for location in locations %}
             <tr>
-                <td><a href="{% url 'apps:management:form51' location.id %}">{{location.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:form51' location.id %}">{{location.name}}</a></td>
             </tr>
         {% endfor %}
     </tbody>

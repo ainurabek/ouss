@@ -13,7 +13,7 @@
 
             <div class="card-body">
               <div class="box-footer clearfix" style="padding-bottom: 20px; ">
-                  <a href="{% url 'apps:management:lp_create' %}" class="btn btn-default btn-flat btn-block">
+                  <a href="{% url 'apps:opu:management:lp_create' %}" class="btn btn-default btn-flat btn-block">
                       <button type="submit" class="btn btn-primary">Добавить ЛП</button>
                   </a>
                 </div>
@@ -35,15 +35,15 @@
                   <tbody>
                       {% for lp in lps %}
                           <tr>
-                              <td><a href="{% url 'apps:management:trakt' lp.id %}">{{lp.name}}</a></td>
+                              <td><a href="{% url 'apps:opu:management:trakt' lp.id %}">{{lp.name}}</a></td>
                               <td>{{lp.tpo1.index}}</td>
                               <td>{{lp.point1.point}}</td>
                               <td>{{lp.tpo2.index}}</td>
                               <td>{{lp.point2.point}}</td>
-                            <td><button class="btn"><a href="{% url 'apps:management:lp_delete' lp.id %}"><i class="fa fa-trash"></i></a>
+                            <td><button class="btn"><a href="{% url 'apps:opu:management:lp_delete' lp.id %}"><i class="fa fa-trash"></i></a>
                             </button>
                             </td>
-                            <td><button class="btn"> <a href="{% url 'apps:management:lp_edit' lp.id %}"><i class="fa fa-edit"></i></a>
+                            <td><button class="btn"> <a href="{% url 'apps:opu:management:lp_edit' lp.id %}"><i class="fa fa-edit"></i></a>
                                             </button>
 
                               </td>
@@ -59,7 +59,7 @@
 <div class="card shadow mb-4">
     <div class="card-body">
         <div class="box-footer clearfix" style="padding-bottom: 20px; ">
-          <a href="{% url 'apps:management:lp_create' %}" class="btn btn-default btn-flat btn-block">
+          <a href="{% url 'apps:opu:management:lp_create' %}" class="btn btn-default btn-flat btn-block">
               <button type="submit" class="btn btn-primary">Добавить ЛП</button>
           </a>
         </div>
@@ -79,15 +79,15 @@
               <tbody>
                   {% for lp in lps %}
                       <tr>
-                          <td><a href="{% url 'apps:management:trakt' lp.id %}">{{lp.name}}</a></td>
+                          <td><a href="{% url 'apps:opu:management:trakt' lp.id %}">{{lp.name}}</a></td>
                           <td>{{lp.tpo1.index}}</td>
                           <td>{{lp.point1.point}}</td>
                           <td>{{lp.tpo2.index}}</td>
                           <td>{{lp.point2.point}}</td>
-                        <td><button class="btn"><a href="{% url 'apps:management:lp_delete' lp.id %}"><i class="fa fa-trash"></i></a>
+                        <td><button class="btn"><a href="{% url 'apps:opu:management:lp_delete' lp.id %}"><i class="fa fa-trash"></i></a>
                         </button>
                         </td>
-                        <td><button class="btn"> <a href="{% url 'apps:management:lp_edit' lp.id %}"><i class="fa fa-edit"></i></a>
+                        <td><button class="btn"> <a href="{% url 'apps:opu:management:lp_edit' lp.id %}"><i class="fa fa-edit"></i></a>
                                         </button>
                           </td>
                       </tr>
@@ -123,7 +123,7 @@
                                     {% render_field filter_form.point2 class="form-control" %}
                                   </div>
                                   <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Фильтр</button>
-                                  <a href="{% url 'apps:management:lp'%}"
+                                  <a href="{% url 'apps:opu:management:lp'%}"
                                      class="btn btn-warning">
                                       <i class="fa fa-undo"></i> Сбросить фильтр</a>
                               </div>

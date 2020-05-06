@@ -11,7 +11,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SKyrgyz Telekom - ТПО</title>
+  <title>Kyrgyz Telekom</title>
 
   <!-- Custom fonts for this template -->
   <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -35,7 +35,7 @@
       <img src="{% static 'img/logo2.gif' %}" style="height: 140px; width: 225px; margin-left: 0px">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'apps:opu:management:lp' %}">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'apps:dispatching:request_list' %}">
         <div class="sidebar-brand-icon rotate-n-15">
 
         </div>
@@ -47,51 +47,36 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:management:lp' %}">
+        <a class="nav-link" href="{% url 'apps:dispatching:request_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Список простых обьектов</span></a>
+          <span>Журнал заявок</span></a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:management:tpo' %}">
+        <a class="nav-link" href="{% url 'apps:dispatching:shutdown_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Список ТПО</span></a>
+          <span>Журнал отключений</span></a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:management:outfit' %}">
+        <a class="nav-link" href="#">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Список Предприятий</span></a>
+          <span>Отчеты</span></a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:management:point' %}">
+        <a class="nav-link" href="#">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Список ИП</span></a>
+          <span>Обекты</span></a>
       </li>
       <li class="nav-item active">
         <a class="nav-link" href="{% url 'apps:opu:management:trassa_list' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Список сохраненных трасс</span></a>
+          <span>Справочник</span></a>
       </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:management:region_list' %}">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Форма 5.1.</span></a>
-      </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:opu:forma51_v2:list_region' %}">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Форма 5.1. v2.0</span></a>
-      </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Пользователи</span></a>
-      </li>
       <!-- Divider -->
       <hr class="sidebar-divider d-none d-md-block">
 

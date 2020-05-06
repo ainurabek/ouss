@@ -1,0 +1,42 @@
+{% extends 'dispatching/base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Создание заявки</h1>
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <form method="POST"  class="post-form">{% csrf_token %}
+<!--                        {{ form.as_p }}-->
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label>{{ form.first_name.label }}</label>
+                                {% render_field form.first_name class="form-control" %}
+                                <label>{{ form.last_name.label }}</label>
+                                {% render_field form.last_name class="form-control" %}
+                                <label>{{ form.address.label }}</label>
+                                {% render_field form.address class="form-control" %}
+                                <label>{{ form.type_request.label }}</label>
+                                {% render_field form.type_request class="form-control" %}
+                                <label>{{ form.status.label }}</label>
+                                {% render_field form.status class="form-control" %}
+                                <label>{{ form.description.label }}</label>
+                                {% render_field form.description class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="box-footer clearfix">
+                            <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

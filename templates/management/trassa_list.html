@@ -26,7 +26,7 @@
                       {% for trassa in trassa_list %}
                         <tr>
                           <td>
-                            <a href="{% url 'apps:management:select_obj' trassa.id %}">{{trassa.name}}</a>
+                            <a href="{% url 'apps:opu:management:select_obj' trassa.id %}">{{trassa.name}}</a>
                           </td>
                           <td>
                             {% for obj in trassa.transit.all %}
@@ -43,7 +43,7 @@
                           <td>{{trassa.maker_trassa}}</td>
                           <td>{{trassa.add_time}}</td>
                           <td>
-                            <a href="{% url 'apps:forma51_v2:create_form51' trassa.id %}">Создать Form5.1</a>
+                            <a href="{% url 'apps:opu:forma51_v2:create_form51' trassa.id %}">Создать Form5.1</a>
                           </td>
                         </tr>
                       {% endfor %}

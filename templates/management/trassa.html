@@ -44,7 +44,7 @@
             {% for lp in ip_ot %}
               <tr>
                 <td>{{lp.point1}}</td>
-                <td><a href="{% url 'apps:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
                 <td>{{lp.point2}}</td>
               </tr>
             {% endfor %}
@@ -64,14 +64,14 @@
             {% for lp in trassa_list1 %}
             <tr>
                 <td>{{lp.point1}}</td>
-                <td><a href="{% url 'apps:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:left_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
                 <td>{{lp.point2}}</td>
             </tr>
             {% endfor %}
             {% for lp in trassa_list2 %}
             <tr>
                 <td>{{lp.point1}}</td>
-                <td><a href="{% url 'apps:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
                 <td>{{lp.point2}}</td>
             </tr>
             {% endfor %}
@@ -92,7 +92,7 @@
             {% for lp in ip_do %}
               <tr>
                 <td>{{lp.point1}}</td>
-                <td><a href="{% url 'apps:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
+                <td><a href="{% url 'apps:opu:management:right_trassa' obj.pk lp.pk %}">{{lp.name}}</a></td>
                 <td>{{lp.point2}}</td>
               </tr>
             {% endfor %}
@@ -104,7 +104,7 @@
   </tbody>
 </table>
 
-<a href="{% url 'apps:management:save_trassa' obj.id %}" class="btn btn-default btn-flat btn-block">
+<a href="{% url 'apps:opu:management:save_trassa' obj.id %}" class="btn btn-default btn-flat btn-block">
     <button type="submit" class="btn btn-primary">Сохранить трассу</button>
 </a>
 

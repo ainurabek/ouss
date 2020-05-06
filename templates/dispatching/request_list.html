@@ -1,0 +1,112 @@
+{% extends 'dispatching/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Журнал заявок</h1>
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="container">
+              <div class="row">
+                <div class="col" >
+                 <button class="btn" style="background-color: #17a673;  height: 90px; font-size: 20px; color: #f8f9fc; text-align: center">
+                     <a href="{% url 'apps:dispatching:status_list' %}"><i class="fas fa-flag-checkered"></i>Новая ({{ new }})</a>
+                 </button>
+                </div>
+                <div class="col" >
+                   <button class="btn" style="background-color: #cc3300;  height: 90px; width:160px; font-size: 20px; color: #f8f9fc; text-align: center"><a href=""><i class="fas fa-sync-alt"></i>В работе ({{processing}})</a>
+                 </button>
+                </div>
+                <div class="col">
+                  <button class="btn" style="background-color: #224abe; height: 90px; font-size: 20px; color: #f8f9fc; text-align: center"><a href=""><i class="fas fa-pause-circle"></i>Отложена ({{delayed}})</a>
+                 </button>
+                </div>
+                <div class="col">
+                  <button class="btn" style="background-color: #dda20a;  height: 90px; width:185px; font-size: 20px; color: #f8f9fc; text-align: center"><a href=""><i class="fas fa-chevron-circle-down"></i>Выполнена ({{complete}})</a>
+                 </button>
+                </div>
+                <div class="col">
+                  <button class="btn" style="background-color: #89e2c2; height: 90px; width:175px; font-size: 20px; color: #f8f9fc; text-align: center"><a href=""><i class="fas fa-window-close"></i>Отказ в исполнении ({{refuse}})</a>
+                 </button>
+                </div>
+                <div class="col">
+                  <button class="btn" style="background-color: #e83e8c;  height: 90px; width:175px;
+                  font-size: 20px; color: white; text-align: center"><a href=""><i class="fas fa-minus-circle"></i>Отказ от заявки ({{cancel}})</a>
+                 </button>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="container">
+              <div class="row">
+                <div class="col-sm"><button class="btn"><a href="{% url 'apps:dispatching:request_create' %}"><i class="fas fa-plus-square"></i>
+                  Создать новую заявку</a>
+                 </button>
+                </div>
+                <div class="col-sm"><button class="btn"><a href=""><i class="far fa-file-excel"></i>
+                  Экспорт в CSV</a>
+                 </button>
+                </div>
+                <div class="col-sm"><button class="btn"><a href=""><i class="fas fa-search"></i>
+                  Поиск заявки</a>
+                 </button>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" style="width: 1500px" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                    <th>№ Заявки</th>
+                    <th>От кого</th>
+                    <th>Дата и время</th>
+                    <th>Адрес заявителя</th>
+                    <th>Вид заявки</th>
+                    <th>Причина</th>
+                    <th>Статус</th>
+                    <th>Исполнитель</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                  {% for r in requests %}
+                      <tr>
+                          <td>{{r.id}}</td>
+                          <td>{{r.first_name}} {{r.last_name}}</td>
+                          <td>{{r.created_at}}</td>
+                          <td>{{r.address }}</td>
+                          <td>{{r.type_request}}</td>
+                          <td>{{r.description}}</td>
+                          <td>{{r.status.name}}</td>
+                          <td>{{r.created_by}}</td>
+                        <td><button class="btn"><a href="{% url 'apps:dispatching:request_delete' r.id %}"><i class="fa fa-trash"></i></a>
+                        </button>
+                        </td>
+                        <td><button class="btn"> <a href="{% url 'apps:dispatching:request_edit' r.id %}"><i class="fa fa-edit"></i></a>
+                                        </button>
+                          </td>
+                      </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -5,22 +5,22 @@
   <!-- Page Heading -->
 {% if obj.trakt == True %}
 <h1 class="h3 mb-2 text-gray-800">Список трактов
-      <a href="{% url 'apps:management:lp'%}"> ({{ parent.name}}), </a>
+      <a href="{% url 'apps:opu:management:lp'%}"> ({{ parent.name}}), </a>
 </h1>
 {% else %}
  <h1 class="h3 mb-2 text-gray-800">Список {{ obj.type_of_trakt }}
-      <a href="{% url 'apps:management:trakt' parent.id%}"> ({{ parent.name}}), </a>
+      <a href="{% url 'apps:opu:management:trakt' parent.id%}"> ({{ parent.name}}), </a>
 </h1>
 {% endif %}
 <!-- DataTales Example -->
 
 <div class="box-footer clearfix" style="padding-bottom: 20px; ">
 {% if obj.trakt == True %}
-  <a href="{% url 'apps:management:trakt_create' parent.id %}" class="btn btn-default btn-flat btn-block">
+  <a href="{% url 'apps:opu:management:trakt_create' parent.id %}" class="btn btn-default btn-flat btn-block">
       <button type="submit" class="btn btn-primary">Добавить Тракт</button>
   </a>
 {% else %}
-  <a href="{% url 'apps:management:trakt_create' parent.id %}" class="btn btn-default btn-flat btn-block">
+  <a href="{% url 'apps:opu:management:trakt_create' parent.id %}" class="btn btn-default btn-flat btn-block">
       <button type="submit" class="btn btn-primary">Добавить {{obj.type_of_trakt }}</button>
   </a>
 {% endif %}
@@ -47,18 +47,18 @@
       <tbody>
           {% for trakt in trakts %}
               <tr>
-                  <td><a href="{% url 'apps:management:trakt' trakt.id %}">{{trakt.name}}</a></td>
+                  <td><a href="{% url 'apps:opu:management:trakt' trakt.id %}">{{trakt.name}}</a></td>
                   <td>{{trakt.tpo1.index}}</td>
                   <td>{{trakt.point1.point}}</td>
                   <td>{{trakt.tpo2.index}}</td>
                   <td>{{trakt.point2.point}}</td>
                   <td>{{trakt.type_of_trakt}}</td>
                   <td>{{trakt.amount_channels}}</td>
-                  <td><button class="btn"><a href="{% url 'apps:management:trakt_edit' trakt.id %}"><i class="fa fa-edit"></i></a>
+                  <td><button class="btn"><a href="{% url 'apps:opu:management:trakt_edit' trakt.id %}"><i class="fa fa-edit"></i></a>
                 </button>
                   </td>
-                  <td><button class="btn"> <a href="{% url 'apps:management:trakt_delete' trakt.id %}"><i class="fa fa-trash"></i></a></button></td>
-                  <td><button class="btn"> <a href="{% url 'apps:management:select_obj' trakt.id %}"><span class="glyphicon glyphicon-plus">Создать трассу</span></td>
+                  <td><button class="btn"> <a href="{% url 'apps:opu:management:trakt_delete' trakt.id %}"><i class="fa fa-trash"></i></a></button></td>
+                  <td><button class="btn"> <a href="{% url 'apps:opu:management:select_obj' trakt.id %}"><span class="glyphicon glyphicon-plus">Создать трассу</span></td>
 
               </tr>
 
@@ -102,7 +102,7 @@
                           </div>
 
                           <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Фильтр</button>
-                          <a href="{% url 'apps:management:trakt' parent.id %}"
+                          <a href="{% url 'apps:opu:management:trakt' parent.id %}"
                              class="btn btn-warning">
                               <i class="fa fa-undo"></i> Сбросить фильтр
                           </a>

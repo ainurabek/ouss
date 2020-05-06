@@ -4,13 +4,13 @@
 {% block content %}
 <div class="row">
         <div class="col-md-2">
-            <a href="{% url 'apps:management:location_list' location.region.slug %}"
+            <a href="{% url 'apps:opu:management:location_list' location.region.slug %}"
                class="btn btn-flat btn-primary btn-block">
                 {{ location.name }}
             </a>
         </div>
     <br>
-    <a href="{% url 'apps:management:form51_create' location.id %}" class="btn btn-default btn-flat btn-block">
+    <a href="{% url 'apps:opu:management:form51_create' location.id %}" class="btn btn-default btn-flat btn-block">
           <button type="submit" class="btn btn-primary">Добавить</button>
     </a>
 
@@ -58,9 +58,9 @@
                   <td>{{form.amount_inst_channels}}</td>
                   <td>{{form.amount_inv_channels}}</td>
                   <td>{{form.reserve}}</td>
-                  <td><button class="btn"><a href="{% url 'apps:management:form51_edit' location.id form.id %}"><i class="fa fa-edit"></i></a>
+                  <td><button class="btn"><a href="{% url 'apps:opu:management:form51_edit' location.id form.id %}"><i class="fa fa-edit"></i></a>
                 </button></td>
-                  <td><button class="btn"> <a href="{% url 'apps:management:form51_delete' form.id %}"><i class="fa fa-trash"></i></a></button></td>
+                  <td><button class="btn"> <a href="{% url 'apps:opu:management:form51_delete' form.id %}"><i class="fa fa-trash"></i></a></button></td>
               </tr>
            {% endfor %}
       </tbody>
@@ -109,7 +109,7 @@
                       </div>
                       <br>
                       <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Фильтр</button>
-                      <a href="{% url 'apps:management:form51' location.id %}" class="btn btn-warning"><i class="fa fa-undo"></i> Сбросить фильтр</a>
+                      <a href="{% url 'apps:opu:management:form51' location.id %}" class="btn btn-warning"><i class="fa fa-undo"></i> Сбросить фильтр</a>
                   </div>
                  </form>
              </div>

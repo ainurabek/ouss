@@ -2,14 +2,8 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path
 from django.urls import include
 from apps.accounts import urls as accounts_urls
-from apps.objects import urls as objects_urls
-from apps.circuits import urls as circuits_urls
-from apps.customer import urls as customer_urls
-from apps.management import urls as management_urls
-from apps.form51 import urls as form51_urls
-from apps.forma51_v2 import urls as forma51_v2_urls
-from apps.alarm_log import urls as alarm_log_urls
-
+from apps.dispatching import urls as dispatching_urls
+from apps.opu import urls as opu_urls
 
 router = DefaultRouter()
 
@@ -20,13 +14,8 @@ app_name = 'apps'
 
 urlpatterns = [
     path('accounts/', include(accounts_urls, namespace='accounts')),
-    path('objects/', include(objects_urls, namespace='objects')),
-    path('circuits/', include(circuits_urls, namespace='circuits')),
-    path('customer/', include(customer_urls, namespace='customer')),
-    path('form51/', include(form51_urls, namespace='form51')),
-    path('management/', include(management_urls, namespace='management_url')),
-    path('form51-v2/', include(forma51_v2_urls, namespace='forma51_v2')),
-    path('alarm-log/', include(alarm_log_urls, namespace='alarm_log')),
+    path('dispatching/', include(dispatching_urls, namespace='dispatching')),
+    path('opu/', include(opu_urls, namespace='opu')),
     path('', include(router.urls)),
 
 ]
