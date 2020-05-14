@@ -6,7 +6,8 @@ from . import views
 app_name = 'dispatching'
 
 urlpatterns = [
-    path('', views.request_list, name='request_list'),
+    path('', views.RequestList.as_view(), name='request_list'),
+    path('<int:pk>/', views.list_of_filtered, name='list_of_filtered'),
     path('request/create/', views.request_create, name='request_create'),
     path('request/<int:request_id>/edit/', views.request_edit, name='request_edit'),
     path('request/delete/<int:pk>/', views.request_delete, name='request_delete'),
