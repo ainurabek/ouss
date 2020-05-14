@@ -185,5 +185,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+CORS_ORIGIN_ALLOW_ALL = True
 # Activate Django-Heroku.
 django_heroku.settings(locals())
