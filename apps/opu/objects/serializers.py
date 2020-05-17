@@ -39,6 +39,7 @@ class OutfitListSerializer(serializers.ModelSerializer):
         fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
         depth = 1
 
+
 class OutfitCreateSerializer(serializers.ModelSerializer):
     tpo = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
@@ -50,6 +51,7 @@ class OutfitCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
         depth = 1
 
+
 class PointListSerializer(serializers.ModelSerializer):
     tpo = TPOSerializer()
     id_outfit = OutfitListSerializer()
@@ -58,15 +60,18 @@ class PointListSerializer(serializers.ModelSerializer):
         fields = ('id', 'point', 'name', 'id_outfit', 'tpo')
         depth = 1
 
+
 class PointCreateSerializer(serializers.ModelSerializer):
     tpo = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
+
     class Meta:
         model = Point
         fields = ('id', 'point', 'name', 'id_outfit', 'tpo')
         depth = 1
+
 
 class IPListSerializer(serializers.ModelSerializer):
     tpo_id = TPOSerializer()
@@ -76,6 +81,7 @@ class IPListSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'point_id', 'object_id', 'tpo_id')
         depth = 1
+
 
 class IPCreateSerializer(serializers.ModelSerializer):
     tpo_id = serializers.PrimaryKeyRelatedField(
@@ -92,8 +98,8 @@ class IPCreateSerializer(serializers.ModelSerializer):
 
 
 class ParentSerializer(serializers.ModelSerializer):
-    point1 = PointListSerializer()
-    point2 = PointListSerializer()
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
 
     class Meta:
         model = Object
@@ -101,19 +107,18 @@ class ParentSerializer(serializers.ModelSerializer):
 
 
 class TransitSerializer(serializers.ModelSerializer):
-    point1 = PointListSerializer()
-    point2 = PointListSerializer()
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
 
     class Meta:
         model = Object
         fields = ('point1', 'name', 'point2')
 
 
-
 class LPSerializer(serializers.ModelSerializer):
-    point1 = PointListSerializer()
-    point2 = PointListSerializer()
-    type_line = TypeLineSerializer()
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    type_line = serializers.SlugRelatedField(slug_field='name', read_only=True)
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
 
@@ -121,6 +126,7 @@ class LPSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit', 'transit2')
         depth = 1
+
 
 class LPCreateSerializer(serializers.ModelSerializer):
     tpo1 = serializers.PrimaryKeyRelatedField(
@@ -144,15 +150,15 @@ class LPCreateSerializer(serializers.ModelSerializer):
 
 class ObjectSerializer(serializers.ModelSerializer):
     id_parent=ParentSerializer()
-    point1 = PointListSerializer()
-    point2 = PointListSerializer()
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     type_of_trakt = TypeOfTraktSerializer()
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'trakt', 'point1', 'point2', 'type_of_trakt', 'transit', 'transit2')
+        fields = ('id', 'id_parent', 'name', 'trakt', 'point1', 'point2', 'type_of_trakt', 'transit', 'transit2')
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
     tpo1 = serializers.PrimaryKeyRelatedField(
@@ -169,3 +175,31 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt', 'system', 'amount_channels', 'type_line', 'our', 'num', 'transit', 'transit2')
+
+
+class SelectObjectSerializer(serializers.ModelSerializer):
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    transit = TransitSerializer(many=True, read_only=True)
+    transit2 = TransitSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', 'transit', 'transit2')
+
+
+class ObjectListSerializer(serializers.ModelSerializer):
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    type_of_trakt = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt')
+
+
+class PointList(serializers.ModelSerializer):
+
+    class Meta:
+        model = Point
+        fields = ('id', 'point')

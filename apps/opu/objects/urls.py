@@ -4,8 +4,9 @@ from rest_framework import routers
 from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView, \
-    ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView, select_lp, \
-    select_object, left_trassa, right_trassa, save_trassa, delete_trassa
+    ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView,\
+    SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
+    CreateRightTrassaView, SelectPointView
 
 
 app_name = 'objects'
@@ -49,15 +50,14 @@ urlpatterns = [
     path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
     path('trakt/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
 
-    path('trakt/select-lp/<int:main_pk>/', select_lp, name='select_lp'),
-    path('trakt/select-object/<int:lp_pk>/', select_object, name='select_obj'),
-    path('trakt/left-trassa/<int:pk>/<int:id>/', left_trassa, name='left_trassa'),
-    path('trakt/right-trassa/<int:pk>/<int:id>/', right_trassa, name='right_trassa'),
-    path('trakt/save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
-    path('trakt/delete-trass/<int:main_pk>/<int:pk>/', delete_trassa, name='delete_trassa'),
-
-
-    url(r'collect_trassa/$', views.trassa, name='trassa'),
+    path('trakt/select-lp/<int:pk>/', SelectObjectView.as_view(), name='select_lp'),
+    path('trakt/point-list/', PointListTrassa.as_view(), name='point_list'),
+    path('trakt/select-point/<int:pk>/', SelectPointView.as_view(), name='select_point'),
+    path('trakt/select-object/<int:pk>/', ObjectList.as_view(), name='select_obj'),
+    path('trakt/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftTrassaView.as_view(), name='left_trassa'),
+    path('trakt/right-trassa/<int:main_pk>/<int:pk>/', CreateRightTrassaView.as_view(), name='right_trassa'),
+    path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
+    path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
 
     path('', include(router.urls))
 
