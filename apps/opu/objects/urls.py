@@ -5,7 +5,7 @@ from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, IPEditView, \
     ObjectDeleteView, ObjectCreateView, ObjectEditView, ObjectListView,\
-    SelectLPView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
+    SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
     CreateRightTrassaView, SelectPointView
 
 
@@ -50,7 +50,7 @@ urlpatterns = [
     path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
     path('trakt/object-delete/<int:pk>/', ObjectDeleteView.as_view(), name='object_delete'),
 
-    path('trakt/select-lp/<int:pk>/', SelectLPView.as_view(), name='select_lp'),
+    path('trakt/select-lp/<int:pk>/', SelectObjectView.as_view(), name='select_lp'),
     path('trakt/point-list/', PointListTrassa.as_view(), name='point_list'),
     path('trakt/select-point/<int:pk>/', SelectPointView.as_view(), name='select_point'),
     path('trakt/select-object/<int:pk>/', ObjectList.as_view(), name='select_obj'),

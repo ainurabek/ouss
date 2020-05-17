@@ -14,7 +14,7 @@ from knox.auth import TokenAuthentication
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer,\
     ObjectSerializer, LPCreateSerializer, \
-    ObjectCreateSerializer, IPCreateSerializer, SelectLPSerializer, PointList
+    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -383,14 +383,14 @@ class ObjectEditView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SelectLPView(APIView):
+class SelectObjectView(APIView):
     """Выбор ЛП для создания трассы"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
-        serializer = SelectLPSerializer(obj).data
+        serializer = SelectObjectSerializer(obj).data
         return Response(serializer)
 
 
@@ -410,7 +410,7 @@ class SelectPointView(APIView):
     def get(self, request, pk):
         point = Point.objects.get(pk=pk)
         lps = Object.objects.filter(Q(point1=point) | Q(point2=point), id_parent=None)
-        serializer = SelectLPSerializer(lps, many=True).data
+        serializer = ObjectListSerializer(lps, many=True).data
         return Response(serializer)
 
 
@@ -421,7 +421,7 @@ class ObjectList(APIView):
 
     def get(self, request, pk):
         objs = Object.objects.filter(id_parent=pk)
-        serializer = SelectLPSerializer(objs, many=True).data
+        serializer = ObjectListSerializer(objs, many=True).data
         return Response(serializer)
 
 
