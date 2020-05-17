@@ -385,8 +385,8 @@ class ObjectEditView(APIView):
 
 class SelectLPView(APIView):
     """Выбор ЛП для создания трассы"""
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
@@ -396,16 +396,16 @@ class SelectLPView(APIView):
 
 class PointListTrassa(ListAPIView):
     """Список ИП для создания трассы"""
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
     queryset = Point.objects.all()
     serializer_class = PointList
 
 
 class SelectPointView(APIView):
     """Выбор ИП для фильтрацы ЛП"""
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
         point = Point.objects.get(pk=pk)
@@ -416,6 +416,8 @@ class SelectPointView(APIView):
 
 class ObjectList(APIView):
     """Список ПГ, ВГ итд"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
         objs = Object.objects.filter(id_parent=pk)
@@ -424,6 +426,8 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -439,6 +443,8 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -455,6 +461,8 @@ class CreateRightTrassaView(APIView):
 
 class SaveTrassaView(APIView):
     """Сохранение трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
@@ -476,6 +484,9 @@ class SaveTrassaView(APIView):
 
 class DeleteTrassaView(APIView):
     """Удаления трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
     def delete(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)

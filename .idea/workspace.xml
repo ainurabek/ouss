@@ -20,9 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d3bf4bd-1140-490d-bf68-a4912d6d1418" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/apps/dispatching/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/dispatching/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dispatching/request_list.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,6 +133,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="418" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1588795105678">
