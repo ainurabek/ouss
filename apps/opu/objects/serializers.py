@@ -154,7 +154,6 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent','name', 'trakt', 'point1', 'point2', 'type_of_trakt', 'transit', 'transit2')
 
-
 class ObjectCreateSerializer(serializers.ModelSerializer):
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
