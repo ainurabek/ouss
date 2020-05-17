@@ -5,10 +5,11 @@ now = datetime.datetime.now()
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic import ListView
 from django.urls import reverse_lazy
 
 from .forms import ShutdownFilterForm, RequestForm
-from .models import Request, ShutdownLog
+from .models import Request, ShutdownLog, Status
 from django.http import HttpResponse, HttpResponseRedirect
 
 
@@ -38,26 +39,28 @@ class ShutdownCreateView(CreateView):
     success_url = reverse_lazy('apps:dispatching:shutdown_list')
 
     def form_valid(self, form):
-        print(self.request.user.profile)
         form.instance.created_by = self.request.user.profile
-        print(self.request.user.profile)
         return super().form_valid(form)
 
-def request_list(request):
-    requests=Request.objects.all()
 
-    new=Request.objects.filter(status__id=1).count()
-    processing = Request.objects.filter(status__id=2).count()
-    delayed = Request.objects.filter(status__id=3).count()
-    complete = Request.objects.filter(status__id=4).count()
-    refuse = Request.objects.filter(status__id=5).count()
-    cancel = Request.objects.filter(status__id=6).count()
+class RequestList(ListView):
+    """Список заявок"""
+    model = Request
+    template_name = 'dispatching/request_list.html'
+    context_object_name = 'request_list'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        status_list = Status.objects.all()
+        context = {'status_list': status_list}
+        return super().get_context_data(**context)
 
 
-    return render(request, 'dispatching/request_list.html', {'requests':requests,
-                                                             'new':new, 'processing':processing,
-                                                             'delayed':delayed, 'complete':complete,
-                                                             'refuse':refuse, 'cancel':cancel})
+def list_of_filtered(request, pk):
+    """Список отфильтрованных заявок"""
+    requests = Request.objects.filter(status=pk)
+    status_list = Status.objects.all()
+    return render(request, 'dispatching/request_list.html', {'request_list': requests, 'status_list': status_list})
+
 
 def status_list(request):
     news = Request.objects.filter(status__id=1)
@@ -78,6 +81,7 @@ def status_list(request):
 #         print(self.request.user.profile)
 #         return super().form_valid(form)
 
+
 def request_create(request):
     if request.method == "POST":
         form = RequestForm(request.POST)
@@ -90,6 +94,7 @@ def request_create(request):
     else:
         form = RequestForm()
     return render(request, 'dispatching/request_create.html', {'form': form})
+
 
 def request_edit(request, request_id):
     request1 = get_object_or_404(Request, pk=request_id)
@@ -105,9 +110,11 @@ def request_edit(request, request_id):
         form = RequestForm(instance=request1)
     return render(request, 'dispatching/request_create.html', {'form': form})
 
+
 def request_delete(request, pk):
     Request.objects.get(pk=pk).delete()
     return redirect('apps:dispatching:request_list')
+
 
 def shutdown_list(request):
     """Список отключений"""
