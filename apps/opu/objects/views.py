@@ -14,7 +14,7 @@ from knox.auth import TokenAuthentication
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer,\
     ObjectSerializer, LPCreateSerializer, \
-    ObjectCreateSerializer, IPCreateSerializer
+    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -383,117 +383,122 @@ class ObjectEditView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def trassa(request):
-    data = []
-    objects = Object.objects.all()
-    for obj in objects:
-        data.append({'ip1': obj.point1, 'name': obj.name, 'ip2': obj.point2, 'id_transit1': [], 'id_transit2': []})
-        if obj.id_transit1 != None:
-            data.append({'id_transit1': obj.id_transit1})
-        elif obj.id_transit2 != None:
-            data.append({'id_transit2': obj.id_transit2})
-    return JsonResponse({'data': data})
+class SelectObjectView(APIView):
+    """Выбор ЛП для создания трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        obj = Object.objects.get(pk=pk)
+        serializer = SelectObjectSerializer(obj).data
+        return Response(serializer)
 
 
-def select_lp(request, main_pk):
-    main_obj = Object.objects.get(pk=main_pk)
-    ip_ot = Object.objects.filter(Q(point1=main_obj.point1) | Q(point2=main_obj.point1))
-    ip_ot = ip_ot.filter(id_parent=None)
-    ip_do = Object.objects.filter(Q(point1=main_obj.point2) | Q(point2=main_obj.point2))
-    ip_do = ip_do.filter(id_parent=None)
-
-    trassa_list1 = main_obj.transit.all().reverse()
-    trassa_list2 = main_obj.transit2.all()
-
-    response = {
-        'main_obj': main_obj.to_json(),
-        'trassa_list1': [m.to_json() for m in trassa_list1],
-        'trassa_list2': [m.to_json() for m in trassa_list2],
-        'ip_ot': [m.to_json() for m in ip_ot],
-        'ip_do': [m.to_json() for m in ip_do]
-    }
-
-    return JsonResponse(response)
+class PointListTrassa(ListAPIView):
+    """Список ИП для создания трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Point.objects.all()
+    serializer_class = PointList
 
 
-def select_object(request, lp_pk):
-    objects = Object.objects.filter(id_parent=lp_pk)
+class SelectPointView(APIView):
+    """Выбор ИП для фильтрацы ЛП"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
-    response = {
-        'objects': [m.to_json() for m in objects],
-    }
-    return JsonResponse(response)
-
-
-def left_trassa(request, pk, id):
-    main_obj = Object.objects.get(pk=pk)
-    obj = Object.objects.get(pk=id)
-
-    if main_obj.transit.filter(pk=id).exists():
-        pass
-    else:
-        main_obj.transit.add(obj)
-        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
-
-    response = {
-        'main_obj': main_obj.to_json(),
-        'obj': obj.to_json(),
-    }
-    return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
+    def get(self, request, pk):
+        point = Point.objects.get(pk=pk)
+        lps = Object.objects.filter(Q(point1=point) | Q(point2=point), id_parent=None)
+        serializer = ObjectListSerializer(lps, many=True).data
+        return Response(serializer)
 
 
-def right_trassa(request, pk, id):
-    main_obj = Object.objects.get(pk=pk)
-    obj = Object.objects.get(pk=id)
+class ObjectList(APIView):
+    """Список ПГ, ВГ итд"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
-    if main_obj.transit2.filter(pk=id).exists():
-        pass
-    else:
-        main_obj.transit2.add(obj)
-        Object.objects.filter(pk=id).update(maker_trassa=request.user.profile)
-
-    response = {
-        'main_obj': main_obj.to_json(),
-        'obj': obj.to_json(),
-    }
-
-    return redirect('apps:objects:select_lp', main_pk=main_obj.pk)
+    def get(self, request, pk):
+        objs = Object.objects.filter(id_parent=pk)
+        serializer = ObjectListSerializer(objs, many=True).data
+        return Response(serializer)
 
 
-def save_trassa(request, pk):
-    main_obj = Object.objects.get(pk=pk)
+class CreateLeftTrassaView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
-    for i in main_obj.transit.all():
-        if main_obj.transit.all() not in i.transit.all():
-            i.transit.add(*main_obj.transit.all())
-        if main_obj.transit2.all() not in i.transit2.all():
-            i.transit2.add(*main_obj.transit2.all())
+    def get(self, request, main_pk, pk):
+        main_obj = Object.objects.get(pk=main_pk)
+        obj = Object.objects.get(pk=pk)
 
-    for i in main_obj.transit2.all():
-        if main_obj.transit2.all() not in i.transit2.all():
-            i.transit2.add(*main_obj.transit2.all())
-        if main_obj.transit.all() not in i.transit.all():
-            i.transit.add(*main_obj.transit.all())
+        if main_obj.transit.filter(pk=pk).exists():
+            pass
+        else:
+            main_obj.transit.add(obj)
+            Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
-    response = {'success': 'Трасса создано успешно'}
-
-    return JsonResponse(response)
+        return Response(status=status.HTTP_201_CREATED)
 
 
-def delete_trassa(request, main_pk, pk):
-    main_obj = Object.objects.get(pk=main_pk)
-    obj = Object.objects.get(pk=pk)
+class CreateRightTrassaView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
 
-    if main_obj.transit.filter(pk=id).exists():
-        main_obj.transit.remove(obj)
-        obj.transit2.clear()
-        obj.transit.clear()
+    def get(self, request, main_pk, pk):
+        main_obj = Object.objects.get(pk=main_pk)
+        obj = Object.objects.get(pk=pk)
 
-    if main_obj.transit2.filter(pk=id).exists():
-        main_obj.transit2.remove(obj)
-        obj.transit2.clear()
-        obj.transit.clear()
+        if main_obj.transit2.filter(pk=pk).exists():
+            pass
+        else:
+            main_obj.transit2.add(obj)
+            Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
-    response = {'success': 'Объект удалена успешно'}
+        return Response(status=status.HTTP_201_CREATED)
 
-    return JsonResponse(response)
+
+class SaveTrassaView(APIView):
+    """Сохранение трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        main_obj = Object.objects.get(pk=pk)
+
+        for i in main_obj.transit.all():
+            if main_obj.transit.all() not in i.transit.all():
+                i.transit.add(*main_obj.transit.all())
+            if main_obj.transit2.all() not in i.transit2.all():
+                i.transit2.add(*main_obj.transit2.all())
+
+        for i in main_obj.transit2.all():
+            if main_obj.transit2.all() not in i.transit2.all():
+                i.transit2.add(*main_obj.transit2.all())
+            if main_obj.transit.all() not in i.transit.all():
+                i.transit.add(*main_obj.transit.all())
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class DeleteTrassaView(APIView):
+    """Удаления трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def delete(self, request, main_pk, pk):
+        main_obj = Object.objects.get(pk=main_pk)
+        obj = Object.objects.get(pk=pk)
+
+        if main_obj.transit.filter(pk=pk).exists():
+            main_obj.transit.remove(obj)
+            obj.transit2.clear()
+            obj.transit.clear()
+
+        if main_obj.transit2.filter(pk=pk).exists():
+            main_obj.transit2.remove(obj)
+            obj.transit2.clear()
+            obj.transit.clear()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
