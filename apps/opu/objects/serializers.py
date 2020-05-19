@@ -148,6 +148,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
                   'comments', 'created_by', 'created_at')
         depth = 1
 
+
 class ObjectSerializer(serializers.ModelSerializer):
     id_parent=ParentSerializer()
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
@@ -204,3 +205,13 @@ class PointList(serializers.ModelSerializer):
     class Meta:
         model = Point
         fields = ('id', 'point')
+
+
+class ObjectFilterSerializer(serializers.ModelSerializer):
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
+
+    class Meta:
+        model = Object
+        fields = ('name', 'point1', 'point2', 'COreceive', 'COdeliver', 'id_outfit')
