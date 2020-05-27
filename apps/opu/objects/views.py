@@ -12,9 +12,10 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
-    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer,\
+    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer, \
     ObjectSerializer, LPCreateSerializer, \
-    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer
+    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
+    ObjectFilterSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -285,12 +286,6 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
-class TraktListView(APIView):
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
-    pass
-
-
 class ObjectListView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -309,14 +304,6 @@ class ObjectListView(APIView):
         trakt = Object.objects.filter(id_parent=lp.pk)
         data = ObjectSerializer(trakt, many=True).data
         return Response(data)
-
-
-# for obj in objects:
-#     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
-#         print(objects)
-#         return HttpResponse(objects)
-#     else:
-#         return HttpResponse("у этой линии передачи нет тракта")
 
 
 # ПГ ВГ ТГ ЧГ РГ
@@ -426,6 +413,7 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
+
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -443,6 +431,7 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
+
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -502,3 +491,28 @@ class DeleteTrassaView(APIView):
             obj.transit.clear()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FilterObjectList(ListAPIView):
+    """Фильтрация объектов"""
+    serializer_class = ObjectFilterSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get_queryset(self):
+        queryset = Object.objects.all()
+        tpo = self.request.query_params.get('tpo', None)
+        point = self.request.query_params.get('point', None)
+        outfit = self.request.query_params.get('outfit', None)
+        ip = self.request.query_params.get('ip', None)
+
+        if tpo is not None and tpo != '':
+            queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
+        if point is not None and point != '':
+            queryset = queryset.filter(Q(point1__point=point) | Q(point2__point=point))
+        if outfit is not None and outfit != '':
+            queryset = queryset.filter(id_outfit__outfit=outfit)
+        if ip is not None and ip != '':
+            queryset = queryset.filter(Q(destination1__point_id__point__icontains=ip) | Q(destination2__point_id__point__icontains=ip))
+
+        return queryset

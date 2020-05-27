@@ -58,6 +58,8 @@ urlpatterns = [
     path('trakt/right-trassa/<int:main_pk>/<int:pk>/', CreateRightTrassaView.as_view(), name='right_trassa'),
     path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
+    path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
+
 
     path('', include(router.urls))
 
