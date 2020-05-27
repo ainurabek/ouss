@@ -6,7 +6,7 @@ from django.http import Http404
 # Create your views here.
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404
+from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -505,7 +505,7 @@ class FilterObjectList(ListAPIView):
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
         ip = self.request.query_params.get('ip', None)
-
+        print(tpo)
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
         if point is not None and point != '':
