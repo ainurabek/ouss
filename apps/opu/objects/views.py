@@ -6,15 +6,16 @@ from django.http import Http404
 # Create your views here.
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404
+from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
-    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer,\
+    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer, \
     ObjectSerializer, LPCreateSerializer, \
-    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer
+    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
+    ObjectFilterSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -25,6 +26,11 @@ from django.utils import timezone
 
 
 # TPO
+from apps.opu.circuits.models import Circuit
+
+from apps.opu.objects.models import Category
+
+
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
@@ -285,12 +291,6 @@ def lp_delete_view(request, pk):
         return Response(data=data)
 
 
-class TraktListView(APIView):
-    # permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
-    pass
-
-
 class ObjectListView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -311,19 +311,10 @@ class ObjectListView(APIView):
         return Response(data)
 
 
-# for obj in objects:
-#     if obj.type_of_trakt.id==2 or 3 or 4 or 5 or 6: #ПГ
-#         print(objects)
-#         return HttpResponse(objects)
-#     else:
-#         return HttpResponse("у этой линии передачи нет тракта")
-
-
 # ПГ ВГ ТГ ЧГ РГ
 
 class ObjectCreateView(APIView):
     """"""
-
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -335,15 +326,40 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = self.get_object(pk)
-        serializer = ObjectCreateSerializer(data=request.data)
+        data = request.data
+        name = data['name']
+        serializer = ObjectCreateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save(
+            instance=serializer.save(
                 id_parent=parent,
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
                 our=parent.our,
-                created_by=self.request.user.profile
+                created_by=self.request.user.profile,
+                point1=parent.point1,
+                name=parent.name+'-'+name,
+
             )
+            if data['amount_channels'] == '12':
+                for x in range(1, 13):
+                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     num_circuit = x,
+                                                     category=Category.objects.get(id=instance.category.id),
+                                                     point1=Point.objects.get(id=instance.point1.id),
+                                                     point2=Point.objects.get(id=instance.point2.id),
+                                                     created_by=request.user.profile)
+                    circuit.save()
+            elif data['amount_channels'] == '30':
+                for x in range(1, 31):
+                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     num_circuit = x,
+                                                     category=Category.objects.get(id=instance.category.id),
+                                                     point1=Point.objects.get(id=instance.point1.id),
+                                                     point2=Point.objects.get(id=instance.point2.id),
+                                                     created_by=request.user.profile)
+                    circuit.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -378,9 +394,25 @@ class ObjectEditView(APIView):
         obj = self.get_object(pk)
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            instance=serializer.save()
+            circuits = Circuit.objects.filter(id_object=instance.id)
+            all = Circuit.objects.filter(id_object=instance.id).count()+1
+
+            for circuit in circuits:
+                all -= 1
+                circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(all),
+                                                                          point1=instance.point1.id,
+                                                                          point2=instance.point2.id)
+
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, instance, validated_data):
+        Circuit.objects.filter(id_object=instance.id).update(point1= validated_data.get('point1', instance.point1),
+                                                             point2= validated_data.get('point2', instance.point2))
+
+        return instance
+
 
 
 class SelectObjectView(APIView):
@@ -426,6 +458,7 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
+
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -443,6 +476,7 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
+
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -502,3 +536,28 @@ class DeleteTrassaView(APIView):
             obj.transit.clear()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FilterObjectList(ListAPIView):
+    """Фильтрация объектов"""
+    serializer_class = ObjectFilterSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get_queryset(self):
+        queryset = Object.objects.all()
+        tpo = self.request.query_params.get('tpo', None)
+        point = self.request.query_params.get('point', None)
+        outfit = self.request.query_params.get('outfit', None)
+        ip = self.request.query_params.get('ip', None)
+        print(tpo)
+        if tpo is not None and tpo != '':
+            queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
+        if point is not None and point != '':
+            queryset = queryset.filter(Q(point1__point=point) | Q(point2__point=point))
+        if outfit is not None and outfit != '':
+            queryset = queryset.filter(id_outfit__outfit=outfit)
+        if ip is not None and ip != '':
+            queryset = queryset.filter(Q(destination1__point_id__point__icontains=ip) | Q(destination2__point_id__point__icontains=ip))
+
+        return queryset

@@ -166,16 +166,13 @@ class Object(models.Model):
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
-		
-
-	def to_json(self):
-		return {'id':self.id, 'name':self.name, 'point1':self.point1.name, 'point2': self.point2.name}
 
 	def __str__(self):
 		return str(self.name)
 
+
 class IP(models.Model):
-	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True)
+	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True, related_name='ip_point')
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, null=True, blank=True)
 	tpo_id = models.ForeignKey(TPO, on_delete=models.CASCADE, null=True, blank=True)
 
