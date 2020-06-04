@@ -1,7 +1,8 @@
 from django.db import models
 # Create your models here.
-from apps.opu.objects.models import IP, Object, Category, InOut
+from apps.opu.objects.models import IP, Object, Category, InOut, Point
 from apps.opu.customer.models import Customer
+from sortedm2m.fields import SortedManyToManyField
 
 from apps.accounts.models import Profile
 
@@ -24,7 +25,7 @@ class Speed(models.Model):
 	def __str__(self):
 		return f'{self.name}, {self.id}'
 
-class Type(models.Model):
+class TypeCom(models.Model):
 	name = models.CharField('Название', max_length=100, blank=True, null=True)
 
 
@@ -57,31 +58,32 @@ class Circuit(models.Model):
 	# id_circuit = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Circuit', on_delete=models.CASCADE, blank=True, null=True)
 	num_circuit = models.CharField(max_length=100, blank=True, null=True)
-	name = models.CharField(max_length=100, blank=True, null=True)
+	final_destination = models.ForeignKey(Point, related_name='circ_final_dest',on_delete=models.CASCADE, blank=True, null=True)
+	name = models.CharField(unique=True, max_length=100, blank=True, null=True)
 	type_using = models.CharField(max_length=100, blank=True, null=True)#######
 	category = models.ForeignKey(Category, related_name='circ_cat',on_delete=models.CASCADE, blank=True, null=True) ###
 	num_order = models.CharField(max_length=100, blank=True, null=True)
 	date_order = models.CharField(max_length=100, blank=True, null=True)
 	num_arenda = models.CharField(max_length=100, blank=True, null=True)
-	number = models.CharField('Номер телефона', max_length=100, blank=True, null=True)
+	number = models.CharField('Номер', max_length=100, blank=True, null=True)
 	speed = models.ForeignKey(Speed, related_name='circ_speed', on_delete=models.CASCADE, blank=True, null=True)
 	measure = models.ForeignKey(Measure, related_name='circ_measure', on_delete=models.CASCADE, blank=True, null=True)
 	adding = models.CharField(max_length=100, blank=True, null=True)
 	comments = models.CharField(max_length=100, blank=True, null=True)
 	type_transit1 = models.CharField(max_length=100, blank=True, null=True)
 	type_transit2 = models.CharField(max_length=100, blank=True, null=True)
-	id_transit1 = models.CharField(max_length=100, blank=True, null=True)
-	id_transit2 = models.CharField(max_length=100, blank=True, null=True)
+	transit = SortedManyToManyField(Object, related_name='cir_transit_obj1', blank=True)
+	transit2 = SortedManyToManyField(Object, related_name='cir_transit_obj2', blank=True)
 	in_out = models.ForeignKey(InOut, related_name='circ_in', on_delete=models.CASCADE, blank=True, null=True)
-	first = models.BooleanField()
+	first = models.BooleanField('Используется/Не используется', blank=True, null=True)
 	handel_add_path1 = models.CharField(max_length=100, blank=True, null=True)
 	handel_add_path2 = models.CharField(max_length=100, blank=True, null=True)
-	destination1 = models.ForeignKey(IP, related_name='circ_ip1', on_delete=models.CASCADE, blank=True, null=True)
-	destination2 = models.ForeignKey(IP, related_name='circ_ip2', on_delete=models.CASCADE, blank=True, null=True)
+	point1 = models.ForeignKey(Point, related_name='circ_ip1', on_delete=models.CASCADE, blank=True, null=True)
+	point2 = models.ForeignKey(Point, related_name='circ_ip2', on_delete=models.CASCADE, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='circ_cust', on_delete=models.CASCADE, blank=True, null=True)
 	id_object = models.ForeignKey(Object, related_name='circ_obj', on_delete=models.CASCADE, blank=True, null=True)
 	mode = models.ForeignKey(Mode, related_name='circ_mode', on_delete=models.CASCADE, blank=True, null=True)
-	type_com = models.ForeignKey(Type, related_name='circ_type_com', on_delete=models.CASCADE, blank=True, null=True)
+	type_com = models.ForeignKey(TypeCom, related_name='circ_type_com', on_delete=models.CASCADE, blank=True, null=True)
 	id_subst =  models.ForeignKey(SubsRoutes, related_name='circ_subst', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -89,6 +91,9 @@ class Circuit(models.Model):
 	class Meta:
 		verbose_name = 'Канал'
 		verbose_name_plural = 'Каналы'
+
+	def __str__(self):
+		return self.name
 
 class Bypass(models.Model):
 

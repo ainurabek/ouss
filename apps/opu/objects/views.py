@@ -26,6 +26,11 @@ from django.utils import timezone
 
 
 # TPO
+from apps.opu.circuits.models import Circuit
+
+from apps.opu.objects.models import Category
+
+
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
@@ -310,7 +315,6 @@ class ObjectListView(APIView):
 
 class ObjectCreateView(APIView):
     """"""
-
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -322,15 +326,40 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = self.get_object(pk)
-        serializer = ObjectCreateSerializer(data=request.data)
+        data = request.data
+        name = data['name']
+        serializer = ObjectCreateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save(
+            instance=serializer.save(
                 id_parent=parent,
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
                 our=parent.our,
-                created_by=self.request.user.profile
+                created_by=self.request.user.profile,
+                point1=parent.point1,
+                name=parent.name+'-'+name,
+
             )
+            if data['amount_channels'] == '12':
+                for x in range(1, 13):
+                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     num_circuit = x,
+                                                     category=Category.objects.get(id=instance.category.id),
+                                                     point1=Point.objects.get(id=instance.point1.id),
+                                                     point2=Point.objects.get(id=instance.point2.id),
+                                                     created_by=request.user.profile)
+                    circuit.save()
+            elif data['amount_channels'] == '30':
+                for x in range(1, 31):
+                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     num_circuit = x,
+                                                     category=Category.objects.get(id=instance.category.id),
+                                                     point1=Point.objects.get(id=instance.point1.id),
+                                                     point2=Point.objects.get(id=instance.point2.id),
+                                                     created_by=request.user.profile)
+                    circuit.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -365,9 +394,25 @@ class ObjectEditView(APIView):
         obj = self.get_object(pk)
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            instance=serializer.save()
+            circuits = Circuit.objects.filter(id_object=instance.id)
+            all = Circuit.objects.filter(id_object=instance.id).count()+1
+
+            for circuit in circuits:
+                all -= 1
+                circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(all),
+                                                                          point1=instance.point1.id,
+                                                                          point2=instance.point2.id)
+
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, instance, validated_data):
+        Circuit.objects.filter(id_object=instance.id).update(point1= validated_data.get('point1', instance.point1),
+                                                             point2= validated_data.get('point2', instance.point2))
+
+        return instance
+
 
 
 class SelectObjectView(APIView):
