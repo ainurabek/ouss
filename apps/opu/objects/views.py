@@ -550,7 +550,7 @@ class FilterObjectList(ListAPIView):
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
         ip = self.request.query_params.get('ip', None)
-        print(tpo)
+
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
         if point is not None and point != '':
