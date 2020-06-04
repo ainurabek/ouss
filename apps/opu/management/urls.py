@@ -5,7 +5,7 @@ from apps.opu.management import views
 
 from apps.opu.management.views import tpo_list, outfit_list, point_list, lp_list, trakt_list,\
    lp_create, trakt_create, trakt_delete, lp_delete, trakt_edit, lp_edit, select_obj,\
-   save_trassa, left_trassa, right_trassa, region_list, form51_delete, trassa_list
+   save_trassa, left_trassa, right_trassa, trassa_list
 
 
 
@@ -31,11 +31,11 @@ urlpatterns = [
     path('save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
     path('trassa-list/', trassa_list, name='trassa_list'),
 
-    path('region/', region_list, name='region_list'),
-    url(r'^(?P<slug>\S+)/locations/$', views.form51_location_list, name='location_list'),
-    url(r'^(?P<location_id>\S+)/list/$', views.form51_list, name='form51'),
-    url(r'^(?P<location_id>\S+)/form51/create/$', views.form51_create, name='form51_create'),
-    url(r'^(?P<location_id>\S+)/form51/edit/(?P<pk>\d+)/$', views.form51_edit, name='form51_edit'),
-    path('form51/delete/<int:pk>/', form51_delete, name='form51_delete'),
+    # path('region/', region_list, name='region_list'),
+    # url(r'^(?P<slug>\S+)/locations/$', views.form51_location_list, name='location_list'),
+    # url(r'^(?P<location_id>\S+)/list/$', views.form51_list, name='form51'),
+    # url(r'^(?P<location_id>\S+)/form51/create/$', views.form51_create, name='form51_create'),
+    # url(r'^(?P<location_id>\S+)/form51/edit/(?P<pk>\d+)/$', views.form51_edit, name='form51_edit'),
+    # path('form51/delete/<int:pk>/', form51_delete, name='form51_delete'),
 
 ]
