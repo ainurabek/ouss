@@ -115,24 +115,24 @@ class FormCreateViewAPI(APIView):
         obj = Object.objects.get(pk=pk)
         serializer = Form51CreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(object=obj)
+            data = serializer.save(object=obj, created_by=self.request.user.profile)
 
             for i in obj.transit.all():
                 if obj != i:
                     Form51.objects.create(
-                        object=i, customer=request.data.customer,
-                        num_ouss=request.data.num_ouss,
-                        order=request.data.order, schema=request.data.schema,
-                        reserve=request.data.reserve
+                        object=i, customer=data.customer,
+                        num_ouss=data.num_ouss,
+                        order=data.order, schema=data.schema,
+                        reserve=data.reserve
                     )
 
             for i in obj.transit2.all():
                 if obj != i:
                     Form51.objects.create(
-                        object=i, customer=request.data.customer,
-                        num_ouss=request.data.num_ouss,
-                        order=request.data.order, schema=request.data.schema,
-                        reserve=request.data.reserve
+                        object=i, customer=data.customer,
+                        num_ouss=data.num_ouss,
+                        order=data.order, schema=data.schema,
+                        reserve=data.reserve
                     )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -147,13 +147,14 @@ class FormListAPIView(ListAPIView):
     serializer_class = Form51Serializer
 
     def get_queryset(self):
+        queryset = Form51.objects.all()
         region = self.request.query_params.get('region', None)
         customer = self.request.query_params.get('customer', None)
 
         if region is not None and region != "":
-            queryset = Form51.objects.filter(object__id_outfit__outfit=region)
+            queryset = queryset.filter(object__id_outfit__outfit=region)
         if customer is not None and customer != "":
-            queryset = Form51.objects.filter(customer__abr=customer)
+            queryset = queryset.filter(customer__customer=customer)
 
         return queryset
 
@@ -162,7 +163,7 @@ class Form51UpdateAPIView(UpdateAPIView):
     """Редактирования Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Form51
+    queryset = Form51.objects.all()
     serializer_class = Form51CreateSerializer
 
 
