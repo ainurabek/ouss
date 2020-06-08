@@ -1,0 +1,39 @@
+{% extends 'management/base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Список областей</h1>
+<a href="{% url 'apps:opu:form51:form_list' %}" class="btn btn-default btn-flat btn-block">
+    <button type="submit" class="btn btn-primary">All form 5.1</button>
+</a>
+<div class="table-responsive">
+  <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+      <tr>
+          <th>Обеъкт</th>
+          <th>Трасса</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for reserve in form51_reserve.reserve_object.all %}
+            <tr>
+                <td>{{ reserve.name }}</td>
+
+                <td>
+                    {% for i in reserve.transit.all %}
+                        ({{i.point1}})
+                        {{i.name}}
+                        ({{i.point2}})
+                    {% endfor %}
+                    {% for i in reserve.transit2.all %}
+                        ({{i.point1}})
+                        {{i.name}}
+                        ({{i.point2}})
+                    {% endfor %}
+                </td>
+</tr>
+         {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

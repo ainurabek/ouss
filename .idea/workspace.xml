@@ -19,11 +19,15 @@
     <select />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
+    <list default="true" id="9d3bf4bd-1140-490d-bf68-a4912d6d1418" name="Default Changelist" comment="" />
+=======
     <list default="true" id="9d3bf4bd-1140-490d-bf68-a4912d6d1418" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/opu/objects/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
     </list>
+>>>>>>> 06eba9723be7a0535163f4c21090e87fd0270163
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -122,6 +126,9 @@
       <workItem from="1588794022928" duration="4315000" />
       <workItem from="1589720445630" duration="172000" />
       <workItem from="1589720692937" duration="3156000" />
+<<<<<<< HEAD
+      <workItem from="1591111051589" duration="21000" />
+=======
       <workItem from="1589730970948" duration="104000" />
       <workItem from="1589787836601" duration="690000" />
       <workItem from="1589788544664" duration="3731000" />
@@ -136,6 +143,7 @@
       <workItem from="1590586182259" duration="39000" />
       <workItem from="1590586241026" duration="1013000" />
       <workItem from="1590593374398" duration="189000" />
+>>>>>>> 06eba9723be7a0535163f4c21090e87fd0270163
     </task>
     <servers />
   </component>
@@ -166,12 +174,21 @@
     <state x="800" y="295" width="608" height="523" key="EnvironmentVariablesDialog" timestamp="1589788302677">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
+<<<<<<< HEAD
+    <state x="418" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1589720562909" />
+    <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl" timestamp="1591111070879">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1591111070879" />
+    <state width="1874" height="275" key="GridCell.Tab.0.bottom" timestamp="1589720617009">
+=======
     <state x="800" y="295" width="608" height="523" key="EnvironmentVariablesDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1589788302677" />
     <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl" timestamp="1589788282930">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1589788282930" />
     <state width="1874" height="275" key="GridCell.Tab.0.bottom" timestamp="1590587253713">
+>>>>>>> 06eba9723be7a0535163f4c21090e87fd0270163
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state width="1874" height="275" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1590587253713" />

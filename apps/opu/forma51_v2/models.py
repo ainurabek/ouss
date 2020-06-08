@@ -1,6 +1,5 @@
 from django.db import models
 from apps.opu.objects.models import Object
-from apps.opu.form51.models import Region
 from apps.opu.customer.models import Customer
 
 class Category_Form(models.Model):
@@ -16,7 +15,6 @@ class Forma(models.Model):
 	amount_inv_channels = models.CharField('Количество задействованных каналов', max_length=100, blank=True, null=True)
 	year = models.CharField('Год ввода', max_length=100, blank=True, null=True)
 	reserve = models.BooleanField('Наличие резерва', blank=True, null=True)
-	region=models.ForeignKey(Region, on_delete=models.CASCADE, blank=True, null=True)
 	order = models.CharField('Распоряжение', max_length=255, blank=True, null=True)
 	customer = models.ForeignKey(Customer, blank=True, null=True, on_delete=models.CASCADE)
 	category = models.ForeignKey(Category_Form, blank=True, null=True, on_delete=models.CASCADE)

@@ -9,24 +9,22 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="box box-info">
-                    <form method="POST">
+                    <form method="PUT">
                         {% csrf_token %}
                         <div class="box-body">
                             <div class="form-group">
                                 <label>{{ form.customer.label }}</label>
                                 {% render_field form.customer class="form-control" %}
+                                <label>{{ form.index_ko.label }}</label>
+                                {% render_field form.index_ko class="form-control" %}
                                 <label>{{ form.num_ouss.label }}</label>
                                 {% render_field form.num_ouss class="form-control" %}
-                                <label>{{ form.report_num.label }}</label>
-                                {% render_field form.report_num class="form-control" %}
                                 <label>{{ form.order.label }}</label>
                                 {% render_field form.order class="form-control" %}
                                 <label>{{ form.schema.label }}</label>
                                 {% render_field form.schema class="form-control" %}
                                 <label>{{ form.reserve.label }}</label>
                                 {% render_field form.reserve class="form-control" %}
-                                <label>{{ form.reserve_object.label }}</label>
-                                {% render_field form.reserve_object class="form-control" %}
                             </div>
                         </div>
                         <div class="box-footer clearfix">

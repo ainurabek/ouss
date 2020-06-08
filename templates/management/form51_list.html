@@ -5,7 +5,7 @@
 <div class="container-fluid">
 
 	<!-- Page Heading -->
-	<h1 class="h3 mb-2 text-gray-800">Список сохраненных трасс</h1>
+	<h1 class="h3 mb-2 text-gray-800">Список Формы 5.1 </h1>
 
 	<!-- DataTales Example -->
 	<div class="card shadow mb-4">
@@ -15,55 +15,50 @@
 				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
 					<thead>
 						<tr>
-							<th>Объекты</th>
-							<th>Трасса</th>
-							<th>ИП от</th>
-							<th>ИП до</th>
-							<th>Тип линии</th>
-							<th>Напров основного пути</th>
-							<th>Потребитель</th>
-							<th>Монтир-каналы</th>
-							<th>Задейственые-каналы</th>
-							<th>Наличие резерва</th>
-							<th>Год</th>
-							<th>№ расп</th>
+                            <th>KO</th>
+							<th>Участок, ИП Направление</th>
+							<th>Номер потока Трасса прохждения потока</th>
+							<th>Инд. КО</th>
+							<th>Номер распоряжения ОУСС</th>
+							<th>Резервв потока</th>
+							<th>Примечание (№ID, МН, Аренда)</th>
+							<th>Распоряжение</th>
+                            <th>Номер донесения</th>
+							<th>Схема</th>
+                            <th></th>
+                            <th></th>
 						</tr>
 					</thead>
 					<tbody>
-						{% for obj in objects %}
+						{% for forma51 in form51_list %}
 						<tr>
+                            <td>{{ forma51.object.name }}</td>
 							<td>
-								{% for i in obj.object.transit.all %}
-									{{ i.name }} -
-								{% endfor %}
-								{% for i in obj.transit2.all %}
-									{{ i.name }} -
-								{% endfor %}
+								{{ forma51.object.point1.point }} - {{ forma51.object.point2.point }}
+                                {{ forma51.object.point1.name }} - {{ forma51.object.point2.name }}
 							</td>
 							<td>
-								{% for i in obj.object.transit.all %}
+								{% for i in forma51.object.transit.all %}
 									({{i.point1}})
                               		{{i.name}}
                               		({{i.point2}})
 								{% endfor %}
-								{% for i in obj.object.transit2.all %}
+								{% for i in forma51.object.transit2.all %}
 									({{i.point1}})
                               		{{i.name}}
                               		({{i.point2}})
 								{% endfor %}
 							</td>
-							<td>{{obj.object.point1}}</td>
-							<td>{{obj.object.point2}}</td>
-							<td>{{obj.object.type_line}}</td>
-							<td>{{obj.direction}}</td>
-							<td>{{obj.customer}}</td>
-							<td>{{obj.amount_inst_channels}}</td>
-							<td>{{obj.amount_inv_channels}}</td>
-							<td>{{obj.reserve}}</td>
-							<td>{{obj.year}}</td>
-							<td>{{obj.order}}</td>
+							<td>{{ forma51.object.category }}</td>
+							<td>{{ forma51.num_ouss }}</td>
+							<td><a href="{% url "apps:opu:form51:reserve_detail" forma51.id%}">{{ forma51.reserve }}</a></td>
+							<td>{{ forma51.customer.abr }}</td>
+							<td>{{ forma51.order }}</td>
+                            <td>{{ forma51.report_num }}</td>
+							<td>{{ forma51.schema }}</td>
+                            <td><a href="{% url "apps:opu:form51:form_update" forma51.id %}"><i class="fa fa-edit"></i></a></td>
+                            <td><a href="{% url "apps:opu:form51:form_delete" forma51.id %}"><i class="fa fa-trash"></a></td>
 						</tr>
-
 						{% endfor %}
 					</tbody>
 				</table>

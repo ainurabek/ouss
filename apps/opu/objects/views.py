@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import Http404
 
 # Create your views here.
-from apps.opu.objects.models import Object, TPO, Outfit, Point, IP
+from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -329,6 +329,19 @@ class ObjectCreateView(APIView):
         data = request.data
         name = data['name']
         serializer = ObjectCreateSerializer(data=data)
+
+        if parent.type_of_trakt is not None:
+            if parent.type_of_trakt.name == 'ВГ':
+                type_obj = TypeOfTrakt.objects.get(name='ПГ')
+            elif parent.type_of_trakt.name == 'ТГ':
+                type_obj = TypeOfTrakt.objects.get(name='ВГ')
+            elif parent.type_of_trakt.name == 'ЧГ':
+                type_obj = TypeOfTrakt.objects.get(name='ТГ')
+            elif parent.type_of_trakt.name == 'РГ':
+                type_obj = TypeOfTrakt.objects.get(name='ЧГ')
+
+            request.data["type_of_trakt"] = type_obj.pk
+
         if serializer.is_valid():
             instance=serializer.save(
                 id_parent=parent,
@@ -342,24 +355,23 @@ class ObjectCreateView(APIView):
             )
             if data['amount_channels'] == '12':
                 for x in range(1, 13):
-                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                    Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
                                                      created_by=request.user.profile)
-                    circuit.save()
             elif data['amount_channels'] == '30':
                 for x in range(1, 31):
-                    circuit = Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
+                    Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
                                                      created_by=request.user.profile)
-                    circuit.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -551,7 +563,7 @@ class FilterObjectList(ListAPIView):
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
         ip = self.request.query_params.get('ip', None)
-        print(tpo)
+
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
         if point is not None and point != '':

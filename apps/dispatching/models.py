@@ -1,9 +1,19 @@
 from django.db import models
 from apps.accounts.models import Profile
-from apps.opu.form51.models import Region
 
 from apps.accounts.models import DepartmentKT, SubdepartmentKT
 
+
+class Region(models.Model):
+    name = models.CharField(max_length=150)
+    slug = models.SlugField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Регионы'
+        verbose_name_plural = 'Регион'
 
 class TypeRequest(models.Model):
     '''Тип заявки (Например Квартирная заявка)'''
@@ -96,3 +106,7 @@ class ShutdownLog(models.Model):
 
     def __str__(self):
         return self.cause
+
+
+class People(models.Model):
+    name = models.CharField(max_length=100)

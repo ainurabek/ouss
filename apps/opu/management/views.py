@@ -2,7 +2,7 @@ from apps.accounts.models import User, DepartmentKT
 from apps.opu.objects.models import TPO, Outfit, Point, Object, Trassa
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm, Form51Form, Form51FilterForm
+from .forms import ObjectForm, TraktForm, TraktEditForm, ObjectFilterForm
 from django.db.models import Q
 from django.utils import timezone
 from django.http import HttpResponse
@@ -21,7 +21,6 @@ import csv
 #         'departments':departments,
 #         'lps': lps
 #     })
-from ..form51.models import Region, Form51, Form51Location
 
 
 def tpo_list(request):
@@ -117,6 +116,7 @@ def lp_delete(request, pk=None):
         lp.delete()
         return redirect('apps:opu:management:lp')
 
+
 def trakt_list(request, lp_id):
     parent = Object.objects.get(pk=lp_id)
     trakts= Object.objects.filter(id_parent=lp_id)
@@ -155,16 +155,16 @@ def trakt_list(request, lp_id):
     if int(trakts.count()) > 0:
         obj = trakts[0]
         context = {
-            'trakts': trakts, 
-            'obj': obj, 
+            'trakts': trakts,
+            'obj': obj,
             'filter_form':filter_form,
             'parent': parent
             }
     else:
         context = {
-            'trakts': trakts, 
-            'parent': parent, 
-            'filter_form':filter_form           
+            'trakts': trakts,
+            'parent': parent,
+            'filter_form':filter_form
         }
     return render(request, 'management/trakt.html', context)
 
@@ -176,7 +176,7 @@ def trakt_create(request, lp_id):
         trakt.id_parent = lp
         trakt.name = str(lp.name)+'-'+str(trakt.name)
         if trakt.type_line == None:
-            trakt.type_line = lp.type_line 
+            trakt.type_line = lp.type_line
         trakt.save()
         return redirect('apps:opu:management:trakt', lp_id=lp_id)
     return render(request, 'management/trakt_form.html', {'form': form})
@@ -253,7 +253,7 @@ def left_trassa(request, pk, id):
 def right_trassa(request, pk, id):
     user = request.user.profile
     main_obj = Object.objects.get(pk=pk)
-    obj = Object.objects.get(pk=id) 
+    obj = Object.objects.get(pk=id)
 
     ip_ot = Object.objects.filter(Q(point1=obj.point1) | Q(point2=obj.point1))
     ip_do = Object.objects.filter(Q(point1=obj.point2) | Q(point2=obj.point2))
@@ -275,7 +275,7 @@ def right_trassa(request, pk, id):
         'trassa_list2': trassa_list2,
         'ip_ot': ip_ot,
         'ip_do': ip_do
-    }   
+    }
 
     return render(request, 'management/trassa.html', context)
 
@@ -336,144 +336,11 @@ def trassa_list(request):
     trassa_list = Object.objects.exclude(transit=None, transit2=None)
     _list = []
     for i in trassa_list:
-        _list.append({'name': i.name, 
-            'transit': i.transit.all().reverse(), 
+        _list.append({'name': i.name,
+            'transit': i.transit.all().reverse(),
             'transit2': i.transit2,
             'maker_trassa': i.maker_trassa,
             'add_time': i.add_time,
             'id': i.pk})
 
     return render(request, 'management/trassa_list.html', {'trassa_list': _list})
-
-
-def region_list(request):
-    return render(request, 'management/region_list.html', {
-        'regions': Region.objects.all()
-    })
-
-def form51_location_list(request, slug):
-    region = get_object_or_404(Region, slug=slug)
-    locations=Form51Location.objects.filter(region=region)
-    return render(request, 'management/location_list.html', {
-        'region': region,
-        'locations': locations
-    })
-
-def form51_list(request, location_id):
-    location = get_object_or_404(Form51Location, id=location_id)
-    forms = Form51.objects.filter(category=location)
-    filter_form = Form51FilterForm(request.GET or None)
-    if filter_form.is_valid():
-        if filter_form.cleaned_data.get('trassa', None):
-            forms = forms.filter(trassa=filter_form.cleaned_data.get('trassa'))
-        if filter_form.cleaned_data.get('num', None):
-            forms = forms.filter(
-                num=filter_form.cleaned_data.get('num')
-            )
-        if filter_form.cleaned_data.get('direction', None):
-            forms = forms.filter(
-                direction=filter_form.cleaned_data.get('direction')
-            )
-        if filter_form.cleaned_data.get('customer', None):
-            forms = forms.filter(
-                customer=filter_form.cleaned_data.get('customer')
-            )
-        if filter_form.cleaned_data.get('object', None):
-            forms = forms.filter(
-                object=filter_form.cleaned_data.get('object')
-            )
-        if filter_form.cleaned_data.get('amount_inst_channels', None):
-            forms = forms.filter(
-                amount_inst_channels=filter_form.cleaned_data.get('amount_inst_channels')
-            )
-
-        if filter_form.cleaned_data.get('amount_inv_channels', None):
-            forms = forms.filter(
-                amount_inv_channels=filter_form.cleaned_data.get('amount_inv_channels')
-            )
-        if filter_form.cleaned_data.get('reserve', None):
-            forms = forms.filter(
-                reserve=filter_form.cleaned_data.get('reserve')
-            )
-
-    items = []
-    for form in forms:
-        item = {}
-        item['id'] = form.id
-        item['object'] = form.object.name
-        item['trassa'] = form.trassa.name
-        item['point1'] = form.point1.name
-        item['point2'] = form.point2.name
-        item['type_line'] = form.type_line.name
-        item['num'] = form.num
-        item['direction'] = form.direction
-        item['customer'] = form.customer.abr
-        item['amount_inst_channels'] = form.amount_inst_channels
-        item['amount_inv_channels'] = form.amount_inv_channels
-        item['reserve'] = form.reserve
-        items.append(item)
-    if 'csv' in request.GET:
-        response = HttpResponse(content_type='application/ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="form51.xls"'
-
-        wb = xlwt.Workbook(encoding='utf-8')
-        ws = wb.add_sheet('Форма 5.1')
-
-        row_num = 0
-
-        font_style = xlwt.XFStyle()
-        font_style.font.bold = True
-
-        columns = ['ID', 'ЛП', 'Трасса', 'ИП от', 'ИП до', 'Тип линии', '№ лямды', 'Напраление основного пути',
-               'Потребитель', 'Монтированные каналы', 'Задейтвованные каналы', 'Наличие резерва', 'Год ввода']
-
-        for col_num in range(len(columns)):
-            ws.write(row_num, col_num, columns[col_num], font_style)
-
-        font_style = xlwt.XFStyle()
-
-        for item in items:
-            row_num += 1
-
-            for col_num in range(len(list(item.keys()))):
-                ws.write(row_num, col_num, item[list(item.keys())[col_num]], font_style)
-
-        wb.save(response)
-        return response
-    return render(request, 'management/form51.html', {
-        'location': location,
-        'forms': forms,
-        'filter_form':filter_form
-    })
-
-def form51_create(request, location_id):
-    location = get_object_or_404(Form51Location, id=location_id)
-    form = Form51Form(request.POST or None)
-    if form.is_valid():
-        form51=form.save(commit=False)
-        form51.category=location
-        form51.save()
-
-        return redirect('apps:opu:management:form51', location_id=location.id)
-    return render(request, 'management/form51_create.html', {'form': form,
-                                                             'location':location})
-
-def form51_edit(request, location_id, pk):
-    location = Form51Location.objects.get(id=location_id)
-    if pk:
-        form51 = Form51.objects.get(id=pk)
-        form = Form51Form(request.POST or None, instance=form51)
-        if request.method == 'POST':
-            form = Form51Form(request.POST or None, instance=form51)
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.category = location
-                instance.save()
-                return redirect('apps:opu:management:form51', location_id=location.id)
-        return render(request, 'management/form51_create.html', {'form': form})
-
-def form51_delete(request, pk):
-    if pk:
-        form51 = Form51.objects.get(id=pk)
-        form51.delete()
-        return redirect('apps:opu:management:form51', location_id=form51.category.id)

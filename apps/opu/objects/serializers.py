@@ -185,6 +185,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments',)
 
+
 class ObjectCreateSerializer(serializers.ModelSerializer):
 
     tpo1 = serializers.PrimaryKeyRelatedField(
@@ -200,8 +201,10 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1', 'point1', 'tpo2', 'point2', 'type_of_trakt',
-                  'system', 'amount_channels', 'type_line', 'our', 'num', 'transit', 'transit2', 'category', 'comments',)
+        fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
+                  'point1', 'tpo2', 'point2', 'type_of_trakt',
+                  'system', 'amount_channels', 'type_line', 'our', 'num',
+                  'transit', 'transit2', 'category', 'comments',)
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):
