@@ -471,6 +471,7 @@ class CreateLeftTrassaView(APIView):
         else:
             main_obj.transit.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
+            
 
         return Response(status=status.HTTP_201_CREATED)
 
