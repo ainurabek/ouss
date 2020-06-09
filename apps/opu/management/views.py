@@ -21,6 +21,7 @@ import csv
 #         'departments':departments,
 #         'lps': lps
 #     })
+from ..circuits.models import Circuit
 
 
 def tpo_list(request):
@@ -233,9 +234,23 @@ def left_trassa(request, pk, id):
         main_obj.transit.remove(obj)
         obj.transit2.clear()
         obj.transit.clear()
+        for i in main_obj.circ_obj.all():
+            cir = Circuit.objects.get(pk=i.pk)
+            cir.transit.clear()
+            cir.transit2.clear()
+
+        for i in obj.circ_obj.all():
+            cir = Circuit.objects.get(pk=i.pk)
+            cir.transit.clear()
+            cir.transit2.clear()
     else:
         main_obj.transit.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
+
+        for cir in main_obj.circ_obj.all():
+            name = obj.name + "/" + str(cir.num_circuit)
+            circuit = Circuit.objects.get(name=name)
+            cir.transit.add(circuit)
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -262,9 +277,23 @@ def right_trassa(request, pk, id):
         main_obj.transit2.remove(obj)
         obj.transit2.clear()
         obj.transit.clear()
+        for i in main_obj.circ_obj.all():
+            cir = Circuit.objects.get(pk=i.pk)
+            cir.transit2.clear()
+            cir.transit.clear()
+
+        for i in obj.circ_obj.all():
+            cir = Circuit.objects.get(pk=i.pk)
+            cir.transit.clear()
+            cir.transit2.clear()
     else:
         main_obj.transit2.add(obj)
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
+
+        for cir in main_obj.circ_obj.all():
+            name = obj.name + "/" + str(cir.num_circuit)
+            circuit = Circuit.objects.get(name=name)
+            cir.transit2.add(circuit)
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -296,6 +325,23 @@ def save_trassa(request, pk):
             i.transit2.add(*main_obj.transit2.all())
         if main_obj.transit.all() not in i.transit.all():
            i.transit.add(*main_obj.transit.all())
+
+    for cir in main_obj.circ_obj.all():
+        for obj in main_obj.transit.all():
+            name = obj.name + "/" + str(cir.num_circuit)
+            print(name)
+            name = Circuit.objects.get(name=name)
+            name.transit.add(*cir.transit.all())
+            name.transit2.add(*cir.transit2.all())
+
+    for cir in main_obj.circ_obj.all():
+        for obj in main_obj.transit2.all():
+            name = obj.name + "/" + str(cir.num_circuit)
+            print(name)
+            name = Circuit.objects.get(name=name)
+            name.transit2.add(*cir.transit2.all())
+            name.transit.add(*cir.transit.all())
+
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
