@@ -484,6 +484,7 @@ class CreateLeftTrassaView(APIView):
         else:
             main_obj.transit.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
+            
 
             for cir in main_obj.circ_obj.all():
                 name = obj.name + "/" + str(cir.num_circuit)
