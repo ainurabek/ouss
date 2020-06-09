@@ -15,11 +15,11 @@ class CircuitList(serializers.ModelSerializer):
                   'id_object', 'customer', 'mode', 'type_com')
 
 
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
 
 class CircuitEdit(serializers.ModelSerializer):
 
