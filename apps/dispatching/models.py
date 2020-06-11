@@ -15,6 +15,7 @@ class Region(models.Model):
         verbose_name = 'Регионы'
         verbose_name_plural = 'Регион'
 
+
 class TypeRequest(models.Model):
     '''Тип заявки (Например Квартирная заявка)'''
     name = models.CharField('Тип заявки', max_length=255)
