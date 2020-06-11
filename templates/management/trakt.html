@@ -41,6 +41,7 @@
             <th></th>
             <th></th>
             <th></th>
+            <th></th>
 
         </tr>
      </thead>
@@ -58,6 +59,7 @@
                 </button>
                   </td>
                   <td><button class="btn"> <a href="{% url 'apps:opu:management:trakt_delete' trakt.id %}"><i class="fa fa-trash"></i></a></button></td>
+                  <td><button class="btn"> <a href="{% url 'apps:opu:management:circuits_list' trakt.id %}"><i class="fa fa-bullseye"></i></a></button></td>
                   <td><button class="btn"> <a href="{% url 'apps:opu:management:select_obj' trakt.id %}"><span class="glyphicon glyphicon-plus">Создать трассу</span></td>
 
               </tr>

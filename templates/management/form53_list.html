@@ -1,0 +1,75 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+
+<div class="container-fluid">
+
+	<!-- Page Heading -->
+	<h1 class="h3 mb-2 text-gray-800">Форма 5.3 </h1>
+
+	<!-- DataTales Example -->
+	<div class="card shadow mb-4">
+
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+                            <th>#</th>
+                            <th>Номер канала</th>
+                            <th>Название</th>
+							<th>Участок, ИП Направление</th>
+                            <th>Трасса</th>
+                            <th>Арендатор</th>
+							<th>Категория</th>
+							<th>№ приказа потока</th>
+							<th>Дата приказа</th>
+							<th>Распоряжение</th>
+                            <th>Примечание</th>
+                            <th>Дата создания</th>
+                            <th></th>
+                            <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for forma53 in form53_list %}
+						<tr>
+                            <td>{{ forma53.id }}</td>
+                            <td>{{ forma53.circuit.num_circuit }}</td>
+                            <td>{{ forma53.circuit.name }}</td>
+							<td>
+								{{ forma53.circuit.point1.point }} - {{ forma53.circuit.point2.point }}
+                                {{ forma53.circuit.point1.name }} - {{ forma53.circuit.point2.name }}
+							</td>
+							<td>
+								{% for i in forma53.circuit.transit.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+								{% for i in forma53.circuit.transit2.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+							</td>
+							<td>{{ forma53.circuit.customer.abr }}</td>
+							<td>{{ forma53.circuit.category.id }}</td>
+							<td>{{ forma53.circuit.num_order }}</td>
+							<td>{{ forma53.circuit.data_order }}</td>
+							<td>{{ forma53.order }}</td>
+                            <td>{{ forma53.circuit.comments }}</td>
+                            <td>{{ forma53.created_at }}</td>
+                            <td><a href="{% url "apps:opu:form53:form53_update" forma53.id %}"><i class="fa fa-edit"></i></a></td>
+                            <td><a href="{% url "apps:opu:form53:form53_delete" forma53.id %}"><i class="fa fa-trash"></i></a></td>
+
+
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

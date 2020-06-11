@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
+from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -34,19 +34,19 @@ class Form51CreateView(View):
                 if obj != i:
                     Form51.objects.create(
                         object=i, customer=form.customer,
-                        index_ko=form.index_ko, num_ouss=form.num_ouss,
+                        num_ouss=form.num_ouss,
                         order=form.order, schema=form.schema,
                         reserve=form.reserve
-                    )
+                    ) #index_ko=form.index_ko,
 
             for i in obj.transit2.all():
                 if obj != i:
                     Form51.objects.create(
                         object=i, customer=form.customer,
-                        index_ko=form.index_ko, num_ouss=form.num_ouss,
+                         num_ouss=form.num_ouss,
                         order=form.order, schema=form.schema,
                         reserve=form.reserve
-                    )
+                    ) #index_ko=form.index_ko,
 
             return redirect('apps:opu:form51:form_list')
 

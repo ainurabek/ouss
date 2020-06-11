@@ -1,0 +1,47 @@
+{% extends 'management/base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Редактирование канала</h1>
+
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <form method="post">{% csrf_token %}
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label>{{ form.num_order.label }}</label>
+                                {% render_field form.num_order class="form-control" %}
+                                <label>{{ form.date_order.label }}</label>
+                                {% render_field form.date_order class="form-control" %}
+                                <label>{{ form.speed.label }}</label>
+                                {% render_field form.speed class="form-control" %}
+                                <label>{{ form.measure.label }}</label>
+                                {% render_field form.measure class="form-control" %}
+                                <label>{{ form.point1.label }}</label>
+                                {% render_field form.point1 class="form-control" %}
+                                <label>{{ form.point2.label }}</label>
+                                {% render_field form.point2 class="form-control" %}
+                                <label>{{ form.customer.label }}</label>
+                                {% render_field form.customer class="form-control" %}
+
+
+                            </div>
+                        </div>
+                        <div class="box-footer clearfix">
+                            <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

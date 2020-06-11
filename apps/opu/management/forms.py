@@ -2,6 +2,7 @@ from django import forms
 
 from apps.opu.objects.models import Object
 
+from apps.opu.circuits.models import Circuit
 
 
 class ObjectForm(forms.ModelForm):
@@ -47,4 +48,22 @@ class ObjectFilterForm(forms.ModelForm):
         super(ObjectFilterForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].required = False
+
+class CircuitsEditForm(forms.ModelForm):
+    class Meta:
+        model = Circuit
+        fields = ('final_destination', 'type_using', 'num_order',
+                  'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
+                  'in_out', 'first', 'point1',
+                  'point2', 'customer', 'mode', 'type_com')
+
+    def update(self, instance, validated_data):
+        """
+        Update and return an existing `Snippet` instance, given the validated data.
+        """
+        instance.category = validated_data.get('category', instance.category)
+        instance.point1 = validated_data.get('point1', instance.point1)
+        instance.point2 = validated_data.get('point2', instance.point2)
+        instance.save()
+        return instance
 

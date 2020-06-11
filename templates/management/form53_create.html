@@ -1,0 +1,33 @@
+{% extends 'management/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Форма 5.3 </h1>
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="box-body">
+                            <div class="form-group">
+
+                                <label>{{ form.order.label }}</label>
+                                {% render_field form.order class="form-control" %}
+                                <label>{{ form.schema.label }}</label>
+                                {% render_field form.schema class="form-control" %}
+
+                            </div>
+                        </div>
+                        <div class="box-footer clearfix">
+                            <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

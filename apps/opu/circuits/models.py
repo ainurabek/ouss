@@ -57,10 +57,10 @@ class Circuit(models.Model):
 	"""Каналы"""
 	# id_circuit = models.CharField(max_length=100, blank=True, null=True)
 	id_parent = models.ForeignKey('Circuit', on_delete=models.CASCADE, blank=True, null=True)
-	num_circuit = models.CharField(max_length=100, blank=True, null=True)
+	num_circuit = models.CharField('Номер канала', max_length=100, blank=True, null=True)
 	final_destination = models.ForeignKey(Point, related_name='circ_final_dest',on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField(unique=True, max_length=100, blank=True, null=True)
-	type_using = models.CharField(max_length=100, blank=True, null=True)#######
+	type_using = models.CharField(max_length=100, blank=True, null=True)
 	category = models.ForeignKey(Category, related_name='circ_cat',on_delete=models.CASCADE, blank=True, null=True) ###
 	num_order = models.CharField(max_length=100, blank=True, null=True)
 	date_order = models.CharField(max_length=100, blank=True, null=True)
@@ -89,8 +89,8 @@ class Circuit(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
-		verbose_name = 'Канал'
-		verbose_name_plural = 'Каналы'
+		verbose_name = 'Канал для Формы 5.3'
+		verbose_name_plural = 'Каналы для Формы 5.3'
 
 	def __str__(self):
 		return self.name

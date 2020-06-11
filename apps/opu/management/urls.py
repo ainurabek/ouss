@@ -5,7 +5,7 @@ from apps.opu.management import views
 
 from apps.opu.management.views import tpo_list, outfit_list, point_list, lp_list, trakt_list,\
    lp_create, trakt_create, trakt_delete, lp_delete, trakt_edit, lp_edit, select_obj,\
-   save_trassa, left_trassa, right_trassa, trassa_list
+   save_trassa, left_trassa, right_trassa, trassa_list, circuits_list, circuits_edit
 
 
 
@@ -31,6 +31,9 @@ urlpatterns = [
     path('save-trassa/<int:pk>/', save_trassa, name='save_trassa'),
     path('trassa-list/', trassa_list, name='trassa_list'),
 
+
+    path('circuits/list/<int:object_id>/', circuits_list, name='circuits_list'),
+    path('circuits/<int:pk>/edit/', circuits_edit, name='circuits_edit'),
     # path('region/', region_list, name='region_list'),
     # url(r'^(?P<slug>\S+)/locations/$', views.form51_location_list, name='location_list'),
     # url(r'^(?P<location_id>\S+)/list/$', views.form51_list, name='form51'),
