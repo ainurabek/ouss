@@ -10,6 +10,7 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     ###HTML
+    path("regions/", views.RegionListView.as_view(), name="region_list"),
     path("", views.Form53ListView.as_view(), name="form53_list"),
     path("edit/<int:pk>/", views.Form53UpdateView.as_view(), name="form53_update"),
     path("create/<int:pk>/", views.Form53CreateView.as_view(), name="form53_create"),

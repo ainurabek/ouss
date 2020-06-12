@@ -12,6 +12,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
+from apps.dispatching.models import Region
+
 
 class Form53CreateView(View):
     """ Создания Формы 5.3"""
@@ -34,7 +36,6 @@ class Form53CreateView(View):
                     Form53.objects.create(
                         circuit=i, order=form.order, schema=form.schema
                     )
-
             return redirect('apps:opu:form53:form53_list')
 
 
@@ -64,6 +65,21 @@ def form53_delete(request, pk):
         Form53.objects.get(pk=pk).delete()
 
     return redirect("apps:opu:form53:form53_list")
+
+class RegionListView(ListView):
+    """Список регионов"""
+    model = Region
+    template_name = "management/region_list.html"
+    context_object_name = "regions"
+
+
+class FilterForm53View(View):
+    """ Фильтрация Формы 5.3 по регионам """
+
+    def get(self, request, slug):
+        region = Region.objects.get(slug=slug)
+        form53_list = Form53.objects.filter(id_object__id_outfit__outfit=region.name)
+        return render(request,"management/form53_list.html", {"form53_list": form53_list})
 
 # API
 #############################################################################################

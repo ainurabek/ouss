@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 import xlwt
 import csv
-# from django.core.exceptions import DoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 
 
 
@@ -182,12 +182,13 @@ def trakt_create(request, lp_id):
         trakt = form.save(commit=False)
         trakt.id_parent = lp
         trakt.name = str(lp.name)+'-'+str(trakt.name)
+        print(trakt.name)
         if trakt.type_line == None:
             trakt.type_line = lp.type_line
         trakt.save()
         if trakt.amount_channels=='12':
             for x in range(1, 13):
-                Circuit.objects.create(name=lp.name + "-" + trakt.name + '/' + str(x),
+                Circuit.objects.create(name=trakt.name + '/' + str(x),
                                        id_object=Object.objects.get(pk=trakt.id),
                                        num_circuit=x,
                                        # category=Category.objects.get(id=trakt.category.id),
@@ -196,7 +197,7 @@ def trakt_create(request, lp_id):
                                        created_by=request.user.profile)
         elif trakt.amount_channels=='30':
             for x in range(1, 31):
-                Circuit.objects.create(name=lp.name + "-" + trakt.name + '/' + str(x),
+                Circuit.objects.create(name=trakt.name + '/' + str(x),
                                        id_object=Object.objects.get(pk=trakt.id),
                                        num_circuit=x,
                                        # category=Category.objects.get(id=trakt.category.id),
@@ -274,10 +275,10 @@ def left_trassa(request, pk, id):
             name = obj.name + "/" + str(cir.num_circuit)
             try:
                 circuit = Circuit.objects.get(name=name)
-                print("----")
                 cir.transit.add(circuit)
-            except Circuit.DoesNotExist:
-                return HttpResponse("Ошибка")
+            except ObjectDoesNotExist:
+                return HttpResponse("Error")
+
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -322,8 +323,8 @@ def right_trassa(request, pk, id):
             try:
                 circuit = Circuit.objects.get(name=name)
                 cir.transit2.add(circuit)
-            except Circuit.DoesNotExist:
-                return HttpResponse("Ошибка")
+            except ObjectDoesNotExist:
+                return HttpResponse("Error")
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -367,7 +368,7 @@ def save_trassa(request, pk):
                 name = Circuit.objects.get(name=name)
                 name.transit.add(*cir.transit.all())
                 name.transit2.add(*cir.transit2.all())
-            except Circuit.DoesNotExist:
+            except ObjectDoesNotExist:
                 return HttpResponse("Ошибка")
 
 
@@ -379,7 +380,7 @@ def save_trassa(request, pk):
                 name = Circuit.objects.get(name=name)
                 name.transit2.add(*cir.transit2.all())
                 name.transit.add(*cir.transit.all())
-            except Circuit.DoesNotExist:
+            except ObjectDoesNotExist:
                 return HttpResponse("Ошибка")
 
 
