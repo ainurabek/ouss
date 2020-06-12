@@ -14,6 +14,8 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
 from apps.dispatching.models import Region
 
+from apps.opu.form53.serializers import Region53Serializer
+
 
 class Form53CreateView(View):
     """ Создания Формы 5.3"""
@@ -66,10 +68,10 @@ def form53_delete(request, pk):
 
     return redirect("apps:opu:form53:form53_list")
 
-class RegionListView(ListView):
+class Region53ListView(ListView):
     """Список регионов"""
     model = Region
-    template_name = "management/region_list.html"
+    template_name = "management/region53_list.html"
     context_object_name = "regions"
 
 
@@ -78,7 +80,7 @@ class FilterForm53View(View):
 
     def get(self, request, slug):
         region = Region.objects.get(slug=slug)
-        form53_list = Form53.objects.filter(id_object__id_outfit__outfit=region.name)
+        form53_list = Form53.objects.filter(circuit__id_object__id_outfit__outfit=region.name)
         return render(request,"management/form53_list.html", {"form53_list": form53_list})
 
 # API
@@ -114,7 +116,13 @@ class Form53ListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = Form53Serializer
-    queryset = Form53.objects.all()
+
+    def get_queryset(self):
+        queryset = Form53.objects.all()
+        region = self.request.query_params.get('region', None)
+        if region is not None and region != "":
+            queryset = queryset.filter(circuit_id_object__id_outfit__outfit=region)
+        return queryset
 
 
 
@@ -132,7 +140,12 @@ class Form53DeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Form53
 
-
+class Region53ListAPIView(ListAPIView):
+    """Список Регоинов"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Region.objects.all()
+    serializer_class = Region53Serializer
 
 
 

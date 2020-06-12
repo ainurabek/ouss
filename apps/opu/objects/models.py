@@ -63,14 +63,15 @@ class LineType(models.Model):
 
 
 class Category(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	index = models.CharField('Индекс', max_length=100, blank=True, null=True)
+	name = models.CharField('Обозначение', max_length=100, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Категория'
 		verbose_name_plural = 'Категории'
 
 	def __str__(self):
-		return f'{self.name}, {self.id}'
+		return f'{self.index}, {self.id}'
 
 
 class System(models.Model):

@@ -178,7 +178,7 @@ class RegionListAPIView(ListAPIView):
     """Список Регоинов"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Region
+    queryset = Region.objects.all()
     serializer_class = RegionSerializer
 
 

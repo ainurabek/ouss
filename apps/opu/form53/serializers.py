@@ -28,8 +28,8 @@ class Form53CreateSerializer(serializers.ModelSerializer):
 
 
 class CircuitForm53Serializer(serializers.ModelSerializer):
-    transit = TransitSerializer()
-    transit2 = TransitSerializer()
+    transit = TransitSerializer(many=True)
+    transit2 = TransitSerializer(many=True)
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
 
@@ -50,3 +50,10 @@ class Form53Serializer(serializers.ModelSerializer):
         model = Form53
         fields = ("id", "circuit",  "order", "schema")
         depth=1
+
+class Region53Serializer(serializers.ModelSerializer):
+    """ Регионы """
+
+    class Meta:
+        model = Region
+        fields = ("id", "name", "slug",)

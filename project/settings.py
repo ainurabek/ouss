@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'apps.opu.customer',
     'apps.opu.form51',
     'apps.opu.form53',
-    'apps.opu.forma51_v2',
     'apps.dispatching',
 
     'knox',

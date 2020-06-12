@@ -28,8 +28,8 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 
 
 class ObjectForm51Serializer(serializers.ModelSerializer):
-    transit = TransitSerializer()
-    transit2 = TransitSerializer()
+    transit = TransitSerializer(many=True)
+    transit2 = TransitSerializer(many=True)
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
 

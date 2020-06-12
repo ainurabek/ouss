@@ -353,6 +353,7 @@ class ObjectCreateView(APIView):
                 point1=parent.point1,
                 name=parent.name+'-'+name,
 
+
             )
             if data['amount_channels'] == '12':
                 for x in range(1, 13):
