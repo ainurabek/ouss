@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 import xlwt
 import csv
+# from django.core.exceptions import DoesNotExist
 
 
 
@@ -265,15 +266,18 @@ def left_trassa(request, pk, id):
             cir.transit.clear()
             cir.transit2.clear()
     else:
-        b=main_obj.transit.add(obj)
-        print("===")
-        print(b)
+        main_obj.transit.add(obj)
+
         Object.objects.filter(pk=id).update(add_time=timezone.now(), maker_trassa=user)
 
         for cir in main_obj.circ_obj.all():
             name = obj.name + "/" + str(cir.num_circuit)
-            circuit = Circuit.objects.get(name=name)
-            cir.transit.add(circuit)
+            try:
+                circuit = Circuit.objects.get(name=name)
+                print("----")
+                cir.transit.add(circuit)
+            except Circuit.DoesNotExist:
+                return HttpResponse("Ошибка")
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -315,8 +319,11 @@ def right_trassa(request, pk, id):
 
         for cir in main_obj.circ_obj.all():
             name = obj.name + "/" + str(cir.num_circuit)
-            circuit = Circuit.objects.get(name=name)
-            cir.transit2.add(circuit)
+            try:
+                circuit = Circuit.objects.get(name=name)
+                cir.transit2.add(circuit)
+            except Circuit.DoesNotExist:
+                return HttpResponse("Ошибка")
 
     trassa_list1 = main_obj.transit.all().reverse()
     trassa_list2 = main_obj.transit2.all()
@@ -356,18 +363,24 @@ def save_trassa(request, pk):
     for cir in main_obj.circ_obj.all():
         for obj in main_obj.transit.all():
             name = obj.name + "/" + str(cir.num_circuit)
-            name = Circuit.objects.get(name=name)
-            name.transit.add(*cir.transit.all())
-            name.transit2.add(*cir.transit2.all())
+            try:
+                name = Circuit.objects.get(name=name)
+                name.transit.add(*cir.transit.all())
+                name.transit2.add(*cir.transit2.all())
+            except Circuit.DoesNotExist:
+                return HttpResponse("Ошибка")
 
 
 
     for cir in main_obj.circ_obj.all():
         for obj in main_obj.transit2.all():
             name = obj.name + "/" + str(cir.num_circuit)
-            name = Circuit.objects.get(name=name)
-            name.transit2.add(*cir.transit2.all())
-            name.transit.add(*cir.transit.all())
+            try:
+                name = Circuit.objects.get(name=name)
+                name.transit2.add(*cir.transit2.all())
+                name.transit.add(*cir.transit.all())
+            except Circuit.DoesNotExist:
+                return HttpResponse("Ошибка")
 
 
     trassa_list1 = main_obj.transit.all().reverse()
