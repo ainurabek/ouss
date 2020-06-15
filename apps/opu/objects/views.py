@@ -31,6 +31,8 @@ from apps.opu.circuits.models import Circuit
 
 from apps.opu.objects.models import Category
 
+from apps.opu.form51.models import Form51
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -531,7 +533,6 @@ class SaveTrassaView(APIView):
 
     def get(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
-
         for i in main_obj.transit.all():
             if main_obj.transit.all() not in i.transit.all():
                 i.transit.add(*main_obj.transit.all())
@@ -563,7 +564,16 @@ class SaveTrassaView(APIView):
                     break
                 name.transit2.add(*cir.transit2.all())
                 name.transit.add(*cir.transit.all())
+        return Response(status=status.HTTP_201_CREATED)
 
+    def post(self, request, pk):
+        main_obj = Object.objects.get(pk=pk)
+        data=request.data
+        if data['save_in'] == True:
+            if Form51.objects.filter(object=main_obj).exists():
+                return HttpResponse("В форме 5.1. уже есть такая трасса")
+            else:
+                Form51.objects.create(object=main_obj)
         return Response(status=status.HTTP_201_CREATED)
 
 

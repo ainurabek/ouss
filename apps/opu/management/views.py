@@ -26,6 +26,7 @@ from django.core.exceptions import ObjectDoesNotExist
 #         'lps': lps
 #     })
 from ..circuits.models import Circuit
+from ..form51.models import Form51
 from ..objects.models import Category
 
 
@@ -415,6 +416,7 @@ def save_trassa(request, pk):
     name = '(' + fin_trassa1 + ')' + '(' + fin_trassa2 + ')'
     trassa_saved = Trassa.objects.create(name=name, created_by=user)
     trassa_saved.save()
+    Form51.objects.create(object=main_obj)
 
     return redirect('apps:opu:management:trassa_list')
 
