@@ -154,7 +154,7 @@ class Object(models.Model):
 	destination2 = models.ForeignKey('IP', related_name='obj_dest2', on_delete=models.CASCADE, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.CASCADE, blank=True, null=True)
 	amount_channels = models.CharField('Количество каналов', max_length=100, blank=True, null=True)
-	not_in_use = models.BooleanField('Активный/Нет', blank=True, null=True)
+	save_in = models.BooleanField('Сохранить', blank=True, null=True)
 	type_line = models.ForeignKey(LineType, related_name='obj_type_line',on_delete=models.CASCADE, blank=True, null=True)
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.CASCADE, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
