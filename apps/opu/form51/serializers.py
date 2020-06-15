@@ -36,6 +36,7 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ("name", "transit", "transit2", "category", "point1", "point2")
+        depth = 1
 
 
 class Form51Serializer(serializers.ModelSerializer):
@@ -54,7 +55,7 @@ class RegionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Region
-        fields = ("id", "name", "slug",)
+        fields = ("id", "name", "slug", )
 
 
 class ObjectReserveSerializer(serializers.ModelSerializer):
