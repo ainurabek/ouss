@@ -127,7 +127,7 @@ class TransitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('point1', 'name', 'point2')
+        fields = ('id', 'point1', 'name', 'point2')
 
 
 class LPSerializer(serializers.ModelSerializer):
@@ -235,4 +235,4 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('name', 'point1', 'point2', 'COreceive', 'COdeliver', 'id_outfit')
+        fields = ( 'id', 'name', 'point1', 'point2', 'COreceive', 'COdeliver', 'id_outfit')

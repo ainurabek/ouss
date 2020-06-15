@@ -27,6 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist
 #     })
 from ..circuits.models import Circuit
 from ..form51.models import Form51
+from ..form_customer.models import Form_Customer
 from ..objects.models import Category
 
 
@@ -416,7 +417,18 @@ def save_trassa(request, pk):
     name = '(' + fin_trassa1 + ')' + '(' + fin_trassa2 + ')'
     trassa_saved = Trassa.objects.create(name=name, created_by=user)
     trassa_saved.save()
-    Form51.objects.create(object=main_obj)
+
+    if request['save_in'] == True:
+        if Form51.objects.filter(object=main_obj).exists():
+            return HttpResponse("В форме 5.1. уже есть такая трасса")
+        else:
+            Form51.objects.create(object=main_obj)
+    if request['customer'] == True:
+        if Form_Customer.objects.filter(object=main_obj).exists():
+            return HttpResponse("В форме арендаторов уже есть такая трасса")
+        else:
+            Form_Customer.objects.create(object=main_obj)
+
 
     return redirect('apps:opu:management:trassa_list')
 

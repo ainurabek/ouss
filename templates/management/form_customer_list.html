@@ -1,0 +1,73 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+
+<div class="container-fluid">
+
+	<!-- Page Heading -->
+	<h1 class="h3 mb-2 text-gray-800">
+		{% for form in form_cust %}
+			{{form.customer.abr}} - {{form.customer.customer}}
+		{% endfor %}
+	</h1>
+
+	<!-- DataTales Example -->
+	<div class="card shadow mb-4">
+		{% for form in form_cust %}
+			Контактные данные: {{ form.customer.contact_name }} {{form.address}} {{form.email}}
+		{% endfor %}
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+                            <th>№</th>
+							<th>ИП от -  ИП до</th>
+							<th>Обозначение и трасса потоков(каналов)</th>
+							<th>Количество потоков</th>
+							<th>Сигнализация</th>
+							<th>Вид использования</th>
+							<th>№ Распоряжение</th>
+                            <th>Скачать распоряжение</th>
+							<th>Примечание</th>
+                            <th></th>
+                            <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for form in form_cust %}
+						<tr>
+                            <td>{{ form.id }}</td>
+							<td>
+								{{ form.object.point1.point }} - {{ form.object.point2.point }}
+                                {{ form.object.point1.name }} - {{ form.object.point2.name }}
+							</td>
+							<td>
+								{% for i in form.circuit.transit.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+								{% for i in form.circuit.transit2.all %}
+									({{i.point1}})
+                              		{{i.name}}
+                              		({{i.point2}})
+								{% endfor %}
+							</td>
+							<td>{{ form.amount_flow }}</td>
+							<td>{{ form.signalization.name }}</td>
+							<td>{{ form.type_of_using }}</td>
+                            <td>{{ form.num_order }}</td>
+							<td>{{ form.order }}</td>
+							<td>{{ form.comments }}</td>
+                            <td><a href="{% url "apps:opu:form51:form_update" forma51.id %}"><i class="fa fa-edit"></i></a></td>
+                            <td><a href="{% url "apps:opu:form51:form_delete" forma51.id %}"><i class="fa fa-trash"></a></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

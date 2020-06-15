@@ -33,6 +33,8 @@ from apps.opu.objects.models import Category
 
 from apps.opu.form51.models import Form51
 
+from apps.opu.form_customer.models import Form_Customer
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -574,6 +576,11 @@ class SaveTrassaView(APIView):
                 return HttpResponse("В форме 5.1. уже есть такая трасса")
             else:
                 Form51.objects.create(object=main_obj)
+        if data['customer'] == True:
+            if Form_Customer.objects.filter(object=main_obj).exists():
+                return HttpResponse("В форме арендаторов уже есть такая трасса")
+            else:
+                Form_Customer.objects.create(object=main_obj)
         return Response(status=status.HTTP_201_CREATED)
 
 
