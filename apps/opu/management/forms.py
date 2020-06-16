@@ -10,7 +10,7 @@ class ObjectForm(forms.ModelForm):
         model = Object
         fields = ('name', 'id_outfit', 'tpo1', 'point1',
                   'tpo2', 'point2', 'system',
-                  'amount_channels', 'type_line', 'our', 'num', 'trakt', )
+                  'amount_channels', 'type_line', 'our', 'num', 'trakt', 'customer' )
 
 
 class TraktForm(forms.ModelForm):
@@ -18,7 +18,7 @@ class TraktForm(forms.ModelForm):
         model = Object
         fields = ('name', 'id_outfit', 'tpo1', 'point1',
                   'tpo2', 'point2', 'type_of_trakt', 'system',
-                  'amount_channels', 'our', 'num', 'trakt',)
+                  'amount_channels', 'our', 'num', 'trakt', 'customer')
 
     def __init__(self, *args, **kwargs):
         id_parent = kwargs.pop('id_parent')
@@ -32,7 +32,7 @@ class TraktEditForm(forms.ModelForm):
         model = Object
         fields = ('name', 'id_outfit', 'tpo1', 'point1',
                   'tpo2', 'point2', 'type_of_trakt', 'system',
-                  'amount_channels', 'our', 'num', 'trakt', )
+                  'amount_channels', 'our', 'num', 'trakt', 'customer')
 
 
 class ObjectFilterForm(forms.ModelForm):
@@ -42,7 +42,7 @@ class ObjectFilterForm(forms.ModelForm):
         model = Object
         fields = ('name', 'id_outfit', 'tpo1', 'point1',
                   'tpo2', 'point2', 'type_of_trakt', 'system',
-                  'amount_channels', 'our', 'num', 'trakt', 'type_line',)
+                  'amount_channels', 'our', 'num', 'trakt', 'type_line', 'customer')
 
     def __init__(self, *args, **kwargs):
         super(ObjectFilterForm, self).__init__(*args, **kwargs)

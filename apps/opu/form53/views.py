@@ -39,8 +39,6 @@ class Form53CreateView(View):
                         circuit=i, order=form.order, schema=form.schema
                     )
             return redirect('apps:opu:form53:form53_list')
-
-
     def get(self, request, pk):
         form = Form53Form()
         return render(request, 'management/form53_create.html', {'form': form})

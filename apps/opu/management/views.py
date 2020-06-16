@@ -26,6 +26,7 @@ from django.core.exceptions import ObjectDoesNotExist
 #         'lps': lps
 #     })
 from ..circuits.models import Circuit
+from ..customer.models import Customer
 from ..form51.models import Form51
 from ..form_customer.models import Form_Customer
 from ..objects.models import Category
@@ -193,6 +194,7 @@ def trakt_create(request, lp_id):
                 Circuit.objects.create(name=trakt.name + '/' + str(x),
                                        id_object=Object.objects.get(pk=trakt.id),
                                        num_circuit=x,
+                                       customer= Customer.objects.get(id=trakt.customer.id),
                                        # category=Category.objects.get(id=trakt.category.id),
                                        point1=Point.objects.get(id=trakt.point1.id),
                                        point2=Point.objects.get(id=trakt.point2.id),
@@ -202,6 +204,7 @@ def trakt_create(request, lp_id):
                 Circuit.objects.create(name=trakt.name + '/' + str(x),
                                        id_object=Object.objects.get(pk=trakt.id),
                                        num_circuit=x,
+                                       customer=Customer.objects.get(id=trakt.customer.id),
                                        # category=Category.objects.get(id=trakt.category.id),
                                        point1=Point.objects.get(id=trakt.point1.id),
                                        point2=Point.objects.get(id=trakt.point2.id),
@@ -418,16 +421,16 @@ def save_trassa(request, pk):
     trassa_saved = Trassa.objects.create(name=name, created_by=user)
     trassa_saved.save()
 
-    if request['save_in'] == True:
-        if Form51.objects.filter(object=main_obj).exists():
-            return HttpResponse("В форме 5.1. уже есть такая трасса")
-        else:
-            Form51.objects.create(object=main_obj)
-    if request['customer'] == True:
-        if Form_Customer.objects.filter(object=main_obj).exists():
-            return HttpResponse("В форме арендаторов уже есть такая трасса")
-        else:
-            Form_Customer.objects.create(object=main_obj)
+    # if request.POST['save_in'] == True:
+    #     if Form51.objects.filter(object=main_obj).exists():
+    #         return HttpResponse("В форме 5.1. уже есть такая трасса")
+    #     else:
+    #         Form51.objects.create(object=main_obj)
+    # if request.POST['customer'] == True:
+    #     if Form_Customer.objects.filter(object=main_obj).exists():
+    #         return HttpResponse("В форме арендаторов уже есть такая трасса")
+    #     else:
+    #         Form_Customer.objects.create(object=main_obj)
 
 
     return redirect('apps:opu:management:trassa_list')

@@ -1,0 +1,30 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+
+<div class="container-fluid">
+	<!-- DataTales Example -->
+	<div class="card shadow mb-4">
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+                            <th></th>
+							<th></th>
+
+						</tr>
+					</thead>
+					<tbody>
+                        <tr>
+	                        <td><a href="{% url 'apps:opu:form_customer:filter_form_cust' customer.id %}">Список форм арендаторов</a></td>
+							<td><a href="{% url 'apps:opu:form_customer:filter_form_circuit' customer.id %}">Список каналов</a></td>
+						</tr>
+
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

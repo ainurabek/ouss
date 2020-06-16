@@ -8,3 +8,4 @@ class FormCustForm(forms.ModelForm):
     class Meta:
         model = Form_Customer
         fields = ('amount_flow', 'signalization', 'type_of_using', 'num_order', 'order', 'comments')
+

@@ -144,7 +144,7 @@ class LPSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments',)
+                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer')
         depth = 1
 
 
@@ -165,7 +165,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments', 'created_by', 'created_at')
+                  'comments', 'created_by', 'customer', 'created_at')
         depth = 1
 
 
@@ -179,11 +179,12 @@ class ObjectSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = OutfitListSerializer()
+    line_type = TypeLineSerializer()
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
-                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments',)
+                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'line_type', 'our')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -204,7 +205,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt',
                   'system', 'amount_channels', 'type_line', 'our', 'num',
-                  'transit', 'transit2', 'category', 'comments',)
+                  'transit', 'transit2', 'category', 'comments', 'customer')
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):
@@ -235,4 +236,4 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ( 'id', 'name', 'point1', 'point2', 'COreceive', 'COdeliver', 'id_outfit')
+        fields = ( 'id', 'name', 'point1', 'point2', 'COreceive', 'COdeliver', 'id_outfit', 'customer')

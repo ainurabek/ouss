@@ -1,0 +1,41 @@
+{% extends 'management/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Форма для Арендаторов </h1>
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="box-body">
+                            <div class="form-group">
+
+                                <label>{{ form.amount_flow.label }}</label>
+                                {% render_field form.amount_flow class="form-control" %}
+                                <label>{{ form.signalization.label }}</label>
+                                {% render_field form.signalization class="form-control" %}
+                                <label>{{ form.type_of_using.label }}</label>
+                                {% render_field form.type_of_using class="form-control" %}
+                                <label>{{ form.num_order.label }}</label>
+                                {% render_field form.num_order class="form-control" %}
+                                <label>{{ form.order.label }}</label>
+                                {% render_field form.order class="form-control" %}
+                                <label>{{ form.comments.label }}</label>
+                                {% render_field form.comments class="form-control" %}
+
+                            </div>
+                        </div>
+                        <div class="box-footer clearfix">
+                            <button type="submit" class="btn btn-success btn-lg pull-right">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

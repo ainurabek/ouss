@@ -35,6 +35,8 @@ from apps.opu.form51.models import Form51
 
 from apps.opu.form_customer.models import Form_Customer
 
+from apps.opu.customer.models import Customer
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -364,6 +366,7 @@ class ObjectCreateView(APIView):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
+
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
@@ -373,6 +376,7 @@ class ObjectCreateView(APIView):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
+
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
@@ -576,11 +580,15 @@ class SaveTrassaView(APIView):
                 return HttpResponse("В форме 5.1. уже есть такая трасса")
             else:
                 Form51.objects.create(object=main_obj)
+        elif data['save_in'] == False:
+            pass
         if data['customer'] == True:
             if Form_Customer.objects.filter(object=main_obj).exists():
                 return HttpResponse("В форме арендаторов уже есть такая трасса")
             else:
-                Form_Customer.objects.create(object=main_obj)
+                Form_Customer.objects.create(object=main_obj, customer=main_obj.customer)
+        elif data['customer'] == False:
+            pass
         return Response(status=status.HTTP_201_CREATED)
 
 
