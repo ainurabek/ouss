@@ -5,7 +5,7 @@ User = get_user_model()
 from .models import Measure, Speed, Mode, TypeCom, SubsRoutes, Circuit, Bypass, AssignPart
 
 admin.site.register(Measure)
-admin.site.register(Speed)
+
 admin.site.register(TypeCom)
 admin.site.register(SubsRoutes)
 admin.site.register(Circuit)

@@ -26,11 +26,7 @@ class TypeComSerializer(serializers.ModelSerializer):
         model = TypeCom
         fields = ('id', 'name')
 
-class SpeedCircSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Speed
-        fields = ('id', 'name')
 
 class MeasureCircSerializer(serializers.ModelSerializer):
 
@@ -78,7 +74,7 @@ class CircuitList(serializers.ModelSerializer):
     customer = CustomerSerializer()
     mode = ModeCircSerializer()
     in_out=InOutSerializer()
-    speed = SpeedCircSerializer()
+
     measure = MeasureCircSerializer()
     category = CategorySerializer()
     class Meta:
