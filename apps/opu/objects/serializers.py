@@ -179,12 +179,12 @@ class ObjectSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = OutfitListSerializer()
-    line_type = TypeLineSerializer()
+    type_line = TypeLineSerializer()
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
-                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'line_type', 'our')
+                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):

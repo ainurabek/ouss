@@ -18,14 +18,14 @@ class Form53CreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form53
-        fields = ("id",  "order", "schema")
+        fields = ("id",  "order", "schema", "comments")
 
 class Form53Serializer(serializers.ModelSerializer):
     """Список Формы 5.3"""
     circuit = CircuitList()
     class Meta:
         model = Form53
-        fields = ("id", "circuit",  "order", "schema")
+        fields = ("id", "circuit",  "order", "schema", "comments")
         depth=1
 
 class Region53Serializer(serializers.ModelSerializer):

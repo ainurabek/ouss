@@ -26,6 +26,7 @@
 							<th>Дата приказа</th>
 							<th>Распоряжение</th>
                             <th>Примечание</th>
+							<th>Комментарии</th>
                             <th>Дата создания</th>
                             <th></th>
                             <th></th>
@@ -59,6 +60,7 @@
 							<td>{{ forma53.circuit.data_order }}</td>
 							<td>{{ forma53.order }}</td>
                             <td>{{ forma53.circuit.comments }}</td>
+							<td>{{ forma53.comments }}</td>
                             <td>{{ forma53.created_at }}</td>
                             <td><a href="{% url "apps:opu:form53:form53_update" forma53.id %}"><i class="fa fa-edit"></i></a></td>
                             <td><a href="{% url "apps:opu:form53:form53_delete" forma53.id %}"><i class="fa fa-trash"></i></a></td>

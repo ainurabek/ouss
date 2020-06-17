@@ -20,6 +20,7 @@ class Form53(models.Model):
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
     order = models.ImageField('Распоряжение', upload_to='object/order/', blank=True, null=True)
     schema = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
+    comments = models.CharField(max_length=100, blank=True, null=True)
     created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
 

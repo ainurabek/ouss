@@ -96,14 +96,14 @@ class Form53CreateViewAPI(APIView):
             for i in circuit.transit.all():
                 if circuit != i:
                     Form53.objects.create(
-                        circuit=i, customer=circuit.customer,
-                        order=data.order, schema=data.schema
+                        circuit=i,
+                        order=data.order, schema=data.schema, comments= data.comments
                     )
             for i in circuit.transit2.all():
                 if circuit != i:
                     Form53.objects.create(
-                        circuit=i, customer=circuit.customer,
-                        order=data.order, schema=data.schema
+                        circuit=i,
+                        order=data.order, schema=data.schema, comments= data.comments
                     )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
