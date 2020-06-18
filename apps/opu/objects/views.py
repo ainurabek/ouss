@@ -1,42 +1,26 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from rest_framework.decorators import api_view, permission_classes
+from django.http import HttpResponse
 from django.http import Http404
-
-# Create your views here.
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveDestroyAPIView, get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
-
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
-    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer, \
+    OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer
-from rest_framework import permissions, viewsets, status, generics
+from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 import xlwt
-
 from django.db.models import Q
-from django.utils import timezone
-
-
-# TPO
 from apps.opu.circuits.models import Circuit
-
 from apps.opu.objects.models import Category
-
 from apps.opu.form51.models import Form51
-
 from apps.opu.form_customer.models import Form_Customer
-
-from apps.opu.customer.models import Customer
-
 from apps.opu.objects.serializers import LPEditSerializer
 
 
