@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt
 from ..circuits.models import Circuit
+from rest_framework.fields import  ReadOnlyField
 
 User = get_user_model()
 
@@ -129,6 +130,16 @@ class TransitSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'point1', 'name', 'point2')
 
+class IPSerializer(serializers.ModelSerializer):
+    point_id=serializers.SlugRelatedField(slug_field='point', read_only=True)
+    object_id=serializers.SlugRelatedField(slug_field='name', read_only=True)
+    tpo_id = serializers.SlugRelatedField(slug_field='index', read_only=True)
+    class Meta:
+        model = IP
+        fields = ('id', 'tpo_id', 'point_id', 'object_id' )
+
+
+
 
 class LPSerializer(serializers.ModelSerializer):
 
@@ -140,11 +151,12 @@ class LPSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = ObjectOutfitSerializer()
+    ip_object=IPSerializer(many=True)
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer')
+                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object')
         depth = 1
 
 
@@ -162,12 +174,37 @@ class LPCreateSerializer(serializers.ModelSerializer):
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
 
+
+
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
                   'comments', 'created_by', 'customer', 'created_at')
         depth = 1
 
+
+class LPEditSerializer(serializers.ModelSerializer):
+    tpo1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TPO.objects.all())
+    tpo2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TPO.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    point2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    id_outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+    type_line = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=LineType.objects.all())
+
+
+
+    class Meta:
+        model = Object
+        fields = (
+        'id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+        'comments', 'created_by', 'customer', 'created_at', 'ip_point')
+        depth = 1
 
 class ObjectSerializer(serializers.ModelSerializer):
     id_parent=ParentSerializer()

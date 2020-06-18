@@ -29,7 +29,7 @@ from ..circuits.models import Circuit
 from ..customer.models import Customer
 from ..form51.models import Form51
 from ..form_customer.models import Form_Customer
-from ..objects.models import Category
+from ..objects.models import Category, IP
 
 
 def tpo_list(request):
@@ -104,7 +104,8 @@ def lp_list(request):
 def lp_create(request):
     form = ObjectForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        instance=form.save()
+        IP.objects.create(object_id=instance, point_id=instance.point1, tpo_id=instance.tpo)
 
         return redirect('apps:opu:management:lp')
     return render(request, 'management/lp_form.html', {'form': form})

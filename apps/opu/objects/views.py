@@ -37,6 +37,8 @@ from apps.opu.form_customer.models import Form_Customer
 
 from apps.opu.customer.models import Customer
 
+from apps.opu.objects.serializers import LPEditSerializer
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -228,6 +230,8 @@ class IPEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
+
+
 @api_view(['DELETE', ])
 @permission_classes((IsAuthenticated,))
 def ip_delete_view(request, pk):
@@ -272,7 +276,7 @@ class LPCreateView(generics.CreateAPIView):
 class LPEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = Object.objects.all()
-    serializer_class = LPCreateSerializer
+    serializer_class = LPEditSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
