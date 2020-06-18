@@ -7,7 +7,7 @@ from django.http import Http404
 # Create your views here.
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404, CreateAPIView
+from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -16,7 +16,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, IPListSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
-    ObjectFilterSerializer
+    ObjectFilterSerializer, TraktListSerializer
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -100,21 +100,10 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
-def tpo_delete_view(request, tpo_id):
-    try:
-        tpo = TPO.objects.get(id=tpo_id)
-    except tpo.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "DELETE":
-        operation = tpo.delete()
-        data = {}
-        if operation:
-            data["success"] = "TPO успешно удален"
-        else:
-            data["failure"] = "TPO не удален"
-        return Response(data=data)
+class TPODeleteView(generics.DestroyAPIView):
+    queryset = Outfit.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 # Предприятия
@@ -148,22 +137,10 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
-def outfit_delete_view(request, outfit_id):
-    outfit = Outfit.objects.get(id=outfit_id)
-    try:
-        outfit
-    except outfit.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "DELETE":
-        operation = outfit.delete()
-        data = {}
-        if operation:
-            data["success"] = "Предприятие успешно удалено"
-        else:
-            data["failure"] = "Предприятие не удалено"
-        return Response(data=data)
+class OutfitDeleteView(generics.DestroyAPIView):
+    queryset = Outfit.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 # ИПы
@@ -191,63 +168,27 @@ class PointEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
-def point_delete_view(request, pk):
-    point = Point.objects.get(id=pk)
-    try:
-        point
-    except point.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "DELETE":
-        operation = point.delete()
-        data = {}
-        if operation:
-            data["success"] = "Point успешно удален"
-        else:
-            data["failure"] = "Point не удален"
-        return Response(data=data)
-
-
-class IPListView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = IP.objects.all()
-    lookup_field = 'pk'
-    serializer_class = IPListSerializer
-
-
-class IPCreateView(generics.CreateAPIView):
-    queryset = IP.objects.all()
-    serializer_class = IPCreateSerializer
-
-
-class IPEditView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'pk'
-    queryset = IP.objects.all()
-    serializer_class = IPCreateSerializer
+class PointDeleteView(generics.DestroyAPIView):
+    queryset = Point.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
 
+class IPCreateView(APIView):
+
+    def post(self, request, pk):
+        request.data["object_id"] = pk
+        serializer = IPCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
-def ip_delete_view(request, pk):
-    ip = IP.objects.get(id=pk)
-    try:
-        ip
-    except ip.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "DELETE":
-        operation = ip.delete()
-        data = {}
-        if operation:
-            data["success"] = "ИП успешно удален"
-        else:
-            data["failure"] = "ИП не удален"
-        return Response(data=data)
+class IPDeleteView(generics.DestroyAPIView):
+    queryset = IP.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 '''
@@ -284,22 +225,10 @@ class LPEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
-def lp_delete_view(request, pk):
-    lp = Object.objects.get(id=pk)
-    try:
-        lp
-    except lp.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "DELETE":
-        operation = lp.delete()
-        data = {}
-        if operation:
-            data["success"] = "Линия передачи успешно удалена"
-        else:
-            data["failure"] = "Линия передачи не удалена"
-        return Response(data=data)
+class LPDeleteView(generics.DestroyAPIView):
+    queryset = Object.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 class ObjectListView(APIView):
@@ -309,34 +238,29 @@ class ObjectListView(APIView):
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
 
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk):
-        lp = self.get_object(pk)
+        lp = get_object_or_404(Object, pk=pk)
         trakt = Object.objects.filter(id_parent=lp.pk)
-        data = ObjectSerializer(trakt, many=True).data
+        data = TraktListSerializer(trakt, many=True).data
         return Response(data)
 
 
+class ObjectDetailView(RetrieveDestroyAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Object.objects.all()
+    serializer_class = ObjectSerializer
+
 # ПГ ВГ ТГ ЧГ РГ
+
 
 class ObjectCreateView(APIView):
     """"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
     def post(self, request, pk):
-        parent = self.get_object(pk)
+        parent = get_object_or_404(Object, pk=pk)
         data = request.data
         name = data['name']
         serializer = ObjectCreateSerializer(data=data)
@@ -390,22 +314,6 @@ class ObjectCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ObjectDeleteView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
-    def delete(self, request, pk):
-        obj = self.get_object(pk)
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class ObjectEditView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -417,7 +325,7 @@ class ObjectEditView(APIView):
             raise Http404
 
     def put(self, request, pk):
-        obj = self.get_object(pk)
+        obj = get_object_or_404(Object, pk=pk)
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance=serializer.save()

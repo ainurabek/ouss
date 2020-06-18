@@ -151,7 +151,7 @@ class LPSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = ObjectOutfitSerializer()
-    ip_object=IPSerializer(many=True)
+    ip_object = IPSerializer(many=True)
 
     class Meta:
         model = Object
@@ -206,6 +206,7 @@ class LPEditSerializer(serializers.ModelSerializer):
         'comments', 'created_by', 'customer', 'created_at', 'ip_point')
         depth = 1
 
+
 class ObjectSerializer(serializers.ModelSerializer):
     id_parent=ParentSerializer()
     tpo1 = TPOSerializer()
@@ -217,11 +218,13 @@ class ObjectSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = OutfitListSerializer()
     type_line = TypeLineSerializer()
+    ip_object = IPSerializer(many=True)
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
-                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our')
+                  'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
+                  "ip_object")
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -260,6 +263,16 @@ class ObjectListSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     type_of_trakt = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt')
+
+
+class TraktListSerializer(serializers.ModelSerializer):
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    type_of_trakt = TypeOfTraktSerializer()
 
     class Meta:
         model = Object
