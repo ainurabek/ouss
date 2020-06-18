@@ -1,26 +1,19 @@
 from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse_lazy
-from django.views.generic import View, ListView, UpdateView
-from apps.opu.form53.forms import Form53Form
-from apps.opu.form53.models import Form53
+from django.views.generic import View, ListView
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
 from rest_framework import status
-from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-
-from apps.dispatching.models import Region
-
-from apps.opu.form53.serializers import Region53Serializer
-
+from rest_framework.generics import UpdateAPIView, DestroyAPIView
 from apps.opu.customer.models import Customer
 
 from apps.opu.form_customer.models import Form_Customer
 
 from apps.opu.form_customer.forms import FormCustForm
+from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
+    CircuitListSerializer
 
 
 class CustomerListView(ListView):
@@ -36,6 +29,7 @@ class MenuCustView(View):
     def get(self, request, pk):
         customer = Customer.objects.get(id=pk)
         return render(request,"management/form_cust_menu.html", {"customer": customer})
+
 
 class FilterFormCustView(View):
     """ Фильтрация Формы арендаторов  по арендаторам """
@@ -84,8 +78,64 @@ def form_cust_edit(request, pk):
         form=FormCustForm(instance=form_customer)
     return render(request, 'management/form_cust_create.html', {'form': form})
 
+
 def form_cust_delete(request, pk):
     customer_id=Form_Customer.objects.get(pk=pk).customer.id
     if pk:
         Form_Customer.objects.get(pk=pk).delete()
     return redirect("apps:opu:form_customer:filter_form_cust", customer_id)
+
+
+
+#API
+#######################################################################################################################
+
+
+class FormCustomerListAPIView(APIView):
+    """ Фильтрация Формы арендаторов  по арендаторам """
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        form_cust = Form_Customer.objects.filter(customer_id=pk)
+        serializer = FormCustomerSerializer(form_cust, many=True)
+        return Response(serializer.data)
+
+
+class FormCustomerCreateAPIView(APIView):
+    """Создания Формы арендаторов"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        circuit = Circuit.objects.get(pk=pk)
+        serializer = FormCustomerCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FormCustomerUpdateAPIView(UpdateAPIView):
+    """Создания Формы арендаторов"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Form_Customer.objects.all()
+    serializer_class = FormCustomerCreateSerializer
+
+
+class FormCustomerDeleteAPIView(DestroyAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Form_Customer.objects.all()
+
+
+class CircuitListAPIView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        circuit = Circuit.objects.filter(customer_id=pk)
+        serializer = CircuitListSerializer(circuit, many=True)
+        return Response(serializer.data)

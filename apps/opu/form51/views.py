@@ -171,7 +171,7 @@ class Form51DeleteAPIView(DestroyAPIView):
     """Удаления Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Form51
+    queryset = Form51.objects.all()
 
 
 class RegionListAPIView(ListAPIView):
