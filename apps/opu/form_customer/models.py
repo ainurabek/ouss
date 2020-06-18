@@ -6,15 +6,17 @@ from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Object
 from apps.opu.circuits.models import Circuit
 
+
 class Signalization(models.Model):
-   name=models.CharField('Название', max_length=100, blank=True, null=True)
+    name = models.CharField('Название', max_length=100, blank=True, null=True)
 
-   class Meta:
-      verbose_name = 'Сигнализация'
-      verbose_name_plural = 'Сигнализация'
+    class Meta:
+        verbose_name = 'Сигнализация'
+        verbose_name_plural = 'Сигнализация'
 
-   def __str__(self):
-      return self.name
+    def __str__(self):
+        return self.name
+
 
 class Form_Customer(models.Model):
     """Форма для арендаторов"""

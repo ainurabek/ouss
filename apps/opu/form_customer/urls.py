@@ -15,15 +15,15 @@ urlpatterns = [
     path("customer/circ/<int:pk>/", views.FilterCircuitView.as_view(), name="filter_form_circuit"),
     path("customer/<int:pk>/", views.FilterFormCustView.as_view(), name="filter_form_cust"),
     path("create/<int:pk>/", views.FormCustCircCreateView.as_view(), name="filter_form_cust_create"),
-
     path('edit/<int:pk>/', views.form_cust_edit, name='form_cust_edit'),
-
-
     path("delete/<int:pk>/", views.form_cust_delete, name="form_cust_delete"),
 
-
-
     ###API
+    path("api/<int:pk>/", views.FormCustomerListAPIView.as_view()),
+    path("api/circuit/<int:pk>/", views.CircuitListAPIView.as_view()),
+    path("api/create/<int:pk>/", views.FormCustomerCreateAPIView.as_view()),
+    path("api/update/<int:pk>/", views.FormCustomerUpdateAPIView.as_view()),
+    path("api/delete/<int:pk>/", views.FormCustomerDeleteAPIView.as_view()),
 
 
     path('', include(router.urls))
