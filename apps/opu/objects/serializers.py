@@ -138,11 +138,15 @@ class IPSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
-
-
-
 class LPSerializer(serializers.ModelSerializer):
+    point1 = PointList()
+    point2 = PointList()
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2')
 
+
+class LPDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     type_line = TypeLineSerializer()
