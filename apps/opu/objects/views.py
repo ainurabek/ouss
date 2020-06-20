@@ -23,6 +23,8 @@ from apps.opu.form51.models import Form51
 from apps.opu.form_customer.models import Form_Customer
 from apps.opu.objects.serializers import LPEditSerializer
 
+from apps.opu.objects.serializers import LPDetailSerializer
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -186,6 +188,12 @@ class LPListView(viewsets.ModelViewSet):
     queryset = Object.objects.filter(id_parent=None)
     lookup_field = 'pk'
     serializer_class = LPSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LPSerializer
+        elif self.action == "retrieve":
+            return LPDetailSerializer
 
 
 class LPCreateView(generics.CreateAPIView):

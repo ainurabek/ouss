@@ -66,7 +66,7 @@ class ProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('id', 'user', 'position','first_name', 'last_name', 'middle_name', 'online',
-                  'gender', 'phone_number')
+                  'gender', 'phone_number', 'start_at')
         depth = 1
 
 

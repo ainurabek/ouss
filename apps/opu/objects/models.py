@@ -171,13 +171,6 @@ class Object(models.Model):
 	def __str__(self):
 		return str(self.name)
 
-	def get_ips(self):
-		if self.point1:
-			return self.point1.get(self.point1.point)
-		elif self.point2:
-			return self.point2.get(self.point2.point)
-
-
 
 class IP(models.Model):
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True, related_name='ip_point')

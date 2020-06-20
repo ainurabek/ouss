@@ -138,11 +138,15 @@ class IPSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
-
-
-
 class LPSerializer(serializers.ModelSerializer):
+    point1 = PointList()
+    point2 = PointList()
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'point1', 'point2')
 
+
+class LPDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     type_line = TypeLineSerializer()
@@ -156,7 +160,7 @@ class LPSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object')
+                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -179,7 +183,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments', 'created_by', 'customer', 'created_at')
+                  'comments', 'created_by', 'customer', 'created_at', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -203,7 +207,7 @@ class LPEditSerializer(serializers.ModelSerializer):
         model = Object
         fields = (
         'id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'created_by', 'customer', 'created_at', 'ip_point')
+        'comments', 'created_by', 'customer', 'created_at', 'ip_point', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -224,7 +228,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object")
+                  "ip_object", 'COreceive', 'COdeliver')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -245,7 +249,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt',
                   'system', 'amount_channels', 'type_line', 'our', 'num',
-                  'transit', 'transit2', 'category', 'comments', 'customer')
+                  'transit', 'transit2', 'category', 'comments', 'customer', 'COreceive', 'COdeliver')
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):
