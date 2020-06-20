@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import get_user_model, login, logout, authenticate
 from knox.views import LoginView as KnoxLoginView
 from django.contrib.auth.signals import user_logged_in, user_logged_out
@@ -50,6 +52,9 @@ class LoginAPI(KnoxLoginView):
 
     def post(self, request, format=None):
         serializer = LoginUserSerializer(data=request.data)
+        # username = User.objects.get(username=request.data["username"])
+        # Profile.objects.filter(user=username).update(start_at=datetime.datetime.now())
+
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         login(request, user)
@@ -102,6 +107,8 @@ class ProfileListAPIView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     lookup_field = 'pk'
     serializer_class = ProfileListSerializer
+
+
 
 
 '''

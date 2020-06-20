@@ -17,6 +17,7 @@ router.register('subdepartments', SubdepartmentKTAPIView)
 
 
 urlpatterns = [
+
     url(r'^register/$', Register.as_view()),
     url(r'^login/$', LoginAPI.as_view()),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
