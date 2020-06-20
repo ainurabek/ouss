@@ -162,8 +162,6 @@ class Profile(models.Model):
                               choices=GENDER_CHOICES)
     phone_number = models.CharField('Рабочий номер телефона', max_length=50, null=True, blank=True)
 
-
-
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
@@ -172,12 +170,22 @@ class Profile(models.Model):
         return '%s %s' % (self.first_name, self.last_name)
 
 
+class Log(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+    start_at = models.DateTimeField(blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Журнал'
+        verbose_name_plural = 'Журнал'
+
+    def __str__(self):
+        return f"{self.user.first_name}"
+
+
 def createProfile(sender, **kwargs):
     if kwargs['created']:
         user_profile = Profile.objects.created(user=kwargs['instance'])
 
     post_save.connect(createProfile, sender=User)
-
-
-
-

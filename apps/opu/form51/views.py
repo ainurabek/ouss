@@ -187,5 +187,5 @@ class ReserveDetailAPIView(APIView):
 
     def get(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
-        serializer = Form51ReserveSerializer(form51, many=True)
+        serializer = Form51ReserveSerializer(form51)
         return Response(serializer.data)

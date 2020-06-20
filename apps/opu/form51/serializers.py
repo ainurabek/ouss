@@ -59,7 +59,8 @@ class RegionSerializer(serializers.ModelSerializer):
 
 
 class ObjectReserveSerializer(serializers.ModelSerializer):
-
+    transit = TransitSerializer(many=True)
+    transit2 = TransitSerializer(many=True)
     class Meta:
         model = Object
         fields = ("name", "transit", "transit2", "category")
@@ -67,9 +68,9 @@ class ObjectReserveSerializer(serializers.ModelSerializer):
 
 class Form51ReserveSerializer(serializers.ModelSerializer):
     """ Резерв """
-    object_reserve = ObjectReserveSerializer()
+    reserve_object = ObjectReserveSerializer(many=True)
 
     class Meta:
         model = Form51
-        fields = ("id", "object_reserve",)
+        fields = ("id", "reserve_object")
         depth = 1

@@ -1,4 +1,7 @@
+import datetime
+from django.utils import timezone
 from django.contrib.auth import get_user_model, login, logout, authenticate
+from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from rest_framework import permissions, viewsets, status, generics
@@ -9,7 +12,8 @@ from knox.auth import TokenAuthentication
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
     DepartmentSerializer, SubdepartmentSerializer
 from django.http.response import HttpResponse, JsonResponse
-from .models import Profile, DepartmentKT, SubdepartmentKT
+from .models import Profile, DepartmentKT, SubdepartmentKT, Log
+
 User = get_user_model()
 
 class Register(APIView):
@@ -52,6 +56,12 @@ class LoginAPI(KnoxLoginView):
         serializer = LoginUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        profile = Profile.objects.get(user__username=user)
+        if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
+            pass
+        else:
+            end_date = timezone.now()+datetime.timedelta(days=1)
+            Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
         login(request, user)
         return super().post(request, format=None)
 

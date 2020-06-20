@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-from .models import Profile, Role, DepartmentKT, SubdepartmentKT
+from .models import Profile, Role, DepartmentKT, SubdepartmentKT, Log
 from .forms import UserAdminChangeForm, UserAdminCreationForm
 
 
@@ -79,6 +79,10 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'last_name', 'first_name', 'position')
     list_filter = ('last_name',)
     search_fields = ('first_name', 'last_name',  )
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'start_at', 'end_time')
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(DepartmentKT)
