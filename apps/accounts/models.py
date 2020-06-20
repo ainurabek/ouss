@@ -161,7 +161,7 @@ class Profile(models.Model):
     gender = models.CharField('Пол', max_length=10, blank=True, null=True,
                               choices=GENDER_CHOICES)
     phone_number = models.CharField('Рабочий номер телефона', max_length=50, null=True, blank=True)
-    start_at = models.DateTimeField(null=True, blank=True)
+
 
     class Meta:
         verbose_name = 'Профиль'
@@ -174,7 +174,6 @@ class Profile(models.Model):
 class Log(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
     start_at = models.DateTimeField(blank=True, null=True)
-    date = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:

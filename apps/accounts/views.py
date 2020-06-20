@@ -62,11 +62,11 @@ class LoginAPI(KnoxLoginView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         profile = Profile.objects.get(user__username=user)
-        if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
+        if Log.objects.filter(Q(user=profile) & Q(end_time__gt=timezone.now())).exists():
             pass
         else:
             end_date = timezone.now()+datetime.timedelta(days=1)
-            Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
+            Log.objects.create(user=profile, start_at=timezone.now(), end_time=end_date)
         login(request, user)
         return super().post(request, format=None)
 
