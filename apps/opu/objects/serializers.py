@@ -139,11 +139,13 @@ class IPSerializer(serializers.ModelSerializer):
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
 class LPSerializer(serializers.ModelSerializer):
+    transit = TransitSerializer(many=True)
+    transit2 = TransitSerializer(many=True)
     point1 = PointList()
     point2 = PointList()
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2')
+        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2',)
 
 
 class LPDetailSerializer(serializers.ModelSerializer):

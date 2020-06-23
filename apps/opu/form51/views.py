@@ -8,9 +8,9 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.urls import reverse_lazy
 from django.views.generic import View, ListView, UpdateView
 
-from apps.dispatching.models import Region
+
 from apps.opu.form51.forms import Form51Form
-from apps.opu.form51.models import Form51
+from apps.opu.form51.models import Form51, Region
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
     Form51ReserveSerializer
 from apps.opu.objects.models import Object

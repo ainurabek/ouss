@@ -1,0 +1,101 @@
+{% extends 'dispatching/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800"><a href="{% url 'apps:dispatching:event_list' journal.id %}">Журнал заявок</a></h1>
+
+<!-- DataTales Example -->
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+
+
+
+        <div class="row">
+            <div class="container">
+              <div class="row">
+                  <table class="table table-bordered" style="width: 350px" >
+
+                      <thead>
+                        <tr>
+                            <th>Выбор по</th>
+                            <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                    {% for choice in choices %}
+                      <tr>
+                          <td>{{choice.name}}</td>
+                          <td><button class="btn"><a href="{% url 'apps:dispatching:event_create' choice.id %}"><i class="fas fa-plus-square"></i>
+                  Создать новое событие</a></button>
+                          </td>
+
+                      </tr>
+                    {% endfor %}
+                      </tbody>
+
+                  </table>
+                <div class="col-sm">
+                </div>
+                <div class="col-sm"><button class="btn"><a href=""><i class="far fa-file-excel"></i>
+                  Распечатать</a>
+                 </button>
+                </div>
+                <div class="col-sm"><button class="btn"><a href=""><i class="fas fa-search"></i>
+                  Поиск заявки</a>
+                 </button>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" style="width: 1500px" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Где</th>
+                    <th>Индекс</th>
+                    <th>Начало</th>
+                    <th>Конец</th>
+                    <th>Предприятие</th>
+                    <th></th>
+
+                </tr>
+              </thead>
+              <tbody>
+                  {% for event in events %}
+                      <tr>
+                          <td>{{event.id}}</td>
+                          {% if event.choice.id == 1 %}
+                          <td><a href="{% url 'apps:dispatching:event_detail' event.id %}" class="btn btn-light btn-flat btn-block">{{event.ips.object_id.name}}</a></td>
+                          {% elif event.choice.id == 2 %}
+                          <td><a href="{% url 'apps:dispatching:event_detail' event.id %}" class="btn btn-light btn-flat btn-block">{{event.object.name}}</a></td>
+                          {% elif event.choice.id == 3 %}
+                          <td><a href="{% url 'apps:dispatching:event_detail' event.id %}" class="btn btn-light btn-flat btn-block">{{event.circuit.name}}</a></td>
+                          {% endif %}
+                          <td>{{event.index.index}}</td>
+                          <td>{{event.created_at}}</td>
+                          <td>{{event.date_to}}</td>
+
+                          <td>{{event.responsible_outfit.adding}}</td>
+
+                        <td><button class="btn"><a href="{% url 'apps:dispatching:event_delete' event.id %}"><i class="fa fa-trash"></i></a>
+                        </button>
+
+                      </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

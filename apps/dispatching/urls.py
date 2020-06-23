@@ -6,15 +6,12 @@ from . import views
 app_name = 'dispatching'
 
 urlpatterns = [
-    path('', views.RequestList.as_view(), name='request_list'),
-    path('<int:pk>/', views.list_of_filtered, name='list_of_filtered'),
-    path('request/create/', views.request_create, name='request_create'),
-    path('request/<int:request_id>/edit/', views.request_edit, name='request_edit'),
-    path('request/delete/<int:pk>/', views.request_delete, name='request_delete'),
-    path('status/list/', views.status_list, name='status_list'),
-    path('create/', StatementCreateView.as_view(), name='statement_create'),
-    path('shutdown/create/', ShutdownCreateView.as_view(), name='shutdown_create'),
-    path('shutdown/list/', views.shutdown_list, name='shutdown_list'),
-    path('shutdown/delete/<int:pk>/', views.shutdown_delete, name='shutdown_delete'),
-    path('shutdown/update/<int:pk>/', ShutdownUpdateView.as_view(), name='shutdown_update'),
+    path('', views.JournalList.as_view(), name='types_journals'),
+    path('journal/<int:journal_pk>/', views.event_list, name='event_list'),
+    path('event/create/<int:pk>/', views.EventCreateView.as_view(), name='event_create'),
+    path('event/detail/<int:event_id>/', views.event_detail, name='event_detail'),
+    path('event/<int:event_id>/edit/', views.event_edit, name='event_edit'),
+    path('event/delete/<int:pk>/', views.event_delete, name='event_delete'),
+
+
 ]

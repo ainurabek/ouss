@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.dispatching.models import Region
+from apps.opu.form51.models import Region
 from apps.opu.form_customer.models import Form_Customer, Signalization
 from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import TransitSerializer

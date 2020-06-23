@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.dispatching.models import Region
+from apps.opu.form51.models import Region
 from apps.opu.customer.models import Customer
 from apps.opu.customer.serializers import CustomerSerializer
 from apps.opu.form51.models import Form51

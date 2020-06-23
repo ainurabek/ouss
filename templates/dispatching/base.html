@@ -35,7 +35,7 @@
       <img src="{% static 'img/logo2.gif' %}" style="height: 140px; width: 225px; margin-left: 0px">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'apps:dispatching:request_list' %}">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'apps:dispatching:types_journals' %}">
         <div class="sidebar-brand-icon rotate-n-15">
 
         </div>
@@ -47,16 +47,12 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:dispatching:request_list' %}">
+        <a class="nav-link" href="{% url 'apps:dispatching:types_journals' %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Журнал заявок</span></a>
       </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="{% url 'apps:dispatching:shutdown_list' %}">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Журнал отключений</span></a>
-      </li>
+
 
       <li class="nav-item active">
         <a class="nav-link" href="#">

@@ -12,7 +12,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
-from apps.dispatching.models import Region
+from apps.opu.form51.models import Region
 
 from apps.opu.form53.serializers import Region53Serializer
 

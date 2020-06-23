@@ -5,6 +5,16 @@ from apps.accounts.models import Profile
 from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Object
 
+class Region(models.Model):
+    name = models.CharField(max_length=150)
+    slug = models.SlugField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Регионы'
+        verbose_name_plural = 'Регион'
 
 class Form51(models.Model):
     """Форма 5.1"""
