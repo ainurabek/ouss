@@ -162,7 +162,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver')
+                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver')
         depth = 1
 
 
