@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt
+from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category
 from ..circuits.models import Circuit
 from rest_framework.fields import  ReadOnlyField
 
@@ -161,16 +161,18 @@ class LPDetailSerializer(serializers.ModelSerializer):
     id_outfit = ObjectOutfitSerializer()
     ip_object = IPSerializer(many=True)
     category = CategorySerializer()
+    our = TypeOfLocationSerializer()
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver')
+                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver', 'our')
         depth = 1
 
 
 class LPCreateSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
@@ -183,6 +185,8 @@ class LPCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Outfit.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
 
 
 
@@ -206,6 +210,10 @@ class LPEditSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Outfit.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
 
 
 
@@ -228,6 +236,8 @@ class ObjectSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     type_line = TypeLineSerializer()
     ip_object = IPSerializer(many=True)
+    category = CategorySerializer()
+    our = TypeOfLocationSerializer()
 
     class Meta:
         model = Object
@@ -237,6 +247,10 @@ class ObjectSerializer(serializers.ModelSerializer):
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
 
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
@@ -248,6 +262,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
          read_only=False, queryset=Point.objects.all())
     type_of_trakt = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TypeOfTrakt.objects.all())
+
 
     class Meta:
         model = Object
