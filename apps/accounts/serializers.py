@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 
-from .models import Profile, DepartmentKT, SubdepartmentKT
+from .models import Profile, DepartmentKT, SubdepartmentKT, Log
 
 User = get_user_model()
 
@@ -70,7 +70,18 @@ class ProfileListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class UserLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ("first_name", "last_name", "middle_name")
 
+
+class LogSerializer(serializers.ModelSerializer):
+    user = UserLogSerializer()
+
+    class Meta:
+        model = Log
+        fields = ("user", "start_at", "end_time")
 
 
 

@@ -12,6 +12,7 @@ urlpatterns = [
     path('event/detail/<int:event_id>/', views.event_detail, name='event_detail'),
     path('event/<int:event_id>/edit/', views.event_edit, name='event_edit'),
     path('event/delete/<int:pk>/', views.event_delete, name='event_delete'),
+    path('api/list/', views.EventListAPIView.as_view()),
 
 
 ]

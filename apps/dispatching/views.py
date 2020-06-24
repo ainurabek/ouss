@@ -1,5 +1,11 @@
 import datetime
+
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
+
+from .serializers import EventListSerializer
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object
 
@@ -82,3 +88,12 @@ def event_delete(request, pk):
     return redirect('apps:dispatching:event_list')
 
 
+# #####################################################################################################################
+
+
+class EventListAPIView(ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventListSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
+              'reason', 'index', 'responsible_outfit', 'send_from')
