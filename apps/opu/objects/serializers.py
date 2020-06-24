@@ -4,6 +4,8 @@ from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, Ty
 from ..circuits.models import Circuit
 from rest_framework.fields import  ReadOnlyField
 
+from ..circuits.serializers import CategorySerializer
+
 User = get_user_model()
 
 
@@ -158,6 +160,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = ObjectOutfitSerializer()
     ip_object = IPSerializer(many=True)
+    category = CategorySerializer()
 
     class Meta:
         model = Object
@@ -167,6 +170,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
 
 
 class LPCreateSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
@@ -184,8 +188,8 @@ class LPCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments', 'created_by', 'customer', 'created_at', 'COreceive', 'COdeliver')
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+                  'comments',  'customer', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -207,9 +211,8 @@ class LPEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = (
-        'id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'created_by', 'customer', 'created_at', 'ip_point', 'COreceive', 'COdeliver')
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+        'comments', 'customer', 'COreceive', 'COdeliver')
         depth = 1
 
 

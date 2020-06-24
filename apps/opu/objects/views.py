@@ -125,6 +125,7 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
 
 class OutfitDeleteView(generics.DestroyAPIView):
     queryset = Outfit.objects.all()
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
