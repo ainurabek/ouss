@@ -268,7 +268,7 @@ class ObjectCreateView(APIView):
             elif parent.type_of_trakt.name == 'РГ':
                 type_obj = TypeOfTrakt.objects.get(name='ЧГ')
 
-            request.data["type_of_trakt"] = type_obj.pk
+                request.data["type_of_trakt"] = type_obj.pk
 
         if serializer.is_valid():
             instance=serializer.save(

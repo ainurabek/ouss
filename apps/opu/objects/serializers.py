@@ -274,11 +274,10 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Customer.objects.all())
     system = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=System.objects.all())
+        read_only=False, allow_null=True, queryset=System.objects.all())
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
-    id_parent = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Object.objects.all())
+
 
 
     class Meta:

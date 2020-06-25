@@ -45,7 +45,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
     object = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Object.objects.all())
     circuit = serializers.PrimaryKeyRelatedField(
-        read_only=False,allow_null=True,  queryset=Circuit.objects.all())
+        read_only=False, allow_null=True,  queryset=Circuit.objects.all())
     ips = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=IP.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
