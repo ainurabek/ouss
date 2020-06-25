@@ -287,7 +287,6 @@ class ObjectCreateView(APIView):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
-
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
@@ -297,7 +296,6 @@ class ObjectCreateView(APIView):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
                                                      id_object=Object.objects.get(pk=instance.id),
                                                      num_circuit = x,
-
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
                                                      point2=Point.objects.get(id=instance.point2.id),
@@ -322,14 +320,24 @@ class ObjectEditView(APIView):
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance=serializer.save()
-            circuits = Circuit.objects.filter(id_object=instance.id)
-            all = Circuit.objects.filter(id_object=instance.id).count()+1
+            if obj.name != instance.name:
+                circuits = Circuit.objects.filter(id_object=instance.id)
+                all = Circuit.objects.filter(id_object=instance.id).count()+1
 
-            for circuit in circuits:
-                all -= 1
-                circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(all),
-                                                                          point1=instance.point1.id,
-                                                                          point2=instance.point2.id)
+                for circuit in circuits:
+                    all -= 1
+                    circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(all))
+                                                                              # point1=instance.point1.id,
+                                                                              # point2=instance.point2.id)
+            elif obj.point1 != instance.point1 or obj.point2 != instance.point2:
+                circuits = Circuit.objects.filter(id_object=instance.id)
+                all = Circuit.objects.filter(id_object=instance.id).count() + 1
+
+                for circuit in circuits:
+                    all -= 1
+                    circuit.name = Circuit.objects.filter(pk=circuit.id).update(
+                        point1=instance.point1.id,
+                        point2=instance.point2.id)
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

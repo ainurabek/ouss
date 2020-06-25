@@ -96,6 +96,21 @@ def event_delete(request, pk):
 
 #API
 
+class EventListAPIView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Event.objects.all()
+    lookup_field = 'pk'
+    serializer_class = EventListSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
+                        'reason', 'index', 'responsible_outfit', 'send_from')
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return EventListSerializer
+        elif self.action == "retrieve":
+            return EventDetailSerializer
 
 class EventCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -124,21 +139,4 @@ class EventDeleteAPIView(DestroyAPIView):
     queryset = Event.objects.all()
     lookup_field = 'pk'
 
-
-
-
-class EventListAPIView(ListAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventListSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index', 'responsible_outfit', 'send_from')
-
-class EventViewSet(viewsets.ModelViewSet):
-    """
-    A viewset for viewing and editing user instances.
-    """
-    serializer_class = EventDetailSerializer
-    queryset = Event.objects.all()
-    lookup_field = 'pk'
 

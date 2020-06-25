@@ -1,9 +1,16 @@
 from rest_framework import serializers
-
-
 from apps.dispatching.models import Event
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import Object, IP
+from apps.opu.customer.models import Customer
+from apps.opu.customer.serializers import CustomerSerializer
+from apps.opu.objects.models import Object, Point
+from apps.opu.circuits.models import Circuit
+from apps.opu.circuits.serializers import CircuitList
+from apps.dispatching.models import Event
+from apps.dispatching.models import TypeOfJournal, Choice, Index, Reason
+from apps.opu.objects.models import IP, Outfit
+from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer, IPListSerializer
 
 
 class EventObjectSerializer(serializers.ModelSerializer):
@@ -42,15 +49,7 @@ class EventListSerializer(serializers.ModelSerializer):
         model = Event
         fields = ("object", "ips", "circuit", "index", "date_from", "date_to", )
 
-from apps.opu.customer.models import Customer
-from apps.opu.customer.serializers import CustomerSerializer
-from apps.opu.objects.models import Object, Point
-from apps.opu.circuits.models import Circuit
-from apps.opu.circuits.serializers import CircuitList
-from apps.dispatching.models import Event
-from apps.dispatching.models import TypeOfJournal, Choice, Index, Reason
-from apps.opu.objects.models import IP, Outfit
-from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer, IPListSerializer
+
 
 
 class TypeJournalSerializer(serializers.ModelSerializer):
@@ -108,9 +107,9 @@ class EventDetailSerializer(serializers.ModelSerializer):
     index=IndexSerializer()
     responsible_outfit =OutfitListSerializer()
     send_from=OutfitListSerializer()
-    ips = IPListSerializer()
-    object = ObjectSerializer()
-    circuit=CircuitList()
+    ips = IPSSerializer()
+    object = EventObjectSerializer()
+    circuit=EventCircuitSerializer()
     customer = CustomerSerializer()
 
 
