@@ -1,8 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt
+from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, System
 from ..circuits.models import Circuit
 from rest_framework.fields import  ReadOnlyField
+
+from ..circuits.serializers import CategorySerializer
+from ..customer.models import Customer
+from ..customer.serializers import CustomerSerializer
 
 User = get_user_model()
 
@@ -64,7 +68,7 @@ class OutfitCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Outfit
-        fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
+        fields = ('outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit')
         depth = 1
 
 
@@ -85,13 +89,14 @@ class PointCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Point
-        fields = ('id', 'point', 'name', 'id_outfit', 'tpo')
+        fields = ('point', 'name', 'id_outfit', 'tpo')
         depth = 1
 
 
 class IPListSerializer(serializers.ModelSerializer):
     tpo_id = TPOSerializer()
     point_id = PointListSerializer()
+
 
     class Meta:
         model = IP
@@ -158,15 +163,20 @@ class LPDetailSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = ObjectOutfitSerializer()
     ip_object = IPSerializer(many=True)
+    category = CategorySerializer()
+    our = TypeOfLocationSerializer()
+    customer = CustomerSerializer()
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver')
+                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments', 'customer', 'ip_object', 'COreceive', 'COdeliver', 'our')
         depth = 1
 
 
 class LPCreateSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
@@ -179,13 +189,17 @@ class LPCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Outfit.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
+    customer=serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Customer.objects.all())
 
 
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments', 'created_by', 'customer', 'created_at', 'COreceive', 'COdeliver')
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+                  'comments',  'customer', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -202,14 +216,19 @@ class LPEditSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Outfit.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
+    customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Customer.objects.all())
 
 
 
     class Meta:
         model = Object
-        fields = (
-        'id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'created_by', 'customer', 'created_at', 'ip_point', 'COreceive', 'COdeliver')
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+        'comments', 'customer', 'COreceive', 'COdeliver')
         depth = 1
 
 
@@ -225,6 +244,9 @@ class ObjectSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     type_line = TypeLineSerializer()
     ip_object = IPSerializer(many=True)
+    category = CategorySerializer()
+    our = TypeOfLocationSerializer()
+    customer = CustomerSerializer()
 
     class Meta:
         model = Object
@@ -234,6 +256,10 @@ class ObjectSerializer(serializers.ModelSerializer):
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeOfLocation.objects.all())
 
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
@@ -245,12 +271,20 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
          read_only=False, queryset=Point.objects.all())
     type_of_trakt = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TypeOfTrakt.objects.all())
+    customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Customer.objects.all())
+    system = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=System.objects.all())
+    id_outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+
+
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt',
-                  'system', 'amount_channels', 'type_line', 'our', 'num',
+                  'system', 'amount_channels', 'our', 'num',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'COreceive', 'COdeliver')
 
 
@@ -259,6 +293,7 @@ class SelectObjectSerializer(serializers.ModelSerializer):
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = Object
