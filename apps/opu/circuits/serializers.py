@@ -74,7 +74,6 @@ class CircuitList(serializers.ModelSerializer):
     customer = CustomerSerializer()
     mode = ModeCircSerializer()
     in_out=InOutSerializer()
-
     measure = MeasureCircSerializer()
     category = CategorySerializer()
     class Meta:
@@ -84,11 +83,23 @@ class CircuitList(serializers.ModelSerializer):
                    'transit', 'transit2', 'in_out', 'first', 'point1', 'point2',
                   'customer', 'mode', 'type_com')
 
-
-
-
-
 class CircuitEdit(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Category.objects.all())
+    measure = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Measure.objects.all())
+    in_out = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=InOut.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    point2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Customer.objects.all())
+    mode = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Mode.objects.all())
+    type_com = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=TypeCom.objects.all())
     class Meta:
         model = Circuit
         fields = ('number', 'type_using', 'category', 'num_order',
@@ -113,8 +124,6 @@ class CircuitEdit(serializers.ModelSerializer):
         instance.customer = validated_data.get('customer', instance.customer)
         instance.mode = validated_data.get('mode', instance.mode)
         instance.type_com = validated_data.get('type_com', instance.type_com)
-
-
         instance.category = validated_data.get('category', instance.category)
         instance.point1 = validated_data.get('point1', instance.point1)
         instance.point2 = validated_data.get('point2', instance.point2)
