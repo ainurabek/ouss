@@ -1,7 +1,17 @@
 import datetime
+
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
+
+from .serializers import EventListSerializer
+from ..opu.circuits.models import Circuit
+from ..opu.objects.models import Object
+
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets
+
 now = datetime.datetime.now()
 from django.views.generic import View
 from django.shortcuts import render, redirect, get_object_or_404
@@ -115,6 +125,15 @@ class EventDeleteAPIView(DestroyAPIView):
     lookup_field = 'pk'
 
 
+
+
+class EventListAPIView(ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventListSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
+              'reason', 'index', 'responsible_outfit', 'send_from')
+
 class EventViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing and editing user instances.
@@ -122,3 +141,4 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventDetailSerializer
     queryset = Event.objects.all()
     lookup_field = 'pk'
+

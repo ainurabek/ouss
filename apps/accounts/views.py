@@ -7,12 +7,13 @@ from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from rest_framework import permissions, viewsets, status, generics
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
-    DepartmentSerializer, SubdepartmentSerializer
+    DepartmentSerializer, SubdepartmentSerializer, LogSerializer
 from django.http.response import HttpResponse, JsonResponse
 from .models import Profile, DepartmentKT, SubdepartmentKT, Log
 
@@ -62,11 +63,11 @@ class LoginAPI(KnoxLoginView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         profile = Profile.objects.get(user__username=user)
-        if Log.objects.filter(Q(user=profile) & Q(end_time__gt=timezone.now())).exists():
+        if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
             pass
         else:
             end_date = timezone.now()+datetime.timedelta(days=1)
-            Log.objects.create(user=profile, start_at=timezone.now(), end_time=end_date)
+            Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
         login(request, user)
         return super().post(request, format=None)
 
@@ -87,6 +88,8 @@ class LogoutView(APIView):
         request._auth.delete()
         user_logged_out.send(sender=request.user.__class__,
                              request=request, user=request.user)
+        if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
+            Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
         return HttpResponse("Пользователь вышел из системы", None, status=status.HTTP_204_NO_CONTENT)
 
 '''
@@ -166,6 +169,16 @@ def subdepartment_view(request, department_id, subdepartment_id):
     else:
         return JsonResponse({'success': 'Success'}, status=202)
 
+
+class LogListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LogSerializer
+
+    def get_queryset(self):
+        subdep = SubdepartmentKT.objects.get(name="opu")
+        queryset = Log.objects.filter(user__user__subdepartment=subdep)
+        return queryset
 
 
 

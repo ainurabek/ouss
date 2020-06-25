@@ -87,6 +87,6 @@ class Event(models.Model):
         verbose_name_plural = 'Журнал событий'
 
     def __str__(self):
-        return self.type_journal.name
+        return str(self.id)
 
 
