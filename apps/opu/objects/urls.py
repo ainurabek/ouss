@@ -25,22 +25,22 @@ urlpatterns = [
 
     path('tpo/create/', TPOCreateView.as_view(), name='tpo_create'),
     url(r'^tpo/edit/(?P<pk>\S+)/$', TPOEditView.as_view()),
-    url(r'^tpo/delete/(?P<tpo_id>\S+)/$', views.TPODeleteView.as_view(), name='tpo_delete'),
+    # url(r'^tpo/delete/(?P<tpo_id>\S+)/$', views.TPODeleteView.as_view(), name='tpo_delete'),
 
     path('outfit/create/', OutfitCreateView.as_view(), name='outfit_create'),
     url(r'^outfit/edit/(?P<pk>\S+)/$', OutfitEditView.as_view()),
-    url(r'^outfit/delete/(?P<outfit_id>\S+)/$', views.OutfitDeleteView.as_view(), name='outfit_delete'),
+    # url(r'^outfit/delete/(?P<outfit_id>\S+)/$', views.OutfitDeleteView.as_view(), name='outfit_delete'),
 
     path('point/create/', PointCreateView.as_view(), name='point_create'),
     url(r'^point/edit/(?P<pk>\S+)/$', PointEditView.as_view()),
-    url(r'^point/delete/(?P<pk>\S+)/$', views.PointDeleteView.as_view(), name='point_delete'),
+    # url(r'^point/delete/(?P<pk>\S+)/$', views.PointDeleteView.as_view(), name='point_delete'),
 
     url(r'^ip/create/(?P<pk>\S+)/$', IPCreateView.as_view()),
     url(r'^ip/delete/(?P<pk>\S+)/$', views.IPDeleteView().as_view(), name='ip_delete'),
 
     path('lp/create/', LPCreateView.as_view(), name='lp_create'),
     url(r'^lp/edit/(?P<pk>\S+)/$', LPEditView.as_view(), name='lp_edit'),
-    url(r'^lp/delete/(?P<pk>\S+)/$', views.LPDeleteView.as_view(), name='lp_delete'),
+    # url(r'^lp/delete/(?P<pk>\S+)/$', views.LPDeleteView.as_view(), name='lp_delete'),
 
     path('trakt/<int:pk>/', ObjectListView.as_view(), name='trakt_list'),
     path('trakt/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),

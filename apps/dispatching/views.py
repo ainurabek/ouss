@@ -1,18 +1,21 @@
 import datetime
 from rest_framework.views import APIView
-from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object
-
+from .serializers import EventCreateSerializer, EventDetailSerializer
+from rest_framework import viewsets
 now = datetime.datetime.now()
 from django.views.generic import View
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView
+from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
-from django.urls import reverse_lazy
 from .forms import EventForm
 from .models import Event, TypeOfJournal, Index, Choice
+from rest_framework.response import Response
+from rest_framework import status
 from django.http import HttpResponse, HttpResponseRedirect
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from knox.auth import TokenAuthentication
 
 class JournalList(ListView):
     """Список заявок"""
@@ -81,4 +84,41 @@ def event_delete(request, pk):
     Event.objects.get(pk=pk).delete()
     return redirect('apps:dispatching:event_list')
 
+#API
 
+
+class EventCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Event"""
+    def post(self, request, pk):
+        type_journal = TypeOfJournal.objects.get(pk=pk)
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(type_journal=type_journal, created_by=self.request.user.profile, created_at=now)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EventUpdateAPIView(UpdateAPIView):
+    """Редактирования event"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = EventCreateSerializer
+
+class EventDeleteAPIView(DestroyAPIView):
+    """Удаления event"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    lookup_field = 'pk'
+
+
+class EventViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing user instances.
+    """
+    serializer_class = EventDetailSerializer
+    queryset = Event.objects.all()
+    lookup_field = 'pk'

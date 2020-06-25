@@ -86,10 +86,10 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-class TPODeleteView(generics.DestroyAPIView):
-    queryset = Outfit.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+# class TPODeleteView(generics.DestroyAPIView):
+#     queryset = Outfit.objects.all()
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
 
 
 # Предприятия
@@ -123,11 +123,11 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-class OutfitDeleteView(generics.DestroyAPIView):
-    queryset = Outfit.objects.all()
-
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+# class OutfitDeleteView(generics.DestroyAPIView):
+#     queryset = Outfit.objects.all()
+#
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
 
 
 # ИПы
@@ -155,10 +155,10 @@ class PointEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
-class PointDeleteView(generics.DestroyAPIView):
-    queryset = Point.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+# class PointDeleteView(generics.DestroyAPIView):
+#     queryset = Point.objects.all()
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
 
 
 class IPCreateView(APIView):
@@ -218,10 +218,10 @@ class LPEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-class LPDeleteView(generics.DestroyAPIView):
-    queryset = Object.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+# class LPDeleteView(generics.DestroyAPIView):
+#     queryset = Object.objects.all()
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
 
 
 class ObjectListView(APIView):

@@ -6,6 +6,8 @@ from apps.opu.form51.models import Form51, Region
 from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import TransitSerializer
 
+from apps.opu.circuits.serializers import CategorySerializer
+
 
 class PointForm51Serializer(serializers.ModelSerializer):
 
@@ -31,6 +33,7 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True)
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
+    category = CategorySerializer()
 
     class Meta:
         model = Object
@@ -60,6 +63,7 @@ class RegionSerializer(serializers.ModelSerializer):
 class ObjectReserveSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True)
     transit2 = TransitSerializer(many=True)
+    category = CategorySerializer()
     class Meta:
         model = Object
         fields = ("name", "transit", "transit2", "category")

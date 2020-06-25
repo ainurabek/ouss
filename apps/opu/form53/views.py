@@ -19,7 +19,6 @@ from apps.opu.form53.serializers import Region53Serializer
 
 class Form53CreateView(View):
     """ Создания Формы 5.3"""
-
     def post(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)
         form = Form53Form(request.POST or None)
@@ -27,7 +26,6 @@ class Form53CreateView(View):
             form=form.save(commit=False)
             form.circuit = circuit
             form.save()
-
             for i in circuit.transit.all():
                 if circuit != i:
                     Form53.objects.create(
@@ -118,8 +116,18 @@ class Form53ListAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Form53.objects.all()
         region = self.request.query_params.get('region', None)
+        customer = self.request.query_params.get('customer', None)
+        category = self.request.query_params.get('category', None)
+        circuit = self.request.query_params.get('circuit', None)
+
         if region is not None and region != "":
-            queryset = queryset.filter(circuit_id_object__id_outfit__outfit=region)
+            queryset = queryset.filter(circuit__id_object__id_outfit__outfit=region)
+        if customer is not None and customer != "":
+            queryset = queryset.filter(circuit__customer=customer)
+        if category is not None and category != "":
+            queryset = queryset.filter(circuit__category=category)
+        if circuit is not None and circuit != "":
+            queryset = queryset.filter(circuit__name=circuit)
         return queryset
 
 
