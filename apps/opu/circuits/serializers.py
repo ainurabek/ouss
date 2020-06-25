@@ -87,19 +87,19 @@ class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Category.objects.all())
     measure = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Measure.objects.all())
+        read_only=False, allow_null=True,  queryset=Measure.objects.all())
     in_out = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=InOut.objects.all())
+        read_only=False, allow_null=True, queryset=InOut.objects.all())
     point1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Point.objects.all())
     point2 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Point.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Customer.objects.all())
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
     mode = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Mode.objects.all())
+        read_only=False, allow_null=True,  queryset=Mode.objects.all())
     type_com = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeCom.objects.all())
+        read_only=False, allow_null=True, queryset=TypeCom.objects.all())
     class Meta:
         model = Circuit
         fields = ('number', 'type_using', 'category', 'num_order',
