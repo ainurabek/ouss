@@ -261,14 +261,22 @@ class ObjectCreateView(APIView):
         if parent.type_of_trakt is not None:
             if parent.type_of_trakt.name == 'ВГ':
                 type_obj = TypeOfTrakt.objects.get(name='ПГ')
+                request.data["type_of_trakt"] = type_obj.pk
             elif parent.type_of_trakt.name == 'ТГ':
                 type_obj = TypeOfTrakt.objects.get(name='ВГ')
+                request.data["type_of_trakt"] = type_obj.pk
             elif parent.type_of_trakt.name == 'ЧГ':
                 type_obj = TypeOfTrakt.objects.get(name='ТГ')
+                request.data["type_of_trakt"] = type_obj.pk
             elif parent.type_of_trakt.name == 'РГ':
                 type_obj = TypeOfTrakt.objects.get(name='ЧГ')
+                request.data["type_of_trakt"] = type_obj.pk
 
-            request.data["type_of_trakt"] = type_obj.pk
+
+
+
+
+
 
         if serializer.is_valid():
             instance=serializer.save(
@@ -285,7 +293,7 @@ class ObjectCreateView(APIView):
             if data['amount_channels'] == '12':
                 for x in range(1, 13):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
-                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     id_object=instance,
                                                      num_circuit = x,
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
@@ -294,7 +302,7 @@ class ObjectCreateView(APIView):
             elif data['amount_channels'] == '30':
                 for x in range(1, 31):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
-                                                     id_object=Object.objects.get(pk=instance.id),
+                                                     id_object=instance,
                                                      num_circuit = x,
                                                      category=Category.objects.get(id=instance.category.id),
                                                      point1=Point.objects.get(id=instance.point1.id),
@@ -316,19 +324,21 @@ class ObjectEditView(APIView):
             raise Http404
 
     def put(self, request, pk):
+        list = []
         obj = get_object_or_404(Object, pk=pk)
+        list.append(obj.name)
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance=serializer.save()
-            if obj.name != instance.name:
-                circuits = Circuit.objects.filter(id_object=instance.id)
-                all = Circuit.objects.filter(id_object=instance.id).count()+1
-
+            if list[0] != instance.name:
+                circuits = Circuit.objects.filter(id_object=instance)
+                all = Circuit.objects.filter(id_object=instance).count()+1
+                cir = 1
                 for circuit in circuits:
-                    all -= 1
-                    circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(all))
-                                                                              # point1=instance.point1.id,
-                                                                              # point2=instance.point2.id)
+                    if cir <= all:
+                        circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(cir))
+                        cir += 1
+
             elif obj.point1 != instance.point1 or obj.point2 != instance.point2:
                 circuits = Circuit.objects.filter(id_object=instance.id)
                 all = Circuit.objects.filter(id_object=instance.id).count() + 1

@@ -7,7 +7,7 @@ from django.db.models.signals import pre_save
 @receiver(pre_save, sender=Object)
 def create_track(sender, instance, *args, **kwargs):
 	# if created :
-	print("++++++++++++++++++++++++++++")
+
 	if instance.id_parent != None and instance.id_parent.type_of_trakt != None:
 		if instance.id_parent.type_of_trakt.name == 'ВГ':
 			type_obj = TypeOfTrakt.objects.get(name='ПГ')
