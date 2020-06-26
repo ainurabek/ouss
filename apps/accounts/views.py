@@ -16,6 +16,8 @@ from .serializers import LoginUserSerializer, UserSerializer, ProfileListSeriali
     DepartmentSerializer, SubdepartmentSerializer, LogSerializer
 from django.http.response import HttpResponse, JsonResponse
 from .models import Profile, DepartmentKT, SubdepartmentKT, Log
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 User = get_user_model()
 
@@ -174,6 +176,8 @@ class LogListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = LogSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('user', 'start_at', 'end_time')
 
     def get_queryset(self):
         subdep = SubdepartmentKT.objects.get(name="opu")

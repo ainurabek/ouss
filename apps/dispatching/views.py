@@ -5,9 +5,9 @@ from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
-from .serializers import EventListSerializer
+from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object
+from ..opu.objects.models import Object, IP
 
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets
@@ -15,14 +15,12 @@ from rest_framework import viewsets
 now = datetime.datetime.now()
 from django.views.generic import View
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic.edit import CreateView, UpdateView
+
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
 from .forms import EventForm
-from .models import Event, TypeOfJournal, Index, Choice
-from rest_framework.response import Response
+from .models import Event, TypeOfJournal
 from rest_framework import status
-from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -39,13 +37,13 @@ class JournalList(ListView):
         return super().get_context_data(**context)
 
 
-def event_list(request, journal_pk):
-    journal = get_object_or_404(TypeOfJournal, pk=journal_pk)
-    events = Event.objects.filter(type_journal=journal)
-    choices = Choice.objects.all()
-    return render(request, 'dispatching/event_list.html', {
-        'events': events, 'choices': choices, 'journal': journal
-    })
+# def event_list(request, journal_pk):
+#     journal = get_object_or_404(TypeOfJournal, pk=journal_pk)
+#     events = Event.objects.filter(type_journal=journal)
+#     choices = Choice.objects.all()
+#     return render(request, 'dispatching/event_list.html', {
+#         'events': events, 'choices': choices, 'journal': journal
+#     })
 
 
 def event_detail(request, event_id):
@@ -53,27 +51,27 @@ def event_detail(request, event_id):
     return render(request, 'dispatching/event_detail.html', {
         'event': event
     })
-class EventCreateView(View):
-    """Создания отключения"""
-    def post(self, request, pk):
-
-        choice = Choice.objects.get(pk=pk)
-        print(choice)
-        form = EventForm(request.POST or None)
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.created_by = self.request.user.profile
-            print(form.created_by)
-            form.choice = choice
-            form.save()
-            return redirect('apps:dispatching:event_list')
-
-    def get(self, request, pk):
-        choice = Choice.objects.get(pk=pk)
-        form = EventForm()
-        return render(request, 'dispatching/request_create.html', {'form': form,
-                                                                   'choice': choice
-                                                                   })
+# class EventCreateView(View):
+#     """Создания отключения"""
+#     def post(self, request, pk):
+#
+#         choice = Choice.objects.get(pk=pk)
+#         print(choice)
+#         form = EventForm(request.POST or None)
+#         if form.is_valid():
+#             form = form.save(commit=False)
+#             form.created_by = self.request.user.profile
+#             print(form.created_by)
+#             form.choice = choice
+#             form.save()
+#             return redirect('apps:dispatching:event_list')
+#
+#     def get(self, request, pk):
+#         choice = Choice.objects.get(pk=pk)
+#         form = EventForm()
+#         return render(request, 'dispatching/request_create.html', {'form': form,
+#                                                                    'choice': choice
+#                                                                    })
 
 def event_edit(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
@@ -104,7 +102,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     serializer_class = EventListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
-                        'reason', 'index', 'responsible_outfit', 'send_from')
+                        'reason', 'index1', 'index2', 'responsible_outfit', 'send_from')
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -112,18 +110,68 @@ class EventListAPIView(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return EventDetailSerializer
 
-class EventCreateViewAPI(APIView):
+
+class IPEventListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = IP.objects.all()
+    serializer_class = IPSSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('point_id', 'object_id')
+
+class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     """Создания Event"""
     def post(self, request, pk):
-        type_journal = TypeOfJournal.objects.get(pk=pk)
+        ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(type_journal=type_journal, created_by=self.request.user.profile, created_at=now)
+            serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CircuitEventListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Circuit.objects.all()
+    serializer_class = CircuitEventList
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('num_circuit', 'customer', 'name', 'type_using')
+
+class EventCircuitCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Event"""
+
+    def post(self, request, pk):
+        circuit = Circuit.objects.get(pk=pk)
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ObjectEventListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Object.objects.all()
+    serializer_class = ObjectEventSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer')
+
+class EventObjectCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Event"""
+
+    def post(self, request, pk):
+        object = Object.objects.get(pk=pk)
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""

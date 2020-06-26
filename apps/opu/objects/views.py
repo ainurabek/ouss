@@ -272,12 +272,6 @@ class ObjectCreateView(APIView):
                 type_obj = TypeOfTrakt.objects.get(name='ЧГ')
                 request.data["type_of_trakt"] = type_obj.pk
 
-
-
-
-
-
-
         if serializer.is_valid():
             instance=serializer.save(
                 id_parent=parent,
@@ -290,6 +284,7 @@ class ObjectCreateView(APIView):
 
 
             )
+
             if data['amount_channels'] == '12':
                 for x in range(1, 13):
                     Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
@@ -536,16 +531,22 @@ class DeleteTrassaView(APIView):
 
             for cir in main_obj.circ_obj.all():
                 name = obj.name + "/" + cir.num_circuit
-                name = Circuit.objects.get(name=name)
-                cir.transit.remove(name)
+                try:
+                    name = Circuit.objects.get(name=name)
+                    cir.transit.remove(name)
+                except ObjectDoesNotExist:
+                    pass
 
         if main_obj.transit2.filter(pk=pk).exists():
             main_obj.transit2.remove(obj)
 
             for cir in main_obj.circ_obj.all():
                 name = obj.name + "/" + cir.num_circuit
-                name = Circuit.objects.get(name=name)
-                cir.transit2.remove(name)
+                try:
+                    name = Circuit.objects.get(name=name)
+                    cir.transit2.remove(name)
+                except ObjectDoesNotExist:
+                    pass
 
         for t_obj in main_obj.transit.all():
             if t_obj.transit.filter(pk=pk).exists():
@@ -553,9 +554,12 @@ class DeleteTrassaView(APIView):
 
                 for circ in t_obj.circ_obj.all():
                     name = obj.name + "/" + circ.num_circuit
-                    name = Circuit.objects.get(name=name)
-                    if circ.transit.filter(pk=name.pk).exists():
-                        circ.transit.remove(name)
+                    try:
+                        name = Circuit.objects.get(name=name)
+                        if circ.transit.filter(pk=name.pk).exists():
+                            circ.transit.remove(name)
+                    except ObjectDoesNotExist:
+                        pass
 
         for t_obj in main_obj.transit2.all():
             if t_obj.transit2.filter(pk=pk).exists():
@@ -563,9 +567,12 @@ class DeleteTrassaView(APIView):
 
                 for circ in t_obj.circ_obj.all():
                     name = obj.name + "/" + circ.num_circuit
-                    name = Circuit.objects.get(name=name)
-                    if circ.transit2.filter(pk=name.pk).exists():
-                        circ.transit2.remove(name)
+                    try:
+                        name = Circuit.objects.get(name=name)
+                        if circ.transit2.filter(pk=name.pk).exists():
+                            circ.transit2.remove(name)
+                    except ObjectDoesNotExist:
+                        pass
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

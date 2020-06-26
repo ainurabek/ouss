@@ -21,17 +21,7 @@ class TypeOfJournal(models.Model):
         verbose_name = 'Виды журнала'
         verbose_name_plural = 'Вид журнала'
 
-class Choice(models.Model):
-    '''Тип заявки (Например Квартирная заявка)'''
-    index = models.CharField('Индекс', max_length=255)
-    name = models.CharField('Название выбора', max_length=255)
 
-    class Meta:
-        verbose_name = 'Выбор по'
-        verbose_name_plural = 'Выбор по'
-
-    def __str__(self):
-        return self.name
 
 class Reason(models.Model):
     name = models.CharField(max_length=150)
@@ -67,8 +57,10 @@ class Event(models.Model):
     contact_name = models.CharField('Передал (ФИО)', max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     reason = models.ForeignKey(Reason, verbose_name='Причины', on_delete=models.CASCADE, null=True, blank=True)
-    index= models.ForeignKey(Index, verbose_name='Индекс', on_delete=models.CASCADE, null=True,
+    index1= models.ForeignKey(Index, related_name='event_index1', verbose_name='Индекс1', on_delete=models.CASCADE, null=True,
                                           blank=True)
+    index2 = models.ForeignKey(Index, related_name='event_index2', verbose_name='Индекс2', on_delete=models.CASCADE, null=True,
+                               blank=True)
     comments = models.CharField('Комментарии', max_length=355, blank=True, null=True)
     responsible_outfit = models.ForeignKey(Outfit, verbose_name='Ответственный', on_delete=models.CASCADE,
                                           null=True, blank=True,  related_name='dispatch_outfit')
@@ -78,7 +70,7 @@ class Event(models.Model):
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", null=True, blank=True)
     ips = models.ForeignKey(IP, on_delete=models.CASCADE, verbose_name="ИП",  null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
-    choice = models.ForeignKey(Choice, verbose_name="выбор по", on_delete=models.CASCADE,  null=True, blank=True)
+
 
 
 
