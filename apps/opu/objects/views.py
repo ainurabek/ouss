@@ -25,6 +25,8 @@ from apps.opu.objects.serializers import LPEditSerializer
 
 from apps.opu.objects.serializers import LPDetailSerializer
 
+from apps.opu.objects.serializers import IPSerializer
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
@@ -177,6 +179,12 @@ class IPDeleteView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+class IPListView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = IP.objects.all()
+    lookup_field = 'pk'
+    serializer_class = IPSerializer
 
 '''
 Линии передачи
