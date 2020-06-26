@@ -333,7 +333,7 @@ class ObjectEditView(APIView):
                 cir = 1
                 for circuit in circuits:
                     if cir <= all:
-                        circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(cir))
+                        circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.name+"/"+str(cir))
                         cir += 1
 
             if obj_point1 != instance.point1 or obj_point2 != instance.point2:
