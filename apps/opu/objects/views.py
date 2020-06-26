@@ -319,13 +319,16 @@ class ObjectEditView(APIView):
             raise Http404
 
     def put(self, request, pk):
-        list = []
+
         obj = get_object_or_404(Object, pk=pk)
-        list.append(obj.name)
+        obj_name=str(obj.name)
+        obj_point1=str(obj.point1)
+        obj_point2=str(obj.point2)
+
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance=serializer.save()
-            if list[0] != instance.name:
+            if obj_name != instance.name:
                 circuits = Circuit.objects.filter(id_object=instance)
                 all = Circuit.objects.filter(id_object=instance).count()+1
                 cir = 1
@@ -334,7 +337,7 @@ class ObjectEditView(APIView):
                         circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.id_parent.name+('-')+instance.name+"/"+str(cir))
                         cir += 1
 
-            elif obj.point1 != instance.point1 or obj.point2 != instance.point2:
+            elif obj_point1 != instance.point1 or obj_point2 != instance.point2:
                 circuits = Circuit.objects.filter(id_object=instance.id)
                 all = Circuit.objects.filter(id_object=instance.id).count() + 1
 
