@@ -522,6 +522,10 @@ class DeleteTrassaView(APIView):
         obj.transit2.clear()
         obj.transit.clear()
 
+        if main_pk==pk:
+            content={'ERROR': 'Але, гараж! Нельзя сам обьект удалять!'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+
         for cir in obj.circ_obj.all():
             cir.transit.clear()
             cir.transit2.clear()
