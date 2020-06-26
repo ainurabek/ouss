@@ -15,7 +15,7 @@ router.register('tpo', views.TPOListView, basename='tpo_list')
 router.register('outfit', views.OutfitsListView, basename='outfit_list')
 router.register('point', views.PointListView, basename='point_list')
 router.register('lp', views.LPListView, basename='lp_list')
-router.register('ip', views.IPListView, basename='ip_list')
+
 
 
 
@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^point/edit/(?P<pk>\S+)/$', PointEditView.as_view()),
     # url(r'^point/delete/(?P<pk>\S+)/$', views.PointDeleteView.as_view(), name='point_delete'),
 
+    url(r'^ip/$', views.IPListView().as_view(), name='ip_list'),
     url(r'^ip/create/(?P<pk>\S+)/$', IPCreateView.as_view()),
     url(r'^ip/delete/(?P<pk>\S+)/$', views.IPDeleteView().as_view(), name='ip_delete'),
 

@@ -179,12 +179,14 @@ class IPDeleteView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-class IPListView(viewsets.ModelViewSet):
+class IPListView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     queryset = IP.objects.all()
     lookup_field = 'pk'
     serializer_class = IPSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('point_id', 'object_id', 'tpo_id')
 
 '''
 Линии передачи
@@ -602,7 +604,7 @@ class FilterObjectList(ListAPIView):
         tpo = self.request.query_params.get('tpo', None)
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
-        ip = self.request.query_params.get('ip', None)
+
 
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
@@ -610,7 +612,5 @@ class FilterObjectList(ListAPIView):
             queryset = queryset.filter(Q(point1__point=point) | Q(point2__point=point))
         if outfit is not None and outfit != '':
             queryset = queryset.filter(id_outfit__outfit=outfit)
-        if ip is not None and ip != '':
-            queryset = queryset.filter(Q(destination1__point_id__point__icontains=ip) | Q(destination2__point_id__point__icontains=ip))
 
         return queryset

@@ -74,8 +74,8 @@ class Region53ListView(ListView):
 class FilterForm53View(View):
     """ Фильтрация Формы 5.3 по регионам """
 
-    def get(self, request, id):
-        region = Region.objects.get(id=id)
+    def get(self, request, slug):
+        region = Region.objects.get(slug=slug)
         form53_list = Form53.objects.filter(circuit__id_object__id_outfit__outfit=region.name)
         return render(request,"management/form53_list.html", {"form53_list": form53_list})
 
