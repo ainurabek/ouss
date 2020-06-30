@@ -23,6 +23,10 @@ urlpatterns = [
     path("api/create/<int:pk>/", views.FormCreateViewAPI.as_view()),
     path("api/reserve/<int:pk>/", views.ReserveDetailAPIView.as_view()),
 
+    path("api/reserve/delete/<int:form_pk>/<int:reserve_pk>/", views.ReserveDelete.as_view()),
+
+    path("upload/", views.ImageView.as_view(), name='file-upload'),
+
     path('', include(router.urls))
 ]
 

@@ -12,8 +12,9 @@ from django.views.generic import View, ListView, UpdateView
 from apps.opu.form51.forms import Form51Form
 from apps.opu.form51.models import Form51, Region
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
-    Form51ReserveSerializer
+    Form51ReserveSerializer, ImageSerializer
 from apps.opu.objects.models import Object
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Templates
@@ -107,6 +108,15 @@ class ReserveDetailView(View):
 # API
 #############################################################################################
 
+class ImageView(APIView):
+  parser_classes = (MultiPartParser, FormParser)
+  def post(self, request, *args, **kwargs):
+    file_serializer = ImageSerializer(data=request.data)
+    if file_serializer.is_valid():
+      file_serializer.save()
+      return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+    else:
+      return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FormCreateViewAPI(APIView):
     """Создания Формы 5.1"""
@@ -189,3 +199,16 @@ class ReserveDetailAPIView(APIView):
         form51 = Form51.objects.get(pk=pk)
         serializer = Form51ReserveSerializer(form51)
         return Response(serializer.data)
+
+class ReserveDelete(APIView):
+    def delete(self, request, form_pk, reserve_pk):
+        form51=Form51.objects.get(pk=form_pk)
+        obj=Object.objects.get(pk=reserve_pk)
+        if form51.reserve_object.filter(pk=reserve_pk).exist():
+            form51.reserve_object.remove(obj)
+        else:
+            pass
+
+
+
+

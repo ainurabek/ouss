@@ -8,6 +8,13 @@ from apps.opu.objects.serializers import TransitSerializer
 
 from apps.opu.circuits.serializers import CategorySerializer
 
+from apps.opu.form51.models import Image
+
+
+class ImageSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Image
+    fields = ('id', 'image', 'name', 'created_at')
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
 
@@ -74,7 +81,7 @@ class ObjectReserveSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     class Meta:
         model = Object
-        fields = ("name", "transit", "transit2", "category")
+        fields = ('id', "name", "transit", "transit2", "category")
 
 
 class Form51ReserveSerializer(serializers.ModelSerializer):
