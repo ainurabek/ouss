@@ -9,6 +9,12 @@ from apps.opu.objects.serializers import TransitSerializer
 from apps.opu.circuits.serializers import CategorySerializer
 
 
+class CustomerForm51Serializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Customer
+        fields = ("id", "customer", 'abr' )
+
 class PointForm51Serializer(serializers.ModelSerializer):
 
     class Meta:
@@ -21,7 +27,8 @@ class Form51CreateSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
     reserve_object = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Object.objects.all(), many=True, required=False)
+        read_only=False, many=True,  queryset=Object.objects.all())
+    print(reserve_object)
 
     class Meta:
         model = Form51
@@ -44,7 +51,7 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
 class Form51Serializer(serializers.ModelSerializer):
     """Список Формы 5.1"""
     object = ObjectForm51Serializer()
-    customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
+    customer = CustomerForm51Serializer()
 
     class Meta:
         model = Form51
