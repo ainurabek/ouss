@@ -19,9 +19,12 @@ urlpatterns = [
     path("delete/<int:pk>/", views.form_cust_delete, name="form_cust_delete"),
 
     ###API
+    path("api/customers/", views.CustomerFormListView.as_view()),
     path("api/<int:pk>/", views.FormCustomerListAPIView.as_view()),
     path("api/circuit/<int:pk>/", views.CircuitListAPIView.as_view()),
-    path("api/create/<int:pk>/", views.FormCustomerCreateAPIView.as_view()),
+    path("api/object/<int:pk>/", views.ObjectListAPIView.as_view()),
+    path("api/create/<int:pk>/", views.FormCustomerCircCreateAPIView.as_view()),
+    path("api/create/<int:pk>/", views.FormCustomerObjCreateAPIView.as_view()),
     path("api/update/<int:pk>/", views.FormCustomerUpdateAPIView.as_view()),
     path("api/delete/<int:pk>/", views.FormCustomerDeleteAPIView.as_view()),
 

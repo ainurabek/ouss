@@ -6,6 +6,13 @@ from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import TransitSerializer
 from apps.opu.circuits.models import Circuit
 
+from apps.opu.customer.models import Customer
+
+
+class CustomerFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ('id', 'abr', 'customer')
 
 class PointSerializer(serializers.ModelSerializer):
 
@@ -20,7 +27,7 @@ class CircuitTransitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ("point1", "name", "point2")
+        fields = ('id', "point1", "name", "point2")
 
 
 class CircuitListSerializer(serializers.ModelSerializer):
@@ -32,7 +39,7 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ("object", "name", "point1", "point2", "transit", "transit2")
+        fields = ('id', "object", "name", "point1", "point2", "transit", "transit2")
 
 
 class CircuitSerializer(serializers.ModelSerializer):
@@ -54,7 +61,7 @@ class ObjectFormCustomer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ("name", "transit", "transit2", "point1", "point2")
+        fields = ( 'id', "name", "transit", "transit2", "point1", "point2")
 
 
 class SignalizationSerializer(serializers.ModelSerializer):
@@ -81,4 +88,4 @@ class FormCustomerCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form_Customer
-        fields = ("amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")
+        fields = ('id', "amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")

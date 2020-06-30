@@ -6,14 +6,20 @@ from rest_framework.response import Response
 from rest_framework import status
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import UpdateAPIView, DestroyAPIView
+from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
 from apps.opu.customer.models import Customer
 
 from apps.opu.form_customer.models import Form_Customer
 
+
 from apps.opu.form_customer.forms import FormCustForm
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
     CircuitListSerializer
+
+from apps.opu.form_customer.serializers import CustomerFormSerializer
+
+from apps.opu.form_customer.serializers import ObjectFormCustomer
+from apps.opu.objects.models import Object
 
 
 class CustomerListView(ListView):
@@ -89,6 +95,12 @@ def form_cust_delete(request, pk):
 
 #API
 #######################################################################################################################
+class CustomerFormListView(ListAPIView):
+    """Список арендаторов"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CustomerFormSerializer
+    queryset = Customer.objects.all()
 
 
 class FormCustomerListAPIView(APIView):
@@ -101,8 +113,25 @@ class FormCustomerListAPIView(APIView):
         serializer = FormCustomerSerializer(form_cust, many=True)
         return Response(serializer.data)
 
+class CircuitListAPIView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-class FormCustomerCreateAPIView(APIView):
+    def get(self, request, pk):
+        circuit = Circuit.objects.filter(customer_id=pk)
+        serializer = CircuitListSerializer(circuit, many=True)
+        return Response(serializer.data)
+
+class ObjectListAPIView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        object = Object.objects.filter(customer_id=pk)
+        serializer = ObjectFormCustomer(object, many=True)
+        return Response(serializer.data)
+
+class FormCustomerCircCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -116,6 +145,19 @@ class FormCustomerCreateAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class FormCustomerObjCreateAPIView(APIView):
+    """Создания Формы арендаторов"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        object = Object.objects.get(pk=pk)
+        serializer = FormCustomerCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""
@@ -131,11 +173,4 @@ class FormCustomerDeleteAPIView(DestroyAPIView):
     queryset = Form_Customer.objects.all()
 
 
-class CircuitListAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
 
-    def get(self, request, pk):
-        circuit = Circuit.objects.filter(customer_id=pk)
-        serializer = CircuitListSerializer(circuit, many=True)
-        return Response(serializer.data)
