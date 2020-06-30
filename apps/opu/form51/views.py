@@ -196,11 +196,13 @@ class ReserveDelete(APIView):
     def delete(self, request, form_pk, reserve_pk):
         form51=Form51.objects.get(pk=form_pk)
         obj=Object.objects.get(pk=reserve_pk)
-        if form51.reserve_object.filter(pk=reserve_pk).exist():
+        if form51.reserve_object.filter(pk=reserve_pk).exists():
             form51.reserve_object.remove(obj)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            pass
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
