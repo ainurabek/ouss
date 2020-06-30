@@ -28,7 +28,7 @@ class Form51CreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Customer.objects.all())
     reserve_object = serializers.PrimaryKeyRelatedField(
         read_only=False, many=True,  queryset=Object.objects.all())
-    print(reserve_object)
+
 
     class Meta:
         model = Form51
@@ -53,9 +53,10 @@ class Form51Serializer(serializers.ModelSerializer):
     object = ObjectForm51Serializer()
     customer = CustomerForm51Serializer()
 
+
     class Meta:
         model = Form51
-        fields = ("id", "object", "customer", "num_ouss", "order", "schema", "reserve", "report_num")
+        fields = ("id", "object", "customer", "num_ouss", "order", "schema", "reserve", "report_num", "reserve_object")
         depth=1
 
 
