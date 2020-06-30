@@ -19,9 +19,9 @@ class PointForm51Serializer(serializers.ModelSerializer):
 class Form51CreateSerializer(serializers.ModelSerializer):
     """Создания Формы 5.1"""
     customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Customer.objects.all())
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
     reserve_object = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Object.objects.all(), many=True)
+        read_only=False, allow_null=True, queryset=Object.objects.all(), many=True)
 
     class Meta:
         model = Form51
