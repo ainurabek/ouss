@@ -116,9 +116,9 @@ class FormCreateViewAPI(APIView):
     def post(self, request, pk):
         obj = Object.objects.get(pk=pk)
         serializer = Form51CreateSerializer(data=request.data)
+
         if serializer.is_valid():
             data = serializer.save(object=obj, created_by=self.request.user.profile)
-
             for i in obj.transit.all():
                 if obj != i:
                     Form51.objects.create(
