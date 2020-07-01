@@ -8,8 +8,7 @@ from apps.opu.objects.serializers import TransitSerializer
 
 from apps.opu.circuits.serializers import CategorySerializer
 
-
-
+from apps.opu.form51.models import OrderPhoto, SchemaPhoto
 
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
@@ -25,6 +24,16 @@ class PointForm51Serializer(serializers.ModelSerializer):
         fields = ("name", "point")
 
 
+class OrderPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderPhoto
+        fields = ("id", "order")
+
+class SchemaPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchemaPhoto
+        fields = ("id", "schema")
+
 class Form51CreateSerializer(serializers.ModelSerializer):
     """Создания Формы 5.1"""
     customer = serializers.PrimaryKeyRelatedField(
@@ -32,11 +41,11 @@ class Form51CreateSerializer(serializers.ModelSerializer):
     reserve_object = serializers.PrimaryKeyRelatedField(
         read_only=False, many=True,  queryset=Object.objects.all())
 
-
-
     class Meta:
         model = Form51
-        fields = ("id", "customer", "num_ouss", "order", "schema", "reserve", "report_num", "reserve_object")
+        fields = ("id", "customer", "num_ouss", "reserve", "report_num", "reserve_object")
+
+
 
 
 class ObjectForm51Serializer(serializers.ModelSerializer):
@@ -56,11 +65,12 @@ class Form51Serializer(serializers.ModelSerializer):
     """Список Формы 5.1"""
     object = ObjectForm51Serializer()
     customer = CustomerForm51Serializer()
-
+    order_photo = OrderPhotoSerializer(many=True)
+    schema_photo = SchemaPhotoSerializer(many=True)
 
     class Meta:
         model = Form51
-        fields = ("id", "object", "customer", "num_ouss", "order", "schema", "reserve", "report_num", "reserve_object")
+        fields = ("id", "object", "customer", "num_ouss", "order_photo", "schema_photo", "reserve", "report_num", "reserve_object")
         depth=1
 
 

@@ -8,7 +8,7 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.urls import reverse_lazy
 from django.views.generic import View, ListView, UpdateView
 
-
+from rest_framework import  generics
 from apps.opu.form51.forms import Form51Form
 from apps.opu.form51.models import Form51, Region
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
@@ -18,6 +18,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Templates
+from apps.opu.form51.models import SchemaPhoto, OrderPhoto
+
+from apps.opu.form51.serializers import OrderPhotoSerializer
+
+from apps.opu.form51.serializers import SchemaPhotoSerializer
 
 
 class Form51CreateView(View):
@@ -119,6 +124,12 @@ class FormCreateViewAPI(APIView):
 
         if serializer.is_valid():
             data = serializer.save(object=obj, created_by=self.request.user.profile)
+            for img in request.FILES.getlist('schema'):
+                SchemaPhoto.objects.create(schema=img, form51=data)
+
+            for img in request.FILES.getlist('order'):
+                OrderPhoto.objects.create(order=img, form51=data)
+
             for i in obj.transit.all():
                 if obj != i:
                     Form51.objects.create(
@@ -202,8 +213,47 @@ class ReserveDelete(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+class OrderPhotoCreateView(APIView):
+    def post(self, request, pk):
+        form51 = Form51.objects.get(pk=pk)
+        serializer = OrderPhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            for img in request.FILES.getlist('order'):
+                OrderPhoto.objects.create(order=img, form51=form51)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class OrderPhotoDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, form_pk, order_pk):
+        form51=Form51.objects.get(pk=form_pk)
+        order = OrderPhoto.objects.get(pk=order_pk, form51=form51)
+        print(order)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class SchemaPhotoCreateView(APIView):
+    def post(self, request, pk):
+        form51 = Form51.objects.get(pk=pk)
+        serializer = SchemaPhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            for img in request.FILES.getlist('schema'):
+                SchemaPhoto.objects.create(schema=img, form51=form51)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SchemaPhotoDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
+    def delete(self, request, form_pk, schema_pk):
+        form51=Form51.objects.get(pk=form_pk)
+        schema = SchemaPhoto.objects.get(pk=schema_pk, form51=form51)
+        schema.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

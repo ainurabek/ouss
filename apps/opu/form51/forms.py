@@ -7,4 +7,6 @@ class Form51Form(forms.ModelForm):
 
     class Meta:
         model = Form51
-        fields = ("num_ouss", "reserve", "customer", "report_num", "schema", "order", "reserve_object")
+        fields = ("num_ouss", "reserve", "customer", "report_num",  "reserve_object")
+
+        # "schema", "order",

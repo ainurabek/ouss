@@ -8,6 +8,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
 from apps.opu.customer.models import Customer
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.opu.form_customer.models import Form_Customer
 
@@ -107,6 +109,8 @@ class FormCustomerListAPIView(APIView):
     """ Фильтрация Формы арендаторов  по арендаторам """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('object', 'circuit')
 
     def get(self, request, pk):
         form_cust = Form_Customer.objects.filter(customer_id=pk)

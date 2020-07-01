@@ -25,8 +25,6 @@ class Form51(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Примечание (№ID, МН, Аренда)", blank=True, null=True)
     object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
     num_ouss = models.CharField("Номер распоряжения ОУСС", max_length=250, blank=True, null=True)
-    order = models.FileField('Распоряжение', upload_to='object/order/', blank=True, null=True)
-    schema = models.FileField('Схема', upload_to='object/schema/', blank=True, null=True)
     reserve = models.CharField('Резерва потока', max_length=15, blank=True, null=True)
     reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)
     report_num = models.CharField('Номер донесения', max_length=200, blank=True, null=True)
@@ -38,3 +36,16 @@ class Form51(models.Model):
 
     def __str__(self):
         return self.object.name
+
+
+
+class SchemaPhoto(models.Model):
+    schema = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
+    form51 = models.ForeignKey(Form51, on_delete=models.CASCADE, verbose_name="Схема",
+                                 blank=True, null=True, related_name="schema_photo")
+
+
+class OrderPhoto(models.Model):
+    order = models.ImageField('Схема', upload_to='object/order/', blank=True, null=True)
+    form51 = models.ForeignKey(Form51, on_delete=models.CASCADE, verbose_name="Распоряжение",
+                                 blank=True, null=True, related_name="order_photo")
