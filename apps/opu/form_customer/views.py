@@ -105,17 +105,17 @@ class CustomerFormListView(ListAPIView):
     queryset = Customer.objects.all()
 
 
+
+
+
 class FormCustomerListAPIView(APIView):
     """ Фильтрация Формы арендаторов  по арендаторам """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'circuit')
+    filterset_fields = ('object', 'circuit', 'customer')
+    queryset = Form_Customer.objects.all()
 
-    def get(self, request, pk):
-        form_cust = Form_Customer.objects.filter(customer_id=pk)
-        serializer = FormCustomerSerializer(form_cust, many=True)
-        return Response(serializer.data)
 
 class CircuitListAPIView(APIView):
     authentication_classes = (TokenAuthentication,)

@@ -20,7 +20,7 @@ urlpatterns = [
 
     ###API
     path("api/customers/", views.CustomerFormListView.as_view()),
-    path("api/<int:pk>/", views.FormCustomerListAPIView.as_view()),
+    path("api/list/", views.FormCustomerListAPIView.as_view()),
     path("api/circuit/<int:pk>/", views.CircuitListAPIView.as_view()),
     path("api/object/<int:pk>/", views.ObjectListAPIView.as_view()),
     path("api/circuit/create/<int:pk>/", views.FormCustomerCircCreateAPIView.as_view()),
