@@ -23,8 +23,8 @@ urlpatterns = [
     path("api/<int:pk>/", views.FormCustomerListAPIView.as_view()),
     path("api/circuit/<int:pk>/", views.CircuitListAPIView.as_view()),
     path("api/object/<int:pk>/", views.ObjectListAPIView.as_view()),
-    path("api/create/<int:pk>/", views.FormCustomerCircCreateAPIView.as_view()),
-    path("api/create/<int:pk>/", views.FormCustomerObjCreateAPIView.as_view()),
+    path("api/circuit/create/<int:pk>/", views.FormCustomerCircCreateAPIView.as_view()),
+    path("api/object/create/<int:pk>/", views.FormCustomerObjCreateAPIView.as_view()),
     path("api/update/<int:pk>/", views.FormCustomerUpdateAPIView.as_view()),
     path("api/delete/<int:pk>/", views.FormCustomerDeleteAPIView.as_view()),
 
