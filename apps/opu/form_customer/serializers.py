@@ -75,10 +75,11 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     object = ObjectFormCustomer()
     circuit = CircuitSerializer()
     signalization = SignalizationSerializer()
+    customer = CustomerFormSerializer()
 
     class Meta:
         model = Form_Customer
-        fields = ("id", "circuit", "object", "amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")
+        fields = ("id", "circuit", 'customer', "object", "amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")
 
 
 class FormCustomerCreateSerializer(serializers.ModelSerializer):
