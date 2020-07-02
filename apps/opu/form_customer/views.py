@@ -115,6 +115,8 @@ class FormCustomerListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('object', 'circuit', 'customer')
     queryset = Form_Customer.objects.all()
+    serializer_class = FormCustomerSerializer
+
 
 
 class CircuitListAPIView(APIView):
