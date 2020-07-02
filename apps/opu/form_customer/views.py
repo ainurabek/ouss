@@ -108,7 +108,7 @@ class CustomerFormListView(ListAPIView):
 
 
 
-class FormCustomerListAPIView(APIView):
+class FormCustomerListAPIView(ListAPIView):
     """ Фильтрация Формы арендаторов  по арендаторам """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
