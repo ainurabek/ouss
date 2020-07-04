@@ -64,12 +64,13 @@ class LoginAPI(KnoxLoginView):
 
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        profile = Profile.objects.get(user__username=user)
-        if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
+        user = User.objects.get(username=user)
+
+        if Log.objects.filter(Q(user=user) & Q(date__gt=timezone.now())).exists():
             pass
         else:
             end_date = timezone.now()+datetime.timedelta(days=1)
-            Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
+            Log.objects.create(user=user, start_at=timezone.now(), date=end_date)
         login(request, user)
         return super().post(request, format=None)
 
@@ -104,6 +105,7 @@ class CreateProfileAPIView(APIView):
     def post(self, request):
         data = request.data
         user = request.user
+        print(user)
         first_name = data['first_name']
         last_name = data['last_name']
         middle_name = data['middle_name']
@@ -180,8 +182,8 @@ class LogListAPIView(ListAPIView):
     filterset_fields = ('user', 'start_at', 'end_time')
 
     def get_queryset(self):
-        subdep = SubdepartmentKT.objects.get(name="opu")
-        queryset = Log.objects.filter(user__user__subdepartment=subdep)
+        subdep = SubdepartmentKT.objects.get(id=2)
+        queryset = Log.objects.filter(user__subdepartment=subdep)
         return queryset
 
 
