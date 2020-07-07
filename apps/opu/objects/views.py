@@ -27,13 +27,16 @@ from apps.opu.objects.serializers import LPDetailSerializer
 
 from apps.opu.objects.serializers import IPSerializer
 
+# from apps.accounts.permissions import IsDispatchOnly
+from apps.accounts.permissions import IsOpuOnly
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
@@ -75,6 +78,8 @@ class TPOListView(viewsets.ModelViewSet):
 class TPOCreateView(generics.CreateAPIView):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 
 class TPOEditView(generics.RetrieveUpdateAPIView):
@@ -82,7 +87,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     queryset = TPO.objects.all()
     serializer_class = TPOSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
@@ -96,7 +101,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
 
 # Предприятия
 class OutfitsListView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Outfit.objects.all()
     lookup_field = 'pk'
@@ -107,6 +112,8 @@ class OutfitsListView(viewsets.ModelViewSet):
 
 
 class OutfitCreateView(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    authentication_classes = (TokenAuthentication,)
     queryset = Outfit.objects.all()
     serializer_class = OutfitCreateSerializer
 
@@ -119,7 +126,7 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
     queryset = Outfit.objects.all()
     serializer_class = OutfitCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
@@ -134,7 +141,7 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
 
 # ИПы
 class PointListView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Point.objects.all()
     lookup_field = 'pk'
@@ -147,6 +154,8 @@ class PointListView(viewsets.ModelViewSet):
 class PointCreateView(generics.CreateAPIView):
     queryset = Point.objects.all()
     serializer_class = PointCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 
 class PointEditView(generics.RetrieveUpdateAPIView):
@@ -154,7 +163,7 @@ class PointEditView(generics.RetrieveUpdateAPIView):
     queryset = Point.objects.all()
     serializer_class = PointCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 
 # class PointDeleteView(generics.DestroyAPIView):
@@ -164,6 +173,8 @@ class PointEditView(generics.RetrieveUpdateAPIView):
 
 
 class IPCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
         request.data["object_id"] = pk
@@ -177,10 +188,10 @@ class IPCreateView(APIView):
 class IPDeleteView(generics.DestroyAPIView):
     queryset = IP.objects.all()
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 class IPListView(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = IP.objects.all()
     lookup_field = 'pk'
@@ -194,7 +205,7 @@ class IPListView(ListAPIView):
 
 
 class LPListView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.filter(id_parent=None)
     lookup_field = 'pk'
@@ -207,14 +218,17 @@ class LPListView(viewsets.ModelViewSet):
             return LPDetailSerializer
 
 
+
 class LPCreateView(generics.CreateAPIView):
     queryset = Object.objects.all()
     serializer_class = LPCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
+
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -222,7 +236,7 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     queryset = Object.objects.all()
     serializer_class = LPEditSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
@@ -235,7 +249,7 @@ class LPEditView(generics.RetrieveUpdateAPIView):
 
 
 class ObjectListView(APIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
@@ -249,7 +263,7 @@ class ObjectListView(APIView):
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
@@ -260,7 +274,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 class ObjectCreateView(APIView):
     """"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
         parent = get_object_or_404(Object, pk=pk)
@@ -320,7 +334,7 @@ class ObjectCreateView(APIView):
 
 class ObjectEditView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get_object(self, pk):
         try:
@@ -369,8 +383,8 @@ class ObjectEditView(APIView):
 
 class SelectObjectView(APIView):
     """Выбор ЛП для создания трассы"""
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
@@ -410,9 +424,8 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
-
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -437,9 +450,8 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
-
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -464,8 +476,8 @@ class CreateRightTrassaView(APIView):
 
 class SaveTrassaView(APIView):
     """Сохранение трассы"""
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
@@ -524,8 +536,8 @@ class SaveTrassaView(APIView):
 
 class DeleteTrassaView(APIView):
     """Удаления трассы"""
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:

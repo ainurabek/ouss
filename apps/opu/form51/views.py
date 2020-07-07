@@ -24,6 +24,8 @@ from apps.opu.form51.serializers import OrderPhotoSerializer
 
 from apps.opu.form51.serializers import SchemaPhotoSerializer
 
+from apps.accounts.permissions import IsOpuOnly
+
 
 class Form51CreateView(View):
     """ Создания Формы 5.1"""
@@ -116,6 +118,8 @@ class ReserveDetailView(View):
 
 
 class FormCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     """Создания Формы 5.1"""
 
     def post(self, request, pk):
@@ -175,7 +179,7 @@ class FormListAPIView(ListAPIView):
 class Form51UpdateAPIView(UpdateAPIView):
     """Редактирования Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form51.objects.all()
     serializer_class = Form51CreateSerializer
 
@@ -183,7 +187,7 @@ class Form51UpdateAPIView(UpdateAPIView):
 class Form51DeleteAPIView(DestroyAPIView):
     """Удаления Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form51.objects.all()
 
 
@@ -204,6 +208,8 @@ class ReserveDetailAPIView(APIView):
         return Response(serializer.data)
 
 class ReserveDelete(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     def delete(self, request, form_pk, reserve_pk):
         form51=Form51.objects.get(pk=form_pk)
         obj=Object.objects.get(pk=reserve_pk)
@@ -214,6 +220,8 @@ class ReserveDelete(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class OrderPhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
         serializer = OrderPhotoSerializer(data=request.data)
@@ -227,7 +235,7 @@ class OrderPhotoCreateView(APIView):
 
 class OrderPhotoDeleteView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def delete(self, request, form_pk, order_pk):
         form51=Form51.objects.get(pk=form_pk)
@@ -237,6 +245,8 @@ class OrderPhotoDeleteView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class SchemaPhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
         serializer = SchemaPhotoSerializer(data=request.data)
@@ -250,7 +260,7 @@ class SchemaPhotoCreateView(APIView):
 
 class SchemaPhotoDeleteView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def delete(self, request, form_pk, schema_pk):
         form51=Form51.objects.get(pk=form_pk)

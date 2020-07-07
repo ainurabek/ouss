@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from apps.accounts.permissions import IsOpuOnly
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -17,7 +18,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 	serializer_class = CustomerSerializer
 	lookup_field = 'pk'
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticatedOrReadOnly,)
+	permission_classes = (IsAuthenticated,)
 	filter_backends = (SearchFilter, DjangoFilterBackend)
 	search_fields = ('customer', 'abr', 'adding', 'contact_name')
 	filterset_fields =  ('customer', 'abr', 'adding', 'contact_name')
@@ -27,13 +28,13 @@ class CustomerEditView(generics.RetrieveUpdateAPIView):
 	queryset = Customer.objects.all()
 	serializer_class = CustomerSerializer
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticatedOrReadOnly,)
+	permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 	def perform_update(self, serializer):
 		serializer.save(created_by=self.request.user.profile)
 
 @api_view(['DELETE', ])
-@permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticated, IsOpuOnly,))
 def customer_delete_view(request, pk):
 	try:
 		customer = Customer.objects.get(id=pk)

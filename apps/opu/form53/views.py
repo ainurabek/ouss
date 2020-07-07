@@ -16,6 +16,8 @@ from apps.opu.form51.models import Region
 
 from apps.opu.form53.serializers import Region53Serializer
 
+from apps.accounts.permissions import IsOpuOnly
+
 
 class Form53CreateView(View):
     """ Создания Формы 5.3"""
@@ -84,6 +86,8 @@ class FilterForm53View(View):
 
 
 class Form53CreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     """Создания Формы 5.3"""
     def post(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)
@@ -135,7 +139,7 @@ class Form53ListAPIView(ListAPIView):
 class Form53UpdateAPIView(UpdateAPIView):
     """Редактирования Формы 5.3"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53.objects.all()
     serializer_class = Form53CreateSerializer
 
@@ -143,7 +147,7 @@ class Form53UpdateAPIView(UpdateAPIView):
 class Form53DeleteAPIView(DestroyAPIView):
     """Удаления Формы 5.3"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53
 
 class Region53ListAPIView(ListAPIView):

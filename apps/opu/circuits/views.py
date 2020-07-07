@@ -17,9 +17,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 #     lookup_field = 'pk'
 #     authentication_classes = (TokenAuthentication,)
 #     permission_classes = (IsAuthenticatedOrReadOnly,)
+from apps.accounts.permissions import IsOpuOnly
+
 
 class CircuitListViewSet(APIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order', 'date_order',
@@ -44,7 +46,7 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEdit
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)

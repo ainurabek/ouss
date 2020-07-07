@@ -23,6 +23,8 @@ from apps.opu.form_customer.serializers import CustomerFormSerializer
 from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
 
+from apps.accounts.permissions import IsOpuOnly
+
 
 class CustomerListView(ListView):
     """Список арендаторов"""
@@ -140,7 +142,7 @@ class ObjectListAPIView(APIView):
 class FormCustomerCircCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)
@@ -154,7 +156,7 @@ class FormCustomerCircCreateAPIView(APIView):
 class FormCustomerObjCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
         object = Object.objects.get(pk=pk)
@@ -167,14 +169,14 @@ class FormCustomerObjCreateAPIView(APIView):
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form_Customer.objects.all()
     serializer_class = FormCustomerCreateSerializer
 
 
 class FormCustomerDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form_Customer.objects.all()
 
 
