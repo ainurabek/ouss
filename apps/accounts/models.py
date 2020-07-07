@@ -172,17 +172,17 @@ class Profile(models.Model):
 
 
 class Log(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="log_user")
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name="log_profile")
     start_at = models.DateTimeField(blank=True, null=True)
     date = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Журнал'
-        verbose_name_plural = 'Журнал'
+        verbose_name = 'Журнал входа'
+        verbose_name_plural = 'Журнал входа'
 
     def __str__(self):
-        return f"{self.user.username}"
+        return f"{self.user.first_name}"
 
 
 def createProfile(sender, **kwargs):

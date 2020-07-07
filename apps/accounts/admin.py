@@ -76,8 +76,8 @@ class CustomUserAdmin(UserAdmin):
 #
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'last_name', 'first_name', 'position', )
-    list_filter = ('last_name', )
+    list_display = ('user', 'last_name', 'first_name', 'position', 'online', )
+    list_filter = ('last_name', 'online',)
     search_fields = ('first_name', 'last_name' )
 
 @admin.register(Log)

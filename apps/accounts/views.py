@@ -1,7 +1,7 @@
 import datetime
 
 from django.utils import timezone
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model, login, logout, authenticate
 from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
@@ -64,13 +64,18 @@ class LoginAPI(KnoxLoginView):
 
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        user = User.objects.get(username=user)
-
-        if Log.objects.filter(Q(user=user) & Q(date__gt=timezone.now())).exists():
+        try:
+            profile = Profile.objects.get(user__username=user)
+            profile.online = True
+            profile.save()
+            if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
+                pass
+            else:
+                end_date = timezone.now()+datetime.timedelta(days=1)
+                Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
+        except ObjectDoesNotExist:
             pass
-        else:
-            end_date = timezone.now()+datetime.timedelta(days=1)
-            Log.objects.create(user=user, start_at=timezone.now(), date=end_date)
+
         login(request, user)
         return super().post(request, format=None)
 
@@ -91,6 +96,9 @@ class LogoutView(APIView):
         request._auth.delete()
         user_logged_out.send(sender=request.user.__class__,
                              request=request, user=request.user)
+        profile = Profile.objects.get(user__username=request.user.username)
+        profile.online = False
+        profile.save()
         if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
             Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
         return HttpResponse("Пользователь вышел из системы", None, status=status.HTTP_204_NO_CONTENT)
