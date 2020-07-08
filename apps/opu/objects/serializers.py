@@ -143,6 +143,12 @@ class IPSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
+class AllObjectSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Object
+        fields = ('__all__')
+
 class LPSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True)
     transit2 = TransitSerializer(many=True)

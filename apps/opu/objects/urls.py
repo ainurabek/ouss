@@ -15,6 +15,7 @@ router.register('tpo', views.TPOListView, basename='tpo_list')
 router.register('outfit', views.OutfitsListView, basename='outfit_list')
 router.register('point', views.PointListView, basename='point_list')
 router.register('lp', views.LPListView, basename='lp_list')
+router.register('objects', views.ObjectAllView, basename='all_objects')
 
 
 

@@ -11,7 +11,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
-    ObjectFilterSerializer, TraktListSerializer
+    ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -248,6 +248,12 @@ class LPEditView(generics.RetrieveUpdateAPIView):
 #     authentication_classes = (TokenAuthentication,)
 #     permission_classes = (IsAuthenticated,)
 
+class ObjectAllView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Object.objects.all()
+    lookup_field = 'pk'
+    serializer_class = AllObjectSerializer
 
 class ObjectListView(APIView):
     permission_classes = (IsAuthenticated,)
