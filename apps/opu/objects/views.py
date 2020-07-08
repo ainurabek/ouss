@@ -81,6 +81,9 @@ class TPOCreateView(generics.CreateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
+    def perform_update(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
 
 class TPOEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
@@ -89,8 +92,6 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-    def perform_update(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
 
 
 # class TPODeleteView(generics.DestroyAPIView):

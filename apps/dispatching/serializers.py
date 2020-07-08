@@ -21,7 +21,7 @@ class EventObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ("name", "id_outfit", )
+        fields = ('id', "name", "id_outfit", )
 
 class CircuitEventList(serializers.ModelSerializer):
     point1=PointCircSerializer()
@@ -53,7 +53,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ("name", "id_outfit", )
+        fields = ('id', "name", "id_outfit", )
 
 
 class IPSSerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class IPSSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IP
-        fields = ("point_id", "object_id")
+        fields = ( 'id',"point_id", "object_id")
         depth = 1
 
 
@@ -75,7 +75,7 @@ class EventListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ("object", "ips", "circuit", "index1", "index2", "date_from", "date_to", )
+        fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", )
 
 
 
