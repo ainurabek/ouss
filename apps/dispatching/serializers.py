@@ -47,6 +47,7 @@ class ObjectEventSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',
                    'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer')
+        depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
@@ -110,14 +111,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
     send_from = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
-    object = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Object.objects.all())
-    circuit = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True,  queryset=Circuit.objects.all())
-    ips = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=IP.objects.all())
-    customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Customer.objects.all())
+
 
 
     class Meta:
@@ -125,6 +119,12 @@ class EventCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by')
+
+        depth = 1
+
+
+
+
 
 class EventDetailSerializer(serializers.ModelSerializer):
     type_journal = TypeJournalSerializer()
