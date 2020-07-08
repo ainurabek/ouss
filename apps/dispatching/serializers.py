@@ -100,7 +100,8 @@ class IndexSerializer(serializers.ModelSerializer):
 
 class EventCreateSerializer(serializers.ModelSerializer):
     """Создания события"""
-
+    type_journal = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeOfJournal.objects.all())
     reason = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Reason.objects.all())
     index1 = serializers.PrimaryKeyRelatedField(
@@ -116,7 +117,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', 'date_from', 'date_to', 'contact_name',
+        fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by')
 
