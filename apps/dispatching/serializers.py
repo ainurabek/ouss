@@ -15,6 +15,8 @@ from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer,
 from apps.opu.circuits.serializers import PointCircSerializer, CategorySerializer
 from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerializer
 
+from apps.opu.circuits.serializers import TransitCircSerializer
+
 
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
@@ -24,13 +26,15 @@ class EventObjectSerializer(serializers.ModelSerializer):
         fields = ('id', "name", "id_outfit", )
 
 class CircuitEventList(serializers.ModelSerializer):
+    transit = TransitCircSerializer(many=True, read_only=True)
+    transit2 = TransitCircSerializer(many=True, read_only=True)
     point1=PointCircSerializer()
     point2=PointCircSerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer')
+        fields = ('id', 'name', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
 
 class ObjectEventSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
