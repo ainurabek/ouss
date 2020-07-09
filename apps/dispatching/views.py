@@ -137,7 +137,7 @@ class CircuitEventListAPIView(ListAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEventList
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('num_circuit', 'customer', 'name', 'type_using')
+    filterset_fields = ('id_object', 'customer', 'name', 'type_using')
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
