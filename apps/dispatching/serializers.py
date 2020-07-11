@@ -58,11 +58,11 @@ class ObjectEventSerializer(serializers.ModelSerializer):
         depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):
-    id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
+
 
     class Meta:
         model = Circuit
-        fields = ('id', "name",  )
+        fields = ('id', "name",)
 
 
 class IPSSerializer(serializers.ModelSerializer):
