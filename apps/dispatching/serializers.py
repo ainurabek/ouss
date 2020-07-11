@@ -17,6 +17,8 @@ from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerial
 
 from apps.opu.circuits.serializers import TransitCircSerializer
 
+from apps.opu.objects.serializers import AllObjectSerializer
+
 
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
@@ -32,9 +34,10 @@ class CircuitEventList(serializers.ModelSerializer):
     point2=PointCircSerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
+    id_object = AllObjectSerializer()
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
+        fields = ('id', 'name', 'id_object', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
 
 class ObjectEventSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
@@ -75,13 +78,12 @@ class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
     ips = IPSSerializer()
-    index1 = serializers.SlugRelatedField(slug_field="index1", read_only=True)
-    index2 = serializers.SlugRelatedField(slug_field="index2", read_only=True)
+    index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
+    index2 = serializers.SlugRelatedField(slug_field="index", read_only=True)
 
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", )
-
 
 
 
