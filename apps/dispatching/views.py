@@ -119,7 +119,7 @@ class EventListAPIView(viewsets.ModelViewSet):
             date_from+='T00:00:00'
             queryset = queryset.filter(date_from__gte=date_from)
         if date_to is not None and date_to != "":
-            date_to += 'T:00:00:00'
+            date_to += 'T00:00:00'
             queryset = queryset.filter(date_to__lte=date_to)
 
         return queryset
