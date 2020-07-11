@@ -35,6 +35,7 @@ class CircuitEventList(serializers.ModelSerializer):
     customer = CustomerSerializer()
     category = CategorySerializer()
     id_object = AllObjectSerializer()
+
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'id_object', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
@@ -61,7 +62,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('id', "name", "id_outfit", )
+        fields = ('id', "name",  )
 
 
 class IPSSerializer(serializers.ModelSerializer):
@@ -83,7 +84,7 @@ class EventListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", )
+        fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", 'created_at' )
 
 
 
