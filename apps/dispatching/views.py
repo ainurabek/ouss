@@ -101,7 +101,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = EventListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('type_journal', 'date_from', 'date_to', 'contact_name',
+    filterset_fields = ('type_journal', 'contact_name',
                         'reason', 'index1', 'index2', 'responsible_outfit', 'send_from')
 
     def get_serializer_class(self):
@@ -109,6 +109,22 @@ class EventListAPIView(viewsets.ModelViewSet):
             return EventListSerializer
         elif self.action == "retrieve":
             return EventDetailSerializer
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        date_from = self.request.query_params.get('date_from', None)
+        date_to = self.request.query_params.get('date_to', None)
+
+        if date_from is not None and date_from != "":
+            date_from+='T:00:00:00'
+            queryset = queryset.filter(date_from__gte=date_from)
+        if date_to is not None and date_to != "":
+            date_to += 'T:00:00:00'
+            queryset = queryset.filter(date_to__lte=date_to)
+
+        return queryset
+
+
 
 
 class IPEventListAPIView(ListAPIView):
