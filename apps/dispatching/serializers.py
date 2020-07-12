@@ -25,7 +25,7 @@ class EventObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', "name", "id_outfit", )
+        fields = ('id', "name", "id_outfit", 'point1', 'point2' )
 
 class CircuitEventList(serializers.ModelSerializer):
     transit = TransitCircSerializer(many=True, read_only=True)
@@ -62,7 +62,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('id', "name",)
+        fields = ('id', "name", 'point1', 'point2')
 
 
 class IPSSerializer(serializers.ModelSerializer):
@@ -151,5 +151,5 @@ class EventDetailSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by')
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', )
 
