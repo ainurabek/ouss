@@ -22,6 +22,8 @@ from apps.opu.objects.serializers import AllObjectSerializer
 
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
 
     class Meta:
         model = Object
@@ -58,6 +60,8 @@ class ObjectEventSerializer(serializers.ModelSerializer):
         depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):
+    point1=serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
 
 
     class Meta:
