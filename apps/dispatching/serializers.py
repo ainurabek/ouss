@@ -19,6 +19,8 @@ from apps.opu.circuits.serializers import TransitCircSerializer
 
 from apps.opu.objects.serializers import AllObjectSerializer
 
+from apps.accounts.serializers import UserLogSerializer
+
 
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
@@ -137,7 +139,6 @@ class EventCreateSerializer(serializers.ModelSerializer):
 
 
 
-
 class EventDetailSerializer(serializers.ModelSerializer):
     type_journal = TypeJournalSerializer()
     reason=ReasonSerializer()
@@ -149,6 +150,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit=EventCircuitSerializer()
     customer = CustomerSerializer()
+    created_by = UserLogSerializer()
 
 
     class Meta:
