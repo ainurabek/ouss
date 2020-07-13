@@ -191,7 +191,7 @@ class LogListAPIView(ListAPIView):
 
     def get_queryset(self):
         subdep = SubdepartmentKT.objects.get(id=2)
-        queryset = Log.objects.filter(user__subdepartment=subdep)
+        queryset = Log.objects.filter(user__user__subdepartment=subdep)
         return queryset
 
 

@@ -75,7 +75,7 @@ class Event(models.Model):
     class Meta:
         verbose_name = 'Журнал событий'
         verbose_name_plural = 'Журнал событий'
-        ordering = ('-created_at', )
+
 
     def __str__(self):
         return str(self.id)
