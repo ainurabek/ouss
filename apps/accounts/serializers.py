@@ -73,7 +73,7 @@ class ProfileListSerializer(serializers.ModelSerializer):
 class UserLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ("first_name", "last_name", "middle_name")
+        fields = ('id', "first_name", "last_name", "middle_name", 'online')
 
 
 class LogSerializer(serializers.ModelSerializer):
@@ -81,7 +81,7 @@ class LogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Log
-        fields = ("user", "start_at", "end_time")
+        fields = ('id', "user", "start_at", "end_time")
 
 
 

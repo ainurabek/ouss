@@ -192,7 +192,19 @@ class LogListAPIView(ListAPIView):
     def get_queryset(self):
         subdep = SubdepartmentKT.objects.get(id=2)
         queryset = Log.objects.filter(user__user__subdepartment=subdep)
+        start_at = self.request.query_params.get('start_at', None)
+        end_time = self.request.query_params.get('end_time', None)
+
+        if start_at is not None and start_at != "":
+            start_at += 'T00:00:00'
+            queryset = queryset.filter(start_at__gte=start_at)
+        if end_time is not None and end_time != "":
+            end_time += 'T23:59:00'
+            queryset = queryset.filter(end_time=end_time)
         return queryset
+
+
+
 
 
 

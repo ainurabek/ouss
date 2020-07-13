@@ -23,13 +23,22 @@ from apps.accounts.serializers import UserLogSerializer
 
 
 class EventObjectSerializer(serializers.ModelSerializer):
+
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', "name", "id_outfit", 'point1', 'point2' )
+        fields = ('id', "name", 'id_outfit', 'point1', 'point2')
+
+class EventDetailObjectSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Object
+        fields = ['event_obj', ]
+        depth=2
 
 class CircuitEventList(serializers.ModelSerializer):
     transit = TransitCircSerializer(many=True, read_only=True)
@@ -43,6 +52,12 @@ class CircuitEventList(serializers.ModelSerializer):
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'id_object', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
+
+class CircuitDetailObjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Circuit
+        fields = ['event_cir']
+        depth=1
 
 class ObjectEventSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
@@ -80,6 +95,11 @@ class IPSSerializer(serializers.ModelSerializer):
         fields = ( 'id',"point_id", "object_id")
         depth = 1
 
+class IPDetailObjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IP
+        fields = ['event_ips']
+        depth=1
 
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
@@ -91,6 +111,8 @@ class EventListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", 'created_at' )
+
+        depth=1
 
 
 
@@ -134,21 +156,21 @@ class EventCreateSerializer(serializers.ModelSerializer):
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by')
 
-        depth = 1
-
+        depth = 2
 
 
 
 class EventDetailSerializer(serializers.ModelSerializer):
+
     type_journal = TypeJournalSerializer()
     reason=ReasonSerializer()
     index1=IndexSerializer()
     index2 = IndexSerializer()
     responsible_outfit =OutfitListSerializer()
     send_from=OutfitListSerializer()
-    ips = IPSSerializer()
-    object = EventObjectSerializer()
-    circuit=EventCircuitSerializer()
+    ips = IPDetailObjectSerializer()
+    object = EventDetailObjectSerializer()
+    circuit=CircuitDetailObjectSerializer()
     customer = CustomerSerializer()
     created_by = UserLogSerializer()
 
@@ -158,4 +180,4 @@ class EventDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', )
-
+        depth=2
