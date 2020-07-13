@@ -157,7 +157,7 @@ class Profile(models.Model):
     first_name = models.CharField('Имя', max_length=30, blank=True, null=True)
     last_name = models.CharField('Фамилия', max_length=30, blank=True, null=True)
     middle_name = models.CharField('Отчество', max_length=30, null=True, blank=True)
-    online = models.BooleanField('В сети', default=False)
+    online = models.BooleanField('В Сети', default=False)
     gender = models.CharField('Пол', max_length=10, blank=True, null=True,
                               choices=GENDER_CHOICES)
     phone_number = models.CharField('Рабочий номер телефона', max_length=50, null=True, blank=True)
