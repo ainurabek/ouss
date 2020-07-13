@@ -187,7 +187,7 @@ class LogListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = LogSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('user', 'start_at', 'end_time')
+    filterset_fields = ('user',)
 
     def get_queryset(self):
         subdep = SubdepartmentKT.objects.get(id=2)
