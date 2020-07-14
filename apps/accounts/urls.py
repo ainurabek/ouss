@@ -20,7 +20,7 @@ urlpatterns = [
 
     url(r'^register/$', Register.as_view()),
     url(r'^login/$', LoginAPI.as_view()),
-    url(r'^logout/$', LogoutView.as_view(), name='logout'),
+    url(r'^logout/$', LogoutView.as_view()),
     url(r'^profile_create/$', CreateProfileAPIView.as_view(), name='create_profile'),
     url(r'^departments/(?P<department_id>\S+)/$', views.department_view, name='department_view'),
     url(r'^subdepartments/(?P<department_id>\S+)/(?P<subdepartment_id>\S+)/$', views.subdepartment_view, name='subdepartment_view'),

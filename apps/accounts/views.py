@@ -19,6 +19,7 @@ from .models import Profile, DepartmentKT, SubdepartmentKT, Log
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
+
 User = get_user_model()
 
 class Register(APIView):
@@ -88,20 +89,33 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class LogoutView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
 
-    def post(self, request, format=None):
-        request._auth.delete()
-        user_logged_out.send(sender=request.user.__class__,
-                             request=request, user=request.user)
+class LogoutView(APIView):
+    def get(self, request, format=None):
+        # simply delete the token to force a login
+
         profile = Profile.objects.get(user__username=request.user.username)
         profile.online = False
         profile.save()
         if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
             Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
-        return HttpResponse("Пользователь вышел из системы", None, status=status.HTTP_204_NO_CONTENT)
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
+
+# class LogoutView(APIView):
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#
+#     def post(self, request, format=None):
+#         request._auth.delete()
+#         user_logged_out.send(sender=request.user.__class__,
+#                              request=request, user=request.user)
+#         profile = Profile.objects.get(user__username=request.user.username)
+#         profile.online = False
+#         profile.save()
+#         if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
+#             Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
+#         return HttpResponse("Пользователь вышел из системы", None, status=status.HTTP_204_NO_CONTENT)
 
 '''
 Данная функция позволяет создать профиль сотрудника. Из фронта приходят данные, которые вводит юзер, также его id (role, user and password)

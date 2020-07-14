@@ -111,6 +111,7 @@ class EventListAPIView(viewsets.ModelViewSet):
             return EventDetailSerializer
 
     def get_queryset(self):
+        # queryset = Event.objects.all()
         queryset = Event.objects.all().distinct('object', 'circuit', 'ips')
         date_from_from = self.request.query_params.get('date_from_from', None)
         date_to_from = self.request.query_params.get('date_to_from', None)
