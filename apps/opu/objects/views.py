@@ -431,8 +431,9 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
+
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -443,22 +444,25 @@ class CreateLeftTrassaView(APIView):
         else:
             main_obj.transit.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
-            
 
-            for cir in main_obj.circ_obj.all():
-                name = obj.name + "/" + str(cir.num_circuit)
-                try:
+            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else obj.circ_obj.count()
+
+            if num_circuit != 0:
+
+                for cir in main_obj.circ_obj.all():
+                    if cir.num_circuit > num_circuit:
+                        break
+                    name = obj.name + "/" + str(cir.num_circuit)
                     circuit = Circuit.objects.get(name=name)
-                except ObjectDoesNotExist:
-                    break
-                cir.transit.add(circuit)
+                    cir.transit.add(circuit)
 
         return Response(status=status.HTTP_201_CREATED)
 
 
 class CreateRightTrassaView(APIView):
+
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
@@ -470,13 +474,16 @@ class CreateRightTrassaView(APIView):
             main_obj.transit2.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
-            for cir in main_obj.circ_obj.all():
-                name = obj.name + "/" + str(cir.num_circuit)
-                try:
+            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else obj.circ_obj.count()
+
+            if num_circuit != 0:
+
+                for cir in main_obj.circ_obj.all():
+                    if cir.num_circuit > num_circuit:
+                        break
+                    name = obj.name + "/" + str(cir.num_circuit)
                     circuit = Circuit.objects.get(name=name)
-                except ObjectDoesNotExist:
-                    break
-                cir.transit2.add(circuit)
+                    cir.transit2.add(circuit)
 
         return Response(status=status.HTTP_201_CREATED)
 

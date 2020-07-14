@@ -133,6 +133,17 @@ class EventListAPIView(viewsets.ModelViewSet):
 
         return queryset
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.object is not None:
+            instance = Event.objects.filter(object=instance.object)
+        elif instance.circuit is not None:
+            instance = Event.objects.filter(circuit=instance.circuit)
+        elif instance.ips is not None:
+            instance = Event.objects.filter(ips=instance.ips)
+        serializer = self.get_serializer(instance, many=True)
+        return Response(serializer.data)
+
 
 
 class IPEventListAPIView(ListAPIView):
