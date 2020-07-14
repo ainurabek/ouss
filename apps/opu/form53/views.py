@@ -86,6 +86,8 @@ class FilterForm53View(View):
 
 
 class Form53CreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
     """Создания Формы 5.3"""
     def post(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)

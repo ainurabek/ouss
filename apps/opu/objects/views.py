@@ -36,7 +36,7 @@ class TPOListView(viewsets.ModelViewSet):
     serializer_class = TPOSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
@@ -491,7 +491,7 @@ class CreateRightTrassaView(APIView):
 class SaveTrassaView(APIView):
     """Сохранение трассы"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
@@ -551,7 +551,7 @@ class SaveTrassaView(APIView):
 class DeleteTrassaView(APIView):
     """Удаления трассы"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
