@@ -17,7 +17,7 @@ from apps.opu.objects.models import Object
 
 class Form53(models.Model):
     """Форма 5.3"""
-    circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
+    circuit = models.OneToOneField(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
     order = models.ImageField('Распоряжение', upload_to='object/order/', blank=True, null=True)
     schema = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
     comments = models.CharField(max_length=100, blank=True, null=True)

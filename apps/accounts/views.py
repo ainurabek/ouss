@@ -92,8 +92,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class LogoutView(APIView):
     def get(self, request, format=None):
-        # simply delete the token to force a login
-
         profile = Profile.objects.get(user__username=request.user.username)
         profile.online = False
         profile.save()
