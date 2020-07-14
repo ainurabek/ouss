@@ -91,11 +91,9 @@ class Form53CreateViewAPI(APIView):
         circuit = Circuit.objects.get(pk=pk)
         if Form53.objects.filter(circuit=circuit).exists():
             return Response(status=status.HTTP_403_FORBIDDEN)
-
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
-
             for i in circuit.transit.all():
                 if circuit != i:
                     Form53.objects.create(

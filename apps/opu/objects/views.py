@@ -450,7 +450,7 @@ class CreateLeftTrassaView(APIView):
             if num_circuit != 0:
 
                 for cir in main_obj.circ_obj.all():
-                    if cir.num_circuit > num_circuit:
+                    if int(cir.num_circuit) > num_circuit:
                         break
                     name = obj.name + "/" + str(cir.num_circuit)
                     circuit = Circuit.objects.get(name=name)
@@ -479,7 +479,7 @@ class CreateRightTrassaView(APIView):
             if num_circuit != 0:
 
                 for cir in main_obj.circ_obj.all():
-                    if cir.num_circuit > num_circuit:
+                    if int(cir.num_circuit) > num_circuit:
                         break
                     name = obj.name + "/" + str(cir.num_circuit)
                     circuit = Circuit.objects.get(name=name)
