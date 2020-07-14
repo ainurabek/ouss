@@ -159,13 +159,33 @@ class EventCreateSerializer(serializers.ModelSerializer):
 
 
 
-class EventDetailSerializer(serializers.ModelSerializer):
+# class EventDetailSerializer(serializers.ModelSerializer):
+#
+#     ips = IPDetailObjectSerializer()
+#     object = EventDetailObjectSerializer()
+#     circuit=CircuitDetailObjectSerializer()
+#
+#     class Meta:
+#         model = Event
+#         fields = ('object', 'circuit', 'ips' )
+#         depth=2
 
-    ips = IPDetailObjectSerializer()
-    object = EventDetailObjectSerializer()
-    circuit=CircuitDetailObjectSerializer()
+class EventDetailSerializer(serializers.ModelSerializer):
+    type_journal = TypeJournalSerializer()
+    reason=ReasonSerializer()
+    index1=IndexSerializer()
+    index2 = IndexSerializer()
+    responsible_outfit =OutfitListSerializer()
+    send_from=OutfitListSerializer()
+    ips = IPSSerializer()
+    object = EventObjectSerializer()
+    circuit=EventCircuitSerializer()
+    customer = CustomerSerializer()
+    created_by = UserLogSerializer()
+
 
     class Meta:
         model = Event
-        fields = ('object', 'circuit', 'ips' )
-        depth=2
+        fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
+              'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', )
