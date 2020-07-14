@@ -23,7 +23,7 @@ class Region(models.Model):
 class Form51(models.Model):
     """Форма 5.1"""
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Примечание (№ID, МН, Аренда)", blank=True, null=True)
-    object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
+    object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
     num_ouss = models.CharField("Номер распоряжения ОУСС", max_length=250, blank=True, null=True)
     reserve = models.CharField('Резерва потока', max_length=15, blank=True, null=True)
     reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)

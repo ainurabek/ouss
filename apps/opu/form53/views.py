@@ -86,11 +86,12 @@ class FilterForm53View(View):
 
 
 class Form53CreateViewAPI(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
     """Создания Формы 5.3"""
     def post(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)
+        if Form53.objects.filter(circuit=circuit).exists():
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
