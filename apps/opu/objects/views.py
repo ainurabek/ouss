@@ -343,12 +343,6 @@ class ObjectEditView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
     def put(self, request, pk):
         obj = get_object_or_404(Object, pk=pk)
         obj_name=str(obj.name)
@@ -446,14 +440,12 @@ class CreateLeftTrassaView(APIView):
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
             num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else obj.circ_obj.count()
-
             if num_circuit != 0:
 
                 for cir in main_obj.circ_obj.all():
                     if int(cir.num_circuit) > num_circuit:
                         break
-                    name = obj.name + "/" + str(cir.num_circuit)
-                    circuit = Circuit.objects.get(name=name)
+                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
                     cir.transit.add(circuit)
 
         return Response(status=status.HTTP_201_CREATED)
@@ -481,8 +473,7 @@ class CreateRightTrassaView(APIView):
                 for cir in main_obj.circ_obj.all():
                     if int(cir.num_circuit) > num_circuit:
                         break
-                    name = obj.name + "/" + str(cir.num_circuit)
-                    circuit = Circuit.objects.get(name=name)
+                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
                     cir.transit2.add(circuit)
 
         return Response(status=status.HTTP_201_CREATED)
@@ -496,36 +487,36 @@ class SaveTrassaView(APIView):
     def get(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
         for i in main_obj.transit.all():
-            if main_obj.transit.all() not in i.transit.all():
-                i.transit.add(*main_obj.transit.all())
-            if main_obj.transit2.all() not in i.transit2.all():
-                i.transit2.add(*main_obj.transit2.all())
+            i.transit.add(*main_obj.transit.all())
+            i.transit2.add(*main_obj.transit2.all())
 
         for i in main_obj.transit2.all():
-            if main_obj.transit2.all() not in i.transit2.all():
-                i.transit2.add(*main_obj.transit2.all())
-            if main_obj.transit.all() not in i.transit.all():
-                i.transit.add(*main_obj.transit.all())
+            i.transit2.add(*main_obj.transit2.all())
+            i.transit.add(*main_obj.transit.all())
+
 
         for cir in main_obj.circ_obj.all():
             for obj in main_obj.transit.all():
-                name = obj.name + "/" + str(cir.num_circuit)
+                if obj.circ_obj.count() == 0:
+                    continue
                 try:
-                    name = Circuit.objects.get(name=name)
-                except ObjectDoesNotExist:
+                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                except IndexError:
                     break
-                name.transit.add(*cir.transit.all())
-                name.transit2.add(*cir.transit2.all())
+                circuit.transit.add(*cir.transit.all())
+                circuit.transit2.add(*cir.transit2.all())
 
         for cir in main_obj.circ_obj.all():
             for obj in main_obj.transit2.all():
-                name = obj.name + "/" + str(cir.num_circuit)
+                if obj.circ_obj.count() == 0:
+                    continue
                 try:
-                    name = Circuit.objects.get(name=name)
-                except ObjectDoesNotExist:
+                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                except IndexError:
                     break
-                name.transit2.add(*cir.transit2.all())
-                name.transit.add(*cir.transit.all())
+                circuit.transit2.add(*cir.transit2.all())
+                circuit.transit.add(*cir.transit.all())
+
         return Response(status=status.HTTP_201_CREATED)
 
     def post(self, request, pk):
@@ -555,58 +546,43 @@ class DeleteTrassaView(APIView):
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
-            # response = {'message': 'Але, гараж! Нельзя сам обьект удалять!'}
-            # return Response(response, status=status.HTTP_403_FORBIDDEN)
             main_obj = Object.objects.get(pk=main_pk)
-            obj = Object.objects.get(pk=pk)
 
             if main_obj.transit.filter(pk=pk).exists():
-                main_obj.transit.remove(obj)
+                main_obj.transit.remove(main_obj)
 
                 for cir in main_obj.circ_obj.all():
-                    name = obj.name + "/" + cir.num_circuit
-                    try:
-                        name = Circuit.objects.get(name=name)
-                        cir.transit.remove(name)
-                    except ObjectDoesNotExist:
-                        pass
+                    cir.transit.remove(cir)
 
             if main_obj.transit2.filter(pk=pk).exists():
-                main_obj.transit2.remove(obj)
+                main_obj.transit2.remove(main_obj)
 
                 for cir in main_obj.circ_obj.all():
-                    name = obj.name + "/" + cir.num_circuit
-                    try:
-                        name = Circuit.objects.get(name=name)
-                        cir.transit2.remove(name)
-                    except ObjectDoesNotExist:
-                        pass
+                    cir.transit2.remove(cir)
+
+            all_cir = main_obj.circ_obj.count()
 
             for t_obj in main_obj.transit.all():
                 if t_obj.transit.filter(pk=pk).exists():
-                    t_obj.transit.remove(obj)
+                    t_obj.transit.remove(main_obj)
 
                     for circ in t_obj.circ_obj.all():
-                        name = obj.name + "/" + circ.num_circuit
-                        try:
-                            name = Circuit.objects.get(name=name)
-                            if circ.transit.filter(pk=name.pk).exists():
-                                circ.transit.remove(name)
-                        except ObjectDoesNotExist:
-                            pass
+                        if all_cir < int(circ.num_circuit):
+                            break
+                        circuit = main_obj.circ_obj.all()[int(circ.num_circuit)-1]
+                        if circ.transit.filter(pk=circuit.pk).exists():
+                            circ.transit.remove(circuit)
 
             for t_obj in main_obj.transit2.all():
                 if t_obj.transit2.filter(pk=pk).exists():
-                    t_obj.transit2.remove(obj)
+                    t_obj.transit2.remove(main_obj)
 
                     for circ in t_obj.circ_obj.all():
-                        name = obj.name + "/" + circ.num_circuit
-                        try:
-                            name = Circuit.objects.get(name=name)
-                            if circ.transit2.filter(pk=name.pk).exists():
-                                circ.transit2.remove(name)
-                        except ObjectDoesNotExist:
-                            pass
+                        if all_cir < int(circ.num_circuit):
+                            break
+                        circuit = main_obj.circ_obj.all()[int(circ.num_circuit)-1]
+                        if circ.transit2.filter(pk=circuit.pk).exists():
+                            circ.transit2.remove(circuit)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -625,22 +601,20 @@ class DeleteTrassaView(APIView):
                 main_obj.transit.remove(obj)
 
                 for cir in main_obj.circ_obj.all():
-                    name = obj.name + "/" + cir.num_circuit
                     try:
-                        name = Circuit.objects.get(name=name)
-                        cir.transit.remove(name)
-                    except ObjectDoesNotExist:
+                        circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                        cir.transit.remove(circuit)
+                    except IndexError:
                         pass
 
             if main_obj.transit2.filter(pk=pk).exists():
                 main_obj.transit2.remove(obj)
 
                 for cir in main_obj.circ_obj.all():
-                    name = obj.name + "/" + cir.num_circuit
                     try:
-                        name = Circuit.objects.get(name=name)
-                        cir.transit2.remove(name)
-                    except ObjectDoesNotExist:
+                        circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                        cir.transit2.remove(circuit)
+                    except IndexError:
                         pass
 
             for t_obj in main_obj.transit.all():
@@ -648,12 +622,11 @@ class DeleteTrassaView(APIView):
                     t_obj.transit.remove(obj)
 
                     for circ in t_obj.circ_obj.all():
-                        name = obj.name + "/" + circ.num_circuit
                         try:
-                            name = Circuit.objects.get(name=name)
-                            if circ.transit.filter(pk=name.pk).exists():
-                                circ.transit.remove(name)
-                        except ObjectDoesNotExist:
+                            circuit = obj.circ_obj.all()[int(circ.num_circuit)-1]
+                            if circ.transit.filter(pk=circuit.pk).exists():
+                                circ.transit.remove(circuit)
+                        except IndexError:
                             pass
 
             for t_obj in main_obj.transit2.all():
@@ -661,12 +634,11 @@ class DeleteTrassaView(APIView):
                     t_obj.transit2.remove(obj)
 
                     for circ in t_obj.circ_obj.all():
-                        name = obj.name + "/" + circ.num_circuit
                         try:
-                            name = Circuit.objects.get(name=name)
-                            if circ.transit2.filter(pk=name.pk).exists():
-                                circ.transit2.remove(name)
-                        except ObjectDoesNotExist:
+                            circuit = obj.circ_obj.all()[int(circ.num_circuit)-1]
+                            if circ.transit2.filter(pk=circuit.pk).exists():
+                                circ.transit2.remove(circuit)
+                        except IndexError:
                             pass
 
             return Response(status=status.HTTP_204_NO_CONTENT)
