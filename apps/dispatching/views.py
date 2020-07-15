@@ -217,6 +217,7 @@ class EventUpdateAPIView(UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
+#удаление события
 class EventDeleteAPIView(DestroyAPIView):
     """Удаления event"""
     authentication_classes = (TokenAuthentication,)
