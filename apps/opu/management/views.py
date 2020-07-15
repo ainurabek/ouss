@@ -105,7 +105,7 @@ def lp_create(request):
     form = ObjectForm(request.POST or None)
     if form.is_valid():
         instance=form.save()
-        IP.objects.create(object_id=instance, point_id=instance.point1, tpo_id=instance.tpo)
+        # IP.objects.create(object_id=instance, point_id=instance.point1, tpo_id=instance.tpo)
 
         return redirect('apps:opu:management:lp')
     return render(request, 'management/lp_form.html', {'form': form})
