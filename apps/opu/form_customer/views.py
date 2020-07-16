@@ -186,13 +186,9 @@ class OrderCusPhotoCreateView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form_cus = Form_Customer.objects.get(pk=pk)
-        serializer = OrderCusPhotoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            for img in request.FILES.getlist('order'):
-                OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for img in request.FILES.getlist('order'):
+            OrderCusPhoto.objects.create(order=img, form_cus=form_cus)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class OrderCusPhotoDeleteView(APIView):
