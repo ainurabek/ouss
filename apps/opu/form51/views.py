@@ -224,13 +224,13 @@ class OrderPhotoCreateView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
-        serializer = OrderPhotoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            for img in request.FILES.getlist('order'):
-                OrderPhoto.objects.create(order=img, form51=form51)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serializer = OrderPhotoSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        for img in request.FILES.getlist('order'):
+            OrderPhoto.objects.create(order=img, form51=form51)
+        return Response(status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderPhotoDeleteView(APIView):
@@ -249,13 +249,13 @@ class SchemaPhotoCreateView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
-        serializer = SchemaPhotoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            for img in request.FILES.getlist('schema'):
-                SchemaPhoto.objects.create(schema=img, form51=form51)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serializer = SchemaPhotoSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        for img in request.FILES.getlist('schema'):
+            SchemaPhoto.objects.create(schema=img, form51=form51)
+        return Response(status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SchemaPhotoDeleteView(APIView):
