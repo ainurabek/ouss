@@ -2,12 +2,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import View, ListView, UpdateView
 from apps.opu.form53.forms import Form53Form
-from apps.opu.form53.models import Form53
+from apps.opu.form53.models import Form53, Order53Photo, Schema53Photo
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
 from rest_framework import status
-from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
+from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer, Order53PhotoSerializer, Schema53PhotoSerializer
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
@@ -17,6 +17,9 @@ from apps.opu.form51.models import Region
 from apps.opu.form53.serializers import Region53Serializer
 
 from apps.accounts.permissions import IsOpuOnly
+
+
+
 
 
 class Form53CreateView(View):
@@ -159,4 +162,51 @@ class Region53ListAPIView(ListAPIView):
     serializer_class = Region53Serializer
 
 
+class Order53PhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    def post(self, request, pk):
+        form53 = Form53.objects.get(pk=pk)
+        serializer = Order53PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            for img in request.FILES.getlist('order'):
+                Order53Photo.objects.create(order=img, form53=form53)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class Order53PhotoDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def delete(self, request, form_pk, order_pk):
+        form53=Form53.objects.get(pk=form_pk)
+        order = Order53Photo.objects.get(pk=order_pk, form53=form53)
+        print(order)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class Schema53PhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    def post(self, request, pk):
+        form53 = Form53.objects.get(pk=pk)
+        serializer = Schema53PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            for img in request.FILES.getlist('schema'):
+                Schema53Photo.objects.create(schema=img, form53=form53)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Schema53PhotoDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def delete(self, request, form_pk, schema_pk):
+        form53=Form53.objects.get(pk=form_pk)
+        schema = Schema53Photo.objects.get(pk=schema_pk, form53=form53)
+        schema.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

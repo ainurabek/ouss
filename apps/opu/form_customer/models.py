@@ -28,7 +28,6 @@ class Form_Customer(models.Model):
                                       null=True)
     type_of_using = models.CharField('Вид использования', max_length=200, blank=True, null=True)
     num_order = models.CharField("Номер распоряжения", max_length=250, blank=True, null=True)
-    order = models.ImageField('Распоряжение', upload_to='object/order/', blank=True, null=True)
     comments = models.CharField("Примечание", max_length=250, blank=True, null=True)
     created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,3 +38,9 @@ class Form_Customer(models.Model):
 
     def __str__(self):
         return self.customer.abr
+
+
+class OrderCusPhoto(models.Model):
+    order = models.ImageField('Схема', upload_to='object/order/', blank=True, null=True)
+    form_customer = models.ForeignKey(Form_Customer, on_delete=models.CASCADE, verbose_name="Распоряжение",
+                                 blank=True, null=True, related_name="order_cust_photo")

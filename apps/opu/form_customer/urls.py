@@ -28,6 +28,10 @@ urlpatterns = [
     path("api/update/<int:pk>/", views.FormCustomerUpdateAPIView.as_view()),
     path("api/delete/<int:pk>/", views.FormCustomerDeleteAPIView.as_view()),
 
+#orderphoto
+    path("api/ordercusphoto/create/<int:pk>/", views.OrderCusPhotoCreateView.as_view()),
+    path("api/ordercusphoto/delete/<int:form_pk>/<int:order_pk>/", views.OrderCusPhotoDeleteView.as_view()),
+
 
     path('', include(router.urls))
 ]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.opu.form51.models import Region
-from apps.opu.form_customer.models import Form_Customer, Signalization
+from apps.opu.form_customer.models import Form_Customer, Signalization, OrderCusPhoto
 from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import TransitSerializer
 from apps.opu.circuits.models import Circuit
@@ -13,6 +13,11 @@ class CustomerFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ('id', 'abr', 'customer')
+
+class OrderCusPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderCusPhoto
+        fields = ("id", "order")
 
 class PointSerializer(serializers.ModelSerializer):
 
@@ -76,6 +81,7 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     circuit = CircuitSerializer()
     signalization = SignalizationSerializer()
     customer = CustomerFormSerializer()
+    order = OrderCusPhotoSerializer()
 
     class Meta:
         model = Form_Customer

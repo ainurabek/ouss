@@ -24,6 +24,15 @@ urlpatterns = [
     path("<int:pk>/edit/", views.Form53UpdateAPIView.as_view()),
     path("<int:pk>/delete/", views.Form53DeleteAPIView.as_view()),
 
+
+#orderphoto
+    path("api/order53photo/create/<int:pk>/", views.Order53PhotoCreateView.as_view()),
+    path("api/order53photo/delete/<int:form_pk>/<int:order_pk>/", views.Order53PhotoDeleteView.as_view()),
+
+#schemaphoto
+    path("api/schema53photo/create/<int:pk>/", views.Schema53PhotoCreateView.as_view()),
+    path("api/schema53photo/delete/<int:form_pk>/<int:schema_pk>/", views.Schema53PhotoDeleteView.as_view()),
+
     path('', include(router.urls))
 ]
 

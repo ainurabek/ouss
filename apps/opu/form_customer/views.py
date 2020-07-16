@@ -11,7 +11,7 @@ from apps.opu.customer.models import Customer
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from apps.opu.form_customer.models import Form_Customer
+from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
 
 
 from apps.opu.form_customer.forms import FormCustForm
@@ -20,10 +20,12 @@ from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, For
 
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 
-from apps.opu.form_customer.serializers import ObjectFormCustomer
+from apps.opu.form_customer.serializers import ObjectFormCustomer, OrderCusPhotoSerializer
 from apps.opu.objects.models import Object
 
 from apps.accounts.permissions import IsOpuOnly
+
+
 
 
 class CustomerListView(ListView):
@@ -179,5 +181,28 @@ class FormCustomerDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form_Customer.objects.all()
 
+class OrderCusPhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    def post(self, request, pk):
+        form_cus = Form_Customer.objects.get(pk=pk)
+        serializer = OrderCusPhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            for img in request.FILES.getlist('order'):
+                OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class OrderCusPhotoDeleteView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def delete(self, request, form_pk, order_pk):
+        form_cus=Form_Customer.objects.get(pk=form_pk)
+        order = OrderCusPhoto.objects.get(pk=order_pk, form_customer=form_cus)
+        print(order)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
