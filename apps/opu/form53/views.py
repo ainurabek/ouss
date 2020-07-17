@@ -100,10 +100,10 @@ class Form53CreateViewAPI(APIView):
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
             for img in request.FILES.getlist('schema'):
-                Schema53Photo.objects.create(src=img, form51=data)
+                Schema53Photo.objects.create(src=img, form53=data)
 
             for img in request.FILES.getlist('order'):
-                Order53Photo.objects.create(src=img, form51=data)
+                Order53Photo.objects.create(src=img, form53=data)
             for i in circuit.transit.all():
                 if circuit != i:
                     Form53.objects.create(
