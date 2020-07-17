@@ -129,10 +129,10 @@ class FormCreateViewAPI(APIView):
         if serializer.is_valid():
             data = serializer.save(object=obj, created_by=self.request.user.profile)
             for img in request.FILES.getlist('schema'):
-                SchemaPhoto.objects.create(schema=img, form51=data)
+                SchemaPhoto.objects.create(src=img, form51=data)
 
             for img in request.FILES.getlist('order'):
-                OrderPhoto.objects.create(order=img, form51=data)
+                OrderPhoto.objects.create(src=img, form51=data)
 
             for i in obj.transit.all():
                 if obj != i:
