@@ -27,12 +27,12 @@ class PointForm51Serializer(serializers.ModelSerializer):
 class OrderPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderPhoto
-        fields = ("id", "order")
+        fields = ("id", "src")
 
 class SchemaPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchemaPhoto
-        fields = ("id", "schema")
+        fields = ("id", "src")
 
 class Form51CreateSerializer(serializers.ModelSerializer):
     """Создания Формы 5.1"""

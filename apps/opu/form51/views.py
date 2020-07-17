@@ -225,7 +225,7 @@ class OrderPhotoCreateView(APIView):
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
-            OrderPhoto.objects.create(order=img, form51=form51)
+            OrderPhoto.objects.create(src=img, form51=form51)
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -245,8 +245,8 @@ class SchemaPhotoCreateView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     def post(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
-        for img in request.FILES.getlist('src'):
-            SchemaPhoto.objects.create(schema=img, form51=form51)
+        for img in request.FILES.getlist('schema'):
+            SchemaPhoto.objects.create(src=img, form51=form51)
         return Response(status=status.HTTP_201_CREATED)
 
 
