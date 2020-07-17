@@ -39,7 +39,7 @@ class Form51CreateSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
     reserve_object = serializers.PrimaryKeyRelatedField(
-        read_only=False, many=True,  queryset=Object.objects.all())
+        read_only=False, many=True, allow_null=True,  queryset=Object.objects.all())
 
     class Meta:
         model = Form51
