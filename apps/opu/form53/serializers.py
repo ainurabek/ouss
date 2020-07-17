@@ -24,12 +24,12 @@ class Form53CreateSerializer(serializers.ModelSerializer):
 
 class Form53Serializer(serializers.ModelSerializer):
     """Список Формы 5.3"""
-    order = Order53PhotoSerializer()
-    schema=Schema53PhotoSerializer()
+    order53_photo = Order53PhotoSerializer(many=True)
+    schema53_photo=Schema53PhotoSerializer(many=True)
     circuit = CircuitList()
     class Meta:
         model = Form53
-        fields = ("id", "circuit",  "order", "schema", "comments", 'created_at')
+        fields = ("id", "circuit",  "order53_photo", "schema53_photo", "comments", 'created_at')
         depth=1
 
 class Region53Serializer(serializers.ModelSerializer):

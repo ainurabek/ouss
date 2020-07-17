@@ -263,26 +263,26 @@ class ObjectSerializer(serializers.ModelSerializer):
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Category.objects.all())
+        read_only=False, allow_null=True, queryset=Category.objects.all())
     our = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeOfLocation.objects.all())
+        read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
 
     tpo1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
+        read_only=False, allow_null=True, queryset=TPO.objects.all())
     point1 = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=Point.objects.all())
+         read_only=False, allow_null=True, queryset=Point.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TPO.objects.all())
+        read_only=False,  allow_null=True, queryset=TPO.objects.all())
     point2 = serializers.PrimaryKeyRelatedField(
-         read_only=False, queryset=Point.objects.all())
+         read_only=False, allow_null=True, queryset=Point.objects.all())
     type_of_trakt = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeOfTrakt.objects.all())
+        read_only=False, allow_null=True,  queryset=TypeOfTrakt.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Customer.objects.all())
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
     system = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=System.objects.all())
     id_outfit = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Outfit.objects.all())
+        read_only=False, allow_null=True, queryset=Outfit.objects.all())
 
 
 
