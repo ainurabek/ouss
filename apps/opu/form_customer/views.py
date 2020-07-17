@@ -152,7 +152,7 @@ class FormCustomerCircCreateAPIView(APIView):
         if serializer.is_valid():
             data=serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
             for img in request.FILES.getlist('order'):
-                OrderCusPhoto.objects.create(order=img, form51=data)
+                OrderCusPhoto.objects.create(order=img, form_customer=data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
