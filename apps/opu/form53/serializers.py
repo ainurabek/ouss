@@ -7,19 +7,20 @@ from apps.opu.circuits.serializers import CircuitList
 class Order53PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order53Photo
-        fields = ("id", "order")
+        fields = ("id", "src")
 
 class Schema53PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schema53Photo
-        fields = ("id", "schema")
+        fields = ("id", "src")
 
 class Form53CreateSerializer(serializers.ModelSerializer):
+
     """Создания Формы 5.3"""
 
     class Meta:
         model = Form53
-        fields = ("id",  "order", "schema", "comments")
+        fields = ("id",  "comments")
 
 class Form53Serializer(serializers.ModelSerializer):
     """Список Формы 5.3"""
