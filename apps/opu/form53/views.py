@@ -99,6 +99,7 @@ class Form53CreateViewAPI(APIView):
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
+
             for img in request.FILES.getlist('schema'):
                 Schema53Photo.objects.create(src=img, form53=data)
 

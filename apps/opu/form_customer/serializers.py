@@ -81,11 +81,12 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     circuit = CircuitSerializer()
     signalization = SignalizationSerializer()
     customer = CustomerFormSerializer()
-    order = OrderCusPhotoSerializer()
+    order_cust_photo = OrderCusPhotoSerializer(many=True)
 
     class Meta:
         model = Form_Customer
-        fields = ("id", "circuit", 'customer', "object", "amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")
+        fields = ("id", "circuit", 'customer', "object", "amount_flow", "signalization",
+                  "type_of_using", "num_order", "order_cust_photo", "comments")
 
 
 class FormCustomerCreateSerializer(serializers.ModelSerializer):
