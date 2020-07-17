@@ -107,16 +107,21 @@ class Form53CreateViewAPI(APIView):
                 Order53Photo.objects.create(src=img, form53=data)
             for i in circuit.transit.all():
                 if circuit != i:
-                    Form53.objects.create(
+                    form53 = Form53.objects.create(
                         circuit=i,
-                        order=data.order, schema=data.schema, comments= data.comments
+                        comments= data.comments
                     )
+                    form53.schema53_photo.add(*data.schema53_photo.all())
+                    form53.order53_photo.add(*data.order53_photo.all())
+
             for i in circuit.transit2.all():
                 if circuit != i:
-                    Form53.objects.create(
+                    form53 = Form53.objects.create(
                         circuit=i,
-                        order=data.order, schema=data.schema, comments= data.comments
+                        comments= data.comments
                     )
+                    form53.schema53_photo.add(*data.schema53_photo.all())
+                    form53.order53_photo.add(*data.order53_photo.all())
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
