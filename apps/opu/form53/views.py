@@ -99,29 +99,30 @@ class Form53CreateViewAPI(APIView):
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
+            print("+++++++++++++++++++++++++++++++")
 
             for img in request.FILES.getlist('schema'):
-                Schema53Photo.objects.create(src=img, form53=data)
+                schema = Schema53Photo.objects.create(src=img)
+                schema.form53.add(data)
 
             for img in request.FILES.getlist('order'):
-                Order53Photo.objects.create(src=img, form53=data)
+                order = Order53Photo.objects.create(src=img)
+                order.form53.add(data)
             for i in circuit.transit.all():
                 if circuit != i:
                     form53 = Form53.objects.create(
-                        circuit=i,
-                        comments= data.comments
+                        circuit=i, comments= data.comments
+                    )
+                    form53.schema53_photo.add(*data.schema53_photo.all())
+                    form53.order53_photo.add(*data.order53_photo.all())
+            for i in circuit.transit2.all():
+                if circuit != i:
+                    form53 = Form53.objects.create(
+                        circuit=i, comments=data.comments
                     )
                     form53.schema53_photo.add(*data.schema53_photo.all())
                     form53.order53_photo.add(*data.order53_photo.all())
 
-            for i in circuit.transit2.all():
-                if circuit != i:
-                    form53 = Form53.objects.create(
-                        circuit=i,
-                        comments= data.comments
-                    )
-                    form53.schema53_photo.add(*data.schema53_photo.all())
-                    form53.order53_photo.add(*data.order53_photo.all())
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
