@@ -96,4 +96,4 @@ class FormCustomerCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form_Customer
-        fields = ('id', "amount_flow", "signalization", "type_of_using", "num_order", "order", "comments")
+        fields = ('id', "amount_flow", "signalization", "type_of_using", "num_order", "comments")
