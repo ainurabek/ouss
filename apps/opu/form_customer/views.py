@@ -191,7 +191,7 @@ class OrderCusPhotoCreateView(APIView):
     def post(self, request, pk):
         form_cus = Form_Customer.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
-            OrderCusPhoto.objects.create(order=img, form_cus=form_cus)
+            OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
         return Response(status=status.HTTP_201_CREATED)
 
 
