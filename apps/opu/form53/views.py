@@ -180,9 +180,18 @@ class Order53PhotoCreateView(APIView):
     def post(self, request, pk):
         form53 = Form53.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
-            Order53Photo.objects.create(src=img, form53=form53)
+            photo_obj = Order53Photo.objects.create(src=img, form53=form53)
+            photo_obj.form53.add(form53)
         return Response(status=status.HTTP_201_CREATED)
-
+class Schema53PhotoCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    def post(self, request, pk):
+        form53 = Form53.objects.get(pk=pk)
+        for img in request.FILES.getlist('schema'):
+            photo_obj = Schema53Photo.objects.create(src=img)
+            photo_obj.form53.add(form53)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 
@@ -196,15 +205,6 @@ class Order53PhotoDeleteView(APIView):
         print(order)
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-class Schema53PhotoCreateView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-    def post(self, request, pk):
-        form53 = Form53.objects.get(pk=pk)
-        for img in request.FILES.getlist('schema'):
-            Schema53Photo.objects.create(src=img, form53=form53)
-        return Response(status=status.HTTP_201_CREATED)
 
 
 class Schema53PhotoDeleteView(APIView):
