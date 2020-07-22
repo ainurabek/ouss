@@ -1,10 +1,8 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from django.http import Http404
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
@@ -27,8 +25,8 @@ from apps.opu.objects.serializers import LPDetailSerializer
 
 from apps.opu.objects.serializers import IPSerializer
 
-# from apps.accounts.permissions import IsDispatchOnly
 from apps.accounts.permissions import IsOpuOnly
+from apps.opu.services import ListWithPKMixin
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -255,18 +253,16 @@ class ObjectAllView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = AllObjectSerializer
 
-class ObjectListView(APIView):
+class ObjectListView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
+    model = Object
+    serializer = TraktListSerializer
+    field_for_filter = "id_parent"
 
-    def get(self, request, pk):
-        lp = get_object_or_404(Object, pk=pk)
-        trakt = Object.objects.filter(id_parent=lp.pk)
-        data = TraktListSerializer(trakt, many=True).data
-        return Response(data)
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
@@ -413,15 +409,13 @@ class SelectPointView(APIView):
         return Response(serializer)
 
 
-class ObjectList(APIView):
+class ObjectList(APIView, ListWithPKMixin):
     """Список ПГ, ВГ итд"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, pk):
-        objs = Object.objects.filter(id_parent=pk)
-        serializer = ObjectListSerializer(objs, many=True).data
-        return Response(serializer)
+    model = Object
+    serializer = ObjectListSerializer
+    field_for_filter = "id_parent"
 
 
 class CreateLeftTrassaView(APIView):

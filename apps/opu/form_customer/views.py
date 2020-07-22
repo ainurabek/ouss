@@ -20,12 +20,11 @@ from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, For
 
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 
-from apps.opu.form_customer.serializers import ObjectFormCustomer, OrderCusPhotoSerializer
+from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
 
 from apps.accounts.permissions import IsOpuOnly
-
-
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin
 
 
 class CustomerListView(ListView):
@@ -123,23 +122,21 @@ class FormCustomerListAPIView(ListAPIView):
 
 
 
-class CircuitListAPIView(APIView):
+class CircuitListAPIView(APIView, ListWithPKMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    model = Circuit
+    serializer = CircuitListSerializer
+    field_for_filter = "customer_id"
 
-    def get(self, request, pk):
-        circuit = Circuit.objects.filter(customer_id=pk)
-        serializer = CircuitListSerializer(circuit, many=True)
-        return Response(serializer.data)
 
-class ObjectListAPIView(APIView):
+class ObjectListAPIView(APIView, ListWithPKMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    model = Object
+    serializer = ObjectFormCustomer
+    field_for_filter = "customer_id"
 
-    def get(self, request, pk):
-        object = Object.objects.filter(customer_id=pk)
-        serializer = ObjectFormCustomer(object, many=True)
-        return Response(serializer.data)
 
 class FormCustomerCircCreateAPIView(APIView):
     """Создания Формы арендаторов"""
@@ -157,6 +154,7 @@ class FormCustomerCircCreateAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class FormCustomerObjCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
@@ -166,9 +164,12 @@ class FormCustomerObjCreateAPIView(APIView):
         object = Object.objects.get(pk=pk)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            for img in request.FILES.getlist('order'):
+                OrderCusPhoto.objects.create(order=img, form_customer=data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""
@@ -183,24 +184,16 @@ class FormCustomerDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form_Customer.objects.all()
 
-class OrderCusPhotoCreateView(APIView):
+
+class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-    def post(self, request, pk):
-        form_cus = Form_Customer.objects.get(pk=pk)
-        for img in request.FILES.getlist('order'):
-            OrderCusPhoto.objects.create(order=img, form_cus=form_cus)
-        return Response(status=status.HTTP_201_CREATED)
+    model = Form_Customer
+    model_photo = OrderCusPhoto
+    search_fields_for_img = ("order", )
 
 
-class OrderCusPhotoDeleteView(APIView):
+class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def delete(self, request, form_pk, order_pk):
-        form_cus=Form_Customer.objects.get(pk=form_pk)
-        order = OrderCusPhoto.objects.get(pk=order_pk, form_customer=form_cus)
-        print(order)
-        order.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+    model_for_delete = OrderCusPhoto
