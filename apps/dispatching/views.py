@@ -1,21 +1,15 @@
 import datetime
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP
-
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets
-
 now = datetime.datetime.now()
-from django.views.generic import View
 from django.shortcuts import render, redirect, get_object_or_404
-
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
 from .forms import EventForm
@@ -182,7 +176,7 @@ class EventCircuitCreateViewAPI(APIView):
     """Создания Event"""
 
     def post(self, request, pk):
-        circuit = Circuit.objects.get(pk=pk)
+        circuit = get_object_or_404(Circuit, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
@@ -203,7 +197,7 @@ class EventObjectCreateViewAPI(APIView):
     """Создания Event"""
 
     def post(self, request, pk):
-        object = Object.objects.get(pk=pk)
+        object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
