@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import View, ListView, UpdateView
 from apps.opu.form53.forms import Form53Form
@@ -7,19 +7,14 @@ from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
 from rest_framework import status
-from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer, Order53PhotoSerializer, Schema53PhotoSerializer
+from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-
 from apps.opu.form51.models import Region
-
 from apps.opu.form53.serializers import Region53Serializer
-
 from apps.accounts.permissions import IsOpuOnly
-
-
-
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin
 
 
 class Form53CreateView(View):
@@ -99,7 +94,6 @@ class Form53CreateViewAPI(APIView):
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
-            print("+++++++++++++++++++++++++++++++")
 
             for img in request.FILES.getlist('schema'):
                 schema = Schema53Photo.objects.create(src=img)
@@ -125,6 +119,7 @@ class Form53CreateViewAPI(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class Form53ListAPIView(ListAPIView):
@@ -177,11 +172,17 @@ class Region53ListAPIView(ListAPIView):
 class Order53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
+
     def post(self, request, pk):
-        form53 = Form53.objects.get(pk=pk)
+        form53 = get_object_or_404(Form53, pk=pk)
         for img in request.FILES.getlist('order'):
+
+            photo = Order53Photo.objects.create(src=img)
+            photo.form53.add(form53)
+
             photo_obj = Order53Photo.objects.create(src=img)
             photo_obj.form53.add(form53)
+
         return Response(status=status.HTTP_201_CREATED)
 
 class Schema53PhotoCreateView(APIView):
@@ -194,26 +195,26 @@ class Schema53PhotoCreateView(APIView):
             photo_obj.form53.add(form53)
         return Response(status=status.HTTP_201_CREATED)
 
+class Order53PhotoDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model_for_delete = Order53Photo
 
 
-class Order53PhotoDeleteView(APIView):
+class Schema53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-    def delete(self, request, form_pk, order_pk):
-        form53=Form53.objects.get(pk=form_pk)
-        order = Order53Photo.objects.get(pk=order_pk, form53=form53)
-        print(order)
-        order.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post(self, request, pk):
+        form53 = get_object_or_404(Form53, pk=pk)
+        for img in request.FILES.getlist('schema'):
+            photo = Schema53Photo.objects.create(src=img)
+            photo.form53.add(form53)
+        return Response(status=status.HTTP_201_CREATED)
 
 
-class Schema53PhotoDeleteView(APIView):
+
+class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def delete(self, request, form_pk, schema_pk):
-        form53=Form53.objects.get(pk=form_pk)
-        schema = Schema53Photo.objects.get(pk=schema_pk, form53=form53)
-        schema.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    model_for_delete = Schema53Photo

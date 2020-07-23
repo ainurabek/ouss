@@ -1,12 +1,10 @@
-from django.shortcuts import render
-from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from knox.auth import TokenAuthentication
 from apps.opu.customer.models import Customer
 from apps.opu.customer.serializers import CustomerSerializer
 from rest_framework import viewsets, generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
@@ -22,6 +20,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 	filter_backends = (SearchFilter, DjangoFilterBackend)
 	search_fields = ('customer', 'abr', 'adding', 'contact_name')
 	filterset_fields =  ('customer', 'abr', 'adding', 'contact_name')
+
 
 class CustomerEditView(generics.RetrieveUpdateAPIView):
 	lookup_field = 'pk'

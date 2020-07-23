@@ -132,7 +132,7 @@ migrations/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
+media/
 # Pyre type checker
 .pyre/
 

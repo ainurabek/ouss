@@ -30,7 +30,7 @@ urlpatterns = [
 
 #orderphoto
     path("api/ordercusphoto/create/<int:pk>/", views.OrderCusPhotoCreateView.as_view()),
-    path("api/ordercusphoto/delete/<int:form_pk>/<int:order_pk>/", views.OrderCusPhotoDeleteView.as_view()),
+    path("api/ordercusphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderCusPhotoDeleteView.as_view()),
 
 
     path('', include(router.urls))

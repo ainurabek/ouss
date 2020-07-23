@@ -1,13 +1,9 @@
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.opu.circuits.serializers import CircuitList, CircuitEdit
-from rest_framework import permissions, viewsets, status, generics
+from rest_framework import generics
 from apps.opu.circuits.models import Circuit
-from rest_framework.response import Response
-
-from apps.opu.objects.models import Object
 from rest_framework.views import APIView
-from django.http import Http404
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -18,27 +14,19 @@ from django_filters.rest_framework import DjangoFilterBackend
 #     authentication_classes = (TokenAuthentication,)
 #     permission_classes = (IsAuthenticatedOrReadOnly,)
 from apps.accounts.permissions import IsOpuOnly
+from apps.opu.services import ListWithPKMixin
 
 
-class CircuitListViewSet(APIView):
+class CircuitListViewSet(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order', 'date_order',
                      'num_arenda', 'speed', 'measure', 'point1', 'point2', 'customer', 'id_object', 'mode', 'type_com')
     filterset_fields = ('point1', 'point2', 'customer', 'id_object', 'category')
-
-    def get_object(self, pk):
-        try:
-            return Object.objects.get(pk=pk)
-        except Object.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        trakt = self.get_object(pk)
-        circuit = Circuit.objects.filter(id_object=trakt.pk)
-        data = CircuitList(circuit, many=True).data
-        return Response(data)
+    model = Circuit
+    serializer = CircuitList
+    field_for_filter = "id_object"
 
 
 class CircuitEditView(generics.RetrieveUpdateAPIView):

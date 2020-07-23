@@ -7,24 +7,15 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.urls import reverse_lazy
 from django.views.generic import View, ListView, UpdateView
-
-from rest_framework import  generics
 from apps.opu.form51.forms import Form51Form
 from apps.opu.form51.models import Form51, Region
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
     Form51ReserveSerializer
 from apps.opu.objects.models import Object
-from rest_framework.parsers import MultiPartParser, FormParser
-
-
 # Templates
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
-
-from apps.opu.form51.serializers import OrderPhotoSerializer
-
-from apps.opu.form51.serializers import SchemaPhotoSerializer
-
 from apps.accounts.permissions import IsOpuOnly
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin
 
 
 class Form51CreateView(View):
@@ -123,7 +114,7 @@ class FormCreateViewAPI(APIView):
     """Создания Формы 5.1"""
 
     def post(self, request, pk):
-        obj = Object.objects.get(pk=pk)
+        obj = Object.objects.get_object_or_404()
         serializer = Form51CreateSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -199,17 +190,19 @@ class RegionListAPIView(ListAPIView):
     serializer_class = RegionSerializer
 
 
-class ReserveDetailAPIView(APIView):
+class ReserveDetailAPIView(APIView, ListWithPKMixin):
     """ Резерв """
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    model = Form51
+    serializer = Form51ReserveSerializer
+    field_for_filter = "pk"
 
-    def get(self, request, pk):
-        form51 = Form51.objects.get(pk=pk)
-        serializer = Form51ReserveSerializer(form51)
-        return Response(serializer.data)
 
 class ReserveDelete(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
+
     def delete(self, request, form_pk, reserve_pk):
         form51=Form51.objects.get(pk=form_pk)
         obj=Object.objects.get(pk=reserve_pk)
@@ -219,43 +212,32 @@ class ReserveDelete(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class OrderPhotoCreateView(APIView):
+
+class OrderPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-    def post(self, request, pk):
-        form51 = Form51.objects.get(pk=pk)
-        for img in request.FILES.getlist('order'):
-            OrderPhoto.objects.create(src=img, form51=form51)
-        return Response(status=status.HTTP_201_CREATED)
+    model = Form51
+    model_photo = OrderPhoto
+    search_fields_for_img = ("order",)
 
 
-class OrderPhotoDeleteView(APIView):
+class OrderPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Form51
+    model_for_delete = OrderPhoto
 
-    def delete(self, request, form_pk, order_pk):
-        form51=Form51.objects.get(pk=form_pk)
-        order = OrderPhoto.objects.get(pk=order_pk, form51=form51)
-        print(order)
-        order.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class SchemaPhotoCreateView(APIView):
+class SchemaPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-    def post(self, request, pk):
-        form51 = Form51.objects.get(pk=pk)
-        for img in request.FILES.getlist('schema'):
-            SchemaPhoto.objects.create(src=img, form51=form51)
-        return Response(status=status.HTTP_201_CREATED)
+    model = Form51
+    model_photo = SchemaPhoto
+    search_fields_for_img = ("schema",)
 
 
-class SchemaPhotoDeleteView(APIView):
+class SchemaPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def delete(self, request, form_pk, schema_pk):
-        form51=Form51.objects.get(pk=form_pk)
-        schema = SchemaPhoto.objects.get(pk=schema_pk, form51=form51)
-        schema.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    model = Form51
+    model_for_delete = SchemaPhoto
