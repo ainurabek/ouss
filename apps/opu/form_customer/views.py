@@ -180,9 +180,17 @@ class FormCustomerDeleteAPIView(DestroyAPIView):
 class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
+
     model = Form_Customer
     model_photo = OrderCusPhoto
     search_field_for_img = "order"
+
+    def post(self, request, pk):
+        form_cus = Form_Customer.objects.get(pk=pk)
+        for img in request.FILES.getlist('order'):
+            OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
+        return Response(status=status.HTTP_201_CREATED)
+
 
 
 class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
