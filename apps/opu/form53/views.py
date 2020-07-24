@@ -14,7 +14,8 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from apps.opu.form51.models import Region
 from apps.opu.form53.serializers import Region53Serializer
 from apps.accounts.permissions import IsOpuOnly
-from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin
+from apps.opu.form53.services import create_photo_for_form53
+from apps.opu.services import PhotoDeleteMixin
 
 
 class Form53CreateView(View):
@@ -88,20 +89,17 @@ class Form53CreateViewAPI(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     """Создания Формы 5.3"""
     def post(self, request, pk):
-        circuit = Circuit.objects.get(pk=pk)
+        circuit = get_object_or_404(Circuit, pk=pk)
         if Form53.objects.filter(circuit=circuit).exists():
             return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
+            create_photo_for_form53(model=Form53, model_photo=Schema53Photo,
+                                    obj=data, field_name="schema", request=request)
+            create_photo_for_form53(model=Form53, model_photo=Order53Photo,
+                                    obj=data, field_name="order", request=request)
 
-            for img in request.FILES.getlist('schema'):
-                schema = Schema53Photo.objects.create(src=img)
-                schema.form53.add(data)
-
-            for img in request.FILES.getlist('order'):
-                order = Order53Photo.objects.create(src=img)
-                order.form53.add(data)
             for i in circuit.transit.all():
                 if circuit != i:
                     form53 = Form53.objects.create(
@@ -161,6 +159,7 @@ class Form53DeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53
 
+
 class Region53ListAPIView(ListAPIView):
     """Список Регоинов"""
     authentication_classes = (TokenAuthentication,)
@@ -175,25 +174,10 @@ class Order53PhotoCreateView(APIView):
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        for img in request.FILES.getlist('order'):
-
-            photo = Order53Photo.objects.create(src=img)
-            photo.form53.add(form53)
-
-            photo_obj = Order53Photo.objects.create(src=img)
-            photo_obj.form53.add(form53)
-
+        create_photo_for_form53(model=Form53, model_photo=Order53Photo,
+                                obj=form53, field_name="order", request=request)
         return Response(status=status.HTTP_201_CREATED)
 
-class Schema53PhotoCreateView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-    def post(self, request, pk):
-        form53 = Form53.objects.get(pk=pk)
-        for img in request.FILES.getlist('schema'):
-            photo_obj = Schema53Photo.objects.create(src=img)
-            photo_obj.form53.add(form53)
-        return Response(status=status.HTTP_201_CREATED)
 
 class Order53PhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
@@ -207,11 +191,9 @@ class Schema53PhotoCreateView(APIView):
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        for img in request.FILES.getlist('schema'):
-            photo = Schema53Photo.objects.create(src=img)
-            photo.form53.add(form53)
+        create_photo_for_form53(model=Form53, model_photo=Schema53Photo,
+                                obj=form53, field_name="schema", request=request)
         return Response(status=status.HTTP_201_CREATED)
-
 
 
 class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):

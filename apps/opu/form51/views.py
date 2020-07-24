@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework import status
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -15,7 +15,7 @@ from apps.opu.objects.models import Object
 # Templates
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
 from apps.accounts.permissions import IsOpuOnly
-from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 
 
 class Form51CreateView(View):
@@ -114,16 +114,13 @@ class FormCreateViewAPI(APIView):
     """Создания Формы 5.1"""
 
     def post(self, request, pk):
-        obj = Object.objects.get_object_or_404()
+        obj = get_object_or_404(Object, pk=pk)
         serializer = Form51CreateSerializer(data=request.data)
 
         if serializer.is_valid():
-            data = serializer.save(object=obj, created_by=self.request.user.profile)
-            for img in request.FILES.getlist('schema'):
-                SchemaPhoto.objects.create(src=img, form51=data)
-
-            for img in request.FILES.getlist('order'):
-                OrderPhoto.objects.create(src=img, form51=data)
+            data = serializer.save(object=obj, created_by=request.user.profile)
+            create_photo(model=Form51, model_photo=SchemaPhoto, obj=data, field_name="schema", request=request)
+            create_photo(model=Form51, model_photo=OrderPhoto, obj=data, field_name="order", request=request)
 
             for i in obj.transit.all():
                 if obj != i:
@@ -204,8 +201,8 @@ class ReserveDelete(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def delete(self, request, form_pk, reserve_pk):
-        form51=Form51.objects.get(pk=form_pk)
-        obj=Object.objects.get(pk=reserve_pk)
+        form51 = get_object_or_404(Form51, pk=form_pk)
+        obj = get_object_or_404(Object, pk=reserve_pk)
         if form51.reserve_object.filter(pk=reserve_pk).exists():
             form51.reserve_object.remove(obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -218,7 +215,7 @@ class OrderPhotoCreateView(APIView, PhotoCreateMixin):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model = Form51
     model_photo = OrderPhoto
-    search_fields_for_img = ("order",)
+    search_field_for_img = "order"
 
 
 class OrderPhotoDeleteView(APIView, PhotoDeleteMixin):
@@ -233,7 +230,7 @@ class SchemaPhotoCreateView(APIView, PhotoCreateMixin):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model = Form51
     model_photo = SchemaPhoto
-    search_fields_for_img = ("schema",)
+    search_field_for_img = "schema"
 
 
 class SchemaPhotoDeleteView(APIView, PhotoDeleteMixin):

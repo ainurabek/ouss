@@ -10,21 +10,15 @@ from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
 from apps.opu.customer.models import Customer
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
-
-
 from apps.opu.form_customer.forms import FormCustForm
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
     CircuitListSerializer
-
 from apps.opu.form_customer.serializers import CustomerFormSerializer
-
 from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
-
 from apps.accounts.permissions import IsOpuOnly
-from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 
 
 class CustomerListView(ListView):
@@ -144,12 +138,11 @@ class FormCustomerCircCreateAPIView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
-        circuit = Circuit.objects.get(pk=pk)
+        circuit = get_object_or_404(Circuit, pk=pk)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            data=serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
-            for img in request.FILES.getlist('order'):
-                OrderCusPhoto.objects.create(order=img, form_customer=data)
+            data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
+            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -161,12 +154,11 @@ class FormCustomerObjCreateAPIView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
-        object = Object.objects.get(pk=pk)
+        object = get_object_or_404(Object, pk=pk)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
-            for img in request.FILES.getlist('order'):
-                OrderCusPhoto.objects.create(order=img, form_customer=data)
+            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +183,7 @@ class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
 
     model = Form_Customer
     model_photo = OrderCusPhoto
-    search_fields_for_img = ("order", )
+    search_field_for_img = "order"
 
     def post(self, request, pk):
         form_cus = Form_Customer.objects.get(pk=pk)

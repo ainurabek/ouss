@@ -2,13 +2,12 @@ import datetime
 
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import get_user_model, login, logout, authenticate
+from django.contrib.auth import get_user_model, login, logout
 from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
-from django.contrib.auth.signals import user_logged_in, user_logged_out
-from rest_framework import permissions, viewsets, status, generics
+from rest_framework import permissions, viewsets, status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -27,10 +26,8 @@ class Register(APIView):
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username', False)
-        print(username)
         password = request.data.get('password', False)
         role = request.data.get('role', False)
-        print(role)
         department = request.data.get('department', False)
         subdepartment = request.data.get('subdepartment', False)
 
@@ -125,7 +122,6 @@ class CreateProfileAPIView(APIView):
     def post(self, request):
         data = request.data
         user = request.user
-        print(user)
         first_name = data['first_name']
         last_name = data['last_name']
         middle_name = data['middle_name']
@@ -160,11 +156,8 @@ class DepartmentKTAPIView(viewsets.ModelViewSet):
 
 def department_view(request, department_id):
     department = DepartmentKT.objects.get(id=department_id)
-    print(department.id)
     user = request.user
-    print(user)
     if user.department.id != department.id:
-        print(user.department.id)
         return JsonResponse({'error': 'Вы не имеете право зайти в этот отдел'}, status=401)
     else:
         return JsonResponse({'success': 'Success'}, status=202)
@@ -182,13 +175,8 @@ class SubdepartmentKTAPIView(viewsets.ModelViewSet):
 def subdepartment_view(request, department_id, subdepartment_id):
     department = DepartmentKT.objects.get(id=department_id)
     subdepartment= SubdepartmentKT.objects.get(department=department, id=subdepartment_id)
-    print(department.id)
-    print(subdepartment.id)
     user = request.user
-    print(user)
     if user.department.id != department.id and user.subdeparment.id != subdepartment.id:
-        print(user.department.id)
-        print(user.subdepartment.id)
         return JsonResponse({'error': 'Вы не имеете право зайти в этот отдел'}, status=401)
     else:
         return JsonResponse({'success': 'Success'}, status=202)

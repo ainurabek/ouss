@@ -16,16 +16,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 import xlwt
 from django.db.models import Q
 from apps.opu.circuits.models import Circuit
-from apps.opu.objects.models import Category
 from apps.opu.form51.models import Form51
 from apps.opu.form_customer.models import Form_Customer
 from apps.opu.objects.serializers import LPEditSerializer
-
 from apps.opu.objects.serializers import LPDetailSerializer
-
 from apps.opu.objects.serializers import IPSerializer
-
 from apps.accounts.permissions import IsOpuOnly
+from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
+    update_circuit
 from apps.opu.services import ListWithPKMixin
 
 
@@ -281,23 +279,11 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = get_object_or_404(Object, pk=pk)
-        data = request.data
-        name = data['name']
-        serializer = ObjectCreateSerializer(data=data)
+        serializer = ObjectCreateSerializer(data=request.data)
 
-        if parent.type_of_trakt is not None:
-            if parent.type_of_trakt.name == 'ВГ':
-                type_obj = TypeOfTrakt.objects.get(name='ПГ')
-                request.data["type_of_trakt"] = type_obj.pk
-            elif parent.type_of_trakt.name == 'ТГ':
-                type_obj = TypeOfTrakt.objects.get(name='ВГ')
-                request.data["type_of_trakt"] = type_obj.pk
-            elif parent.type_of_trakt.name == 'ЧГ':
-                type_obj = TypeOfTrakt.objects.get(name='ТГ')
-                request.data["type_of_trakt"] = type_obj.pk
-            elif parent.type_of_trakt.name == 'РГ':
-                type_obj = TypeOfTrakt.objects.get(name='ЧГ')
-                request.data["type_of_trakt"] = type_obj.pk
+        if check_parent_type_of_trakt(parent):
+            type_obj = get_type_of_trakt(parent)
+            request.data["type_of_trakt"] = type_obj.pk
 
         if serializer.is_valid():
             instance=serializer.save(
@@ -305,32 +291,11 @@ class ObjectCreateView(APIView):
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
                 our=parent.our,
-                created_by=self.request.user.profile,
-                point1=parent.point1,
-                name=parent.name+'-'+name,
-
-
+                created_by=request.user.profile,
+                name=parent.name+'-'+request.data["name"],
             )
 
-            if data['amount_channels'] == '12':
-                for x in range(1, 13):
-                    Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
-                                                     id_object=instance,
-                                                     num_circuit = x,
-                                                     category=Category.objects.get(id=instance.category.id),
-                                                     point1=Point.objects.get(id=instance.point1.id),
-                                                     point2=Point.objects.get(id=instance.point2.id),
-                                                     created_by=request.user.profile)
-            elif data['amount_channels'] == '30':
-                for x in range(1, 31):
-                    Circuit.objects.create(name=parent.name+ "-" + name + '/' + str(x),
-                                                     id_object=instance,
-                                                     num_circuit = x,
-                                                     category=Category.objects.get(id=instance.category.id),
-                                                     point1=Point.objects.get(id=instance.point1.id),
-                                                     point2=Point.objects.get(id=instance.point2.id),
-                                                     created_by=request.user.profile)
-
+            create_circuit(model=Circuit, obj=instance, request=request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -341,41 +306,14 @@ class ObjectEditView(APIView):
 
     def put(self, request, pk):
         obj = get_object_or_404(Object, pk=pk)
-        obj_name=str(obj.name)
-        obj_point1=str(obj.point1)
-        obj_point2=str(obj.point2)
+        old_obj = save_old_object(obj)
 
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
-            instance=serializer.save()
-            if obj_name != instance.name:
-                circuits = Circuit.objects.filter(id_object=instance)
-                all = Circuit.objects.filter(id_object=instance).count()+1
-                cir = 1
-                for circuit in circuits:
-                    if cir <= all:
-                        circuit.name=Circuit.objects.filter(pk=circuit.id).update(name=instance.name+"/"+str(cir))
-                        cir += 1
-
-            if obj_point1 != instance.point1 or obj_point2 != instance.point2:
-                circuits = Circuit.objects.filter(id_object=instance.id)
-                all = Circuit.objects.filter(id_object=instance.id).count() + 1
-
-                for circuit in circuits:
-                    all -= 1
-                    circuit.name = Circuit.objects.filter(pk=circuit.id).update(
-                        point1=instance.point1.id,
-                        point2=instance.point2.id)
-
-            return Response(serializer.data)
+            instance = serializer.save()
+            update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, instance, validated_data):
-        Circuit.objects.filter(id_object=instance.id).update(point1= validated_data.get('point1', instance.point1),
-                                                             point2= validated_data.get('point2', instance.point2))
-
-        return instance
-
 
 
 class SelectObjectView(APIView):
@@ -479,7 +417,7 @@ class SaveTrassaView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
-        main_obj = Object.objects.get(pk=pk)
+        main_obj = get_object_or_404(Object, pk=pk)
         for i in main_obj.transit.all():
             i.transit.add(*main_obj.transit.all())
             i.transit2.add(*main_obj.transit2.all())
