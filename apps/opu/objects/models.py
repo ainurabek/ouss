@@ -85,6 +85,7 @@ class System(models.Model):
 		return f'{self.name}, {self.id}'
 
 
+
 class Outfit(models.Model):
 	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
 	adding = models.CharField('Название', max_length=100, blank=True, null=True)
@@ -102,6 +103,16 @@ class Outfit(models.Model):
 	def __str__(self):
 		return self.outfit
 
+class OutfitWorker(models.Model):
+	name = models.CharField('ФИО', max_length=100, blank=True, null=True)
+	outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE, blank=True, null=True, related_name='outfit_worker')
+
+	class Meta:
+		verbose_name = 'Сотрудник предприятия'
+		verbose_name_plural = 'Сотрудники предприятий'
+
+	def __str__(self):
+		return self.name
 
 class Point(models.Model):
 	point = models.CharField('ИП', max_length=100, blank=True, null=True)

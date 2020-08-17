@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, System
+from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, System, OutfitWorker
 from ..circuits.models import Circuit
 from rest_framework.fields import  ReadOnlyField
 
@@ -59,6 +59,14 @@ class OutfitListSerializer(serializers.ModelSerializer):
         fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
         depth = 1
 
+class OutfitWorkerListSerializer(serializers.ModelSerializer):
+
+    outfit = OutfitListSerializer()
+
+    class Meta:
+        model = OutfitWorker
+        fields = ('id', 'outfit', 'name')
+        depth = 1
 
 class OutfitCreateSerializer(serializers.ModelSerializer):
     tpo = serializers.PrimaryKeyRelatedField(
