@@ -5,7 +5,11 @@ from apps.accounts.models import DepartmentKT, SubdepartmentKT
 
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
+
+from apps.opu.objects.models import Outfit, Object, IP, Point
+
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
+
 
 
 
@@ -81,6 +85,8 @@ class Event(models.Model):
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, related_name='event_cir', verbose_name="Каналы", null=True, blank=True)
     ips = models.ForeignKey(IP, on_delete=models.CASCADE, verbose_name="ИП", related_name='event_ips', null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
+    point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.CASCADE, related_name="point1_event", null=True, blank=True)
+    point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.CASCADE, related_name="point2_event", null=True, blank=True)
 
 
     class Meta:

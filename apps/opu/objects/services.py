@@ -1,8 +1,9 @@
-from apps.opu.objects.models import TypeOfTrakt
+from apps.opu.objects.models import TypeOfTrakt, Object
 
 
 def check_parent_type_of_trakt(parent):
     return True if parent.type_of_trakt is not None else False
+
 
 def get_parent_type_of_trakt(parent_obj):
     if check_parent_type_of_trakt(parent=parent_obj):
@@ -21,6 +22,8 @@ def get_type_of_trakt(parent_obj):
             type_obj = TypeOfTrakt.objects.get(name='ТГ')
         elif type_of_trakt_parent.name == 'РГ':
             type_obj = TypeOfTrakt.objects.get(name='ЧГ')
+        elif type_of_trakt_parent.name == 'ПГ':
+            type_obj = TypeOfTrakt.objects.get(name='ПГ')
         return type_obj
     return None
 
@@ -44,6 +47,7 @@ def save_old_object(obj):
     obj_point2 = str(obj.point2)
     return obj_name, obj_point1, obj_point2
 
+
 def update_circuit(model, old_obj, obj):
     obj_name, obj_point1, obj_point2 = old_obj
     if obj_name != obj.name:
@@ -64,3 +68,15 @@ def update_circuit(model, old_obj, obj):
             circuit.name = model.objects.filter(pk=circuit.id).update(
                 point1=obj.point1.id,
                 point2=obj.point2.id)
+
+
+def update_amount_channels(obj):
+    if obj.id_parent:
+        count = obj.amount_channels
+        while obj.id_parent != None:
+            if count == "" or count == None:
+                break
+            obj = Object.objects.get(pk=obj.id_parent.pk)
+            if obj.amount_channels == "" or obj.amount_channels == None:
+                break
+            Object.objects.filter(pk=obj.pk).update(amount_channels=int(obj.amount_channels)+int(count))
