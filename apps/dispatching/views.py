@@ -141,7 +141,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -149,6 +148,7 @@ class IPEventListAPIView(ListAPIView):
     serializer_class = IPSSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('point_id', 'object_id')
+
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -162,6 +162,7 @@ class EventIPCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CircuitEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -169,6 +170,7 @@ class CircuitEventListAPIView(ListAPIView):
     serializer_class = CircuitEventList
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('id_object', 'customer', 'name', 'type_using')
+
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -183,6 +185,7 @@ class EventCircuitCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ObjectEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -190,6 +193,7 @@ class ObjectEventListAPIView(ListAPIView):
     serializer_class = ObjectEventSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer')
+
 
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -204,12 +208,14 @@ class EventObjectCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
+
 
 #удаление события
 class EventDeleteAPIView(DestroyAPIView):

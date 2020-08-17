@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt
+from apps.opu.objects.models import Object, TPO, Outfit, Point, IP
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +13,6 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-import xlwt
 from django.db.models import Q
 from apps.opu.circuits.models import Circuit
 from apps.opu.form51.models import Form51
@@ -23,7 +22,7 @@ from apps.opu.objects.serializers import LPDetailSerializer
 from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
-    update_circuit
+    update_circuit, update_amount_channels
 from apps.opu.services import ListWithPKMixin
 
 
@@ -37,38 +36,38 @@ class TPOListView(viewsets.ModelViewSet):
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
 
-    def export_csv(request):
-        if 'csv' in request.GET:
-            response = HttpResponse(content_type='application/ms-excel')
-            response['Content-Disposition'] = 'attachment; filename="tpo.xls"'
-            wb = xlwt.Workbook(encoding='utf-8')
-            ws = wb.add_sheet('TPO')
-            # Sheet header, first row
-            row_num = 0
-            font_style = xlwt.XFStyle()
-            font_style.font.bold = True
-            columns = ['ID', 'Название', 'Индекс']
-            for col_num in range(len(columns)):
-                ws.write(row_num, col_num, columns[col_num], font_style)
-
-            # Sheet body, remaining rows
-            font_style = xlwt.XFStyle()
-            rows = TPO.objects.all()
-            if 'name' in request.GET and request.GET.get('name', None):
-                rows = rows.filter(name=request.GET.get('name'))
-            if 'index' in request.GET and request.GET.get('index', None):
-                rows = rows.filter(tpo=request.GET['index'])
-
-            for row in rows:
-                row_num += 1
-                item = []
-                item.append(row.id)
-                item.append(row.name)
-                item.append(row.index)
-                for col_num in range(len(item)):
-                    ws.write(row_num, col_num, item[col_num], font_style)
-            wb.save(response)
-            return response
+    # def export_csv(request):
+    #     if 'csv' in request.GET:
+    #         response = HttpResponse(content_type='application/ms-excel')
+    #         response['Content-Disposition'] = 'attachment; filename="tpo.xls"'
+    #         wb = xlwt.Workbook(encoding='utf-8')
+    #         ws = wb.add_sheet('TPO')
+    #         # Sheet header, first row
+    #         row_num = 0
+    #         font_style = xlwt.XFStyle()
+    #         font_style.font.bold = True
+    #         columns = ['ID', 'Название', 'Индекс']
+    #         for col_num in range(len(columns)):
+    #             ws.write(row_num, col_num, columns[col_num], font_style)
+    #
+    #         # Sheet body, remaining rows
+    #         font_style = xlwt.XFStyle()
+    #         rows = TPO.objects.all()
+    #         if 'name' in request.GET and request.GET.get('name', None):
+    #             rows = rows.filter(name=request.GET.get('name'))
+    #         if 'index' in request.GET and request.GET.get('index', None):
+    #             rows = rows.filter(tpo=request.GET['index'])
+    #
+    #         for row in rows:
+    #             row_num += 1
+    #             item = []
+    #             item.append(row.id)
+    #             item.append(row.name)
+    #             item.append(row.index)
+    #             for col_num in range(len(item)):
+    #                 ws.write(row_num, col_num, item[col_num], font_style)
+    #         wb.save(response)
+    #         return response
 
 
 class TPOCreateView(generics.CreateAPIView):
@@ -97,6 +96,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
 
 
 # Предприятия
+
 class OutfitsListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -187,6 +187,7 @@ class IPDeleteView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
+
 class IPListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -196,9 +197,8 @@ class IPListView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('point_id', 'object_id', 'tpo_id')
 
-'''
-Линии передачи
-'''
+
+""" Линии передачи """
 
 
 class LPListView(viewsets.ModelViewSet):
@@ -215,17 +215,14 @@ class LPListView(viewsets.ModelViewSet):
             return LPDetailSerializer
 
 
-
 class LPCreateView(generics.CreateAPIView):
     queryset = Object.objects.all()
     serializer_class = LPCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
-
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -251,6 +248,7 @@ class ObjectAllView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = AllObjectSerializer
 
+
 class ObjectListView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -260,7 +258,6 @@ class ObjectListView(APIView, ListWithPKMixin):
     model = Object
     serializer = TraktListSerializer
     field_for_filter = "id_parent"
-
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
@@ -286,7 +283,7 @@ class ObjectCreateView(APIView):
             request.data["type_of_trakt"] = type_obj.pk
 
         if serializer.is_valid():
-            instance=serializer.save(
+            instance = serializer.save(
                 id_parent=parent,
                 type_line=parent.type_line,
                 id_outfit=parent.id_outfit,
@@ -296,6 +293,7 @@ class ObjectCreateView(APIView):
             )
 
             create_circuit(model=Circuit, obj=instance, request=request)
+            update_amount_channels(obj=instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -357,7 +355,6 @@ class ObjectList(APIView, ListWithPKMixin):
 
 
 class CreateLeftTrassaView(APIView):
-
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -371,7 +368,8 @@ class CreateLeftTrassaView(APIView):
             main_obj.transit.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
-            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else obj.circ_obj.count()
+            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else \
+                obj.circ_obj.count()
             if num_circuit != 0:
 
                 for cir in main_obj.circ_obj.all():
@@ -398,7 +396,8 @@ class CreateRightTrassaView(APIView):
             main_obj.transit2.add(obj)
             Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
 
-            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else obj.circ_obj.count()
+            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else\
+                obj.circ_obj.count()
 
             if num_circuit != 0:
 

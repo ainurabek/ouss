@@ -42,8 +42,8 @@ class EventDetailObjectSerializer(serializers.ModelSerializer):
 class CircuitEventList(serializers.ModelSerializer):
     transit = TransitCircSerializer(many=True, read_only=True)
     transit2 = TransitCircSerializer(many=True, read_only=True)
-    point1=PointCircSerializer()
-    point2=PointCircSerializer()
+    point1 = PointCircSerializer()
+    point2 = PointCircSerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
     id_object = AllObjectSerializer()
@@ -146,6 +146,10 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
     send_from = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
+    point2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
 
 
 
@@ -153,7 +157,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by')
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
 
@@ -172,20 +176,22 @@ class EventCreateSerializer(serializers.ModelSerializer):
 
 class EventDetailSerializer(serializers.ModelSerializer):
     type_journal = TypeJournalSerializer()
-    reason=ReasonSerializer()
-    index1=IndexSerializer()
+    reason = ReasonSerializer()
+    index1 = IndexSerializer()
     index2 = IndexSerializer()
-    responsible_outfit =OutfitListSerializer()
-    send_from=OutfitListSerializer()
+    responsible_outfit = OutfitListSerializer()
+    send_from = OutfitListSerializer()
     ips = IPSSerializer()
     object = EventObjectSerializer()
-    circuit=EventCircuitSerializer()
+    circuit = EventCircuitSerializer()
     customer = CustomerSerializer()
     created_by = UserLogSerializer()
+    point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
+    point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
 
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', )
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2',)
