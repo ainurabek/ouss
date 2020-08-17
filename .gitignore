@@ -7,8 +7,8 @@ __pycache__/
 
 # C extensions
 *.so
-.migrations/
-*/migrations/*
+#.migrations/
+#*/migrations/*
 # Distribution / packaging
 data.py
 .Python
@@ -116,7 +116,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-migrations/
+#migrations/
 
 # Spyder project settings
 .spyderproject
@@ -142,5 +142,5 @@ media/
 # Cython debug symbols
 cython_debug/
 
-**/migrations/
-**/**/migrations
+#**/migrations/
+#**/**/migrations
