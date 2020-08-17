@@ -6,5 +6,6 @@ admin.site.register(TypeOfJournal)
 admin.site.register(Index)
 admin.site.register(Event)
 admin.site.register(Reason)
+admin.site.register(Comments)
 
 

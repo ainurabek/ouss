@@ -1,11 +1,12 @@
 import datetime
+from datetime import date
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object, IP
+from ..opu.objects.models import Object, IP, OutfitWorker
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets
 now = datetime.datetime.now()
@@ -86,17 +87,19 @@ def event_delete(request, pk):
     Event.objects.get(pk=pk).delete()
     return redirect('apps:dispatching:event_list')
 
-#API
+########API
 
 class EventListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
+
     queryset = Event.objects.all()
     lookup_field = 'pk'
     serializer_class = EventListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('type_journal', 'contact_name',
                         'reason', 'index1', 'index2', 'responsible_outfit', 'send_from')
+
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -105,10 +108,18 @@ class EventListAPIView(viewsets.ModelViewSet):
             return EventDetailSerializer
 
     def get_queryset(self):
-        # queryset = Event.objects.all()
-        queryset = Event.objects.all().distinct('object', 'circuit', 'ips')
+        #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
+
+        today = datetime.date.today()
+        queryset = Event.objects.filter(created_at=today, index2__index=None).distinct('object', 'circuit', 'ips')
         date_from_from = self.request.query_params.get('date_from_from', None)
         date_to_from = self.request.query_params.get('date_to_from', None)
+        created_at = self.request.query_params.get('created_at', None)
+
+# фильтр  по дате создания, без времени
+        if created_at is not None and created_at != "":
+            queryset = queryset.filter(created_at=created_at)
+
 #фильтр для поля Начало
         if date_from_from is not None and date_from_from != "":
             date_from_from+='T00:00:00'
@@ -116,7 +127,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         if date_to_from is not None and date_to_from != "":
             date_to_from += 'T23:59:00'
             queryset = queryset.filter(date_from__lte=date_to_from)
-        # фильтр для поля Конец
+# фильтр для поля Конец
         date_from_to = self.request.query_params.get('date_from_to', None)
         date_to_to = self.request.query_params.get('date_to_to', None)
 
@@ -202,6 +213,8 @@ class EventObjectCreateViewAPI(APIView):
 
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
+        outfit_worker=OutfitWorker.objects.get(outfit=object.id_outfit)
+        print(outfit_worker)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)

@@ -8,8 +8,8 @@ from apps.opu.objects.models import Object, Point
 from apps.opu.circuits.models import Circuit
 from apps.opu.circuits.serializers import CircuitList
 from apps.dispatching.models import Event
-from apps.dispatching.models import TypeOfJournal, Index, Reason
-from apps.opu.objects.models import IP, Outfit
+from apps.dispatching.models import TypeOfJournal, Index, Reason, Comments
+from apps.opu.objects.models import IP, Outfit, OutfitWorker
 from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer, IPListSerializer
 
 from apps.opu.circuits.serializers import PointCircSerializer, CategorySerializer
@@ -17,9 +17,15 @@ from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerial
 
 from apps.opu.circuits.serializers import TransitCircSerializer
 
-from apps.opu.objects.serializers import AllObjectSerializer
+from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSerializer
 
 from apps.accounts.serializers import UserLogSerializer
+
+class CommentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comments
+        fields = ('id', "name")
 
 
 class EventObjectSerializer(serializers.ModelSerializer):
@@ -150,6 +156,10 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     point2 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
+    contact_name = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=OutfitWorker.objects.all())
+    comments = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Comments.objects.all())
 
 
 
@@ -160,6 +170,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
+
 
 
 
@@ -188,6 +199,9 @@ class EventDetailSerializer(serializers.ModelSerializer):
     created_by = UserLogSerializer()
     point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
+    contact_name=OutfitWorkerListSerializer()
+    comments =CommentsSerializer()
+
 
 
     class Meta:
