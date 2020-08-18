@@ -9,7 +9,7 @@ from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets
-now = datetime.datetime.now()
+now = date.today()
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
@@ -218,6 +218,7 @@ class EventObjectCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            print(now)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
