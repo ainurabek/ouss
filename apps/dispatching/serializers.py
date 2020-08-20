@@ -32,10 +32,11 @@ class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    type_line= serializers.SlugRelatedField(slug_field='name', read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', "name", 'id_outfit', 'point1', 'point2')
+        fields = ('id', "name", 'id_outfit', 'point1', 'point2', 'type_line', 'amount_channels')
 
 class EventDetailObjectSerializer(serializers.ModelSerializer):
 
