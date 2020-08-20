@@ -83,7 +83,11 @@ class LogSerializer(serializers.ModelSerializer):
         model = Log
         fields = ('id', "user", "start_at", "end_time")
 
+class LogUpdateSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Log
+        fields = ("end_time",)
 
 
 

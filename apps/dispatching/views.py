@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 
-from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer
+from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer, CommentsSerializer
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -17,7 +17,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
 from .forms import EventForm
-from .models import Event, TypeOfJournal
+from .models import Event, TypeOfJournal, Comments
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -273,8 +273,18 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
-    """Удаления event"""
+    """Удаления"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = OutfitWorker.objects.all()
+    lookup_field = 'pk'
+
+
+
+#Создание, удаление и список комментариев
+class CommentModelViewSet(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
     lookup_field = 'pk'

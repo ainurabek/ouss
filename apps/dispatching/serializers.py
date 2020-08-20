@@ -22,7 +22,6 @@ from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSe
 from apps.accounts.serializers import UserLogSerializer
 
 class CommentsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Comments
         fields = ('id', "name")
@@ -74,8 +73,8 @@ class ObjectEventSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     category = CategorySerializer()
     customer = CustomerSerializer()
-    comments1=CommentsSerializer()
-    comments2=CommentsSerializer()
+    # comments1=CommentsSerializer()
+    # comments2=CommentsSerializer()
 
     class Meta:
         model = Object
@@ -160,10 +159,10 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=OutfitWorker.objects.all())
-    comments1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Comments.objects.all())
-    comments2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Comments.objects.all())
+    # comments1 = serializers.PrimaryKeyRelatedField(
+    #     read_only=False, allow_null=True, queryset=Comments.objects.all())
+    # comments2 = serializers.PrimaryKeyRelatedField(
+    #     read_only=False, allow_null=True, queryset=Comments.objects.all())
 
 
 
@@ -204,8 +203,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     contact_name=OutfitWorkerListSerializer()
-    comments1 =CommentsSerializer()
-    comments2 = CommentsSerializer()
+
 
 
 

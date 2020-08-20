@@ -14,3 +14,8 @@ class IsOpuOnly(BasePermission):
                 return True
             else:
                 return False
+
+
+class IsCreator(BasePermission):
+    def has_permission(self, request, view):
+        return True if view.get_object().user.pk == request.user.pk else False

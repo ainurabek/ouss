@@ -6,13 +6,15 @@ from django.contrib.auth import get_user_model, login, logout
 from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, viewsets, status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
+
+from .permissions import IsCreator
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
-    DepartmentSerializer, SubdepartmentSerializer, LogSerializer
+    DepartmentSerializer, SubdepartmentSerializer, LogSerializer, LogUpdateSerializer
 from django.http.response import HttpResponse, JsonResponse
 from .models import Profile, DepartmentKT, SubdepartmentKT, Log
 from django_filters.rest_framework import DjangoFilterBackend
@@ -52,6 +54,7 @@ class Register(APIView):
 '''
 Данная функция позволяет залогиниться зарегистрированному ползователю. Необходимо, чтобы фрон отправил логин и пароль юзера
 '''
+
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
@@ -66,17 +69,19 @@ class LoginAPI(KnoxLoginView):
             profile = Profile.objects.get(user__username=user)
             profile.online = True
             profile.save()
-            if Log.objects.filter(Q(user=profile) & Q(date__gt=timezone.now())).exists():
+
+            if Log.objects.filter(user=profile, end_time__gte=timezone.now()).exists():
+                pass
+            elif Log.objects.filter(user=profile, end_time=None).exists():
                 pass
             else:
-                end_date = timezone.now()+datetime.timedelta(days=1)
-                Log.objects.create(user=profile, start_at=timezone.now(), date=end_date)
+                Log.objects.create(user=profile, start_at=timezone.now())
+
         except ObjectDoesNotExist:
             pass
 
         login(request, user)
         return super().post(request, format=None)
-
 '''
 Данная функция показывает всех существующих юзеров
 '''
@@ -96,6 +101,12 @@ class LogoutView(APIView):
             Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
         logout(request)
         return Response(status=status.HTTP_200_OK)
+
+class LogUpdateAPIView(UpdateAPIView):
+    queryset = Log.objects.all()
+    permission_classes = (IsAuthenticated, IsCreator)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = LogUpdateSerializer
 
 # class LogoutView(APIView):
 #     authentication_classes = (TokenAuthentication,)

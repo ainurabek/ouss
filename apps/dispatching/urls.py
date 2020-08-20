@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from apps.dispatching.views import *
 from . import views
 from rest_framework import routers
@@ -8,7 +8,10 @@ from .views import OutfitWorkerAPIView
 app_name = 'dispatching'
 
 router = routers.DefaultRouter()
-# router.register('outfit_workers', OutfitWorkerAPIView)
+
+
+router.register('comment', views.CommentModelViewSet, basename='comment')
+
 
 urlpatterns = [
     path('', views.JournalList.as_view(), name='types_journals'),
@@ -42,6 +45,10 @@ urlpatterns = [
     path("api/outfit_worker/create/", views.OutfitWorkerCreateView.as_view()),
     path("api/outfit_worker/edit/<int:pk>/", views.OutfitWorkerEditView.as_view()),
     path("api/outfit_worker/delete/<int:pk>/", views.OutfitWorkerDeleteAPIView.as_view()),
+
+    #comments
+    path('', include(router.urls)),
+
 
 
 

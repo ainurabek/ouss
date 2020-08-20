@@ -74,7 +74,7 @@ class OutfitWorkerCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OutfitWorker
-        fields = ('outfit', 'name')
+        fields = ('id', 'outfit', 'name')
         depth = 1
 
 class OutfitCreateSerializer(serializers.ModelSerializer):
