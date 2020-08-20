@@ -7,7 +7,7 @@ from apps.opu.objects.models import Object
 
 class Region(models.Model):
     name = models.CharField(max_length=150)
-    slug = models.SlugField()
+
 
     def __str__(self):
         return self.name

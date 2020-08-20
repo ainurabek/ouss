@@ -8,15 +8,15 @@ from django.db.models.signals import post_save
 from sortedm2m.fields import SortedManyToManyField
 
 class InOut(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 	def __str__(self):
 		return self.name
 
 
 class TPO(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True) #название ТПО
-	index = models.CharField('Индекс', max_length=100, blank=True, null=True) #номер ТПО
+	name = models.CharField('Название', max_length=100) #название ТПО
+	index = models.CharField('Индекс', max_length=100) #номер ТПО
 
 	class Meta:
 		verbose_name = 'ТПО'
@@ -27,7 +27,7 @@ class TPO(models.Model):
 
 
 class TypeOfTrakt(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 
 	class Meta:
@@ -51,7 +51,7 @@ class TypeOfLocation(models.Model):
 
 
 class LineType(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 
 	class Meta:
@@ -63,8 +63,8 @@ class LineType(models.Model):
 
 
 class Category(models.Model):
-	index = models.CharField('Индекс', max_length=100, blank=True, null=True)
-	name = models.CharField('Обозначение', max_length=100, blank=True, null=True)
+	index = models.CharField('Индекс', max_length=100)
+	name = models.CharField('Обозначение', max_length=100)
 
 	class Meta:
 		verbose_name = 'Категория'
@@ -75,7 +75,7 @@ class Category(models.Model):
 
 
 class System(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 	class Meta:
 		verbose_name = 'Вид системы'
@@ -88,7 +88,7 @@ class System(models.Model):
 
 class Outfit(models.Model):
 	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
-	adding = models.CharField('Название', max_length=100, blank=True, null=True)
+	adding = models.CharField('Название', max_length=100)
 	num_outfit = models.CharField('Номер', max_length=100, blank=True, null=True)
 	tpo = models.ForeignKey('TPO', null = True, on_delete=models.CASCADE)
 	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.CASCADE)
@@ -104,8 +104,8 @@ class Outfit(models.Model):
 		return self.outfit
 
 class OutfitWorker(models.Model):
-	name = models.CharField('ФИО', max_length=100, blank=True, null=True)
-	outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE, blank=True, null=True, related_name='outfit_worker')
+	name = models.CharField('ФИО', max_length=100)
+	outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE, related_name='outfit_worker')
 
 	class Meta:
 		verbose_name = 'Сотрудник предприятия'
@@ -115,8 +115,8 @@ class OutfitWorker(models.Model):
 		return self.name
 
 class Point(models.Model):
-	point = models.CharField('ИП', max_length=100, blank=True, null=True)
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	point = models.CharField('ИП', max_length=100)
+	name = models.CharField('Название', max_length=100)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
 
@@ -141,7 +141,7 @@ class Trassa(models.Model):
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 	COreceive = models.CharField('КО прием', max_length=100, blank=True, null=True)
 	COdeliver = models.CharField('КО передачи', max_length=100, blank=True, null=True)
 	inter_code = models.CharField('Международное обозначение', max_length=100, blank=True, null=True)
@@ -184,8 +184,8 @@ class Object(models.Model):
 
 
 class IP(models.Model):
-	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, null=True, blank=True, related_name='ip_point')
-	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, null=True, blank=True, related_name='ip_object')
+	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
+	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
 	tpo_id = models.ForeignKey(TPO, on_delete=models.CASCADE, null=True, blank=True)
 
 	class Meta:

@@ -9,14 +9,14 @@ from apps.accounts.models import Profile
 
 class Measure(models.Model):
 
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 	def __str__(self):
 		return f'{self.name}, {self.id}'
 
 class Speed(models.Model):
 
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 	class Meta:
 		verbose_name = 'Скорость'
@@ -26,7 +26,7 @@ class Speed(models.Model):
 		return f'{self.name}, {self.id}'
 
 class TypeCom(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 
 	class Meta:
@@ -37,7 +37,7 @@ class TypeCom(models.Model):
 		return f'{self.name}, {self.id}'
 
 class Mode(models.Model):
-	name = models.CharField('Название', max_length=100, blank=True, null=True)
+	name = models.CharField('Название', max_length=100)
 
 	class Meta:
 		verbose_name = 'Режим'
@@ -48,7 +48,7 @@ class Mode(models.Model):
 
 
 class SubsRoutes(models.Model):
-	route = models.CharField(max_length=100, blank=True, null=True)
+	route = models.CharField(max_length=100)
 
 	def __str__(self):
 		return f'{self.route}, {self.id}'

@@ -65,7 +65,7 @@ class Index(models.Model):
 
 class Event(models.Model):
     '''Событие'''
-    type_journal = models.ForeignKey(TypeOfJournal, verbose_name='Вид журнала', on_delete=models.CASCADE, null=True, blank=True)
+    type_journal = models.ForeignKey(TypeOfJournal, verbose_name='Вид журнала', on_delete=models.CASCADE)
     date_from = models.DateTimeField(blank=True, null=True, verbose_name='От')
     date_to = models.DateTimeField(blank=True, null=True, verbose_name='До')
     created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.CASCADE, null=True, blank=True)
@@ -88,7 +88,7 @@ class Event(models.Model):
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.CASCADE, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.CASCADE, related_name="point2_event", null=True, blank=True)
-
+    name = models.CharField('Название', max_length=500, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Журнал событий'

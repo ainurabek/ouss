@@ -102,9 +102,6 @@ class CustomerFormListView(ListAPIView):
     queryset = Customer.objects.all()
 
 
-
-
-
 class FormCustomerListAPIView(ListAPIView):
     """ Фильтрация Формы арендаторов  по арендаторам """
     authentication_classes = (TokenAuthentication,)
@@ -113,7 +110,6 @@ class FormCustomerListAPIView(ListAPIView):
     filterset_fields = ('object', 'circuit', 'customer')
     queryset = Form_Customer.objects.all()
     serializer_class = FormCustomerSerializer
-
 
 
 class CircuitListAPIView(APIView, ListWithPKMixin):
@@ -139,6 +135,9 @@ class FormCustomerCircCreateAPIView(APIView):
 
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
+        if Form_Customer.objects.filter(circuit=circuit).exists():
+            content = {'По такому каналу уже форма арендаторов создана'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
@@ -155,6 +154,9 @@ class FormCustomerObjCreateAPIView(APIView):
 
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
+        if Form_Customer.objects.filter(object=object).exists():
+            content = {'По такому обьекту уже форма арендаторов создана'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)

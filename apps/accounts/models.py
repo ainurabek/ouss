@@ -18,7 +18,7 @@ class Role(models.Model):
         return self.name
 
 class DepartmentKT(models.Model):
-    name = models.CharField('Отдел', max_length=30, blank=True)
+    name = models.CharField('Отдел', max_length=30)
 
     class Meta:
         verbose_name = 'Отдел'
@@ -29,9 +29,9 @@ class DepartmentKT(models.Model):
 
 class SubdepartmentKT(models.Model):
     department = models.ForeignKey(DepartmentKT, verbose_name='Подотдел',
-                                  null=True, blank=True, related_name='supdepartment',
+                                  related_name='supdepartment',
                                   on_delete=models.CASCADE)
-    name = models.CharField('Подотдел', max_length=30, blank=True)
+    name = models.CharField('Подотдел', max_length=30)
 
     class Meta:
         verbose_name = 'Подотдел'

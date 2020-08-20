@@ -92,7 +92,7 @@ class FormCustomerSerializer(serializers.ModelSerializer):
 class FormCustomerCreateSerializer(serializers.ModelSerializer):
     """Создания Формы арендаторов"""
     signalization = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Signalization.objects.all())
+        read_only=False, allow_null=True, queryset=Signalization.objects.all())
 
     class Meta:
         model = Form_Customer

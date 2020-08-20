@@ -8,7 +8,7 @@ from apps.opu.circuits.models import Circuit
 
 
 class Signalization(models.Model):
-    name = models.CharField('Название', max_length=100, blank=True, null=True)
+    name = models.CharField('Название', max_length=100)
 
     class Meta:
         verbose_name = 'Сигнализация'

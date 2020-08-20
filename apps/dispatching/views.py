@@ -4,7 +4,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 
-from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, IPSSerializer, CommentsSerializer
+from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
+    IPSSerializer, CommentsSerializer, EventUnknownSerializer
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -101,7 +102,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     serializer_class = EventListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('type_journal', 'contact_name',
-                        'reason', 'index1', 'index2', 'responsible_outfit', 'send_from')
+                        'reason', 'index1', 'index2', 'responsible_outfit', 'send_from', 'created_at', 'name')
 
 
     def get_serializer_class(self):
@@ -114,7 +115,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
 
         today = datetime.date.today()
-
         queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
         queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
         queryset=queryset1.union(queryset2).order_by('-created_at')
@@ -224,11 +224,11 @@ class EventObjectCreateViewAPI(APIView):
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
         outfit_worker=OutfitWorker.objects.get(outfit=object.id_outfit)
-        print(outfit_worker)
+
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
-            print(now)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -288,3 +288,26 @@ class CommentModelViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
+
+#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None
+class UnknownEventListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Event.objects.exclude(name__isnull=True)
+    # queryset = Event.objects.exclude(name=None)
+    serializer_class = EventUnknownSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('name',)
+
+
+class EventUnknownCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Unknown Event"""
+
+    def post(self, request):
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save( created_by=self.request.user.profile, created_at=now)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
