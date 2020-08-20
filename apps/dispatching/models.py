@@ -76,7 +76,9 @@ class Event(models.Model):
                                           blank=True)
     index2 = models.ForeignKey(Index, related_name='event_index2', verbose_name='Индекс2', on_delete=models.CASCADE, null=True,
                                blank=True)
-    comments = models.ForeignKey(Comments, verbose_name='Примечание', on_delete=models.CASCADE, null=True, blank=True)
+    comments1 = models.ForeignKey(Comments, related_name='event_comments1', verbose_name='Примечание1', on_delete=models.CASCADE, null=True, blank=True)
+    comments2 = models.ForeignKey(Comments, related_name='event_comments2', verbose_name='Примечание2',
+                                  on_delete=models.CASCADE, null=True, blank=True)
     responsible_outfit = models.ForeignKey(Outfit, verbose_name='Ответственный', on_delete=models.CASCADE,
                                           null=True, blank=True,  related_name='dispatch_outfit')
     send_from = models.ForeignKey(Outfit, verbose_name='Передал (предприятие)', on_delete=models.CASCADE,

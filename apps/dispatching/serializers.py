@@ -74,11 +74,13 @@ class ObjectEventSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     category = CategorySerializer()
     customer = CustomerSerializer()
+    comments1=CommentsSerializer()
+    comments2=CommentsSerializer()
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',
-                   'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer')
+                   'transit', 'transit2', 'tpo1', 'tpo2', 'comments1', 'comments2', 'customer')
         depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):
@@ -158,7 +160,9 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=OutfitWorker.objects.all())
-    comments = serializers.PrimaryKeyRelatedField(
+    comments1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Comments.objects.all())
+    comments2 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Comments.objects.all())
 
 
@@ -166,7 +170,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'index2', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
@@ -200,12 +204,13 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     contact_name=OutfitWorkerListSerializer()
-    comments =CommentsSerializer()
+    comments1 =CommentsSerializer()
+    comments2 = CommentsSerializer()
 
 
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'index2', 'comments', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'index2', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2',)

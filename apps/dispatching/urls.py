@@ -1,12 +1,14 @@
 from django.urls import path
 from apps.dispatching.views import *
 from . import views
+from rest_framework import routers
 
-
+from .views import OutfitWorkerAPIView
 
 app_name = 'dispatching'
 
-
+router = routers.DefaultRouter()
+# router.register('outfit_workers', OutfitWorkerAPIView)
 
 urlpatterns = [
     path('', views.JournalList.as_view(), name='types_journals'),
@@ -34,6 +36,12 @@ urlpatterns = [
     #if objects
     path("api/event/objects/", views.ObjectEventListAPIView.as_view()),
     path("api/event/objects/create/<int:pk>/", views.EventObjectCreateViewAPI.as_view()),
+
+    #outfit_worker
+    path("api/outfit_worker/", views.OutfitWorkerAPIView.as_view()),
+    path("api/outfit_worker/create/", views.OutfitWorkerCreateView.as_view()),
+    path("api/outfit_worker/edit/<int:pk>/", views.OutfitWorkerEditView.as_view()),
+    path("api/outfit_worker/delete/<int:pk>/", views.OutfitWorkerDeleteAPIView.as_view()),
 
 
 

@@ -8,6 +8,7 @@ app_name = 'form53'
 
 router = routers.DefaultRouter()
 
+
 urlpatterns = [
     ###HTML
     path("regions/", views.Region53ListView.as_view(), name="region53_list"),

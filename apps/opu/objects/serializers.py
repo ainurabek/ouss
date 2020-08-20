@@ -68,6 +68,15 @@ class OutfitWorkerListSerializer(serializers.ModelSerializer):
         fields = ('id', 'outfit', 'name')
         depth = 1
 
+class OutfitWorkerCreateSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+
+    class Meta:
+        model = OutfitWorker
+        fields = ('outfit', 'name')
+        depth = 1
+
 class OutfitCreateSerializer(serializers.ModelSerializer):
     tpo = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())

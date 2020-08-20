@@ -8,7 +8,10 @@ from .serializers import EventListSerializer, CircuitEventList, ObjectEventSeria
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker
 from .serializers import EventCreateSerializer, EventDetailSerializer
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
+
+from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
+
 now = date.today()
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
@@ -111,7 +114,14 @@ class EventListAPIView(viewsets.ModelViewSet):
         #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
 
         today = datetime.date.today()
-        queryset = Event.objects.filter(created_at=today, index2__index=None).distinct('object', 'circuit', 'ips')
+
+        queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
+        queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
+        queryset=queryset1.union(queryset2).order_by('-created_at')
+        #фильтр по хвостам  за сегодня
+
+
+
         date_from_from = self.request.query_params.get('date_from_from', None)
         date_to_from = self.request.query_params.get('date_to_from', None)
         created_at = self.request.query_params.get('created_at', None)
@@ -239,4 +249,32 @@ class EventDeleteAPIView(DestroyAPIView):
     queryset = Event.objects.all()
     lookup_field = 'pk'
 
+#возможность создавать сотрудников предприятий диспетчерам
+class OutfitWorkerAPIView(ListAPIView):
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('outfit', 'name')
 
+class OutfitWorkerCreateView(generics.CreateAPIView):
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+
+class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+class OutfitWorkerDeleteAPIView(DestroyAPIView):
+    """Удаления event"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = OutfitWorker.objects.all()
+    lookup_field = 'pk'
