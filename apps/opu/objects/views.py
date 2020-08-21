@@ -268,8 +268,10 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
         update_amount_channels(obj=instance)
-        cascading_delete_object(instance)
+        self.perform_destroy(instance)
+        # cascading_delete_object(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
