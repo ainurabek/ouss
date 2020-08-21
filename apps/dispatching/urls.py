@@ -46,6 +46,9 @@ urlpatterns = [
     path("api/outfit_worker/edit/<int:pk>/", views.OutfitWorkerEditView.as_view()),
     path("api/outfit_worker/delete/<int:pk>/", views.OutfitWorkerDeleteAPIView.as_view()),
 
+    #передавать сотрудникв предприятий
+    path("api/outfit_worker/<int:pk>/", views.OutfitWorkerGet.as_view()),
+
     #unknown events
     path("api/event/unknown/", views.UnknownEventListAPIView.as_view()),
     path("api/event/unknown/create/", views.EventUnknownCreateViewAPI.as_view()),
