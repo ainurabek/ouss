@@ -22,7 +22,7 @@ from apps.opu.objects.serializers import LPDetailSerializer
 from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
-    update_circuit, update_amount_channels
+    update_circuit, update_amount_channels, cascading_delete_object
 from apps.opu.services import ListWithPKMixin
 
 
@@ -265,6 +265,13 @@ class ObjectDetailView(RetrieveDestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        update_amount_channels(obj=instance)
+        cascading_delete_object(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # ПГ ВГ ТГ ЧГ РГ
 
