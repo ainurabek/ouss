@@ -115,8 +115,8 @@ class Form53CreateViewAPI(APIView):
                     )
                     form53.schema53_photo.add(*data.schema53_photo.all())
                     form53.order53_photo.add(*data.order53_photo.all())
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Форма 5.3 создана успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -177,7 +177,8 @@ class Order53PhotoCreateView(APIView):
         form53 = get_object_or_404(Form53, pk=pk)
         create_photo_for_form53(model=Form53, model_photo=Order53Photo,
                                 obj=form53, field_name="order", request=request)
-        return Response(status=status.HTTP_201_CREATED)
+        response = {"data": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class Order53PhotoDeleteView(APIView, PhotoDeleteMixin):
@@ -194,7 +195,8 @@ class Schema53PhotoCreateView(APIView):
         form53 = get_object_or_404(Form53, pk=pk)
         create_photo_for_form53(model=Form53, model_photo=Schema53Photo,
                                 obj=form53, field_name="schema", request=request)
-        return Response(status=status.HTTP_201_CREATED)
+        response = {"data": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):

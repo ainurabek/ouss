@@ -139,8 +139,8 @@ class FormCreateViewAPI(APIView):
                         order=data.order, schema=data.schema,
                         reserve=data.reserve
                     )
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Форма 5.1 создана успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

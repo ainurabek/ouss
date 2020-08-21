@@ -268,11 +268,12 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-
-        update_amount_channels(obj=instance)
+        update_amount_channels(obj=instance)       
         self.perform_destroy(instance)
-        # cascading_delete_object(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#         cascading_delete_object(instance)
+        response = {"data": "Объект успешно удален"}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
+
 
 
 # ПГ ВГ ТГ ЧГ РГ
@@ -303,7 +304,8 @@ class ObjectCreateView(APIView):
 
             create_circuit(model=Circuit, obj=instance, request=request)
             update_amount_channels(obj=instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Объект успешно создан"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -319,7 +321,8 @@ class ObjectEditView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            response = {"data": "Объект успешно отредактирован"}
+            return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -386,8 +389,8 @@ class CreateLeftTrassaView(APIView):
                         break
                     circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
                     cir.transit.add(circuit)
-
-        return Response(status=status.HTTP_201_CREATED)
+        response = {"data": "Объект успешно добавлен в трассу"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class CreateRightTrassaView(APIView):
@@ -415,8 +418,8 @@ class CreateRightTrassaView(APIView):
                         break
                     circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
                     cir.transit2.add(circuit)
-
-        return Response(status=status.HTTP_201_CREATED)
+        response = {"data": "Объект успешно добавлен в трассу"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class SaveTrassaView(APIView):
@@ -456,7 +459,7 @@ class SaveTrassaView(APIView):
                     break
                 circuit.transit2.add(*cir.transit2.all())
                 circuit.transit.add(*cir.transit.all())
-
+        response = {"data": "Трасса успешно сахранен"}
         return Response(status=status.HTTP_201_CREATED)
 
     def post(self, request, pk):

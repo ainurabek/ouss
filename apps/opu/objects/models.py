@@ -15,7 +15,7 @@ class InOut(models.Model):
 
 
 class TPO(models.Model):
-	name = models.CharField('Название', max_length=100) #название ТПО
+	name = models.CharField('Название', max_length=100, error_messages={"invalid": "Это поле обязательно."}) #название ТПО
 	index = models.CharField('Индекс', max_length=100) #номер ТПО
 
 	class Meta:

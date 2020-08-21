@@ -1,5 +1,4 @@
 import datetime
-
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model, login, logout
@@ -11,7 +10,6 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
-
 from .permissions import IsCreator
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
     DepartmentSerializer, SubdepartmentSerializer, LogSerializer, LogUpdateSerializer
@@ -146,7 +144,8 @@ class CreateProfileAPIView(APIView):
 
         user.is_profile_created = True
         user.save()
-        return HttpResponse(profile, status=status.HTTP_201_CREATED)
+        response = {"data": "Профиль пользователя успешно создан"}
+        return HttpResponse(response, status=status.HTTP_201_CREATED)
 
 
 
