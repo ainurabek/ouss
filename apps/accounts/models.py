@@ -104,6 +104,7 @@ class User(AbstractBaseUser):
     subdepartment = models.ForeignKey(SubdepartmentKT, verbose_name='Подотдел пользователя',
                                   null=True, blank=True, related_name='users_subdepartment',
                                   on_delete=models.CASCADE)
+    is_profile_created = models.BooleanField('Создан ли профиль', default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []

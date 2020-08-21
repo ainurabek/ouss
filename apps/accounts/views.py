@@ -133,6 +133,7 @@ class CreateProfileAPIView(APIView):
     def post(self, request):
         data = request.data
         user = request.user
+
         first_name = data['first_name']
         last_name = data['last_name']
         middle_name = data['middle_name']
@@ -142,6 +143,9 @@ class CreateProfileAPIView(APIView):
         profile = Profile.objects.create(user=user, first_name=first_name, last_name=last_name,
                                          middle_name=middle_name, position=position, gender=gender,
                                          phone_number=phone_number, online=True)
+
+        user.is_profile_created = True
+        user.save()
         return HttpResponse(profile, status=status.HTTP_201_CREATED)
 
 
