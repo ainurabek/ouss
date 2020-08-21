@@ -24,12 +24,12 @@ class Form_Customer(models.Model):
     object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
     circuit = models.OneToOneField(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
     amount_flow = models.CharField('Количество потоков', max_length=200, blank=True, null=True)
-    signalization = models.ForeignKey(Signalization, related_name='cust_sign', on_delete=models.CASCADE, blank=True,
+    signalization = models.ForeignKey(Signalization, related_name='cust_sign', on_delete=models.SET_NULL, blank=True,
                                       null=True)
     type_of_using = models.CharField('Вид использования', max_length=200, blank=True, null=True)
     num_order = models.CharField("Номер распоряжения", max_length=250, blank=True, null=True)
     comments = models.CharField("Примечание", max_length=250, blank=True, null=True)
-    created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+    created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -68,26 +68,26 @@ class Event(models.Model):
     type_journal = models.ForeignKey(TypeOfJournal, verbose_name='Вид журнала', on_delete=models.CASCADE)
     date_from = models.DateTimeField(blank=True, null=True, verbose_name='От')
     date_to = models.DateTimeField(blank=True, null=True, verbose_name='До')
-    created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.CASCADE, null=True, blank=True)
-    contact_name = models.ForeignKey(OutfitWorker, verbose_name='Передал (ФИО)', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.SET_NULL, null=True, blank=True)
+    contact_name = models.ForeignKey(OutfitWorker, verbose_name='Передал (ФИО)', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateField('Дата создания', blank=True, null=True)
-    reason = models.ForeignKey(Reason, verbose_name='Причины', on_delete=models.CASCADE, null=True, blank=True)
+    reason = models.ForeignKey(Reason, verbose_name='Причины', on_delete=models.SET_NULL, null=True, blank=True)
     index1= models.ForeignKey(Index, related_name='event_index1', verbose_name='Индекс1', on_delete=models.CASCADE, null=True,
                                           blank=True)
     index2 = models.ForeignKey(Index, related_name='event_index2', verbose_name='Индекс2', on_delete=models.CASCADE, null=True,
                                blank=True)
     comments1 = models.CharField('Примечание1', max_length=500, null=True, blank=True)
     comments2 = models.CharField('Примечание2', max_length=500, null=True, blank=True)
-    responsible_outfit = models.ForeignKey(Outfit, verbose_name='Ответственный', on_delete=models.CASCADE,
+    responsible_outfit = models.ForeignKey(Outfit, verbose_name='Ответственный', on_delete=models.SET_NULL,
                                           null=True, blank=True,  related_name='dispatch_outfit')
-    send_from = models.ForeignKey(Outfit, verbose_name='Передал (предприятие)', on_delete=models.CASCADE,
+    send_from = models.ForeignKey(Outfit, verbose_name='Передал (предприятие)', on_delete=models.SET_NULL,
                                           null=True, blank=True,  related_name='dispatch_send_outfit')
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='event_obj', verbose_name="КО",  null=True, blank=True)
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, related_name='event_cir', verbose_name="Каналы", null=True, blank=True)
     ips = models.ForeignKey(IP, on_delete=models.CASCADE, verbose_name="ИП", related_name='event_ips', null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
-    point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.CASCADE, related_name="point1_event", null=True, blank=True)
-    point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.CASCADE, related_name="point2_event", null=True, blank=True)
+    point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
+    point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
     name = models.CharField('Название', max_length=500, null=True, blank=True)
 
     class Meta:

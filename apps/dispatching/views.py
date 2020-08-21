@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object, IP, OutfitWorker
+from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
 
@@ -232,6 +232,19 @@ class EventObjectCreateViewAPI(APIView):
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#чтобы передавать фронту нужн
+class OutfitWorkerGet(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        outfit = Outfit.objects.get(pk=pk)
+        outfit_worker = OutfitWorker.objects.filter(outfit=outfit)
+        serializer = OutfitWorkerListSerializer(outfit_worker, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class EventUpdateAPIView(UpdateAPIView):
