@@ -19,7 +19,7 @@ class Form53(models.Model):
     """Форма 5.3"""
     circuit = models.OneToOneField(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
     comments = models.CharField(max_length=100, blank=True, null=True)
-    created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+    created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
 
     class Meta:

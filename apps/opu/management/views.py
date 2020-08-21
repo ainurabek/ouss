@@ -1,5 +1,5 @@
 from apps.accounts.models import User, DepartmentKT
-from apps.opu.objects.models import TPO, Outfit, Point, Object, Trassa
+from apps.opu.objects.models import TPO, Outfit, Point, Object
 
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.response import Response

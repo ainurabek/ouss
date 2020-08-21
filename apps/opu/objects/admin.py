@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Object, IP, Point, Outfit, Trassa, TransitObject, System, InOut, LineType, TPO, TypeOfLocation,\
+from .models import Object, IP, Point, Outfit, TransitObject, System, InOut, LineType, TPO, TypeOfLocation,\
     TypeOfTrakt, Category, OutfitWorker
 
 
@@ -38,10 +38,7 @@ class ObjectAdmin(admin.ModelAdmin):
     list_display = ('id', 'id_parent', 'name', 'point1', 'point2', 'amount_channels')
     search_fields = ('name',)
 
-@admin.register(Trassa)
-class TrassaAdmin(admin.ModelAdmin):
-    list_display = ('id',)
-    search_fields = ('id',)
+
 
 admin.site.register(InOut)
 # admin.site.register(TPO)

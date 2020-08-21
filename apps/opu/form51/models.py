@@ -28,7 +28,7 @@ class Form51(models.Model):
     reserve = models.CharField('Резерва потока', max_length=15, blank=True, null=True)
     reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)
     report_num = models.CharField('Номер донесения', max_length=200, blank=True, null=True)
-    created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+    created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Форма 5.1'

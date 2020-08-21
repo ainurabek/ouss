@@ -90,9 +90,9 @@ class Outfit(models.Model):
 	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
 	adding = models.CharField('Название', max_length=100)
 	num_outfit = models.CharField('Номер', max_length=100, blank=True, null=True)
-	tpo = models.ForeignKey('TPO', null = True, on_delete=models.CASCADE)
-	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.CASCADE)
-	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+	tpo = models.ForeignKey('TPO', null = True, on_delete=models.SET_NULL)
+	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.SET_NULL)
+	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
 
@@ -124,19 +124,6 @@ class Point(models.Model):
 		return self.point
 
 
-class Trassa(models.Model):
-	created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
-	name = models.CharField('Трасса', max_length=1000000, blank=True, null=True)
-	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-
-	class Meta:
-
-		verbose_name = 'Трасса'
-		verbose_name_plural = 'Трасса'
-
-	def __str__(self):
-		return str(self.name)
-
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
@@ -145,11 +132,11 @@ class Object(models.Model):
 	COreceive = models.CharField('КО прием', max_length=100, blank=True, null=True)
 	COdeliver = models.CharField('КО передачи', max_length=100, blank=True, null=True)
 	inter_code = models.CharField('Международное обозначение', max_length=100, blank=True, null=True)
-	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.CASCADE, blank=True, null=True)
+	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.SET_NULL, blank=True, null=True)
 	tpo1 = models.ForeignKey(TPO, related_name='obj_tpo', on_delete=models.SET_NULL, blank=True, null=True)
 	point1 = models.ForeignKey(Point, related_name='obj_point', verbose_name='ИП приема', on_delete=models.CASCADE, blank=True, null=True)
 	tpo2 = models.ForeignKey(TPO, related_name='obj_tpo2', on_delete=models.SET_NULL, blank=True, null=True)
-	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.CASCADE, blank=True, null=True)
+	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.SET_NULL, blank=True, null=True)
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.CASCADE, blank=True, null=True)
 	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
 	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)

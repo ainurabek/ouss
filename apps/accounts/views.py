@@ -149,12 +149,22 @@ class CreateProfileAPIView(APIView):
         return HttpResponse(profile, status=status.HTTP_201_CREATED)
 
 
+
+
 class ProfileListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Profile.objects.all()
-    lookup_field = 'pk'
     serializer_class = ProfileListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        try:
+            queryset = Profile.objects.filter(user=user)
+        except ObjectDoesNotExist:
+            pass
+        return queryset
+
 
 
 
