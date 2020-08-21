@@ -94,6 +94,8 @@ def form_cust_delete(request, pk):
 
 #API
 #######################################################################################################################
+
+
 class CustomerFormListView(ListAPIView):
     """Список арендаторов"""
     authentication_classes = (TokenAuthentication,)
@@ -142,7 +144,8 @@ class FormCustomerCircCreateAPIView(APIView):
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
             create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Форма арендатора успешно создана"}
+            return Response(response, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -161,7 +164,8 @@ class FormCustomerObjCreateAPIView(APIView):
         if serializer.is_valid():
             data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
             create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Форма арендатора успешно создана"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -191,8 +195,8 @@ class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
         form_cus = Form_Customer.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
             OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
-        return Response(status=status.HTTP_201_CREATED)
-
+        response = {"data": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):

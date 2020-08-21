@@ -46,7 +46,8 @@ class PhotoCreateMixin:
     def post(self, request, pk):
         obj = get_object_or_404(self.model, pk=pk)
         create_photo(self.model, self.model_photo, obj, self.search_field_for_img, request)
-        return Response(status=status.HTTP_201_CREATED)
+        response = {"data": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class PhotoDeleteMixin:
@@ -54,4 +55,5 @@ class PhotoDeleteMixin:
 
     def delete(self, request, obj_pk, deleted_pk):
         get_object_or_404(self.model_for_delete, pk=deleted_pk).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        response = {"data": "Изображение успешно удалено"}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)

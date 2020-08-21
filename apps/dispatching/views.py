@@ -180,7 +180,8 @@ class EventIPCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Событие создано успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -228,8 +229,8 @@ class EventObjectCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Событие создано успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -309,5 +310,6 @@ class EventUnknownCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save( created_by=self.request.user.profile, created_at=now)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response = {"data": "Событие создано успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
