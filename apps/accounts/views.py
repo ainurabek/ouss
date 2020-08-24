@@ -102,7 +102,7 @@ class LogoutView(APIView):
 
 class LogUpdateAPIView(UpdateAPIView):
     queryset = Log.objects.all()
-    permission_classes = (IsAuthenticated, IsCreator)
+    permission_classes = (IsAuthenticated, IsCreator,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = LogUpdateSerializer
 

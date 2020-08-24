@@ -53,6 +53,13 @@ urlpatterns = [
     path("api/event/unknown/", views.UnknownEventListAPIView.as_view()),
     path("api/event/unknown/create/", views.EventUnknownCreateViewAPI.as_view()),
 
+
+    #статистика за месяц-неедлю-сегодня
+    path("api/event/week/", views.get_dates_and_counts_week),
+
+    path("api/event/month/", views.get_dates_and_counts_month),
+    path("api/event/today/", views.get_dates_and_counts_today),
+
     #comments
     path('', include(router.urls)),
 

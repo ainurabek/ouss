@@ -1,8 +1,9 @@
 import datetime
-from datetime import date
+from datetime import date, timedelta
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer
@@ -224,8 +225,6 @@ class EventObjectCreateViewAPI(APIView):
 
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
-        outfit_worker=OutfitWorker.objects.get(outfit=object.id_outfit)
-
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
@@ -326,3 +325,52 @@ class EventUnknownCreateViewAPI(APIView):
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# статистика событий за сегодня
+class DashboardTodayEventList(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Event.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        today = datetime.date.today()
+        queryset = Event.objects.filter(created_at=today)
+        serializer = EventListSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+# статистика событий за неделю
+
+def get_dates_and_counts_week(request):
+    data = {}
+    week = datetime.date.today() - timedelta(days=7)
+    dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
+    teams_data = [
+        {"day": date.created_at.weekday(), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        for date in dates
+    ]
+    data["dates"] = teams_data
+    return JsonResponse(data, safe=False)
+
+def get_dates_and_counts_month(request):
+    data = {}
+    month = datetime.date.today() - timedelta(days=30)
+    dates = Event.objects.filter(created_at__gte=month).distinct('created_at')
+    teams_data = [
+        {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        for date in dates
+    ]
+    data["dates"] = teams_data
+    return JsonResponse(data, safe=False)
+
+def get_dates_and_counts_today(request):
+    data = {}
+    time = timedelta - timedelta(hours=24)
+
+    dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
+    teams_data = [
+        {"time": date.date_from.hour, "counts": Event.objects.filter(date_from=date.date_from).count() }
+        for date in dates
+    ]
+    data["dates"] = teams_data
+    return JsonResponse(data, safe=False)
