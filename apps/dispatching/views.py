@@ -1,5 +1,6 @@
 import datetime
-from datetime import date, timedelta, time, timezone
+from datetime import date, timedelta
+from django.utils import timezone
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -152,8 +153,11 @@ class EventListAPIView(viewsets.ModelViewSet):
 
         return queryset
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def retrieve(self, request, pk=None):
+
+        instance = get_object_or_404(Event, pk=pk)
+
+        # instance = self.get_object()
         if instance.object is not None:
             instance = Event.objects.filter(object=instance.object)
         elif instance.circuit is not None:
@@ -345,9 +349,11 @@ class DashboardTodayEventList(ListAPIView):
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
+
+
     dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
     teams_data = [
-        {"day": date.created_at.weekday(), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
         for date in dates
     ]
     data["dates"] = teams_data
@@ -367,8 +373,6 @@ def get_dates_and_counts_month(request):
 def get_dates_and_counts_today(request):
     data = {}
     time = datetime.date.today()
-    print(timezone)
-
     dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
     teams_data = [
         {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count() }

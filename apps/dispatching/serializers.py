@@ -211,8 +211,6 @@ class EventDetailSerializer(serializers.ModelSerializer):
     contact_name=OutfitWorkerListSerializer()
 
 
-
-
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
