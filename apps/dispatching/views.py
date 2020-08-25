@@ -116,40 +116,18 @@ class EventListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
-
+        #фильтр по хвостам  за сегодня
         today = datetime.date.today()
         queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
         queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
         queryset=queryset1.union(queryset2).order_by('-created_at')
-        #фильтр по хвостам  за сегодня
 
-
-
-        date_from_from = self.request.query_params.get('date_from_from', None)
-        date_to_from = self.request.query_params.get('date_to_from', None)
+        # фильтр  по дате создания, без времени + хвосты
         created_at = self.request.query_params.get('created_at', None)
-
-# фильтр  по дате создания, без времени
         if created_at is not None and created_at != "":
-            queryset = queryset.filter(created_at=created_at)
-
-#фильтр для поля Начало
-        if date_from_from is not None and date_from_from != "":
-            date_from_from+='T00:00:00'
-            queryset = queryset.filter(date_from__gte=date_from_from)
-        if date_to_from is not None and date_to_from != "":
-            date_to_from += 'T23:59:00'
-            queryset = queryset.filter(date_from__lte=date_to_from)
-# фильтр для поля Конец
-        date_from_to = self.request.query_params.get('date_from_to', None)
-        date_to_to = self.request.query_params.get('date_to_to', None)
-
-        if date_from_to is not None and date_from_to != "":
-            date_from_to += 'T00:00:00'
-            queryset = queryset.filter(date_to__gte=date_from_to)
-        if date_to_to is not None and date_to_to != "":
-            date_to_to += 'T23:59:00'
-            queryset = queryset.filter(date_to__lte=date_to_to)
+            q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
+            q2 = Event.objects.filter(created_at=created_at)
+            queryset=q1.union(q2)
 
         return queryset
 
