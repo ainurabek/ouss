@@ -80,13 +80,12 @@ class ObjectEventSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     category = CategorySerializer()
     customer = CustomerSerializer()
-    # comments1=CommentsSerializer()
-    # comments2=CommentsSerializer()
+
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',
-                   'transit', 'transit2', 'tpo1', 'tpo2', 'comments1', 'comments2', 'customer')
+                   'transit', 'transit2', 'tpo1', 'tpo2', 'customer')
         depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):

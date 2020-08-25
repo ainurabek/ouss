@@ -1,5 +1,6 @@
 import datetime
-from datetime import date, timedelta
+from datetime import date, timedelta, time, timezone
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -365,11 +366,12 @@ def get_dates_and_counts_month(request):
 
 def get_dates_and_counts_today(request):
     data = {}
-    time = timedelta - timedelta(hours=24)
+    time = datetime.date.today()
+    print(timezone)
 
     dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
     teams_data = [
-        {"time": date.date_from.hour, "counts": Event.objects.filter(date_from=date.date_from).count() }
+        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count() }
         for date in dates
     ]
     data["dates"] = teams_data
