@@ -80,6 +80,7 @@ class ObjectEventSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     customer = CustomerSerializer()
 
+
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',

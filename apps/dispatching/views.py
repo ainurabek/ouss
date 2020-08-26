@@ -114,15 +114,17 @@ class EventListAPIView(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return EventDetailSerializer
 
+    # событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
+
     def get_queryset(self):
-        #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
-        #фильтр по хвостам  за сегодня
+
+    #фильтр по хвостам + за сегодня
         today = datetime.date.today()
         queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
         queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
         queryset=queryset1.union(queryset2).order_by('-created_at')
 
-        # фильтр  по дате создания, без времени + хвосты
+    # фильтр  по дате создания, без времени + хвосты за предыдущие дни
         created_at = self.request.query_params.get('created_at', None)
         if created_at is not None and created_at != "":
             q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
