@@ -93,7 +93,7 @@ def event_delete(request, pk):
     return redirect('apps:dispatching:event_list')
 
 ########API
-
+#listevent
 class EventListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -112,47 +112,29 @@ class EventListAPIView(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return EventDetailSerializer
 
+    # событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
+
     def get_queryset(self):
-        #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
+    #фильтр по хвостам + за сегодня
 
         today = datetime.date.today()
         queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
         queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
         queryset=queryset1.union(queryset2).order_by('-created_at')
-        #фильтр по хвостам  за сегодня
 
+    # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
-
-        date_from_from = self.request.query_params.get('date_from_from', None)
-        date_to_from = self.request.query_params.get('date_to_from', None)
         created_at = self.request.query_params.get('created_at', None)
-
-# фильтр  по дате создания, без времени
-        if created_at is not None and created_at != "":
-            queryset = queryset.filter(created_at=created_at)
-
-#фильтр для поля Начало
-        if date_from_from is not None and date_from_from != "":
-            date_from_from+='T00:00:00'
-            queryset = queryset.filter(date_from__gte=date_from_from)
-        if date_to_from is not None and date_to_from != "":
-            date_to_from += 'T23:59:00'
-            queryset = queryset.filter(date_from__lte=date_to_from)
-# фильтр для поля Конец
-        date_from_to = self.request.query_params.get('date_from_to', None)
-        date_to_to = self.request.query_params.get('date_to_to', None)
-
-        if date_from_to is not None and date_from_to != "":
-            date_from_to += 'T00:00:00'
-            queryset = queryset.filter(date_to__gte=date_from_to)
-        if date_to_to is not None and date_to_to != "":
-            date_to_to += 'T23:59:00'
-            queryset = queryset.filter(date_to__lte=date_to_to)
+        if created_at is not None and created_at != '':
+            q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
+            q2 = Event.objects.filter(created_at=created_at)
+            queryset=q1.union(q2)
 
         return queryset
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+
+    def retrieve(self, request, pk=None):
+        instance = get_object_or_404(Event, pk=pk)
         if instance.object is not None:
             instance = Event.objects.filter(object=instance.object)
         elif instance.circuit is not None:
@@ -162,7 +144,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, many=True)
         return Response(serializer.data)
 
-
+#ip-Ainur
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -171,7 +153,7 @@ class IPEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('point_id', 'object_id')
 
-
+#create- Ainur
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -194,7 +176,7 @@ class CircuitEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('id_object', 'customer', 'name', 'type_using')
 
-
+#cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -208,7 +190,7 @@ class EventCircuitCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+#obj - Ainur
 class ObjectEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -217,7 +199,7 @@ class ObjectEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer')
 
-
+#obj create - Ainur
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -233,7 +215,7 @@ class EventObjectCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#чтобы передавать фронту нужн
+#чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -245,7 +227,7 @@ class OutfitWorkerGet(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
+# event update - Ainur
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
@@ -254,7 +236,7 @@ class EventUpdateAPIView(UpdateAPIView):
     serializer_class = EventCreateSerializer
 
 
-#удаление события
+#удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
     """Удаления event"""
     authentication_classes = (TokenAuthentication,)
@@ -271,20 +253,21 @@ class OutfitWorkerAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'name')
 
+#создание сотрудника - Ainur
 class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-
+#редактирование сотрудника - Ainur
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-
+#сотрудника удаление - Ainur
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
@@ -294,7 +277,7 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
 
 
 
-#Создание, удаление и список комментариев
+#Создание, удаление и список комментариеиив
 class CommentModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -302,7 +285,7 @@ class CommentModelViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
 
-#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None
+#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class UnknownEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -326,7 +309,6 @@ class EventUnknownCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# статистика событий за сегодня
 class DashboardTodayEventList(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -338,7 +320,6 @@ class DashboardTodayEventList(ListAPIView):
         serializer = EventListSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-# статистика событий за неделю
 
 def get_dates_and_counts_week(request):
     data = {}
@@ -350,7 +331,6 @@ def get_dates_and_counts_week(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
-
 
 
 def get_dates_and_counts_month(request):
@@ -376,6 +356,7 @@ def get_dates_and_counts_today(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
+
 
 
 def get_outfit_statistics_for_a_month(request):
@@ -427,16 +408,19 @@ class CompletedEvents(ListAPIView):
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
 
-        if date_from == '' and date_to == '':
+
+        if date_to == "" and date_from == "":
             week = datetime.date.today() - timedelta(days=7)
             queryset = queryset.filter(created_at__gte=week)
+
         else:
+
             if date_to == "":
                 queryset = queryset.filter(created_at=date_from)
+
             else:
                 if date_to != '':
                     queryset = queryset.filter(created_at__lte=date_to)
-
                 if date_from != '':
                     queryset = queryset.filter(created_at__gte=date_from)
 
@@ -452,16 +436,18 @@ class UncompletedEventList(ListAPIView):
         queryset = Event.objects.all()
         date_from = queryset.query_params.get('date_from', None)
         date_to = queryset.query_params.get('date_to', None)
+
         if date_from == '' and date_to == '':
             week = datetime.date.today() - timedelta(days=7)
             queryset = queryset.filter(created_at__gte=week)
         else:
-            if date_to == '':
+            if date_to == "":
                 queryset = queryset.filter(created_at=date_from)
             else:
-                if date_from is not None and date_from != '':
-                    queryset = queryset.filter(created_at__gte=date_from)
-                if date_to is not None and date_to != '':
+                if date_to != '':
                     queryset = queryset.filter(created_at__lte=date_to)
+                if date_from != '':
+                    queryset = queryset.filter(created_at__gte=date_from)
+
         return queryset
 
