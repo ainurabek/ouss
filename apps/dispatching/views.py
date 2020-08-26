@@ -209,7 +209,9 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
+            print("====")
             serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            print("111====")
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
