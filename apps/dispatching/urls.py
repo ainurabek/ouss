@@ -65,11 +65,11 @@ urlpatterns = [
     path("api/event/precent-day/", views.get_outfit_statistics_for_a_day),
     path("api/event/completed-list/", views.CompletedEvents.as_view()),
 
+    #статистика незавершенных событий
+    path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
+
+
     #comments
     path('', include(router.urls)),
-
-
-
-
 
 ]

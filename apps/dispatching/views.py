@@ -340,7 +340,6 @@ class DashboardTodayEventList(ListAPIView):
 
 # статистика событий за неделю
 
-
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
@@ -353,6 +352,7 @@ def get_dates_and_counts_week(request):
     return JsonResponse(data, safe=False)
 
 
+# статистика событий за месяц
 def get_dates_and_counts_month(request):
     data = {}
     month = datetime.date.today() - timedelta(days=30)
@@ -365,6 +365,8 @@ def get_dates_and_counts_month(request):
     return JsonResponse(data, safe=False)
 
 
+
+# статистика событий за сегодня
 def get_dates_and_counts_today(request):
     data = {}
     time = timedelta - timedelta(hours=24)
@@ -418,6 +420,7 @@ def get_outfit_statistics_for_a_day(request):
 
 
 class CompletedEvents(ListAPIView):
+# статистика незавершенных событий
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
@@ -426,6 +429,35 @@ class CompletedEvents(ListAPIView):
         queryset = Event.objects.exclude(index2=None)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
+
+
+        if date_to == "" and date_from == "":
+            week = datetime.date.today() - timedelta(days=7)
+            queryset = queryset.filter(created_at__gte=week)
+
+        else:
+
+            if date_to == "":
+                queryset = queryset.filter(created_at=date_from)
+
+            else:
+                if date_to != '':
+                    queryset = queryset.filter(created_at__lte=date_to)
+                if date_from != '':
+                    queryset = queryset.filter(created_at__gte=date_from)
+
+        return queryset
+
+
+class UncompletedEventList(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = EventListSerializer
+    queryset = Event.objects.all()
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        date_from = queryset.query_params.get('date_from', None)
+        date_to = queryset.query_params.get('date_to', None)
 
         if date_from == '' and date_to == '':
             week = datetime.date.today() - timedelta(days=7)
@@ -436,10 +468,10 @@ class CompletedEvents(ListAPIView):
             else:
                 if date_to != '':
                     queryset = queryset.filter(created_at__lte=date_to)
-
                 if date_from != '':
                     queryset = queryset.filter(created_at__gte=date_from)
 
         return queryset
+
 
 
