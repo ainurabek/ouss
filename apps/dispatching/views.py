@@ -326,7 +326,7 @@ def get_dates_and_counts_week(request):
     week = datetime.date.today() - timedelta(days=7)
     dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
     teams_data = [
-        {"day": date.created_at.weekday(), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
         for date in dates
     ]
     data["dates"] = teams_data
@@ -347,16 +347,15 @@ def get_dates_and_counts_month(request):
 
 def get_dates_and_counts_today(request):
     data = {}
-    time = timedelta - timedelta(hours=24)
+    time = datetime.date.today()
 
     dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
     teams_data = [
-        {"time": date.date_from.hour, "counts": Event.objects.filter(date_from=date.date_from).count() }
+        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count() }
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
-
 
 
 def get_outfit_statistics_for_a_month(request):
@@ -431,23 +430,23 @@ class UncompletedEventList(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.all()
+
     def get_queryset(self):
         queryset = Event.objects.all()
-        date_from = queryset.query_params.get('date_from', None)
-        date_to = queryset.query_params.get('date_to', None)
+        date_from = self.request.query_params.get('date_from', None)
+        date_to = self.request.query_params.get('date_to', None)
 
         if date_from == '' and date_to == '':
             week = datetime.date.today() - timedelta(days=7)
             queryset = queryset.filter(created_at__gte=week)
         else:
-            if date_to == "":
+            if date_to == '':
                 queryset = queryset.filter(created_at=date_from)
             else:
-                if date_to != '':
-                    queryset = queryset.filter(created_at__lte=date_to)
-                if date_from != '':
+                if date_from is not None and date_from != '':
                     queryset = queryset.filter(created_at__gte=date_from)
+                if date_to is not None and date_to != '':
+                    queryset = queryset.filter(created_at__lte=date_to)
 
         return queryset
 
