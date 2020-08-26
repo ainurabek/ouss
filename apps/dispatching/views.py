@@ -93,7 +93,7 @@ def event_delete(request, pk):
     return redirect('apps:dispatching:event_list')
 
 ########API
-
+#listevent
 class EventListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -162,7 +162,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, many=True)
         return Response(serializer.data)
 
-
+#ip-Ainur
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -171,7 +171,7 @@ class IPEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('point_id', 'object_id')
 
-
+#create- Ainur
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -194,7 +194,7 @@ class CircuitEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('id_object', 'customer', 'name', 'type_using')
 
-
+#cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -208,7 +208,7 @@ class EventCircuitCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+#obj - Ainur
 class ObjectEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -217,7 +217,7 @@ class ObjectEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer')
 
-
+#obj create - Ainur
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -233,7 +233,7 @@ class EventObjectCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#чтобы передавать фронту нужн
+#чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -245,7 +245,7 @@ class OutfitWorkerGet(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
+# event update - Ainur
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
@@ -254,7 +254,7 @@ class EventUpdateAPIView(UpdateAPIView):
     serializer_class = EventCreateSerializer
 
 
-#удаление события
+#удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
     """Удаления event"""
     authentication_classes = (TokenAuthentication,)
@@ -271,20 +271,21 @@ class OutfitWorkerAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'name')
 
+#создание сотрудника - Ainur
 class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-
+#редактирование сотрудника - Ainur
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-
+#сотрудника удаление - Ainur
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
@@ -294,7 +295,7 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
 
 
 
-#Создание, удаление и список комментариев
+#Создание, удаление и список комментариеиив
 class CommentModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -302,7 +303,7 @@ class CommentModelViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
 
-#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None
+#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class UnknownEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -326,20 +327,7 @@ class EventUnknownCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# статистика событий за сегодня
-class DashboardTodayEventList(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.all()
-
-    def get(self, request, *args, **kwargs):
-        today = datetime.date.today()
-        queryset = Event.objects.filter(created_at=today)
-        serializer = EventListSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-# статистика событий за неделю
-
+# статистика событий за неделю - Айнур
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
@@ -351,8 +339,7 @@ def get_dates_and_counts_week(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
-# статистика событий за месяц
+# статистика событий за месяц - Айнур
 def get_dates_and_counts_month(request):
     data = {}
     month = datetime.date.today() - timedelta(days=30)
@@ -365,8 +352,7 @@ def get_dates_and_counts_month(request):
     return JsonResponse(data, safe=False)
 
 
-
-# статистика событий за сегодня
+# статистика событий за сегодня - Айнур
 def get_dates_and_counts_today(request):
     data = {}
     time = timedelta - timedelta(hours=24)
@@ -378,6 +364,7 @@ def get_dates_and_counts_today(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
+
 
 
 def get_outfit_statistics_for_a_month(request):
@@ -420,7 +407,6 @@ def get_outfit_statistics_for_a_day(request):
 
 
 class CompletedEvents(ListAPIView):
-# статистика незавершенных событий
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
