@@ -92,11 +92,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class LogoutView(APIView):
     def get(self, request, format=None):
-        profile = Profile.objects.get(user__username=request.user.username)
-        profile.online = False
-        profile.save()
-        if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
-            Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
+        if request.user.role.id == 1:
+            pass
+        else:
+            profile = Profile.objects.get(user__username=request.user.username)
+            profile.online = False
+            profile.save()
         logout(request)
         return Response(status=status.HTTP_200_OK)
 
@@ -106,20 +107,6 @@ class LogUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     serializer_class = LogUpdateSerializer
 
-# class LogoutView(APIView):
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-#
-#     def post(self, request, format=None):
-#         request._auth.delete()
-#         user_logged_out.send(sender=request.user.__class__,
-#                              request=request, user=request.user)
-#         profile = Profile.objects.get(user__username=request.user.username)
-#         profile.online = False
-#         profile.save()
-#         if Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).exists():
-#             Log.objects.filter(Q(user=request.user.profile) & Q(date__gt=timezone.now())).update(end_time=timezone.now())
-#         return HttpResponse("Пользователь вышел из системы", None, status=status.HTTP_204_NO_CONTENT)
 
 '''
 Данная функция позволяет создать профиль сотрудника. Из фронта приходят данные, которые вводит юзер, также его id (role, user and password)
