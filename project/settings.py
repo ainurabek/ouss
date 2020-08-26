@@ -147,6 +147,7 @@ USE_L10N = True
 USE_TZ = False
 
 import warnings
+#show an error
 warnings.filterwarnings(
     'error', r"DateTimeField .* received a naive datetime",
     RuntimeWarning, r'django\.db\.models\.fields',
