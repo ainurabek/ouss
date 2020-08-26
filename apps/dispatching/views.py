@@ -341,6 +341,7 @@ class DashboardTodayEventList(ListAPIView):
 
 # статистика событий за неделю
 
+
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
@@ -351,6 +352,7 @@ def get_dates_and_counts_week(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
+
 
 def get_dates_and_counts_month(request):
     data = {}
@@ -363,6 +365,7 @@ def get_dates_and_counts_month(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
+
 def get_dates_and_counts_today(request):
     data = {}
     time = timedelta - timedelta(hours=24)
@@ -374,3 +377,74 @@ def get_dates_and_counts_today(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
+
+
+def get_outfit_statistics_for_a_month(request):
+    data = {}
+    month = datetime.date.today() - timedelta(days=30)
+    dates = Event.objects.filter(created_at__gte=month).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=month).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+def get_outfit_statistics_for_a_week(request):
+    data = {}
+    week = datetime.date.today() - timedelta(days=7)
+    dates = Event.objects.filter(created_at__gte=week).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=week).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+def get_outfit_statistics_for_a_day(request):
+    data = {}
+    day = datetime.date.today()
+    dates = Event.objects.filter(created_at__gte=day).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=day).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+class CompletedEvents(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = EventListSerializer
+
+    def get_queryset(self):
+        queryset = Event.objects.exclude(index2=None)
+        date_from = self.request.query_params.get('date_from', None)
+        date_to = self.request.query_params.get('date_to', None)
+
+        if date_to == "" and date_from == "":
+            week = datetime.date.today() - timedelta(days=7)
+            queryset = queryset.filter(created_at__gte=week)
+
+        else:
+
+            if date_to == "":
+                queryset = queryset.filter(created_at=date_from)
+
+            else:
+                if date_to != '':
+                    queryset = queryset.filter(created_at__lte=date_to)
+                if date_from != '':
+                    queryset = queryset.filter(created_at__gte=date_from)
+
+        return queryset
+
+
+
+
