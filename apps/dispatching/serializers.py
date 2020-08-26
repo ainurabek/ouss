@@ -148,23 +148,23 @@ class IndexSerializer(serializers.ModelSerializer):
 class EventCreateSerializer(serializers.ModelSerializer):
     """Создания события"""
     type_journal = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=TypeOfJournal.objects.all())
+        read_only=False, queryset=TypeOfJournal.objects.all())
     reason = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Reason.objects.all())
     index1 = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Index.objects.all())
+        read_only=False,  queryset=Index.objects.all())
     index2 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Index.objects.all())
     responsible_outfit = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Outfit.objects.all())
+        read_only=False,  queryset=Outfit.objects.all())
     send_from = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Outfit.objects.all())
+        read_only=False, queryset=Outfit.objects.all())
     point1 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     point2 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=OutfitWorker.objects.all())
+        read_only=False, queryset=OutfitWorker.objects.all())
 
 
     class Meta:
