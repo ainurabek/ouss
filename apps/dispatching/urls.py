@@ -46,7 +46,7 @@ urlpatterns = [
     path("api/outfit_worker/edit/<int:pk>/", views.OutfitWorkerEditView.as_view()),
     path("api/outfit_worker/delete/<int:pk>/", views.OutfitWorkerDeleteAPIView.as_view()),
 
-    #передавать сотрудникв предприятий
+    #передавать сотрудникв предприятий - Айнур
     path("api/outfit_worker/<int:pk>/", views.OutfitWorkerGet.as_view()),
 
     #unknown events
@@ -54,12 +54,12 @@ urlpatterns = [
     path("api/event/unknown/create/", views.EventUnknownCreateViewAPI.as_view()),
 
 
-    #статистика за месяц-неедлю-сегодня
+    #статистика за месяц-неделю-сегодня
     path("api/event/week/", views.get_dates_and_counts_week),
     path("api/event/month/", views.get_dates_and_counts_month),
     path("api/event/today/", views.get_dates_and_counts_today),
 
-    #статистика незавершенных событий
+    #статистика незавершенных событий - Айнур
     path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
 
     #comments

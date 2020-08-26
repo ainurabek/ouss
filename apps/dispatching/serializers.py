@@ -26,9 +26,8 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ('id', "name")
 
-
+#venet obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
-
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
@@ -45,7 +44,6 @@ class EventUnknownSerializer(serializers.ModelSerializer):
                   'comments1', 'comments2')
 
 class EventDetailObjectSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Object
         fields = ['event_obj', ]
@@ -70,6 +68,7 @@ class CircuitDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_cir']
         depth=1
 
+#obj event
 class ObjectEventSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
     tpo2 = TPOSerializer()
@@ -113,6 +112,7 @@ class IPDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_ips']
         depth=1
 
+#event list
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
@@ -165,11 +165,6 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=OutfitWorker.objects.all())
-    # comments1 = serializers.PrimaryKeyRelatedField(
-    #     read_only=False, allow_null=True, queryset=Comments.objects.all())
-    # comments2 = serializers.PrimaryKeyRelatedField(
-    #     read_only=False, allow_null=True, queryset=Comments.objects.all())
-
 
 
     class Meta:
@@ -194,6 +189,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
 #         fields = ('object', 'circuit', 'ips' )
 #         depth=2
 
+#event detail
 class EventDetailSerializer(serializers.ModelSerializer):
     type_journal = TypeJournalSerializer()
     reason = ReasonSerializer()
