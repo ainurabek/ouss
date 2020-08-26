@@ -307,7 +307,6 @@ class UnknownEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     queryset = Event.objects.exclude(name__isnull=True)
-    # queryset = Event.objects.exclude(name=None)
     serializer_class = EventUnknownSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name',)
