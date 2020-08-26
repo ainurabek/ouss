@@ -1,7 +1,5 @@
 import datetime
 from datetime import date, timedelta
-from django.utils import timezone
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -116,26 +114,45 @@ class EventListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         #событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
-        #фильтр по хвостам  за сегодня
+
         today = datetime.date.today()
         queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
         queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
         queryset=queryset1.union(queryset2).order_by('-created_at')
+        #фильтр по хвостам  за сегодня
 
-        # фильтр  по дате создания, без времени + хвосты
+
+
+        date_from_from = self.request.query_params.get('date_from_from', None)
+        date_to_from = self.request.query_params.get('date_to_from', None)
         created_at = self.request.query_params.get('created_at', None)
+
+# фильтр  по дате создания, без времени
         if created_at is not None and created_at != "":
-            q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
-            q2 = Event.objects.filter(created_at=created_at)
-            queryset=q1.union(q2)
+            queryset = queryset.filter(created_at=created_at)
+
+#фильтр для поля Начало
+        if date_from_from is not None and date_from_from != "":
+            date_from_from+='T00:00:00'
+            queryset = queryset.filter(date_from__gte=date_from_from)
+        if date_to_from is not None and date_to_from != "":
+            date_to_from += 'T23:59:00'
+            queryset = queryset.filter(date_from__lte=date_to_from)
+# фильтр для поля Конец
+        date_from_to = self.request.query_params.get('date_from_to', None)
+        date_to_to = self.request.query_params.get('date_to_to', None)
+
+        if date_from_to is not None and date_from_to != "":
+            date_from_to += 'T00:00:00'
+            queryset = queryset.filter(date_to__gte=date_from_to)
+        if date_to_to is not None and date_to_to != "":
+            date_to_to += 'T23:59:00'
+            queryset = queryset.filter(date_to__lte=date_to_to)
 
         return queryset
 
-    def retrieve(self, request, pk=None):
-
-        instance = get_object_or_404(Event, pk=pk)
-
-        # instance = self.get_object()
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
         if instance.object is not None:
             instance = Event.objects.filter(object=instance.object)
         elif instance.circuit is not None:
@@ -308,20 +325,34 @@ class EventUnknownCreateViewAPI(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# статистика событий за сегодня
+class DashboardTodayEventList(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Event.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        today = datetime.date.today()
+        queryset = Event.objects.filter(created_at=today)
+        serializer = EventListSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 # статистика событий за неделю
+
+
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
-
-
     dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
     teams_data = [
-        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        {"day": date.created_at.weekday(), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
-# статистика событий за месяц
+
+
 def get_dates_and_counts_month(request):
     data = {}
     month = datetime.date.today() - timedelta(days=30)
@@ -333,39 +364,86 @@ def get_dates_and_counts_month(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-# статистика событий за сегодня
+
 def get_dates_and_counts_today(request):
     data = {}
-    time = datetime.date.today()
+    time = timedelta - timedelta(hours=24)
+
     dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
     teams_data = [
-        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count() }
+        {"time": date.date_from.hour, "counts": Event.objects.filter(date_from=date.date_from).count() }
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-# статистика незавершенных событий
-class UncompletedEventList(ListAPIView):
+
+def get_outfit_statistics_for_a_month(request):
+    data = {}
+    month = datetime.date.today() - timedelta(days=30)
+    dates = Event.objects.filter(created_at__gte=month).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=month).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+def get_outfit_statistics_for_a_week(request):
+    data = {}
+    week = datetime.date.today() - timedelta(days=7)
+    dates = Event.objects.filter(created_at__gte=week).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=week).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+def get_outfit_statistics_for_a_day(request):
+    data = {}
+    day = datetime.date.today()
+    dates = Event.objects.filter(created_at__gte=day).distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=day).count()
+    teams_data = [
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count() }
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+class CompletedEvents(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
 
     def get_queryset(self):
-        queryset = Event.objects.all()
+        queryset = Event.objects.exclude(index2=None)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
 
-        if date_from == '' and date_to == '':
+        if date_to == "" and date_from == "":
             week = datetime.date.today() - timedelta(days=7)
             queryset = queryset.filter(created_at__gte=week)
+
         else:
-            if date_to == '':
+
+            if date_to == "":
                 queryset = queryset.filter(created_at=date_from)
+
             else:
-                if date_from is not None and date_from != '':
-                    queryset = queryset.filter(created_at__gte=date_from)
-                if date_to is not None and date_to != '':
+                if date_to != '':
                     queryset = queryset.filter(created_at__lte=date_to)
+                if date_from != '':
+                    queryset = queryset.filter(created_at__gte=date_from)
 
         return queryset
+
+
+
+
