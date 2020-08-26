@@ -6,13 +6,6 @@ from apps.opu.circuits.models import Circuit
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
-# class CircuitViewSet(viewsets.ModelViewSet):
-#     queryset = Circuit.objects.all()
-#     serializer_class = CircuitList
-#     lookup_field = 'pk'
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticatedOrReadOnly,)
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
 
