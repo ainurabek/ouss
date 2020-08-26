@@ -26,7 +26,7 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ('id', "name")
 
-#venet obj detail - Ainur
+#event obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
@@ -68,7 +68,7 @@ class CircuitDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_cir']
         depth=1
 
-#obj event
+#obj event - Ainur
 class ObjectEventSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
     tpo2 = TPOSerializer()
@@ -79,8 +79,7 @@ class ObjectEventSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     category = CategorySerializer()
     customer = CustomerSerializer()
-    # comments1=CommentsSerializer()
-    # comments2=CommentsSerializer()
+
 
     class Meta:
         model = Object
@@ -113,7 +112,7 @@ class IPDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_ips']
         depth=1
 
-#event list
+#event list - Ainur
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
@@ -190,7 +189,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
 #         fields = ('object', 'circuit', 'ips' )
 #         depth=2
 
-#event detail
+#event detail - Ainur
 class EventDetailSerializer(serializers.ModelSerializer):
     type_journal = TypeJournalSerializer()
     reason = ReasonSerializer()
@@ -206,9 +205,6 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
     contact_name=OutfitWorkerListSerializer()
-
-
-
 
     class Meta:
         model = Event

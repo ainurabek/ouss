@@ -151,8 +151,9 @@ class EventListAPIView(viewsets.ModelViewSet):
 
         return queryset
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+
+    def retrieve(self, request, pk=None):
+        instance = get_object_or_404(Event, pk=pk)
         if instance.object is not None:
             instance = Event.objects.filter(object=instance.object)
         elif instance.circuit is not None:
