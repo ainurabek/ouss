@@ -312,8 +312,6 @@ class EventUnknownCreateViewAPI(APIView):
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
-
-
     dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
     teams_data = [
         {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
@@ -355,7 +353,6 @@ class UncompletedEventList(ListAPIView):
         queryset = Event.objects.all()
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
-
         if date_from == '' and date_to == '':
             week = datetime.date.today() - timedelta(days=7)
             queryset = queryset.filter(created_at__gte=week)
@@ -367,5 +364,4 @@ class UncompletedEventList(ListAPIView):
                     queryset = queryset.filter(created_at__gte=date_from)
                 if date_to is not None and date_to != '':
                     queryset = queryset.filter(created_at__lte=date_to)
-
         return queryset
