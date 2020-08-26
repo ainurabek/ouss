@@ -125,9 +125,10 @@ class EventListAPIView(viewsets.ModelViewSet):
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
-        if created_at is not None and created_at != "":
-            queryset = queryset.filter(created_at=created_at)
-
+        if created_at is not None and created_at != '':
+            q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
+            q2 = Event.objects.filter(created_at=created_at)
+            queryset=q1.union(q2)
 
         return queryset
 
