@@ -56,9 +56,11 @@ urlpatterns = [
 
     #статистика за месяц-неедлю-сегодня
     path("api/event/week/", views.get_dates_and_counts_week),
-
     path("api/event/month/", views.get_dates_and_counts_month),
     path("api/event/today/", views.get_dates_and_counts_today),
+
+    #статистика незавершенных событий
+    path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
 
     #comments
     path('', include(router.urls)),

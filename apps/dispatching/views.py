@@ -309,21 +309,7 @@ class EventUnknownCreateViewAPI(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# статистика событий за сегодня
-class DashboardTodayEventList(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.all()
-
-    def get(self, request, *args, **kwargs):
-        today = datetime.date.today()
-        queryset = Event.objects.filter(created_at=today)
-        serializer = EventListSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 # статистика событий за неделю
-
 def get_dates_and_counts_week(request):
     data = {}
     week = datetime.date.today() - timedelta(days=7)
@@ -336,7 +322,7 @@ def get_dates_and_counts_week(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
-
+# статистика событий за месяц
 def get_dates_and_counts_month(request):
     data = {}
     month = datetime.date.today() - timedelta(days=30)
@@ -348,6 +334,7 @@ def get_dates_and_counts_month(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
+# статистика событий за сегодня
 def get_dates_and_counts_today(request):
     data = {}
     time = datetime.date.today()
@@ -358,3 +345,28 @@ def get_dates_and_counts_today(request):
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
+
+# статистика незавершенных событий
+class UncompletedEventList(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = EventListSerializer
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        date_from = self.request.query_params.get('date_from', None)
+        date_to = self.request.query_params.get('date_to', None)
+
+        if date_from == '' and date_to == '':
+            week = datetime.date.today() - timedelta(days=7)
+            queryset = queryset.filter(created_at__gte=week)
+        else:
+            if date_to == '':
+                queryset = queryset.filter(created_at=date_from)
+            else:
+                if date_from is not None and date_from != '':
+                    queryset = queryset.filter(created_at__gte=date_from)
+                if date_to is not None and date_to != '':
+                    queryset = queryset.filter(created_at__lte=date_to)
+
+        return queryset
