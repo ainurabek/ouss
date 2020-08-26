@@ -132,9 +132,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         return queryset
 
     def retrieve(self, request, pk=None):
-
         instance = get_object_or_404(Event, pk=pk)
-
         # instance = self.get_object()
         if instance.object is not None:
             instance = Event.objects.filter(object=instance.object)
