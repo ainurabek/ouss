@@ -142,6 +142,8 @@ class EventListAPIView(viewsets.ModelViewSet):
             instance = Event.objects.filter(circuit=instance.circuit)
         elif instance.ips is not None:
             instance = Event.objects.filter(ips=instance.ips)
+        elif instance.name is not None:
+            instance = Event.objects.filter(name=instance.name)
         serializer = self.get_serializer(instance, many=True)
         return Response(serializer.data)
 
