@@ -89,6 +89,7 @@ class Event(models.Model):
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
     name = models.CharField('Название', max_length=500, null=True, blank=True)
+    period_of_time = models.CharField("Сумма часов, за которое устранили аварию", max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Журнал событий'
