@@ -203,8 +203,8 @@ class EventDetailSerializer(serializers.ModelSerializer):
     circuit = EventCircuitSerializer()
     customer = CustomerSerializer()
     created_by = UserLogSerializer()
-    point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
+    point1 = PointList()
+    point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
 
     class Meta:
