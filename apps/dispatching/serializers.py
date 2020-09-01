@@ -122,7 +122,8 @@ class EventListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", 'created_at', 'name')
+        fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", 'created_at', 'name',
+                  "period_of_time")
 
         depth=1
 
@@ -202,12 +203,13 @@ class EventDetailSerializer(serializers.ModelSerializer):
     circuit = EventCircuitSerializer()
     customer = CustomerSerializer()
     created_by = UserLogSerializer()
-    point1 = serializers.SlugRelatedField(slug_field="point", read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field="point", read_only=True)
+    point1 = PointList()
+    point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name')
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name',
+                  "period_of_time")

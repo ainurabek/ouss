@@ -59,15 +59,10 @@ urlpatterns = [
 
     path("api/event/month/", views.get_dates_and_counts_month),
     path("api/event/today/", views.get_dates_and_counts_today),
-
-
     path("api/event/precent-month/", views.get_outfit_statistics_for_a_month),
     path("api/event/precent-week/", views.get_outfit_statistics_for_a_week),
     path("api/event/precent-day/", views.get_outfit_statistics_for_a_day),
     path("api/event/completed-list/", views.CompletedEvents.as_view()),
-
-    #статистика незавершенных событий - Айнур
-
     path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
 
 

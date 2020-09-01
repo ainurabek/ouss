@@ -7,6 +7,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer
+from .services import get_minus_date, update_period_of_time, ListFilterAPIView
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -141,6 +142,8 @@ class EventListAPIView(viewsets.ModelViewSet):
             instance = Event.objects.filter(circuit=instance.circuit)
         elif instance.ips is not None:
             instance = Event.objects.filter(ips=instance.ips)
+        elif instance.name is not None:
+            instance = Event.objects.filter(name=instance.name)
         serializer = self.get_serializer(instance, many=True)
         return Response(serializer.data)
 
@@ -162,7 +165,8 @@ class EventIPCreateViewAPI(APIView):
         ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            obj = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            update_period_of_time(instance=obj)
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -186,7 +190,8 @@ class EventCircuitCreateViewAPI(APIView):
         circuit = get_object_or_404(Circuit, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
+            obj = serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
+            update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -209,10 +214,9 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            print("====")
-            serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
-            print("111====")
+            obj = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
             response = {"data": "Событие создано успешно"}
+            update_period_of_time(instance=obj)
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -236,6 +240,9 @@ class EventUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
+
+    def perform_update(self, serializer):
+        update_period_of_time(instance=self.get_object())
 
 
 #удаление события - Ainur
@@ -305,17 +312,28 @@ class EventUnknownCreateViewAPI(APIView):
     def post(self, request):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save( created_by=self.request.user.profile, created_at=now)
+            obj = serializer.save( created_by=self.request.user.profile, created_at=now)
             response = {"data": "Событие создано успешно"}
+            update_period_of_time(instance=obj)
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# статистика событий за неделю - Айнур
+class DashboardTodayEventList(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Event.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        today = datetime.date.today()
+        queryset = Event.objects.filter(created_at=today)
+        serializer = EventListSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 def get_dates_and_counts_week(request):
     data = {}
-    week = datetime.date.today() - timedelta(days=7)
-    dates = Event.objects.filter(created_at__gte=week).distinct('created_at')
+    dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).distinct('created_at')
     teams_data = [
         {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
         for date in dates
@@ -323,11 +341,10 @@ def get_dates_and_counts_week(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-# статистика событий за месяц - Айнур
+
 def get_dates_and_counts_month(request):
     data = {}
-    month = datetime.date.today() - timedelta(days=30)
-    dates = Event.objects.filter(created_at__gte=month).distinct('created_at')
+    dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).distinct('created_at')
     teams_data = [
         {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
         for date in dates
@@ -336,14 +353,12 @@ def get_dates_and_counts_month(request):
     return JsonResponse(data, safe=False)
 
 
-# статистика событий за сегодня - Айнур
 def get_dates_and_counts_today(request):
     data = {}
     time = datetime.date.today()
-
     dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
     teams_data = [
-        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count() }
+        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count()}
         for date in dates
     ]
     data["dates"] = teams_data
@@ -351,12 +366,13 @@ def get_dates_and_counts_today(request):
 
 
 def get_outfit_statistics_for_a_month(request):
-    data = {}
-    month = datetime.date.today() - timedelta(days=30)
+    month = get_minus_date(days=30)
     dates = Event.objects.filter(created_at__gte=month).distinct('responsible_outfit')
-    all = Event.objects.filter(created_at__gte=month).count()
+    all_data = Event.objects.filter(created_at__gte=month).count()
     teams_data = [
-        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count() }
+        {"outfit": date.responsible_outfit.outfit,
+         "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()/all_data)*100,
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()}
         for date in dates
     ]
 
@@ -364,8 +380,7 @@ def get_outfit_statistics_for_a_month(request):
 
 
 def get_outfit_statistics_for_a_week(request):
-    data = {}
-    week = datetime.date.today() - timedelta(days=7)
+    week = get_minus_date(days=7)
     dates = Event.objects.filter(created_at__gte=week).distinct('responsible_outfit')
     all = Event.objects.filter(created_at__gte=week).count()
     teams_data = [
@@ -377,7 +392,6 @@ def get_outfit_statistics_for_a_week(request):
 
 
 def get_outfit_statistics_for_a_day(request):
-    data = {}
     day = datetime.date.today()
     dates = Event.objects.filter(created_at__gte=day).distinct('responsible_outfit')
     all = Event.objects.filter(created_at__gte=day).count()
@@ -389,58 +403,15 @@ def get_outfit_statistics_for_a_day(request):
     return JsonResponse(teams_data, safe=False)
 
 
-class CompletedEvents(ListAPIView):
+class CompletedEvents(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-
-    def get_queryset(self):
-        queryset = Event.objects.exclude(index2=None)
-        date_from = self.request.query_params.get('date_from', None)
-        date_to = self.request.query_params.get('date_to', None)
+    queryset = Event.objects.exclude(index2=None)
 
 
-        if date_to == "" and date_from == "":
-            week = datetime.date.today() - timedelta(days=7)
-            queryset = queryset.filter(created_at__gte=week)
-
-        else:
-
-            if date_to == "":
-                queryset = queryset.filter(created_at=date_from)
-
-            else:
-                if date_to != '':
-                    queryset = queryset.filter(created_at__lte=date_to)
-                if date_from != '':
-                    queryset = queryset.filter(created_at__gte=date_from)
-
-        return queryset
-
-
-class UncompletedEventList(ListAPIView):
+class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-
-    def get_queryset(self):
-        queryset = Event.objects.all()
-        date_from = self.request.query_params.get('date_from', None)
-        date_to = self.request.query_params.get('date_to', None)
-
-        if date_from == '' and date_to == '':
-            week = datetime.date.today() - timedelta(days=7)
-            queryset = queryset.filter(created_at__gte=week)
-        else:
-            if date_to == '':
-                queryset = queryset.filter(created_at=date_from)
-            else:
-                if date_from is not None and date_from != '':
-                    queryset = queryset.filter(created_at__gte=date_from)
-                if date_to is not None and date_to != '':
-                    queryset = queryset.filter(created_at__lte=date_to)
-
-        return queryset
-
-
-
+    queryset = Event.objects.all()
