@@ -79,7 +79,7 @@ class RegionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Region
-        fields = ("id", "name", "slug", )
+        fields = ("id", "name", )
 
 
 class ObjectReserveSerializer(serializers.ModelSerializer):
