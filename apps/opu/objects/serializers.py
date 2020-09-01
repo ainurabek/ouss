@@ -60,7 +60,6 @@ class OutfitListSerializer(serializers.ModelSerializer):
         depth = 1
 
 class OutfitWorkerListSerializer(serializers.ModelSerializer):
-
     outfit = OutfitListSerializer()
 
     class Meta:

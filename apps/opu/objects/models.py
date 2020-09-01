@@ -110,6 +110,7 @@ class OutfitWorker(models.Model):
 	class Meta:
 		verbose_name = 'Сотрудник предприятия'
 		verbose_name_plural = 'Сотрудники предприятий'
+		ordering = ('id',)
 
 	def __str__(self):
 		return self.name
