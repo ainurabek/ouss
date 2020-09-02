@@ -21,6 +21,7 @@ from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSe
 
 from apps.accounts.serializers import UserLogSerializer
 
+from KT.KT.project.apps.opu.objects.serializers import ObjectOutfitSerializer
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -30,7 +31,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 #event obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
-    id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
+    id_outfit = ObjectOutfitSerializer()
     point1 = PointList()
     point2 = PointList()
     type_line= serializers.SlugRelatedField(slug_field='name', read_only=True)
@@ -58,7 +59,7 @@ class CircuitEventList(serializers.ModelSerializer):
     point2 = PointCircSerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
-    id_object = AllObjectSerializer()
+    id_object = ObjectSerializer()
 
     class Meta:
         model = Circuit
