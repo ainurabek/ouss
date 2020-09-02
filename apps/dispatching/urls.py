@@ -66,6 +66,9 @@ urlpatterns = [
     path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
 
 
+    #фильтры для отчета
+    path("api/event/report/", views.ReportEventDisp.as_view()),
+
     #comments
     path('', include(router.urls)),
 

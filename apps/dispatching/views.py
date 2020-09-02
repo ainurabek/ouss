@@ -414,4 +414,30 @@ class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
+    queryset = Event.objects.exclude(index2__isnull=True)
+
+
+
+class ReportEventDisp(ListAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = EventDetailSerializer
     queryset = Event.objects.all()
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        # q1 = Event.objects.filter(index2=None)
+        # q2 = Event.objects.exclude(index2__isnull=True)
+
+        date_from = self.request.query_params.get('date_from', None)
+        date_to = self.request.query_params.get('date_to', None)
+
+        if date_to == "" and date_from != '':
+            queryset = self.queryset.filter(created_at=date_from)
+        elif date_to != '' and date_from == '':
+            queryset = self.queryset.filter(created_at=date_to)
+        elif date_to != '' and date_from != '':
+            queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
+
+        return queryset
+
