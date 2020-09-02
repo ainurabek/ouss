@@ -13,13 +13,16 @@ from apps.opu.objects.models import IP, Outfit, OutfitWorker
 from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer, IPListSerializer
 
 from apps.opu.circuits.serializers import PointCircSerializer, CategorySerializer
-from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerializer
+from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerializer, PointListSerializer
 
 from apps.opu.circuits.serializers import TransitCircSerializer
 
 from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSerializer
 
 from apps.accounts.serializers import UserLogSerializer
+
+from apps.opu.objects.serializers import PointListSerializer
+
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -98,7 +101,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
 
 class IPSSerializer(serializers.ModelSerializer):
-    point_id = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point_id = PointListSerializer()
     object_id = EventObjectSerializer()
 
     class Meta:
