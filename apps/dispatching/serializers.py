@@ -21,7 +21,6 @@ from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSe
 
 from apps.accounts.serializers import UserLogSerializer
 
-from apps.opu.objects.serializers import PointListSerializer
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -32,8 +31,8 @@ class CommentsSerializer(serializers.ModelSerializer):
 #event obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointList()
+    point2 = PointList()
     type_line= serializers.SlugRelatedField(slug_field='name', read_only=True)
 
     class Meta:
@@ -101,7 +100,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
 
 class IPSSerializer(serializers.ModelSerializer):
-    point_id = PointListSerializer()
+    point_id = serializers.SlugRelatedField(slug_field='point', read_only=True)
     object_id = EventObjectSerializer()
 
     class Meta:
