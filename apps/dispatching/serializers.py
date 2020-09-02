@@ -21,7 +21,7 @@ from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSe
 
 from apps.accounts.serializers import UserLogSerializer
 
-from KT.KT.project.apps.opu.objects.serializers import ObjectOutfitSerializer
+from apps.opu.objects.serializers import ObjectOutfitSerializer
 
 
 class CommentsSerializer(serializers.ModelSerializer):
