@@ -122,11 +122,12 @@ class EventListSerializer(serializers.ModelSerializer):
     ips = IPSSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     index2 = serializers.SlugRelatedField(slug_field="index", read_only=True)
+    responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
 
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "index2", "date_from", "date_to", 'created_at', 'name',
-                  "period_of_time")
+                  "period_of_time", "responsible_outfit")
 
         depth=1
 
