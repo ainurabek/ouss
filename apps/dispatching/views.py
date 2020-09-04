@@ -7,7 +7,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer
-from .services import get_minus_date, update_period_of_time, ListFilterAPIView
+from .services import get_minus_date, ListFilterAPIView
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -241,8 +241,9 @@ class EventUpdateAPIView(UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
-    def perform_update(self, serializer):
-        update_period_of_time(instance=self.get_object())
+    # def perform_update(self, serializer):
+    #     update_period_of_time(instance=self.get_object())
+    #     serializer.save()
 
 
 #удаление события - Ainur

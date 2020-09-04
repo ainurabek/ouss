@@ -31,8 +31,12 @@ def get_minus_date(days: int):
     return datetime.date.today() - timedelta(days=days)
 
 
-def update_period_of_time(instance):
-    if instance.date_from is not None and instance.date_to is not None:
-        date = instance.date_to - instance.date_from
-        instance.period_of_time = date
-        instance.save()
+# def update_period_of_time(instance):
+#     if instance.date_from is not None and instance.date_to is not None:
+#         date = instance.date_to - instance.date_from
+#         period_time=(((date.total_seconds()/60)*100)/60)/100
+#         print(period_time)
+#         instance.period_of_time = period_time
+#         print(instance.period_of_time)
+#         instance.save()
+#         print(instance.period_of_time)

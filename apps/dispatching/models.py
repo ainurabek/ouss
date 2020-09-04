@@ -101,3 +101,9 @@ class Event(models.Model):
         return str(self.id)
 
 
+    def get_period(self):
+        if self.date_to !=None and self.date_from !=None:
+            date = (self.date_to) - (self.date_from)
+            period_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+            return period_time
+

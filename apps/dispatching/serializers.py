@@ -22,6 +22,7 @@ from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSe
 from apps.accounts.serializers import UserLogSerializer
 
 from apps.opu.objects.serializers import ObjectOutfitSerializer
+from rest_framework.fields import ReadOnlyField
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -123,6 +124,7 @@ class EventListSerializer(serializers.ModelSerializer):
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     index2 = serializers.SlugRelatedField(slug_field="index", read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
+    period_of_time = ReadOnlyField(source='get_period')
 
     class Meta:
         model = Event
@@ -170,13 +172,14 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
+    period_of_time = ReadOnlyField(source='get_period')
 
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'index2', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2')
+                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2', "period_of_time")
 
         depth = 2
 
