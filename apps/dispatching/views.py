@@ -424,21 +424,45 @@ class ReportEventDisp(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventDetailSerializer
 
+    #
+    #
+    # def get_queryset(self):
+    #     queryset = Event.objects.all()
+    #
+    #     date_from = self.request.query_params.get('date_from', None)
+    #     date_to = self.request.query_params.get('date_to', None)
+    #
+    #
+    #     if date_to =='' and date_from != '':
+    #         queryset = queryset.filter(created_at=date_from).order_by('-created_at')
+    #     elif date_to !='' and date_from =='':
+    #         queryset = queryset.filter(created_at=date_to).order_by('-created_at')
+    #     elif date_to !='' and date_from !='':
+    #         queryset = queryset.filter(created_at__gte=date_from, created_at__lte=date_to).order_by('-created_at')
+    #     return queryset
 
-
+#в отчете выходят данные за тот заданный период +хвосты(незакрытые)
     def get_queryset(self):
         queryset = Event.objects.all()
 
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
 
+        if date_to == '' and date_from != '':
+            queryset1 = Event.objects.filter(index2=None, created_at__lte=date_from)
+            queryset2 = queryset.filter(created_at=date_from)
+            queryset = queryset1.union(queryset2)
+        elif date_to != '' and date_from == '':
+            queryset1 = queryset.filter(index2=None, created_at__lte=date_to)
+            queryset2 = queryset.filter(created_at=date_to)
+            queryset = queryset1.union(queryset2)
+        elif date_to != '' and date_from != '':
+            queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
+            queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
+            queryset = queryset1.union(queryset2)
 
-        if date_to =='' and date_from != '':
-            queryset = queryset.filter(created_at=date_from).order_by('-created_at')
-        elif date_to !='' and date_from =='':
-            queryset = queryset.filter(created_at=date_to).order_by('-created_at')
-        elif date_to !='' and date_from !='':
-            queryset = queryset.filter(created_at__gte=date_from, created_at__lte=date_to).order_by('-created_at')
         return queryset
+
+
 
 
