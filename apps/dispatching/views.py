@@ -165,8 +165,8 @@ class EventIPCreateViewAPI(APIView):
         ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            obj = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
-            update_period_of_time(instance=obj)
+            serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            # update_period_of_time(instance=obj)
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -190,8 +190,8 @@ class EventCircuitCreateViewAPI(APIView):
         circuit = get_object_or_404(Circuit, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            obj = serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
-            update_period_of_time(instance=obj)
+            serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
+            # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -214,9 +214,9 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            obj = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
             response = {"data": "Событие создано успешно"}
-            update_period_of_time(instance=obj)
+            # update_period_of_time(instance=obj)
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -313,9 +313,9 @@ class EventUnknownCreateViewAPI(APIView):
     def post(self, request):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            obj = serializer.save( created_by=self.request.user.profile, created_at=now)
+            serializer.save( created_by=self.request.user.profile, created_at=now)
             response = {"data": "Событие создано успешно"}
-            update_period_of_time(instance=obj)
+            # update_period_of_time(instance=obj)
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -423,22 +423,22 @@ class ReportEventDisp(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventDetailSerializer
-    queryset = Event.objects.all()
+
+
 
     def get_queryset(self):
         queryset = Event.objects.all()
-        # q1 = Event.objects.filter(index2=None)
-        # q2 = Event.objects.exclude(index2__isnull=True)
 
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
 
-        if date_to == "" and date_from != '':
-            queryset = self.queryset.filter(created_at=date_from)
-        elif date_to != '' and date_from == '':
-            queryset = self.queryset.filter(created_at=date_to)
-        elif date_to != '' and date_from != '':
-            queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
 
+        if date_to =='' and date_from != '':
+            queryset = queryset.filter(created_at=date_from).order_by('-created_at')
+        elif date_to !='' and date_from =='':
+            queryset = queryset.filter(created_at=date_to).order_by('-created_at')
+        elif date_to !='' and date_from !='':
+            queryset = queryset.filter(created_at__gte=date_from, created_at__lte=date_to).order_by('-created_at')
         return queryset
+
 

@@ -95,11 +95,8 @@ class Event(models.Model):
         verbose_name = 'Журнал событий'
         verbose_name_plural = 'Журнал событий'
 
-
-
     def __str__(self):
         return str(self.id)
-
 
     def get_period(self):
         if self.date_to !=None and self.date_from !=None:
