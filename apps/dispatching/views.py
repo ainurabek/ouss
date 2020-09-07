@@ -461,6 +461,9 @@ class ReportEventDisp(ListAPIView):
             queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
             queryset = queryset1.union(queryset2)
 
+        else:
+            return None
+
         return queryset
 
 
