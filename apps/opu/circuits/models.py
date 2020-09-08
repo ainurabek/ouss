@@ -47,15 +47,11 @@ class Mode(models.Model):
 		return f'{self.name}, {self.id}'
 
 
-class SubsRoutes(models.Model):
-	route = models.CharField(max_length=100)
 
-	def __str__(self):
-		return f'{self.route}, {self.id}'
 
 class Circuit(models.Model):
 	"""Каналы"""
-	# id_circuit = models.CharField(max_length=100, blank=True, null=True)
+
 	id_parent = models.ForeignKey('Circuit', on_delete=models.CASCADE, blank=True, null=True)
 	num_circuit = models.CharField('Номер канала', max_length=100, blank=True, null=True)
 	final_destination = models.ForeignKey(Point, related_name='circ_final_dest',on_delete=models.CASCADE, blank=True, null=True)
@@ -70,21 +66,19 @@ class Circuit(models.Model):
 	measure = models.ForeignKey(Measure, related_name='circ_measure', on_delete=models.SET_NULL, blank=True, null=True)
 	adding = models.CharField('Примечание', max_length=100, blank=True, null=True)
 	comments = models.CharField(max_length=100, blank=True, null=True)
-	type_transit1 = models.CharField(max_length=100, blank=True, null=True)
-	type_transit2 = models.CharField(max_length=100, blank=True, null=True)
+
 	transit = SortedManyToManyField("Circuit", related_name='cir_transit_obj1', blank=True)
 	transit2 = SortedManyToManyField("Circuit", related_name='cir_transit_obj2', blank=True)
 	in_out = models.ForeignKey(InOut, related_name='circ_in', on_delete=models.SET_NULL, blank=True, null=True)
 	first = models.BooleanField('Используется/Не используется', blank=True, null=True)
-	handel_add_path1 = models.CharField(max_length=100, blank=True, null=True)
-	handel_add_path2 = models.CharField(max_length=100, blank=True, null=True)
+
 	point1 = models.ForeignKey(Point, related_name='circ_ip1', on_delete=models.SET_NULL, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='circ_ip2', on_delete=models.SET_NULL, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='circ_cust', on_delete=models.SET_NULL, blank=True, null=True)
 	id_object = models.ForeignKey(Object, related_name='circ_obj', on_delete=models.CASCADE, blank=True, null=True)
 	mode = models.ForeignKey(Mode, related_name='circ_mode', on_delete=models.SET_NULL, blank=True, null=True)
 	type_com = models.ForeignKey(TypeCom, related_name='circ_type_com', on_delete=models.SET_NULL, blank=True, null=True)
-	id_subst =  models.ForeignKey(SubsRoutes, related_name='circ_subst', on_delete=models.SET_NULL, blank=True, null=True)
+
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 

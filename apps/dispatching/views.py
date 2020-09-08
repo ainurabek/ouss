@@ -1,12 +1,13 @@
 import datetime
-from datetime import date, timedelta
+from datetime import date
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-
+from django.db.models import Q
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
-    IPSSerializer, CommentsSerializer, EventUnknownSerializer
+    IPSSerializer, CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
+    ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
 from .services import get_minus_date, ListFilterAPIView
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
@@ -19,93 +20,22 @@ now = date.today()
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from django.views.generic import ListView
-from .forms import EventForm
-from .models import Event, TypeOfJournal, Comments
+
+from .models import Event, TypeOfJournal, Comments, Reason, Index
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
-class JournalList(ListView):
-    """Список заявок"""
-    model = TypeOfJournal
-    template_name = 'dispatching/types_journals.html'
-    context_object_name = 'types_journals'
-
-    def get_context_data(self, *, pk=None, **kwargs):
-        types_journal = TypeOfJournal.objects.all()
-        context = {'types_journal': types_journal}
-        return super().get_context_data(**context)
-
-
-# def event_list(request, journal_pk):
-#     journal = get_object_or_404(TypeOfJournal, pk=journal_pk)
-#     events = Event.objects.filter(type_journal=journal)
-#     choices = Choice.objects.all()
-#     return render(request, 'dispatching/event_list.html', {
-#         'events': events, 'choices': choices, 'journal': journal
-#     })
-
-
-def event_detail(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    return render(request, 'dispatching/event_detail.html', {
-        'event': event
-    })
-# class EventCreateView(View):
-#     """Создания отключения"""
-#     def post(self, request, pk):
-#
-#         choice = Choice.objects.get(pk=pk)
-#         print(choice)
-#         form = EventForm(request.POST or None)
-#         if form.is_valid():
-#             form = form.save(commit=False)
-#             form.created_by = self.request.user.profile
-#             print(form.created_by)
-#             form.choice = choice
-#             form.save()
-#             return redirect('apps:dispatching:event_list')
-#
-#     def get(self, request, pk):
-#         choice = Choice.objects.get(pk=pk)
-#         form = EventForm()
-#         return render(request, 'dispatching/request_create.html', {'form': form,
-#                                                                    'choice': choice
-#                                                                    })
-
-def event_edit(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
-        if form.is_valid():
-            request1 = form.save(commit=False)
-            request1.created_by = request.user.profile
-            request1.created_at = datetime.datetime.now()
-            request1.save()
-            return redirect('apps:dispatching:event_list')
-    else:
-        form = EventForm(instance=event)
-    return render(request, 'dispatching/request_create.html', {'form': form})
-
-
-def event_delete(request, pk):
-    Event.objects.get(pk=pk).delete()
-    return redirect('apps:dispatching:event_list')
 
 ########API
 #listevent
 class EventListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-
-    queryset = Event.objects.all()
+    queryset = Event.objects.filter(callsorevent=True)
     lookup_field = 'pk'
     serializer_class = EventListSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('type_journal', 'contact_name',
-                        'reason', 'index1', 'index2', 'responsible_outfit', 'send_from', 'created_at', 'name')
-
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -119,17 +49,31 @@ class EventListAPIView(viewsets.ModelViewSet):
     #фильтр по хвостам + за сегодня
 
         today = datetime.date.today()
-        queryset1 = Event.objects.filter(index2=None).distinct('object', 'circuit', 'ips')
-        queryset2 = Event.objects.filter(created_at=today).distinct('object', 'circuit', 'ips')
+        queryset1 = self.queryset.exclude(index1__id=11)
+        queryset2 = self.queryset.filter(created_at=today)
         queryset=queryset1.union(queryset2).order_by('-created_at')
+
 
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
+        type_journal = self.request.query_params.get('type_journal', None)
+        responsible_outfit = self.request.query_params.get('responsible_outfit', None)
+        index1 = self.request.query_params.get('index1', None)
+        name = self.request.query_params.get('name', None)
+
         if created_at is not None and created_at != '':
             q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
             q2 = Event.objects.filter(created_at=created_at)
             queryset=q1.union(q2)
+        if type_journal is not None and type_journal != '':
+            queryset = queryset.filter(type_journal=type_journal)
+        if responsible_outfit is not None and responsible_outfit != '':
+            queryset = queryset.filter(responsible_outfit=responsible_outfit)
+        if index1 is not None and index1 != '':
+            queryset = queryset.filter(index1=index1)
+        if name is not None and name != '':
+            queryset = queryset.filter(name=name)
 
         return queryset
 
@@ -220,6 +164,24 @@ class EventObjectCreateViewAPI(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class EventCallsCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Event"""
+
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        serializer = CallsCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            if event.object !=None:
+                instance=serializer.save(id_parent=event, object=event.object, created_by=self.request.user.profile, created_at=now, callsorevent=False)
+                response = {"data": "Звонок создано успешно"}
+                event.date_to = instance.date_from
+                event.index1=instance.index1
+                event.save()
+                Event.objects.filter(id_parent=event).update(date_to=instance.date_from)
+                return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
@@ -254,46 +216,7 @@ class EventDeleteAPIView(DestroyAPIView):
     queryset = Event.objects.all()
     lookup_field = 'pk'
 
-#возможность создавать сотрудников предприятий диспетчерам
-class OutfitWorkerAPIView(ListAPIView):
-    queryset = OutfitWorker.objects.all()
-    serializer_class = OutfitWorkerListSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('outfit', 'name')
 
-#создание сотрудника - Ainur
-class OutfitWorkerCreateView(generics.CreateAPIView):
-    queryset = OutfitWorker.objects.all()
-    serializer_class = OutfitWorkerCreateSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-#редактирование сотрудника - Ainur
-class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'pk'
-    queryset = OutfitWorker.objects.all()
-    serializer_class = OutfitWorkerCreateSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-#сотрудника удаление - Ainur
-class OutfitWorkerDeleteAPIView(DestroyAPIView):
-    """Удаления"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = OutfitWorker.objects.all()
-    lookup_field = 'pk'
-
-
-
-#Создание, удаление и список комментариеиив
-class CommentModelViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    lookup_field = 'pk'
 
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class UnknownEventListAPIView(ListAPIView):
@@ -408,43 +331,27 @@ class CompletedEvents(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.exclude(index2=None)
+    # queryset = Event.objects.exclude(index2=None)
+    queryset = Event.objects.all
 
 
 class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.exclude(index2__isnull=True)
+    # queryset = Event.objects.exclude(index2__isnull=True)
+    queryset = Event.objects.all()
 
 
-
+#Отчет дисп службы
 class ReportEventDisp(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    serializer_class = EventDetailSerializer
-
-    #
-    #
-    # def get_queryset(self):
-    #     queryset = Event.objects.all()
-    #
-    #     date_from = self.request.query_params.get('date_from', None)
-    #     date_to = self.request.query_params.get('date_to', None)
-    #
-    #
-    #     if date_to =='' and date_from != '':
-    #         queryset = queryset.filter(created_at=date_from).order_by('-created_at')
-    #     elif date_to !='' and date_from =='':
-    #         queryset = queryset.filter(created_at=date_to).order_by('-created_at')
-    #     elif date_to !='' and date_from !='':
-    #         queryset = queryset.filter(created_at__gte=date_from, created_at__lte=date_to).order_by('-created_at')
-    #     return queryset
+    serializer_class = ReportSerializer
 
 #в отчете выходят данные за тот заданный период +хвосты(незакрытые)
     def get_queryset(self):
         queryset = Event.objects.all()
-
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
 
@@ -461,11 +368,90 @@ class ReportEventDisp(ListAPIView):
             queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
             queryset = queryset1.union(queryset2)
 
-        else:
-            return None
+
 
         return queryset
 
+def get_report_object(request):
+
+    today = datetime.date.today()
+    queryset1 = Event.objects.exclude(index1__id=11)
+    queryset2 = Event.objects.filter(created_at=today)
+    dates = queryset1.union(queryset2).order_by('-created_at').distinct('object')
 
 
 
+    teams_data = [
+        { "date_from": date.date_from,
+         "date_to":date.date_to, 'index1':date.index1.name, "id":date.id, 'name':date.object.name}
+        for date in dates
+    ]
+
+    return JsonResponse(teams_data, safe=False)
+
+
+
+#возможность создавать сотрудников предприятий диспетчерам
+class OutfitWorkerAPIView(ListAPIView):
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('outfit', 'name')
+
+#создание сотрудника - Ainur
+class OutfitWorkerCreateView(generics.CreateAPIView):
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+#редактирование сотрудника - Ainur
+class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = OutfitWorker.objects.all()
+    serializer_class = OutfitWorkerCreateSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+#сотрудника удаление - Ainur
+class OutfitWorkerDeleteAPIView(DestroyAPIView):
+    """Удаления"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = OutfitWorker.objects.all()
+    lookup_field = 'pk'
+
+
+
+#Создание, удаление и список комментариеиив
+class CommentModelViewSet(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    lookup_field = 'pk'
+
+#Создание, удаление и список видо журналов
+class TypeJournalModelViewSet(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = TypeOfJournal.objects.all()
+    serializer_class = TypeJournalSerializer
+    lookup_field = 'pk'
+
+#Создание, удаление и список Reason
+class ReasonModelViewSet(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Reason.objects.all()
+    serializer_class = ReasonSerializer
+    lookup_field = 'pk'
+
+#Создание, удаление и список Reason
+class IndexModelViewSet(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Index.objects.all()
+    serializer_class = IndexSerializer
+    lookup_field = 'pk'

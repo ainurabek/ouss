@@ -1,6 +1,4 @@
 from django.db import models
-from django.urls import reverse
-
 from apps.accounts.models import Profile
 from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Object

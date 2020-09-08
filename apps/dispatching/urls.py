@@ -11,16 +11,12 @@ router = routers.DefaultRouter()
 
 
 router.register('comment', views.CommentModelViewSet, basename='comment')
+router.register('type_journal', views.TypeJournalModelViewSet, basename='type_journal')
+router.register('reason', views.ReasonModelViewSet, basename='reason')
+router.register('index', views.IndexModelViewSet, basename='index')
 
 
 urlpatterns = [
-    path('', views.JournalList.as_view(), name='types_journals'),
-    # path('journal/<int:journal_pk>/', views.event_list, name='event_list'),
-    # path('event/create/<int:pk>/', views.EventCreateView.as_view(), name='event_create'),
-    path('event/detail/<int:event_id>/', views.event_detail, name='event_detail'),
-    path('event/<int:event_id>/edit/', views.event_edit, name='event_edit'),
-    path('event/delete/<int:pk>/', views.event_delete, name='event_delete'),
-
 
     #api
     path('api/list/', views.EventListAPIView.as_view({'get': 'list'}), name="api_list_event"),
@@ -68,6 +64,10 @@ urlpatterns = [
 
     #фильтры для отчета
     path("api/event/report/", views.ReportEventDisp.as_view()),
+
+    #второй звонок
+    path("api/event/calls/create/<int:pk>/", views.EventCallsCreateViewAPI.as_view()),
+    path("api/reports/", views.get_report_object),
 
     #comments
     path('', include(router.urls)),

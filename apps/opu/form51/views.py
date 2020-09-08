@@ -5,9 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-from django.urls import reverse_lazy
-from django.views.generic import View, ListView, UpdateView
-from apps.opu.form51.forms import Form51Form
+
 from apps.opu.form51.models import Form51, Region
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
     Form51ReserveSerializer
@@ -18,89 +16,6 @@ from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 
 
-class Form51CreateView(View):
-    """ Создания Формы 5.1"""
-
-    def post(self, request, pk):
-        obj = Object.objects.get(pk=pk)
-        form = Form51Form(request.POST or None)
-        if form.is_valid():
-            form=form.save(commit=False)
-            form.object = obj
-            form.save()
-
-            for i in obj.transit.all():
-                if obj != i:
-                    Form51.objects.create(
-                        object=i, customer=form.customer,
-                        num_ouss=form.num_ouss,
-                        order=form.order, schema=form.schema,
-                        reserve=form.reserve
-                    ) #index_ko=form.index_ko,
-
-            for i in obj.transit2.all():
-                if obj != i:
-                    Form51.objects.create(
-                        object=i, customer=form.customer,
-                         num_ouss=form.num_ouss,
-                        order=form.order, schema=form.schema,
-                        reserve=form.reserve
-                    ) #index_ko=form.index_ko,
-
-            return redirect('apps:opu:form51:form_list')
-
-
-    def get(self, request, pk):
-
-        form = Form51Form()
-        return render(request, 'management/form51_create.html', {'form': form})
-
-
-class Form51ListView(ListView):
-    """ Список Формы 5.1 """
-    model = Form51
-    template_name = "management/form51_list.html"
-    context_object_name = "form51_list"
-
-
-class Form51UpdateView(UpdateView):
-    """ Редактирования Формы 5.1 """
-    model = Form51
-    form_class = Form51Form
-    success_url = reverse_lazy("apps:opu:form51:form_list")
-    template_name = "management/form51_create.html"
-
-
-def form51_delete(request, pk):
-    """ Удаления Форма 5.1 """
-    if pk:
-        Form51.objects.get(pk=pk).delete()
-
-    return redirect("apps:opu:form51:form_list")
-
-
-class RegionListView(ListView):
-    """Список регионов"""
-    model = Region
-    template_name = "management/region_list.html"
-    context_object_name = "regions"
-
-
-class FilterForm51View(View):
-    """ Фильтрация Формы 5.1 по регионам """
-
-    def get(self, request, slug):
-        region = Region.objects.get(slug=slug)
-        form51_list = Form51.objects.filter(object__id_outfit__outfit=region.name)
-        return render(request,"management/form51_list.html", {"form51_list": form51_list})
-
-
-class ReserveDetailView(View):
-    """ Информация о резерве """
-
-    def get(self, request, pk):
-        obj = Form51.objects.get(pk=pk)
-        return render(request, "management/reserve_detail.html", {"form51_reserve": obj})
 
 
 # API

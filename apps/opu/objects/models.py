@@ -74,16 +74,6 @@ class Category(models.Model):
 		return f'{self.index}, {self.id}'
 
 
-class System(models.Model):
-	name = models.CharField('Название', max_length=100)
-
-	class Meta:
-		verbose_name = 'Вид системы'
-		verbose_name_plural = 'Вид системы'
-
-	def __str__(self):
-		return f'{self.name}, {self.id}'
-
 
 
 class Outfit(models.Model):
@@ -130,8 +120,6 @@ class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField('Название', max_length=100)
-	COreceive = models.CharField('КО прием', max_length=100, blank=True, null=True)
-	COdeliver = models.CharField('КО передачи', max_length=100, blank=True, null=True)
 	inter_code = models.CharField('Международное обозначение', max_length=100, blank=True, null=True)
 	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.SET_NULL, blank=True, null=True)
 	tpo1 = models.ForeignKey(TPO, related_name='obj_tpo', on_delete=models.SET_NULL, blank=True, null=True)
@@ -141,16 +129,9 @@ class Object(models.Model):
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.SET_NULL, blank=True, null=True)
 	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
 	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)
-	system = models.ForeignKey(System, related_name='obj_system', on_delete=models.SET_NULL, blank=True, null=True)
-	type_transit1 = models.CharField('Тип транзита1', max_length=100, blank=True, null=True)
-	type_transit2 = models.CharField('Тип транзита2', max_length=100, blank=True, null=True)
 	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
-	handel_add_path1 = models.CharField('Начало', max_length=100, blank=True, null=True)
-	handel_add_path2 = models.CharField('Конец', max_length=100, blank=True, null=True)
-	destination1 = models.ForeignKey('IP', related_name='obj_dest1', on_delete=models.SET_NULL, blank=True, null=True)
-	destination2 = models.ForeignKey('IP', related_name='obj_dest2', on_delete=models.SET_NULL, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
 	amount_channels = models.CharField('Количество каналов', max_length=100, blank=True, null=True)
 	save_in = models.BooleanField('Сохранить', blank=True, null=True)
@@ -158,7 +139,6 @@ class Object(models.Model):
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.SET_NULL, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
-	maker_trassa = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='maker', blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
 
@@ -182,12 +162,4 @@ class IP(models.Model):
 
 	def __str__(self):
 		return self.point_id.point
-
-
-class TransitObject(models.Model):
-	id_complex_object = models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_complex_obj')
-	id_object = models.ForeignKey(Object, on_delete=models.CASCADE, blank=True, null=True, related_name='id_transit_obj')
-	num = models.CharField(max_length=100, blank=True, null=True)
-	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
-	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 

@@ -36,39 +36,6 @@ class TPOListView(viewsets.ModelViewSet):
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
 
-    # def export_csv(request):
-    #     if 'csv' in request.GET:
-    #         response = HttpResponse(content_type='application/ms-excel')
-    #         response['Content-Disposition'] = 'attachment; filename="tpo.xls"'
-    #         wb = xlwt.Workbook(encoding='utf-8')
-    #         ws = wb.add_sheet('TPO')
-    #         # Sheet header, first row
-    #         row_num = 0
-    #         font_style = xlwt.XFStyle()
-    #         font_style.font.bold = True
-    #         columns = ['ID', 'Название', 'Индекс']
-    #         for col_num in range(len(columns)):
-    #             ws.write(row_num, col_num, columns[col_num], font_style)
-    #
-    #         # Sheet body, remaining rows
-    #         font_style = xlwt.XFStyle()
-    #         rows = TPO.objects.all()
-    #         if 'name' in request.GET and request.GET.get('name', None):
-    #             rows = rows.filter(name=request.GET.get('name'))
-    #         if 'index' in request.GET and request.GET.get('index', None):
-    #             rows = rows.filter(tpo=request.GET['index'])
-    #
-    #         for row in rows:
-    #             row_num += 1
-    #             item = []
-    #             item.append(row.id)
-    #             item.append(row.name)
-    #             item.append(row.index)
-    #             for col_num in range(len(item)):
-    #                 ws.write(row_num, col_num, item[col_num], font_style)
-    #         wb.save(response)
-    #         return response
-
 
 class TPOCreateView(generics.CreateAPIView):
     queryset = TPO.objects.all()
@@ -86,13 +53,6 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     serializer_class = TPOSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-
-
-# class TPODeleteView(generics.DestroyAPIView):
-#     queryset = Outfit.objects.all()
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
 
 
 # Предприятия
@@ -129,13 +89,6 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-# class OutfitDeleteView(generics.DestroyAPIView):
-#     queryset = Outfit.objects.all()
-#
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-
-
 # ИПы
 class PointListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -161,12 +114,6 @@ class PointEditView(generics.RetrieveUpdateAPIView):
     serializer_class = PointCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-
-# class PointDeleteView(generics.DestroyAPIView):
-#     queryset = Point.objects.all()
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
 
 
 class IPCreateView(APIView):
@@ -235,11 +182,6 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
-
-# class LPDeleteView(generics.DestroyAPIView):
-#     queryset = Object.objects.all()
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
 
 class ObjectAllView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)

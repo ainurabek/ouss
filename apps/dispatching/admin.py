@@ -6,6 +6,7 @@ admin.site.register(TypeOfJournal)
 admin.site.register(Index)
 
 
+
 #Event_admin
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

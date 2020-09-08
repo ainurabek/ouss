@@ -1,18 +1,9 @@
-from django.db import models
-from django.urls import reverse
 
-from apps.accounts.models import Profile
-from apps.opu.customer.models import Customer
-from apps.opu.objects.models import Object
+
 from apps.opu.circuits.models import Circuit
-
-
 from django.db import models
-from django.urls import reverse
-
 from apps.accounts.models import Profile
-from apps.opu.customer.models import Customer
-from apps.opu.objects.models import Object
+
 
 
 class Form53(models.Model):
