@@ -3,8 +3,7 @@ from datetime import date
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
-from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.db.models import Q
+from django.http import JsonResponse
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
@@ -17,9 +16,8 @@ from rest_framework import viewsets, generics
 from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
 
 now = date.today()
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-from django.views.generic import ListView
 
 from .models import Event, TypeOfJournal, Comments, Reason, Index
 from rest_framework import status
@@ -51,7 +49,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         today = datetime.date.today()
         queryset1 = self.queryset.exclude(index1__id=11)
         queryset2 = self.queryset.filter(created_at=today)
-        queryset=queryset1.union(queryset2).order_by('-created_at')
+        queryset = queryset1.union(queryset2).order_by('-created_at')
 
 
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
@@ -63,9 +61,10 @@ class EventListAPIView(viewsets.ModelViewSet):
         name = self.request.query_params.get('name', None)
 
         if created_at is not None and created_at != '':
-            q1 = Event.objects.filter(created_at__lte=created_at, index2=None)
-            q2 = Event.objects.filter(created_at=created_at)
-            queryset=q1.union(q2)
+            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1=11)
+            q2 = self.queryset.filter(created_at=created_at)
+            queryset = q1.union(q2)
+
         if type_journal is not None and type_journal != '':
             queryset = queryset.filter(type_journal=type_journal)
         if responsible_outfit is not None and responsible_outfit != '':
@@ -79,19 +78,11 @@ class EventListAPIView(viewsets.ModelViewSet):
 
 
     def retrieve(self, request, pk=None):
-        instance = get_object_or_404(Event, pk=pk)
-        if instance.object is not None:
-            instance = Event.objects.filter(object=instance.object)
-        elif instance.circuit is not None:
-            instance = Event.objects.filter(circuit=instance.circuit)
-        elif instance.ips is not None:
-            instance = Event.objects.filter(ips=instance.ips)
-        elif instance.name is not None:
-            instance = Event.objects.filter(name=instance.name)
-        serializer = self.get_serializer(instance, many=True)
+        calls = Event.objects.filter(id_parent_id=pk).order_by("-created_at")
+        serializer = self.get_serializer(calls, many=True)
         return Response(serializer.data)
 
-#ip-Ainur
+
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
@@ -100,7 +91,7 @@ class IPEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('point_id', 'object_id')
 
-#create- Ainur
+
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -109,7 +100,14 @@ class EventIPCreateViewAPI(APIView):
         ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            event = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1, ips=event.ips,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 )
             # update_period_of_time(instance=obj)
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
@@ -138,7 +136,10 @@ class EventCircuitCreateViewAPI(APIView):
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
-                                 reason=event.reason, comments1=event.comments1)
+                                 reason=event.reason, comments1=event.comments1, circuit=event.circuit,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 )
             # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -162,10 +163,14 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event=serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
-            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at, date_from=event.date_from, index1=event.index1,
+            event = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
-                                 reason=event.reason, comments1=event.comments1)
+                                 reason=event.reason, comments1=event.comments1, object=event.object,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 )
             response = {"data": "Событие создано успешно"}
 
             return Response(response, status=status.HTTP_201_CREATED)
