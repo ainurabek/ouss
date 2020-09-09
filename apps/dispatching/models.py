@@ -71,7 +71,7 @@ class Event(models.Model):
     contact_name = models.ForeignKey(OutfitWorker, verbose_name='Передал (ФИО)', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateField('Дата создания', blank=True, null=True)
     reason = models.ForeignKey(Reason, verbose_name='Причины', on_delete=models.SET_NULL, null=True, blank=True)
-    index1= models.ForeignKey(Index, related_name='event_index1', verbose_name='Индекс1', on_delete=models.CASCADE, null=True,
+    index1 = models.ForeignKey(Index, related_name='event_index1', verbose_name='Индекс1', on_delete=models.CASCADE, null=True,
                                           blank=True)
     comments1 = models.CharField('Примечание1', max_length=500, null=True, blank=True)
     comments2 = models.CharField('Примечание2', max_length=500, null=True, blank=True)
@@ -86,7 +86,7 @@ class Event(models.Model):
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
     name = models.CharField('Название', max_length=500, null=True, blank=True)
-    callsorevent=models.BooleanField(default=True)
+    callsorevent = models.BooleanField(default=True)
     period_of_time = models.CharField("Сумма часов, за которое устранили аварию", max_length=100, blank=True, null=True)
 
     class Meta:
