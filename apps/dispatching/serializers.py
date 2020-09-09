@@ -240,6 +240,6 @@ class ReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', 'date_from', 'date_to', 'index1')
+        fields = ('id', 'date_from', 'date_to', 'index1', 'created_at',  'object', 'circuit', 'ips', 'name')
 
 
