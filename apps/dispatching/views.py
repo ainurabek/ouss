@@ -182,21 +182,59 @@ class EventCallsCreateViewAPI(APIView):
     """Создания Event"""
 
     def post(self, request, pk):
+        response = {"data": "Звонок создано успешно"}
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance=serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now, callsorevent=False)
-            response = {"data": "Звонок создано успешно"}
-            event.date_to = instance.date_from
-            event.index1=instance.index1
-            event.save()
-            Event.objects.filter(id_parent=event, date_to__isnull=True).exclude(id=event.id).update(date_to=instance.date_from)
-            # for i in a:
-            #     if i.date_to == None and i != instance:
-            #         i.date_to = instance.date_from
-            #         i.save()
+            if serializer.object !=None:
+                instance=serializer.save(id_parent=event, created_by=self.request.user.profile,
+                                         created_at=now, callsorevent=False, object=event.object )
+                event.date_to = instance.date_from
+                event.index1=instance.index1
+                event.save()
+                a = Event.objects.filter(id_parent=event)
+                for i in a:
+                    if i.date_to == None and i != instance:
+                        i.date_to = instance.date_from
+                        i.save()
 
-            return Response(response, status=status.HTTP_201_CREATED)
+            if serializer.circuit != None:
+                instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
+                                           created_at=now, callsorevent=False, circuit=event.circuit)
+                event.date_to = instance.date_from
+                event.index1 = instance.index1
+                event.save()
+                a = Event.objects.filter(id_parent=event)
+                for i in a:
+                    if i.date_to == None and i != instance:
+                        i.date_to = instance.date_from
+                        i.save()
+
+            if serializer.ips != None:
+                instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
+                                           created_at=now, callsorevent=False, ips=event.ips)
+                event.date_to = instance.date_from
+                event.index1 = instance.index1
+                event.save()
+                a = Event.objects.filter(id_parent=event)
+                for i in a:
+                    if i.date_to == None and i != instance:
+                        i.date_to = instance.date_from
+                        i.save()
+
+            if serializer.name != None:
+                instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
+                                           created_at=now, callsorevent=False, name=event.name)
+                event.date_to = instance.date_from
+                event.index1 = instance.index1
+                event.save()
+                a = Event.objects.filter(id_parent=event)
+                for i in a:
+                    if i.date_to == None and i != instance:
+                        i.date_to = instance.date_from
+                        i.save()
+
+                return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #чтобы передавать фронту нужно
@@ -372,33 +410,58 @@ class ReportEventDisp(ListAPIView):
         date_to = self.request.query_params.get('date_to', None)
 
         if date_to == '' and date_from != '':
-            queryset1 = Event.objects.filter(index2=None, created_at__lte=date_from)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_from)
             queryset2 = queryset.filter(created_at=date_from)
             queryset = queryset1.union(queryset2)
         elif date_to != '' and date_from == '':
-            queryset1 = queryset.filter(index2=None, created_at__lte=date_to)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to)
             queryset2 = queryset.filter(created_at=date_to)
             queryset = queryset1.union(queryset2)
         elif date_to != '' and date_from != '':
-            queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to, created_at__lte=date_from)
+            # queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
             queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
             queryset = queryset1.union(queryset2)
-
-
 
         return queryset
 
 def get_report_object(request):
+
     today = datetime.date.today()
     dates = Event.objects.filter(created_at=today).exclude(index1__id=11)
+    teams_data = []
+    for i in dates:
+        if i.object !=None:
+            objects = [
+                {'name':i.object.name, "date_from": i.date_from,
+                 "date_to":i.date_to, 'index1':i.index1.name, "id":date.id}
+                for date in dates
+            ]
+            teams_data.append(objects)
+        if i.circuit !=None:
+            circuits = [
+                {'name': i.circuit.name, "date_from": i.date_from,
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
+                for date in dates
+            ]
+            teams_data.append(circuits)
+        if i.ips !=None:
+            ips = [
+                {'name': i.ips.point_id.point, "date_from": i.date_from,
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
+                for date in dates
+            ]
+            teams_data.append(ips)
+        if i.name !=None:
+            unknown = [
+                {'name': i.name, "date_from": i.date_from,
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
+                for date in dates
+            ]
+            teams_data.append(unknown)
 
+    # next(item for item in teams_data if item["name"] == "Pam")
 
-    teams_data = [
-
-        { "date_from": date.date_from,
-         "date_to":date.date_to, 'index1':date.index1.name, "id":date.id}
-        for date in dates
-    ]
 
     return JsonResponse(teams_data, safe=False)
 
