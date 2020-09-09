@@ -66,13 +66,13 @@ class EventListAPIView(viewsets.ModelViewSet):
             queryset = q1.union(q2)
 
         if type_journal is not None and type_journal != '':
-            queryset = queryset.filter(type_journal=type_journal)
+            queryset = self.queryset.filter(type_journal=type_journal)
         if responsible_outfit is not None and responsible_outfit != '':
-            queryset = queryset.filter(responsible_outfit=responsible_outfit)
+            queryset = self.queryset.filter(responsible_outfit=responsible_outfit)
         if index1 is not None and index1 != '':
-            queryset = queryset.filter(index1=index1)
+            queryset = self.queryset.filter(index1=index1)
         if name is not None and name != '':
-            queryset = queryset.filter(name=name)
+            queryset = self.queryset.filter(name=name)
 
         return queryset
 
