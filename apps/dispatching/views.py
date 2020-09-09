@@ -158,9 +158,12 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            event=serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at, date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1)
             response = {"data": "Событие создано успешно"}
-            # update_period_of_time(instance=obj)
+
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -173,14 +176,18 @@ class EventCallsCreateViewAPI(APIView):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            if event.object !=None:
-                instance=serializer.save(id_parent=event, object=event.object, created_by=self.request.user.profile, created_at=now, callsorevent=False)
-                response = {"data": "Звонок создано успешно"}
-                event.date_to = instance.date_from
-                event.index1=instance.index1
-                event.save()
-                Event.objects.filter(id_parent=event).update(date_to=instance.date_from)
-                return Response(response, status=status.HTTP_201_CREATED)
+            instance=serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now, callsorevent=False)
+            response = {"data": "Звонок создано успешно"}
+            event.date_to = instance.date_from
+            event.index1=instance.index1
+            event.save()
+            a = Event.objects.filter(id_parent=event)
+            for i in a:
+                if i.date_to == None and i != instance:
+                    i.date_to = instance.date_from
+                    i.save()
+
+            return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #чтобы передавать фронту нужно
@@ -373,17 +380,14 @@ class ReportEventDisp(ListAPIView):
         return queryset
 
 def get_report_object(request):
-
     today = datetime.date.today()
-    queryset1 = Event.objects.exclude(index1__id=11)
-    queryset2 = Event.objects.filter(created_at=today)
-    dates = queryset1.union(queryset2).order_by('-created_at').distinct('object')
-
+    dates = Event.objects.filter(created_at=today).exclude(index1__id=11)
 
 
     teams_data = [
+
         { "date_from": date.date_from,
-         "date_to":date.date_to, 'index1':date.index1.name, "id":date.id, 'name':date.object.name}
+         "date_to":date.date_to, 'index1':date.index1.name, "id":date.id}
         for date in dates
     ]
 

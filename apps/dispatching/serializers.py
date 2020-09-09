@@ -143,7 +143,7 @@ class EventListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name',
-                  "period_of_time", "responsible_outfit", 'callsorevent', 'id_parent')
+                  "period_of_time", "responsible_outfit", 'callsorevent')
 
         depth=1
 
