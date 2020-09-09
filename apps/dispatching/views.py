@@ -185,16 +185,16 @@ class EventCallsCreateViewAPI(APIView):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance=serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now, callsorevent=False)
+            instance = serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now, callsorevent=False)
             response = {"data": "Звонок создано успешно"}
             event.date_to = instance.date_from
-            event.index1=instance.index1
+            event.index1 = instance.index1
             event.save()
-            Event.objects.filter(id_parent=event, date_to__isnull=True).exclude(id=event.id).update(date_to=instance.date_from)
-            # for i in a:
-            #     if i.date_to == None and i != instance:
-            #         i.date_to = instance.date_from
-            #         i.save()
+            calls = Event.objects.filter(id_parent=event, date_to=None)
+            for call in calls:
+                if call != instance:
+                    call.date_to = instance.date_from
+                    call.save()
 
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
