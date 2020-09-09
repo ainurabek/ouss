@@ -186,7 +186,7 @@ class EventCallsCreateViewAPI(APIView):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            if serializer.object !=None:
+            if event.object !=None:
                 instance=serializer.save(id_parent=event, created_by=self.request.user.profile,
                                          created_at=now, callsorevent=False, object=event.object )
                 event.date_to = instance.date_from
@@ -198,7 +198,7 @@ class EventCallsCreateViewAPI(APIView):
                         i.date_to = instance.date_from
                         i.save()
 
-            if serializer.circuit != None:
+            if event.circuit != None:
                 instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                            created_at=now, callsorevent=False, circuit=event.circuit)
                 event.date_to = instance.date_from
@@ -210,7 +210,7 @@ class EventCallsCreateViewAPI(APIView):
                         i.date_to = instance.date_from
                         i.save()
 
-            if serializer.ips != None:
+            if event.ips != None:
                 instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                            created_at=now, callsorevent=False, ips=event.ips)
                 event.date_to = instance.date_from
@@ -222,7 +222,7 @@ class EventCallsCreateViewAPI(APIView):
                         i.date_to = instance.date_from
                         i.save()
 
-            if serializer.name != None:
+            if event.name != None:
                 instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                            created_at=now, callsorevent=False, name=event.name)
                 event.date_to = instance.date_from
@@ -257,9 +257,6 @@ class EventUpdateAPIView(UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
-    # def perform_update(self, serializer):
-    #     update_period_of_time(instance=self.get_object())
-    #     serializer.save()
 
 
 #удаление события - Ainur
@@ -428,35 +425,34 @@ class ReportEventDisp(ListAPIView):
 def get_report_object(request):
 
     today = datetime.date.today()
-    dates = Event.objects.filter(created_at=today).exclude(index1__id=11)
+    dates = Event.objects.filter(created_at=today)
     teams_data = []
     for i in dates:
         if i.object !=None:
             objects = [
                 {'name':i.object.name, "date_from": i.date_from,
-                 "date_to":i.date_to, 'index1':i.index1.name, "id":date.id}
-                for date in dates
+                 "date_to":i.date_to, 'index1':i.index1.name, "id":i.id}
             ]
             teams_data.append(objects)
         if i.circuit !=None:
             circuits = [
                 {'name': i.circuit.name, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
-                for date in dates
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+
             ]
             teams_data.append(circuits)
         if i.ips !=None:
             ips = [
                 {'name': i.ips.point_id.point, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
-                for date in dates
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+
             ]
             teams_data.append(ips)
         if i.name !=None:
             unknown = [
                 {'name': i.name, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": date.id}
-                for date in dates
+                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+
             ]
             teams_data.append(unknown)
 

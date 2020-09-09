@@ -173,7 +173,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2', "period_of_time")
 
         depth = 2
@@ -232,7 +232,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name',
                   "period_of_time")
 
