@@ -141,6 +141,12 @@ media/
 
 # Cython debug symbols
 cython_debug/
+folder
+.dockerignore
+Dockerfile
+data.py
+docker-compose.yml
+log
 
 #**/migrations/
 #**/**/migrations
