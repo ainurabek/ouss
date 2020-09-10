@@ -49,7 +49,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     #фильтр по хвостам + за сегодня
 
         today = datetime.date.today()
-        queryset1 = self.queryset.exclude(index1__id=11)
+        queryset1 = self.queryset.exclude(index1_id=11)
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2).order_by('-created_at')
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
@@ -78,7 +78,7 @@ class EventListAPIView(viewsets.ModelViewSet):
 
 
     def retrieve(self, request, pk=None):
-        calls = Event.objects.filter(id_parent_id=pk).order_by("-created_at")
+        calls = Event.objects.filter(id_parent_id=pk).order_by("-id")
         serializer = self.get_serializer(calls, many=True)
         return Response(serializer.data)
 
@@ -221,6 +221,22 @@ class EventUpdateAPIView(UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
+    def perform_update(self, serializer):
+        #это меняет дату конца предыдущего события
+        instance = serializer.save()
+        if instance.id_parent is not None:
+            latest_event = instance.id_parent.event_id_parent.all().latest()
+            if latest_event.pk == instance.pk:
+                print(instance.date_from)
+                instance.id_parent.date_to =instance.date_from
+                instance.id_parent.index1=instance.index1
+                instance.id_parent.save()
+            instance.previous.date_to = instance.date_from
+            instance.previous.save()
+            serializer.save()
+
+
+
 
 #удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
@@ -234,7 +250,7 @@ class EventDeleteAPIView(DestroyAPIView):
         main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
         if instance.previous is not None:
             previous_event = get_object_or_404(Event, pk=instance.previous.pk)
-            main_event.date_to = previous_event.date_to
+            main_event.date_to = previous_event.date_from
             main_event.index1 = previous_event.index1
             main_event.save()
             previous_event.date_to = None
