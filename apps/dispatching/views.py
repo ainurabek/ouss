@@ -1,5 +1,7 @@
 import datetime
 from datetime import date
+from itertools import groupby
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -50,8 +52,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         queryset1 = self.queryset.exclude(index1__id=11)
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2).order_by('-created_at')
-
-
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
@@ -171,6 +171,7 @@ class EventObjectCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
+
             response = {"data": "Событие создано успешно"}
 
             return Response(response, status=status.HTTP_201_CREATED)
@@ -266,6 +267,8 @@ class EventDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Event.objects.all()
     lookup_field = 'pk'
+
+
 
 
 
@@ -422,44 +425,69 @@ class ReportEventDisp(ListAPIView):
 
         return queryset
 
+
+
+
 def get_report_object(request):
+    date = request.GET.get('date')
+    if date != '':
+        dates = Event.objects.filter(callsorevent=False, created_at__lte=date).exclude(index1__id=11)
+        teams_data = []
+        for i in dates:
+            if i.object !=None:
+                obj = {}
+                obj['name'] = i.object.name
+                obj['date_from'] = i.date_from
+                obj['date_to'] = i.date_to
+                obj['index1'] = i.index1.name
+                obj['point1'] = i.point1.point
+                obj['point2'] = i.point2.point
+                obj['comments'] = i.comments1
+                obj['outfit'] = i.responsible_outfit.outfit
+                teams_data.append(obj)
+            if i.circuit !=None:
+                cir ={}
+                cir['name']= i.circuit.name
+                cir["date_from"]= i.date_from
+                cir["date_to"]= i.date_to
+                cir['index1']= i.index1.name
+                cir['point1'] = i.point1.point
+                cir['point2'] = i.point2.point
+                cir['comments'] = i.comments1
+                cir['outfit'] = i.responsible_outfit.outfit
+                teams_data.append(cir)
+            if i.ips !=None:
+                ips = {}
+                ips['name'] = i.ips.point_id.point
+                ips["date_from"] =  i.date_from
+                ips["date_to"] = i.date_to
+                ips['index1'] = i.index1.name
+                ips['point1'] = i.point1.point
+                ips['point2'] = i.point2.point
+                ips['comments'] = i.comments1
+                ips['outfit'] = i.responsible_outfit.outfit
+                teams_data.append(ips)
+            if i.name !=None:
+                unknown = {}
+                unknown['name'] = i.name
+                unknown["date_from"] = i.date_from
+                unknown["date_to"] =  i.date_to
+                unknown['index1'] =  i.index1.name
+                unknown['point1'] = i.point1.point
+                unknown['point2'] = i.point2.point
+                unknown['comments'] = i.comments1
+                unknown['outfit'] = i.responsible_outfit.outfit
+                teams_data.append(unknown)
+        queryset = [{"name": key,  "calls": [ g for g in group]}
+                for key, group in groupby(teams_data,  lambda x: x['name'])]
+        # queryset1 = [{"outfit": k, "calls": [g for g in group]}
+        #             for k, group in groupby(queryset, key=lambda x: x['outfit'])]
+        # a = teams_data.sort(key=lambda x: x['name'])
+        # print(a)
+        a = [{"name":k, "calls":[ g for g in v]}
+             for k, v in groupby(teams_data, key=lambda x: x['name'])]
 
-    today = datetime.date.today()
-    dates = Event.objects.filter(created_at=today)
-    teams_data = []
-    for i in dates:
-        if i.object !=None:
-            objects = [
-                {'name':i.object.name, "date_from": i.date_from,
-                 "date_to":i.date_to, 'index1':i.index1.name, "id":i.id}
-            ]
-            teams_data.append(objects)
-        if i.circuit !=None:
-            circuits = [
-                {'name': i.circuit.name, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-
-            ]
-            teams_data.append(circuits)
-        if i.ips !=None:
-            ips = [
-                {'name': i.ips.point_id.point, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-
-            ]
-            teams_data.append(ips)
-        if i.name !=None:
-            unknown = [
-                {'name': i.name, "date_from": i.date_from,
-                 "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-
-            ]
-            teams_data.append(unknown)
-
-    # next(item for item in teams_data if item["name"] == "Pam")
-
-
-    return JsonResponse(teams_data, safe=False)
+        return JsonResponse(queryset, safe=False)
 
 
 
