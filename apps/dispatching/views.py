@@ -488,8 +488,6 @@ def get_report_object(request):
 
     return JsonResponse(data, safe=False)
 
-
-
 #возможность создавать сотрудников предприятий диспетчерам
 class OutfitWorkerAPIView(ListAPIView):
     queryset = OutfitWorker.objects.all()
