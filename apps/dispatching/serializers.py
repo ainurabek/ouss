@@ -140,13 +140,11 @@ class EventListSerializer(serializers.ModelSerializer):
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
     period_of_time = ReadOnlyField(source='get_period')
-    date = ReadOnlyField(source='get_end')
-
+   
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name',
-                  "period_of_time", "responsible_outfit", 'callsorevent', 'date')
-
+                  "period_of_time", "responsible_outfit", )
         depth=1
 
 

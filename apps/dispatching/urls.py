@@ -66,7 +66,7 @@ urlpatterns = [
     path("api/event/report/", views.ReportEventDisp.as_view()),
 
     #второй звонок
-    path("api/event/calls/create/<int:pk>/", views.EventCallsCreateViewAPI.as_view()),
+    path("api/event/calls/create/<int:pk>/<int:id>/", views.EventCallsCreateViewAPI.as_view()),
     path("api/reports/", views.get_report_object),
 
     #comments

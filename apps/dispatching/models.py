@@ -88,6 +88,7 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     period_of_time = models.CharField("Сумма часов, за которое устранили аварию", max_length=100, blank=True, null=True)
+    previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Журнал событий'
