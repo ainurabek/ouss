@@ -94,6 +94,7 @@ class Event(models.Model):
         verbose_name = 'Журнал событий'
         verbose_name_plural = 'Журнал событий'
         ordering = ('id',)
+        get_latest_by = ('id')
 
     def __str__(self):
         return str(self.id)
@@ -103,4 +104,12 @@ class Event(models.Model):
             date = (self.date_to) - (self.date_from)
             period_time = (((date.total_seconds() / 60) * 100) / 60) / 100
             return period_time
+
+    # def get_end(self):
+    #     calls = self.objects.filter(id_parent = self.id)
+    #     print(calls)
+    #     for call in calls:
+    #         if call != None:
+    #             self.date_to = call.date_from.latest()
+    #             return self.date_to
 

@@ -60,7 +60,7 @@ class EventUnknownSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', "name", 'responsible_outfit', 'send_from', 'point1', 'point2', 'customer', 'index1',
-                  'comments1', 'comments2')
+                  'comments1')
 
 class EventDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,7 +79,8 @@ class CircuitEventList(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'id_object', 'num_circuit', 'type_using', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
+        fields = ('id', 'name', 'id_object', 'num_circuit', 'type_using',
+                  'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
 
 class CircuitDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -139,12 +140,11 @@ class EventListSerializer(serializers.ModelSerializer):
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
     period_of_time = ReadOnlyField(source='get_period')
-
+   
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name',
                   "period_of_time", "responsible_outfit", )
-
         depth=1
 
 

@@ -1,5 +1,7 @@
 import datetime
 from datetime import date
+from itertools import groupby
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -50,8 +52,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         queryset1 = self.queryset.exclude(index1__id=11)
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2).order_by('-created_at')
-
-
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
@@ -171,6 +171,7 @@ class EventObjectCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
+
             response = {"data": "Событие создано успешно"}
 
             return Response(response, status=status.HTTP_201_CREATED)
@@ -241,6 +242,8 @@ class EventDeleteAPIView(DestroyAPIView):
         instance.delete()
         if main_event.event_id_parent.count() == 0:
             main_event.delete()
+
+
 
 
 
@@ -395,9 +398,9 @@ class ReportEventDisp(ListAPIView):
             queryset = queryset1.union(queryset2)
 
         return queryset
-
+      
+      
 def get_report_object(request):
-
     today = datetime.date.today()
     # dates = Event.objects.filter(created_at=today)
     teams_data = []
@@ -484,6 +487,7 @@ def get_report_object(request):
     #     data.append(res)
 
     return JsonResponse(data, safe=False)
+
 
 
 #возможность создавать сотрудников предприятий диспетчерам
