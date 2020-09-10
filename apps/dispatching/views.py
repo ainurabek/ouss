@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
     IPSSerializer, CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
-from .services import get_minus_date, ListFilterAPIView
+from .services import get_minus_date, ListFilterAPIView, get_event_name
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -66,13 +66,13 @@ class EventListAPIView(viewsets.ModelViewSet):
             queryset = q1.union(q2)
 
         if type_journal is not None and type_journal != '':
-            queryset = queryset.filter(type_journal=type_journal)
+            queryset = self.queryset.filter(type_journal=type_journal)
         if responsible_outfit is not None and responsible_outfit != '':
-            queryset = queryset.filter(responsible_outfit=responsible_outfit)
+            queryset = self.queryset.filter(responsible_outfit=responsible_outfit)
         if index1 is not None and index1 != '':
-            queryset = queryset.filter(index1=index1)
+            queryset = self.queryset.filter(index1=index1)
         if name is not None and name != '':
-            queryset = queryset.filter(name=name)
+            queryset = self.queryset.filter(name=name)
 
         return queryset
 
@@ -176,28 +176,29 @@ class EventObjectCreateViewAPI(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     """Создания Event"""
 
-    def post(self, request, pk):
+    def post(self, request, pk, id):
         event = get_object_or_404(Event, pk=pk)
+        previous_event = get_object_or_404(Event, pk=id)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now, callsorevent=False)
+            instance = serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now,
+                                       callsorevent=False, previous=previous_event)
             response = {"data": "Звонок создано успешно"}
             event.date_to = instance.date_from
             event.index1 = instance.index1
             event.save()
-            calls = Event.objects.filter(id_parent=event, date_to=None)
-            for call in calls:
-                if call != instance:
-                    call.date_to = instance.date_from
-                    call.save()
+            previous_event.date_to = instance.date_from
+            previous_event.save()
 
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 #чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
@@ -219,10 +220,6 @@ class EventUpdateAPIView(UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
-    # def perform_update(self, serializer):
-    #     update_period_of_time(instance=self.get_object())
-    #     serializer.save()
-
 
 #удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
@@ -231,6 +228,19 @@ class EventDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Event.objects.all()
     lookup_field = 'pk'
+
+    def perform_destroy(self, instance):
+        main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
+        if instance.previous is not None:
+            previous_event = get_object_or_404(Event, pk=instance.previous.pk)
+            main_event.date_to = previous_event.date_to
+            main_event.index1 = previous_event.index1
+            main_event.save()
+            previous_event.date_to = None
+            previous_event.save()
+        instance.delete()
+        if main_event.event_id_parent.count() == 0:
+            main_event.delete()
 
 
 
@@ -347,8 +357,7 @@ class CompletedEvents(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    # queryset = Event.objects.exclude(index2=None)
-    queryset = Event.objects.all
+    queryset = Event.objects.filter(callsorevent=False, index1=11)
 
 
 class UncompletedEventList(ListFilterAPIView):
@@ -372,36 +381,109 @@ class ReportEventDisp(ListAPIView):
         date_to = self.request.query_params.get('date_to', None)
 
         if date_to == '' and date_from != '':
-            queryset1 = Event.objects.filter(index2=None, created_at__lte=date_from)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_from)
             queryset2 = queryset.filter(created_at=date_from)
             queryset = queryset1.union(queryset2)
         elif date_to != '' and date_from == '':
-            queryset1 = queryset.filter(index2=None, created_at__lte=date_to)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to)
             queryset2 = queryset.filter(created_at=date_to)
             queryset = queryset1.union(queryset2)
         elif date_to != '' and date_from != '':
-            queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
+            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to, created_at__lte=date_from)
+            # queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
             queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
             queryset = queryset1.union(queryset2)
-
-
 
         return queryset
 
 def get_report_object(request):
+
     today = datetime.date.today()
-    dates = Event.objects.filter(created_at=today).exclude(index1__id=11)
+    # dates = Event.objects.filter(created_at=today)
+    teams_data = []
+    # for i in dates:
+    #     if i.object !=None:
+    #         objects = [
+    #             {'name':i.object.name, "date_from": i.date_from,
+    #              "date_to":i.date_to, 'index1':i.index1.name, "id":i.id}
+    #         ]
+    #         teams_data.append(objects)
+    #     if i.circuit !=None:
+    #         circuits = [
+    #             {'name': i.circuit.name, "date_from": i.date_from,
+    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+    #
+    #         ]
+    #         teams_data.append(circuits)
+    #     if i.ips !=None:
+    #         ips = [
+    #             {'name': i.ips.point_id.point, "date_from": i.date_from,
+    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+    #
+    #         ]
+    #         teams_data.append(ips)
+    #     if i.name !=None:
+    #         unknown = [
+    #             {'name': i.name, "date_from": i.date_from,
+    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
+    #
+    #         ]
+    #         teams_data.append(unknown)
 
+    # next(item for item in teams_data if item["name"] == "Pam")
+    # all_calls = Event.objects.filter(callsorevent=False)
 
-    teams_data = [
+    all_event = Event.objects.filter(callsorevent=True)
+    all_calls = Event.objects.filter(callsorevent=False)
+    type_journal = Event.objects.order_by("type_journal").distinct("type_journal")
+    outfits = Event.objects.order_by("responsible_outfit").distinct("responsible_outfit")
 
-        { "date_from": date.date_from,
-         "date_to":date.date_to, 'index1':date.index1.name, "id":date.id}
-        for date in dates
-    ]
+    data = [
+        {"type_journal": type.type_journal.name,
+         "outfits":
+             [{"outfit": outfit.responsible_outfit.outfit,
+                      "events": [
+                          {"event": get_event_name(event),
+                                  "calls": [{
+                        "id": call.id,
+                        "name": get_event_name(call),
+                        "date_from": call.date_from,
+                        "date_to": call.date_to,
+                        "region": call.point1.point + " - " + call.point2.point,
+                        "index1": call.index1.name,
+                        "comments1": call.comments1
+                    }
+                                      for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=11)]}
+                                 for event in all_event.filter(responsible_outfit=outfit.responsible_outfit)]}
+                     for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
+    # for type in type_journal:
+    #     res = {}
+    #     res["type_journal"] = type.type_journal.name
+    #     res["outfits"] = []
+    #     for outfit in outfits.filter(type_journal=type.type_journal):
+    #         out = {}
+    #         out["outfit"] = outfit.responsible_outfit.outfit
+    #         out["events"] = []
+    #         for event in all_event.filter(responsible_outfit=outfit.responsible_outfit):
+    #             event_name = get_event_name(event)
+    #             e = {"event": event_name}
+    #             e["calls"] = []
+    #             for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=11):
+    #                 call_name = get_event_name(call)
+    #                 e["calls"].append({
+    #                     "id": call.id,
+    #                     "name": call_name,
+    #                     "date_from": call.date_from,
+    #                     "date_to": call.date_to,
+    #                     "region": call.point1.point + " - " + call.point2.point,
+    #                     "index1": call.index1.name,
+    #                     "comments1": call.comments1
+    #                 })
+    #             out["events"].append(e)
+    #         res["outfits"].append(out)
+    #     data.append(res)
 
-    return JsonResponse(teams_data, safe=False)
-
+    return JsonResponse(data, safe=False)
 
 
 #возможность создавать сотрудников предприятий диспетчерам
@@ -413,12 +495,14 @@ class OutfitWorkerAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'name')
 
+
 #создание сотрудника - Ainur
 class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
 
 #редактирование сотрудника - Ainur
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
@@ -427,6 +511,8 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+
 #сотрудника удаление - Ainur
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""

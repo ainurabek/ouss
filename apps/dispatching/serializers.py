@@ -143,7 +143,7 @@ class EventListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name',
-                  "period_of_time", "responsible_outfit", 'callsorevent')
+                  "period_of_time", "responsible_outfit", )
 
         depth=1
 
@@ -173,7 +173,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2', "period_of_time")
 
         depth = 2
@@ -206,7 +206,7 @@ class CallsCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1',
                   'point2', "period_of_time", 'date_calls')
 
@@ -232,7 +232,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'comments2', 'responsible_outfit', 'send_from',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name',
                   "period_of_time")
 
@@ -240,6 +240,6 @@ class ReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', 'date_from', 'date_to', 'index1')
+        fields = ('id', 'date_from', 'date_to', 'index1', 'created_at',  'object', 'circuit', 'ips', 'name')
 
 
