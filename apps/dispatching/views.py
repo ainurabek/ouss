@@ -48,7 +48,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     #фильтр по хвостам + за сегодня
 
         today = datetime.date.today()
-        queryset1 = self.queryset.exclude(index1_id=11)
+        queryset1 = self.queryset.exclude(index1_id=5)
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2).order_by('-created_at')
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
@@ -60,7 +60,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         name = self.request.query_params.get('name', None)
 
         if created_at is not None and created_at != '':
-            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1=11)
+            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1=5)
             q2 = self.queryset.filter(created_at=created_at)
             queryset = q1.union(q2)
 
@@ -393,14 +393,14 @@ class CompletedEvents(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(index1=11)
+    queryset = Event.objects.filter(index1=5)
 
 
 class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1=11)
+    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1=5)
 
 
 
@@ -411,8 +411,8 @@ def get_report_object(request):
     if date is None or date == "":
         date = datetime.date.today()
 
-    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=11)
-    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1=11)
+    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=5)
+    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1=5)
     all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
     type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
@@ -433,7 +433,7 @@ def get_report_object(request):
                         "index1": call.index1.name,
                         "comments1": call.comments1
                     }
-                                      for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=11)]}
+                                      for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=5)]}
                                  for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
                      for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
     return JsonResponse(data, safe=False)
