@@ -118,7 +118,7 @@ class EventCircuitSerializer(serializers.ModelSerializer):
 
 
 class IPSSerializer(serializers.ModelSerializer):
-    point_id = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point_id = PointListSerializer()
     object_id = EventObjectSerializer()
 
     class Meta:
