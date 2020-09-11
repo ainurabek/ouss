@@ -42,7 +42,6 @@ class EventListAPIView(viewsets.ModelViewSet):
             return EventListSerializer
         elif self.action == "retrieve":
             return EventDetailSerializer
-
     # событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
 
     def get_queryset(self):
@@ -231,8 +230,9 @@ class EventUpdateAPIView(UpdateAPIView):
                 instance.id_parent.date_to =instance.date_from
                 instance.id_parent.index1=instance.index1
                 instance.id_parent.save()
-            instance.previous.date_to = instance.date_from
-            instance.previous.save()
+            if instance.previous is not None:
+                instance.previous.date_to = instance.date_from
+                instance.previous.save()
             serializer.save()
 
 
@@ -281,110 +281,127 @@ class EventUnknownCreateViewAPI(APIView):
     def post(self, request):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save( created_by=self.request.user.profile, created_at=now)
+            event = serializer.save( created_by=self.request.user.profile, created_at=now)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1, name=event.name,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 )
             response = {"data": "Событие создано успешно"}
             # update_period_of_time(instance=obj)
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DashboardTodayEventList(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        today = datetime.date.today()
-        queryset = Event.objects.filter(created_at=today)
-        serializer = EventListSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
+#статистика событий за неделю
 def get_dates_and_counts_week(request):
     data = {}
-    dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).distinct('created_at')
+    dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).\
+        exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
+
     teams_data = [
-        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
+            exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+#статистика событий за месяц
 def get_dates_and_counts_month(request):
     data = {}
-    dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).distinct('created_at')
+    dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).\
+        exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
     teams_data = [
-        {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).count() }
+        {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
+            exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+#статистика событий за сегодня
 def get_dates_and_counts_today(request):
     data = {}
     time = datetime.date.today()
-    dates = Event.objects.filter(date_from__gte=time).distinct('date_from__hour')
+
+    dates = Event.objects.filter(date_from__gte=time).\
+        exclude(previous__isnull=True, callsorevent=False).order_by('date_from').distinct('date_from')
     teams_data = [
-        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).count()}
+        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).
+            exclude(previous__isnull=True, callsorevent=False).count()}
         for date in dates
     ]
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+#статистика событий по предприятиям за месяц
 def get_outfit_statistics_for_a_month(request):
     month = get_minus_date(days=30)
-    dates = Event.objects.filter(created_at__gte=month).distinct('responsible_outfit')
-    all_data = Event.objects.filter(created_at__gte=month).count()
+    dates = Event.objects.filter(created_at__gte=month).\
+        exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+    all_data = Event.objects.filter(created_at__gte=month).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
-         "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()/all_data)*100,
-         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).count()}
+         "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
+                     exclude(previous__isnull=True, callsorevent=False).count()/all_data)*100,
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
+             exclude(previous__isnull=True, callsorevent=False).count()}
         for date in dates
     ]
 
     return JsonResponse(teams_data, safe=False)
 
-
+#статистика событий по предприятиям за неделю
 def get_outfit_statistics_for_a_week(request):
     week = get_minus_date(days=7)
-    dates = Event.objects.filter(created_at__gte=week).distinct('responsible_outfit')
-    all = Event.objects.filter(created_at__gte=week).count()
+    dates = Event.objects.filter(created_at__gte=week).exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=week).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
-        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).count() }
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit,
+                                                                                    created_at__gte=week).
+                                                               exclude(previous__isnull=True, callsorevent=False).count()/all)*100,
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).
+             exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
     ]
 
     return JsonResponse(teams_data, safe=False)
 
-
+#статистика событий по предприятиям за сегодня
 def get_outfit_statistics_for_a_day(request):
     day = datetime.date.today()
-    dates = Event.objects.filter(created_at__gte=day).distinct('responsible_outfit')
-    all = Event.objects.filter(created_at__gte=day).count()
+    dates = Event.objects.filter(created_at__gte=day).\
+        exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+    all = Event.objects.filter(created_at__gte=day).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
-        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count()/all)*100, "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).count() }
+        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit,
+                                                                                    created_at__gte=day).
+                                                               exclude(previous__isnull=True, callsorevent=False).count()/all)*100,
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).
+             exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
     ]
 
     return JsonResponse(teams_data, safe=False)
 
-
+#список завершенных событий
 class CompletedEvents(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(callsorevent=False, index1=11)
+    queryset = Event.objects.filter(index1=11)
 
 
 class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    # queryset = Event.objects.exclude(index2__isnull=True)
-    queryset = Event.objects.all()
+    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1=11)
+
 
 
 #Отчет дисп службы

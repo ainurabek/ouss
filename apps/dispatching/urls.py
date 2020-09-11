@@ -49,27 +49,26 @@ urlpatterns = [
     path("api/event/unknown/", views.UnknownEventListAPIView.as_view()),
     path("api/event/unknown/create/", views.EventUnknownCreateViewAPI.as_view()),
 
-
     #статистика за месяц-неделю-сегодня
     path("api/event/week/", views.get_dates_and_counts_week),
-
     path("api/event/month/", views.get_dates_and_counts_month),
     path("api/event/today/", views.get_dates_and_counts_today),
-    path("api/event/precent-month/", views.get_outfit_statistics_for_a_month),
-    path("api/event/precent-week/", views.get_outfit_statistics_for_a_week),
-    path("api/event/precent-day/", views.get_outfit_statistics_for_a_day),
-    path("api/event/completed-list/", views.CompletedEvents.as_view()),
-    path("api/uncompleted/event/", views.UncompletedEventList.as_view()),
 
+    #статистика событий по предприятиям за день-сегодня-месяц
+    path("api/event/out-month/", views.get_outfit_statistics_for_a_month),
+    path("api/event/out-week/", views.get_outfit_statistics_for_a_week),
+    path("api/event/out-today/", views.get_outfit_statistics_for_a_day),
+    #статистика завершенных событий по определнной дате
+    path("api/event/completed-list/", views.CompletedEvents.as_view()),
+    #статистика незавершенных событий
+    path("api/event/uncompleted-list/", views.UncompletedEventList.as_view()),
 
     #фильтры для отчета
     path("api/event/report/", views.ReportEventDisp.as_view()),
-
     #второй звонок
     path("api/event/calls/create/<int:pk>/<int:id>/", views.EventCallsCreateViewAPI.as_view()),
     path("api/reports/", views.get_report_object),
 
-    #comments
     path('', include(router.urls)),
 
 ]
