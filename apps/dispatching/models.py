@@ -81,7 +81,7 @@ class Event(models.Model):
                                           null=True, blank=True,  related_name='dispatch_send_outfit')
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='event_obj', verbose_name="КО",  null=True, blank=True)
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, related_name='event_cir', verbose_name="Каналы", null=True, blank=True)
-    ips = models.ForeignKey(IP, on_delete=models.CASCADE, verbose_name="ИП", related_name='event_ips', null=True, blank=True)
+    ips = models.ForeignKey(Point, on_delete=models.CASCADE, verbose_name="ИП", related_name='event_ips', null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)

@@ -7,15 +7,15 @@ from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
-    IPSSerializer, CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
+     CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object, IP, OutfitWorker, Outfit
+from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
 
-from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
+from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer, PointListSerializer
 
 now = date.today()
 from django.shortcuts import get_object_or_404
@@ -85,10 +85,10 @@ class EventListAPIView(viewsets.ModelViewSet):
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = IP.objects.all()
-    serializer_class = IPSSerializer
+    queryset = Point.objects.all()
+    serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('point_id', 'object_id')
+    filterset_fields = ('name', 'point')
 
 
 class EventIPCreateViewAPI(APIView):
@@ -96,7 +96,7 @@ class EventIPCreateViewAPI(APIView):
     permission_classes = (IsAuthenticated,)
     """Создания Event"""
     def post(self, request, pk):
-        ip = IP.objects.get(pk=pk)
+        ip = Point.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)

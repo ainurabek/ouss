@@ -117,18 +117,11 @@ class EventCircuitSerializer(serializers.ModelSerializer):
         fields = ('id', "name", 'point1', 'point2')
 
 
-class IPSSerializer(serializers.ModelSerializer):
-    point_id = PointListSerializer()
-    object_id = EventObjectSerializer()
 
-    class Meta:
-        model = IP
-        fields = ( 'id',"point_id", "object_id")
-        depth = 1
 
 class IPDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = IP
+        model = Point
         fields = ['event_ips']
         depth=1
 
@@ -136,7 +129,7 @@ class IPDetailObjectSerializer(serializers.ModelSerializer):
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
-    ips = IPSSerializer()
+    ips = PointListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
     period_of_time = ReadOnlyField(source='get_period')
@@ -220,7 +213,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
 
     responsible_outfit = OutfitListSerializer()
     send_from = OutfitListSerializer()
-    ips = IPSSerializer()
+    ips = PointListSerializer()
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
     customer = CustomerSerializer()
