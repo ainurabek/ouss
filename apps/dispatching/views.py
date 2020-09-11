@@ -404,75 +404,19 @@ class UncompletedEventList(ListFilterAPIView):
 
 
 
-#Отчет дисп службы
-class ReportEventDisp(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = ReportSerializer
 
-#в отчете выходят данные за тот заданный период +хвосты(незакрытые)
-    def get_queryset(self):
-        queryset = Event.objects.all()
-        date_from = self.request.query_params.get('date_from', None)
-        date_to = self.request.query_params.get('date_to', None)
-
-        if date_to == '' and date_from != '':
-            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_from)
-            queryset2 = queryset.filter(created_at=date_from)
-            queryset = queryset1.union(queryset2)
-        elif date_to != '' and date_from == '':
-            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to)
-            queryset2 = queryset.filter(created_at=date_to)
-            queryset = queryset1.union(queryset2)
-        elif date_to != '' and date_from != '':
-            queryset1 = queryset.exclude(index1__id=11, created_at__gte=date_to, created_at__lte=date_from)
-            # queryset1 = queryset.filter(index2=None, created_at__lte=date_to, created_at__gte=date_from)
-            queryset2 = queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
-            queryset = queryset1.union(queryset2)
-
-        return queryset
-      
       
 def get_report_object(request):
-    today = datetime.date.today()
-    # dates = Event.objects.filter(created_at=today)
-    teams_data = []
-    # for i in dates:
-    #     if i.object !=None:
-    #         objects = [
-    #             {'name':i.object.name, "date_from": i.date_from,
-    #              "date_to":i.date_to, 'index1':i.index1.name, "id":i.id}
-    #         ]
-    #         teams_data.append(objects)
-    #     if i.circuit !=None:
-    #         circuits = [
-    #             {'name': i.circuit.name, "date_from": i.date_from,
-    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-    #
-    #         ]
-    #         teams_data.append(circuits)
-    #     if i.ips !=None:
-    #         ips = [
-    #             {'name': i.ips.point_id.point, "date_from": i.date_from,
-    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-    #
-    #         ]
-    #         teams_data.append(ips)
-    #     if i.name !=None:
-    #         unknown = [
-    #             {'name': i.name, "date_from": i.date_from,
-    #              "date_to": i.date_to, 'index1': i.index1.name, "id": i.id}
-    #
-    #         ]
-    #         teams_data.append(unknown)
+    date = request.GET.get("date")
+    if date is None or date == "":
+        date = datetime.date.today()
 
-    # next(item for item in teams_data if item["name"] == "Pam")
-    # all_calls = Event.objects.filter(callsorevent=False)
-
-    all_event = Event.objects.filter(callsorevent=True)
+    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=11)
+    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1=11)
+    all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
-    type_journal = Event.objects.order_by("type_journal").distinct("type_journal")
-    outfits = Event.objects.order_by("responsible_outfit").distinct("responsible_outfit")
+    type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
+    outfits = (all_event_completed | all_event_uncompleted).order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = [
         {"type_journal": type.type_journal.name,
@@ -490,35 +434,8 @@ def get_report_object(request):
                         "comments1": call.comments1
                     }
                                       for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=11)]}
-                                 for event in all_event.filter(responsible_outfit=outfit.responsible_outfit)]}
+                                 for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
                      for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
-    # for type in type_journal:
-    #     res = {}
-    #     res["type_journal"] = type.type_journal.name
-    #     res["outfits"] = []
-    #     for outfit in outfits.filter(type_journal=type.type_journal):
-    #         out = {}
-    #         out["outfit"] = outfit.responsible_outfit.outfit
-    #         out["events"] = []
-    #         for event in all_event.filter(responsible_outfit=outfit.responsible_outfit):
-    #             event_name = get_event_name(event)
-    #             e = {"event": event_name}
-    #             e["calls"] = []
-    #             for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=11):
-    #                 call_name = get_event_name(call)
-    #                 e["calls"].append({
-    #                     "id": call.id,
-    #                     "name": call_name,
-    #                     "date_from": call.date_from,
-    #                     "date_to": call.date_to,
-    #                     "region": call.point1.point + " - " + call.point2.point,
-    #                     "index1": call.index1.name,
-    #                     "comments1": call.comments1
-    #                 })
-    #             out["events"].append(e)
-    #         res["outfits"].append(out)
-    #     data.append(res)
-
     return JsonResponse(data, safe=False)
 
 #возможность создавать сотрудников предприятий диспетчерам

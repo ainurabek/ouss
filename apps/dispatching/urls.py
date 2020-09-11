@@ -64,10 +64,10 @@ urlpatterns = [
     path("api/event/uncompleted-list/", views.UncompletedEventList.as_view()),
 
     #фильтры для отчета
-    path("api/event/report/", views.ReportEventDisp.as_view()),
+    path("api/reports/", views.get_report_object),
     #второй звонок
     path("api/event/calls/create/<int:pk>/<int:id>/", views.EventCallsCreateViewAPI.as_view()),
-    path("api/reports/", views.get_report_object),
+
 
     path('', include(router.urls)),
 
