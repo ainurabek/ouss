@@ -33,6 +33,8 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
-        get_active_channels(obj = instance.id_object, first = instance.first)
+        get_active_channels(obj= instance.id_object)
+
+
 
 

@@ -96,9 +96,8 @@ def cascading_delete_object(object)->None:
         obj.delete()
 
 def get_active_channels(obj, first=False):
-    active_channels = Circuit.objects.filter(first = True, id_object = obj)
+    active_channels = Circuit.objects.filter(first = True, id_object = obj).count()
+    Object.objects.filter(pk=obj.pk).update(num=int(active_channels))
 
-    if first == True:
-        Object.objects.filter(pk=obj.pk).update(num=int(obj.amount_channels) - int(active_channels))
 
 

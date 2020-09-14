@@ -172,7 +172,7 @@ class LPSerializer(serializers.ModelSerializer):
     point2 = PointList()
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2')
+        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2', 'num')
 
 
 class LPDetailSerializer(serializers.ModelSerializer):
@@ -193,7 +193,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'num')
         depth = 1
 
 
@@ -251,7 +251,7 @@ class LPEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'customer')
+        'comments', 'customer', 'num')
         depth = 1
 
 
@@ -275,7 +275,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object")
+                  "ip_object", 'num')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -341,7 +341,7 @@ class TraktListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2")
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2", 'num')
 
 
 class ObjectFilterSerializer(serializers.ModelSerializer):
