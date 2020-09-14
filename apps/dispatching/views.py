@@ -49,7 +49,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         today = datetime.date.today()
         queryset1 = self.queryset.exclude(index1_id=5)
         queryset2 = self.queryset.filter(created_at=today)
-        queryset = queryset1.union(queryset2).order_by('-created_at')
+        queryset = queryset1.union(queryset2).order_by('id')
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
