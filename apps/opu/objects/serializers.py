@@ -193,7 +193,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels', 'total_amount_active_channels')
 
         depth = 1
 
@@ -273,7 +273,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object", 'num', "total_amount_channels")
+                  "ip_object", 'num', "total_amount_channels", 'total_amount_active_channels')
 
 
 
@@ -340,7 +340,7 @@ class TraktListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2", 'num')
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2")
 
 
 class ObjectFilterSerializer(serializers.ModelSerializer):

@@ -142,6 +142,7 @@ class Object(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
 	total_amount_channels = models.CharField(max_length=25, blank=True, null=True)
+	total_amount_active_channels = models.CharField(max_length=25, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
