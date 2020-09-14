@@ -169,9 +169,10 @@ class LPCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user.profile)
+        instance = serializer.save(created_by=self.request.user.profile,
+                                   total_amount_channels=self.request.data["amount_channels"])
         create_circuit(model=Circuit, obj=instance, request=self.request)
-        update_amount_channels(obj=instance)
+        update_total_amount_channels(obj=instance)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -214,9 +215,8 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        update_total_amount_channels(obj=instance)
+        update_total_amount_channels(obj=instance, flag=False)
         self.perform_destroy(instance)
-#         cascading_delete_object(instance)
         response = {"data": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 

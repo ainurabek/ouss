@@ -1,3 +1,4 @@
+from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object
 
 
@@ -84,9 +85,16 @@ def update_total_amount_channels(obj, flag=True):
             if obj.id_parent is None:
                 _update_object_total_amount_channels(obj, flag, count)
                 break
-            if count == "" or count == None:
+            if count == "" or count is None:
                 break
             obj = Object.objects.get(pk=obj.id_parent.pk)
             if obj.total_amount_channels == "" or obj.total_amount_channels == None:
                 break
             _update_object_total_amount_channels(obj, flag, count)
+
+
+def get_active_channels(obj, first=False):
+    active_channels = Circuit.objects.filter(first = True, id_object = obj)
+
+    if first == True:
+        Object.objects.filter(pk=obj.pk).update(num=int(obj.amount_channels) - int(active_channels))
