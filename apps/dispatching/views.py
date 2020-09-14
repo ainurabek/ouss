@@ -208,11 +208,15 @@ class EventUpdateAPIView(UpdateAPIView):
 
     def perform_update(self, serializer):
         #это меняет дату конца предыдущего события
+        date_to = str(self.get_object().date_from)
+        index1 = str(self.get_object().index1)
         instance = serializer.save()
         if instance.id_parent is not None:
             latest_event = instance.id_parent.event_id_parent.all().latest()
-            if latest_event.pk == instance.pk and instance.date_to is not None:
+            if latest_event.pk == instance.pk and instance.date_to != date_to:
                 instance.id_parent.date_to =instance.date_from
+                instance.id_parent.save()
+            if latest_event.pk ==instance.pk and instance.index1 != index1:
                 instance.id_parent.index1=instance.index1
                 instance.id_parent.save()
             if instance.previous is not None:
