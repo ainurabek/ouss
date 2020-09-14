@@ -213,7 +213,7 @@ class EventUpdateAPIView(UpdateAPIView):
         instance = serializer.save()
         if instance.id_parent is not None:
             latest_event = instance.id_parent.event_id_parent.all().latest()
-            if latest_event.pk == instance.pk and instance.date_to != date_to:
+            if latest_event.pk == instance.pk and instance.date_from != date_to:
                 instance.id_parent.date_to =instance.date_from
                 instance.id_parent.save()
             if latest_event.pk ==instance.pk and instance.index1 != index1:
