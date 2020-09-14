@@ -195,21 +195,8 @@ class EventCallsCreateViewAPI(APIView):
             event.save()
             previous_event.date_to = instance.date_from
             previous_event.save()
-
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-#чтобы передавать фронту нужно
-class OutfitWorkerGet(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, pk):
-        outfit = Outfit.objects.get(pk=pk)
-        outfit_worker = OutfitWorker.objects.filter(outfit=outfit)
-        serializer = OutfitWorkerListSerializer(outfit_worker, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # event update - Ainur
@@ -234,9 +221,6 @@ class EventUpdateAPIView(UpdateAPIView):
                 instance.previous.date_to = instance.date_from
                 instance.previous.save()
             serializer.save()
-
-
-
 
 #удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
@@ -404,8 +388,6 @@ class UncompletedEventList(ListFilterAPIView):
 
 
 
-
-      
 def get_report_object(request):
     date = request.GET.get("date")
     if date is None or date == "":
@@ -438,6 +420,19 @@ def get_report_object(request):
                      for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
     return JsonResponse(data, safe=False)
 
+
+# чтобы передавать фронту нужно
+class OutfitWorkerGet(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        outfit = Outfit.objects.get(pk=pk)
+        outfit_worker = OutfitWorker.objects.filter(outfit=outfit)
+        serializer = OutfitWorkerListSerializer(outfit_worker, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 #возможность создавать сотрудников предприятий диспетчерам
 class OutfitWorkerAPIView(ListAPIView):
     queryset = OutfitWorker.objects.all()
@@ -446,6 +441,7 @@ class OutfitWorkerAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'name')
+
 
 
 #создание сотрудника - Ainur
@@ -506,3 +502,4 @@ class IndexModelViewSet(viewsets.ModelViewSet):
     queryset = Index.objects.all()
     serializer_class = IndexSerializer
     lookup_field = 'pk'
+
