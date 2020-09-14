@@ -128,7 +128,7 @@ class Object(models.Model):
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.SET_NULL, blank=True, null=True)
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.SET_NULL, blank=True, null=True)
 	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
-	num = models.CharField('Номер задейственного канала', max_length=100, blank=True, null=True)
+	num = models.CharField('Количество задейственных каналов', max_length=100, blank=True, null=True)
 	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
@@ -146,6 +146,7 @@ class Object(models.Model):
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
+		ordering = ('id',)
 
 	def __str__(self):
 		return str(self.name)
@@ -159,6 +160,7 @@ class IP(models.Model):
 	class Meta:
 		verbose_name = 'ИП'
 		verbose_name_plural = 'ИП'
+		ordering = ('id',)
 
 	def __str__(self):
 		return self.point_id.point

@@ -16,6 +16,7 @@ class Form53(models.Model):
     class Meta:
         verbose_name = 'Форма 5.3'
         verbose_name_plural = 'Форма 5.3.'
+        ordering = ('id',)
 
     def __str__(self):
         return self.circuit.name

@@ -9,6 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
 
+from apps.opu.objects.services import get_active_channels
+
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
@@ -16,7 +18,7 @@ class CircuitListViewSet(APIView, ListWithPKMixin):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order', 'date_order',
                      'num_arenda', 'speed', 'measure', 'point1', 'point2', 'customer', 'id_object', 'mode', 'type_com')
-    filterset_fields = ('point1', 'point2', 'customer', 'id_object', 'category')
+    filterset_fields = ('point1', 'point2', 'customer', 'id_object', 'category', )
     model = Circuit
     serializer = CircuitList
     field_for_filter = "id_object"
@@ -30,5 +32,7 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
+        instance = serializer.save(created_by=self.request.user.profile)
+        get_active_channels(obj = instance.id_object, first = instance.first)
+
 

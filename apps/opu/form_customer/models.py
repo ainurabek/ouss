@@ -13,6 +13,7 @@ class Signalization(models.Model):
     class Meta:
         verbose_name = 'Сигнализация'
         verbose_name_plural = 'Сигнализация'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
@@ -35,6 +36,7 @@ class Form_Customer(models.Model):
     class Meta:
         verbose_name = 'Форма для Арендаторов'
         verbose_name_plural = 'Форма для Арендаторов'
+        ordering = ('id',)
 
     def __str__(self):
         return self.customer.abr

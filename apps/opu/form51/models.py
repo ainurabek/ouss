@@ -13,6 +13,7 @@ class Region(models.Model):
     class Meta:
         verbose_name = 'Регионы'
         verbose_name_plural = 'Регион'
+        ordering = ('id',)
 
 
 
@@ -31,6 +32,7 @@ class Form51(models.Model):
     class Meta:
         verbose_name = 'Форма 5.1'
         verbose_name_plural = 'Форма 5.1.'
+        ordering = ('id',)
 
     def __str__(self):
         return self.object.name

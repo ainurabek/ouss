@@ -1,5 +1,7 @@
 from apps.opu.objects.models import TypeOfTrakt, Object
 
+from apps.opu.circuits.models import Circuit
+
 
 def check_parent_type_of_trakt(parent):
     return True if parent.type_of_trakt is not None else False
@@ -92,4 +94,11 @@ def cascading_delete_object(object)->None:
 
     for obj in id_object:
         obj.delete()
+
+def get_active_channels(obj, first=False):
+    active_channels = Circuit.objects.filter(first = True, id_object = obj)
+
+    if first == True:
+        Object.objects.filter(pk=obj.pk).update(num=int(obj.amount_channels) - int(active_channels))
+
 

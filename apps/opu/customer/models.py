@@ -17,6 +17,7 @@ class Customer(models.Model):
 	class Meta:
 		verbose_name = 'Арендатор'
 		verbose_name_plural = 'Арендаторы'
+		ordering = ('id',)
 
 	def __str__(self):
 		return self.abr

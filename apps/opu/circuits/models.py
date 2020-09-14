@@ -70,7 +70,7 @@ class Circuit(models.Model):
 	transit = SortedManyToManyField("Circuit", related_name='cir_transit_obj1', blank=True)
 	transit2 = SortedManyToManyField("Circuit", related_name='cir_transit_obj2', blank=True)
 	in_out = models.ForeignKey(InOut, related_name='circ_in', on_delete=models.SET_NULL, blank=True, null=True)
-	first = models.BooleanField('Используется/Не используется', blank=True, null=True)
+	first = models.BooleanField('Используется/Не используется', default = False)
 
 	point1 = models.ForeignKey(Point, related_name='circ_ip1', on_delete=models.SET_NULL, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='circ_ip2', on_delete=models.SET_NULL, blank=True, null=True)
@@ -85,6 +85,7 @@ class Circuit(models.Model):
 	class Meta:
 		verbose_name = 'Канал для Формы 5.3'
 		verbose_name_plural = 'Каналы для Формы 5.3'
+		ordering = ('id',)
 
 	def __str__(self):
 		return self.name
