@@ -169,7 +169,9 @@ class LPCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
+        instance = serializer.save(created_by=self.request.user.profile)
+        create_circuit(model=Circuit, obj=instance, request=self.request)
+        update_amount_channels(obj=instance)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -180,7 +182,9 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
+        old_obj= save_old_object(self.get_object())
+        instance = serializer.save(created_by=self.request.user.profile)
+        update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
 
 
 class ObjectAllView(viewsets.ModelViewSet):

@@ -81,7 +81,7 @@ class CircuitList(serializers.ModelSerializer):
         fields = ('id', 'name', 'number', 'id_object', 'num_circuit', 'type_using', 'category', 'num_order',
                   'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
                    'transit', 'transit2', 'in_out', 'first', 'point1', 'point2',
-                  'customer', 'mode', 'type_com')
+                  'customer', 'mode', 'type_com', 'first')
 
 class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
@@ -105,7 +105,7 @@ class CircuitEdit(serializers.ModelSerializer):
         fields = ('number', 'type_using', 'category', 'num_order',
                   'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
                    'in_out', 'first', 'point1', 'point2',
-                  'customer', 'mode', 'type_com')
+                  'customer', 'mode', 'type_com', 'first')
 
     def update(self, instance, validated_data):
         """
