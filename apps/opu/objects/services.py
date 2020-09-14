@@ -70,26 +70,23 @@ def update_circuit(model, old_obj, obj):
                 point2=obj.point2.id)
 
 
-def update_amount_channels(obj, flag=True):
+def _update_object_total_amount_channels(object, flag, count):
+    if flag:
+        Object.objects.filter(pk=object.pk).update(total_amount_channels=int(object.total_amount_channels) + int(count))
+    else:
+        Object.objects.filter(pk=object.pk).update(total_amount_channels=int(object.total_amount_channels) - int(count))
+
+
+def update_total_amount_channels(obj, flag=True):
     if obj.id_parent:
-        count = obj.amount_channels
-        while obj.id_parent != None:
+        count = obj.total_amount_channels
+        while True:
+            if obj.id_parent is None:
+                _update_object_total_amount_channels(obj, flag, count)
+                break
             if count == "" or count == None:
                 break
             obj = Object.objects.get(pk=obj.id_parent.pk)
-            if obj.amount_channels == "" or obj.amount_channels == None:
+            if obj.total_amount_channels == "" or obj.total_amount_channels == None:
                 break
-            if flag:
-                Object.objects.filter(pk=obj.pk).update(amount_channels=int(obj.amount_channels)+int(count))
-            else:
-                Object.objects.filter(pk=obj.pk).update(amount_channels=int(obj.amount_channels) - int(count))
-
-
-def cascading_delete_object(object)->None:
-    id_object = [object]
-    for obj in id_object:
-        id_object += Object.objects.filter(id_parent=obj)
-
-    for obj in id_object:
-        obj.delete()
-
+            _update_object_total_amount_channels(obj, flag, count)
