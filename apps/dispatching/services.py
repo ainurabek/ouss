@@ -36,12 +36,12 @@ def get_event_name(event_object) -> str:
     if event_object.object is not None:
         event_name = event_object.object.name
     elif event_object.ips is not None:
-        event_name = event_object.ips.point_id.point
+        event_name = event_object.ips.point
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
     elif event_object.name is not None:
         event_name = event_object.name
-    return  event_name
+    return event_name
 
 
 # def update_period_of_time(instance):

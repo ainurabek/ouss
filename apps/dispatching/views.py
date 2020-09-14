@@ -1,6 +1,5 @@
 import datetime
 from datetime import date
-from itertools import groupby
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -213,7 +212,6 @@ class EventUpdateAPIView(UpdateAPIView):
         if instance.id_parent is not None:
             latest_event = instance.id_parent.event_id_parent.all().latest()
             if latest_event.pk == instance.pk:
-                print(instance.date_from)
                 instance.id_parent.date_to =instance.date_from
                 instance.id_parent.index1=instance.index1
                 instance.id_parent.save()
@@ -339,6 +337,7 @@ def get_outfit_statistics_for_a_month(request):
 
     return JsonResponse(teams_data, safe=False)
 
+
 #статистика событий по предприятиям за неделю
 def get_outfit_statistics_for_a_week(request):
     week = get_minus_date(days=7)
@@ -354,6 +353,7 @@ def get_outfit_statistics_for_a_week(request):
     ]
 
     return JsonResponse(teams_data, safe=False)
+
 
 #статистика событий по предприятиям за сегодня
 def get_outfit_statistics_for_a_day(request):
@@ -394,7 +394,7 @@ def get_report_object(request):
         date = datetime.date.today()
 
     all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=5)
-    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1=5)
+    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1_id=5)
     all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
     type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
@@ -415,11 +415,10 @@ def get_report_object(request):
                         "index1": call.index1.name,
                         "comments1": call.comments1
                     }
-                                      for call in all_calls.filter(id_parent=event, responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal).exclude(index1_id=5)]}
+                                      for call in all_calls.filter(id_parent=event).exclude(index1_id=5)]}
                                  for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
-                     for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
+                    for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
     return JsonResponse(data, safe=False)
-
 
 # чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
