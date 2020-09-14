@@ -22,7 +22,7 @@ from apps.opu.objects.serializers import LPDetailSerializer
 from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
-    update_circuit, update_amount_channels, cascading_delete_object
+    update_circuit, update_total_amount_channels
 from apps.opu.services import ListWithPKMixin
 
 
@@ -169,9 +169,10 @@ class LPCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user.profile)
+        instance = serializer.save(created_by=self.request.user.profile,
+                                   total_amount_channels=self.request.data["amount_channels"])
         create_circuit(model=Circuit, obj=instance, request=self.request)
-        update_amount_channels(obj=instance)
+        update_total_amount_channels(obj=instance)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -214,9 +215,8 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        update_amount_channels(obj=instance)       
+        update_total_amount_channels(obj=instance, flag=False)
         self.perform_destroy(instance)
-#         cascading_delete_object(instance)
         response = {"data": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
@@ -246,10 +246,11 @@ class ObjectCreateView(APIView):
                 our=parent.our,
                 created_by=request.user.profile,
                 name=parent.name+'-'+request.data["name"],
+                total_amount_channels=request.data['amount_channels']
             )
 
             create_circuit(model=Circuit, obj=instance, request=request)
-            update_amount_channels(obj=instance)
+            update_total_amount_channels(obj=instance)
             response = {"data": "Объект успешно создан"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
