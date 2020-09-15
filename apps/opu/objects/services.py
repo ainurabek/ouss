@@ -94,7 +94,33 @@ def update_total_amount_channels(obj, flag=True):
 
 
 def get_active_channels(obj, first=False):
-    active_channels = Circuit.objects.filter(first = True, id_object = obj)
+    active_channels = Circuit.objects.filter(first = True, id_object = obj).count()
+    Object.objects.filter(pk=obj.pk).update(num=int(active_channels))
 
-    if first == True:
-        Object.objects.filter(pk=obj.pk).update(num=int(obj.amount_channels) - int(active_channels))
+
+def _update_object_total_amount_active_channels(object, first, count):
+    if first:
+        Object.objects.filter(pk=object.pk).update(total_amount_active_channels=int(object.num) - int(count))
+    else:
+        Object.objects.filter(pk=object.pk).update(total_amount_active_channels=int(object.num) + int(count))
+
+def update_total_amount_active_channels(obj, first=False):
+    if obj.id_parent is None:
+        Object.objects.filter(pk=obj.pk).update(total_amount_active_channels=int(obj.num))
+
+    else:
+        count = obj.num
+        while True:
+            if obj.id_parent is None:
+                _update_object_total_amount_active_channels(obj, first, count)
+                break
+            if count == "" or count is None:
+                break
+            obj = Object.objects.get(pk=obj.id_parent.pk)
+            if obj.num == "" or obj.num == None:
+                break
+            _update_object_total_amount_active_channels(obj, first, count)
+
+
+
+

@@ -25,6 +25,8 @@ from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_tr
     update_circuit, update_total_amount_channels
 from apps.opu.services import ListWithPKMixin
 
+from apps.opu.objects.services import get_active_channels, update_total_amount_active_channels
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all()

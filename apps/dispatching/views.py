@@ -49,7 +49,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         today = datetime.date.today()
         queryset1 = self.queryset.exclude(index1_id=5)
         queryset2 = self.queryset.filter(created_at=today)
-        queryset = queryset1.union(queryset2).order_by('-created_at')
+        queryset = queryset1.union(queryset2).order_by('id')
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
@@ -208,11 +208,16 @@ class EventUpdateAPIView(UpdateAPIView):
 
     def perform_update(self, serializer):
         #это меняет дату конца предыдущего события
+        date_to = str(self.get_object().date_from)
+        index1 = str(self.get_object().index1)
         instance = serializer.save()
         if instance.id_parent is not None:
             latest_event = instance.id_parent.event_id_parent.all().latest()
-            if latest_event.pk == instance.pk:
+            if latest_event.pk == instance.pk and str(instance.date_from) != date_to:
+
                 instance.id_parent.date_to =instance.date_from
+                instance.id_parent.save()
+            if latest_event.pk ==instance.pk and str(instance.index1) != index1:
                 instance.id_parent.index1=instance.index1
                 instance.id_parent.save()
             if instance.previous is not None:

@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
 
-from apps.opu.objects.services import get_active_channels
+from apps.opu.objects.services import get_active_channels, update_total_amount_active_channels
 
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
@@ -33,6 +33,9 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
-        get_active_channels(obj = instance.id_object, first = instance.first)
+        get_active_channels(obj= instance.id_object, first=False)
+        update_total_amount_active_channels(obj=instance.id_object, first=False)
+
+
 
 
