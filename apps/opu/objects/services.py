@@ -120,7 +120,3 @@ def update_total_amount_active_channels(obj, first=False):
             if obj.num == "" or obj.num == None:
                 break
             _update_object_total_amount_active_channels(obj, first, count)
-
-
-
-

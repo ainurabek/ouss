@@ -1,5 +1,9 @@
 from django.http import HttpResponse
-from apps.opu.objects.models import Object, TPO, Outfit, Point, IP
+from rest_framework.viewsets import ModelViewSet
+
+from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
+from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
+    Category
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +13,8 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
-    ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer
+    ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
+    LineTypeSerializer
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -557,3 +562,45 @@ class FilterObjectList(ListAPIView):
             queryset = queryset.filter(id_outfit__outfit=outfit)
 
         return queryset
+
+
+class TypeOfTraktAPIView(ModelViewSet):
+    serializer_class = TypeOfTraktSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = TypeOfTrakt.objects.all()
+
+
+class InOutAPIVIew(ModelViewSet):
+    serializer_class = InOutSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = InOut.objects.all()
+
+
+class TypeOfLocationAPIVIew(ModelViewSet):
+    serializer_class = TypeOfLocationSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = TypeOfLocation.objects.all()
+
+
+class LineTypeAPIVIew(ModelViewSet):
+    serializer_class = LineTypeSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = LineType.objects.all()
+
+
+class CategoryAPIVIew(ModelViewSet):
+    serializer_class = CategorySerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = Category.objects.all()
+
+

@@ -16,6 +16,10 @@ router.register('outfit', views.OutfitsListView, basename='outfit_list')
 router.register('point', views.PointListView, basename='point_list')
 router.register('lp', views.LPListView, basename='lp_list')
 router.register('objects', views.ObjectAllView, basename='all_objects')
+router.register('line-type', views.LineTypeAPIVIew, basename='line_type')
+router.register('category', views.CategoryAPIVIew, basename='category')
+router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
+router.register('in-out', views.InOutAPIVIew, basename='in_out')
 
 
 

@@ -1,8 +1,11 @@
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
-from apps.opu.circuits.serializers import CircuitList, CircuitEdit
+from rest_framework.viewsets import ModelViewSet
+
+from apps.opu.circuits.serializers import CircuitList, CircuitEdit, MeasureCircSerializer, SpeedSerializer, \
+    TypeComSerializer, ModeCircSerializer
 from rest_framework import generics
-from apps.opu.circuits.models import Circuit
+from apps.opu.circuits.models import Circuit, Measure, Speed, TypeCom, Mode
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -37,5 +40,34 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
         update_total_amount_active_channels(obj=instance.id_object, first=False)
 
 
+class MeasureAPIView(ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    serializer_class = MeasureCircSerializer
+    lookup_field = 'pk'
+    queryset = Measure.objects.all()
 
+
+class SpeedAPIView(ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    serializer_class = SpeedSerializer
+    lookup_field = 'pk'
+    queryset = Speed.objects.all()
+
+
+class TypeComAPIView(ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    serializer_class = TypeComSerializer
+    lookup_field = 'pk'
+    queryset = TypeCom.objects.all()
+
+
+class ModeAPIView(ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    serializer_class = ModeCircSerializer
+    lookup_field = 'pk'
+    queryset = Mode.objects.all()
 
