@@ -1,9 +1,6 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker
-from ..circuits.models import Circuit
-from rest_framework.fields import  ReadOnlyField
-
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
@@ -16,6 +13,13 @@ class PointList(serializers.ModelSerializer):
     class Meta:
         model = Point
         fields = ('id', 'point')
+
+
+class LineTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LineType
+        fields = ('id', 'name')
 
 
 class ObjectOutfitSerializer(serializers.ModelSerializer):

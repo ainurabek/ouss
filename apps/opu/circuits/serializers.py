@@ -7,11 +7,18 @@ from ..objects.models import Category, Object, Point, InOut
 User = get_user_model()
 
 
+class SpeedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Speed
+        fields = ('__all__',)
+
+
 class ObjectCircSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('__all__')
+        fields = ('__all__',)
 
 
 class PointCircSerializer(serializers.ModelSerializer):
@@ -49,12 +56,12 @@ class ModeCircSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('__all__',)
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = '__all__'
+        fields = ('__all__', )
 
 class TransitCircSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
