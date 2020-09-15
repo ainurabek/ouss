@@ -11,8 +11,11 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
+from django.http import JsonResponse
 
-from apps.opu.objects.services import get_active_channels, update_total_amount_active_channels
+from apps.opu.objects.services import get_active_channels, get_total_amount_active_channels
+
+from apps.opu.objects.models import Object
 
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
@@ -35,9 +38,14 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
+        a = bool(self.get_object().first)
         instance = serializer.save(created_by=self.request.user.profile)
-        get_active_channels(obj= instance.id_object, first=False)
-        update_total_amount_active_channels(obj=instance.id_object, first=False)
+        if a != instance.first:
+            get_total_amount_active_channels(obj=instance.id_object, instance=instance)
+        get_active_channels(obj= instance.id_object)
+
+
+
 
 
 class MeasureAPIView(ModelViewSet):

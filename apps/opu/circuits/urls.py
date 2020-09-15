@@ -15,6 +15,7 @@ router.register('speed', views.SpeedAPIView, basename='speed')
 urlpatterns = [
     path('trakt/<int:pk>/', CircuitListViewSet.as_view(), name = 'circuit_list '),
     path('edit/<int:pk>/', CircuitEditView.as_view(), name='circuit_edit'),
+    path('total/<int:obj>/', views.get_total_amount_active_channels_1, name='total'),
     path('', include(router.urls))
 
 ]

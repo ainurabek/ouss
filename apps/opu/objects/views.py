@@ -30,7 +30,9 @@ from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_tr
     update_circuit, update_total_amount_channels
 from apps.opu.services import ListWithPKMixin
 
-from apps.opu.objects.services import get_active_channels, update_total_amount_active_channels
+from apps.opu.objects.services import get_active_channels
+
+from apps.opu.circuits.views import get_total_amount_active_channels_1
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -177,7 +179,7 @@ class LPCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile,
-                                   total_amount_channels=self.request.data["amount_channels"])
+                                   total_amount_channels=self.request.data["amount_channels"], total_amount_active_channels="0")
         create_circuit(model=Circuit, obj=instance, request=self.request)
         update_total_amount_channels(obj=instance)
 
@@ -193,6 +195,7 @@ class LPEditView(generics.RetrieveUpdateAPIView):
         old_obj= save_old_object(self.get_object())
         instance = serializer.save(created_by=self.request.user.profile)
         update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
+
 
 
 class ObjectAllView(viewsets.ModelViewSet):
@@ -253,7 +256,8 @@ class ObjectCreateView(APIView):
                 our=parent.our,
                 created_by=request.user.profile,
                 name=parent.name+'-'+request.data["name"],
-                total_amount_channels=request.data['amount_channels']
+                total_amount_channels=request.data['amount_channels'],
+                total_amount_active_channels = "0"
             )
 
             create_circuit(model=Circuit, obj=instance, request=request)
