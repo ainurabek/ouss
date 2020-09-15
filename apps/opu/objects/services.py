@@ -1,5 +1,6 @@
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object
+from django.http import JsonResponse
 
 
 def check_parent_type_of_trakt(parent):
@@ -93,33 +94,43 @@ def update_total_amount_channels(obj, flag=True):
             _update_object_total_amount_channels(obj, flag, count)
 
 
-def get_active_channels(obj, first=False):
+def get_active_channels(obj):
     active_channels = Circuit.objects.filter(first = True, id_object = obj).count()
-    Object.objects.filter(pk=obj.pk).update(num=int(active_channels))
+    Object.objects.filter(pk=obj.pk).update(num = int(active_channels))
 
 
-def _update_object_total_amount_active_channels(object, first, count):
-    if first:
-        Object.objects.filter(pk=object.pk).update(total_amount_active_channels=int(object.num) - int(count))
-    else:
-        Object.objects.filter(pk=object.pk).update(total_amount_active_channels=int(object.num) + int(count))
+def get_total_amount_active_channels(obj, instance):
+    cir = instance.id_object
+    while True:
+        if cir.id_parent is None:
+            if instance.first ==True:
+                cir.total_amount_active_channels = int(cir.total_amount_active_channels)+1
+                cir.save()
+            else:
+                cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
+                cir.save()
 
-def update_total_amount_active_channels(obj, first=False):
-    if obj.id_parent is None:
-        Object.objects.filter(pk=obj.pk).update(total_amount_active_channels=int(obj.num))
+            break
 
-    else:
-        count = obj.num
-        while True:
-            if obj.id_parent is None:
-                _update_object_total_amount_active_channels(obj, first, count)
-                break
-            if count == "" or count is None:
-                break
-            obj = Object.objects.get(pk=obj.id_parent.pk)
-            if obj.num == "" or obj.num == None:
-                break
-            _update_object_total_amount_active_channels(obj, first, count)
+        if instance.first == True:
+            cir.total_amount_active_channels = int(cir.total_amount_active_channels) + 1
+            cir.save()
+            cir = cir.id_parent
+        else:
+
+            cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
+            cir.save()
+            cir = cir.id_parent
+
+
+
+
+
+
+
+
+
+
 
 
 
