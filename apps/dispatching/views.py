@@ -404,25 +404,64 @@ def get_report_object(request):
     all_calls = Event.objects.filter(callsorevent=False)
     type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
     outfits = (all_event_completed | all_event_uncompleted).order_by("responsible_outfit").distinct("responsible_outfit")
+    data = []
+    # data = [
+    #     {"type_journal": type.type_journal.name,
+    #      "outfits":
+    #          [{"outfit": outfit.responsible_outfit.outfit,
+    #                   "events": [
+    #                       {"event": get_event_name(event),
+    #                               "calls": [{
+    #                     "id": call.id,
+    #                     "name": get_event_name(call),
+    #                     "date_from": call.date_from,
+    #                     "date_to": call.date_to,
+    #                     "region": call.point1.point + " - " + call.point2.point,
+    #                     "index1": call.index1.name,
+    #                     "comments1": call.comments1
+    #                 }
+    #                                   for call in all_calls.filter(id_parent=event).exclude(index1_id=5)]}
+    #                              for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
+    #                 for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
+    for type in type_journal:
+        data.append({"type_journal": type.type_journal.name,
+                     "outfit": None,
+                     "name": None,
+                     "date_from": None,
+                     "date_to": None,
+                     "region": None,
+                     "index1": None,
+                     "comments1": None})
+        for out in outfits.filter(type_journal=type.type_journal):
+            data.append({"outfit": out.responsible_outfit.outfit,
+                     "name": None,
+                     "type_journal": None,
+                     "date_from": None,
+                     "date_to": None,
+                     "region": None,
+                     "index1": None,
+                     "comments1": None})
+            for event in all_event.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal):
+                data.append({"outfit": None,
+                             "name": get_event_name(event),
+                             "type_journal": None,
+                             "date_from": None,
+                             "date_to": None,
+                             "region": None,
+                             "index1": None,
+                             "comments1": None})
+                for call in all_calls.filter(id_parent=event).exclude(index1_id=5):
+                    data.append({"outfit": None,
+                                 "name": get_event_name(call),
+                                 "type_journal": None,
+                                 "date_from": call.date_from,
+                                 "date_to": call.date_to,
+                                 "region": call.point1.point + " - " + call.point2.point,
+                                 "index1": call.index1.index,
+                                 "comments1": call.comments1})
 
-    data = [
-        {"type_journal": type.type_journal.name,
-         "outfits":
-             [{"outfit": outfit.responsible_outfit.outfit,
-                      "events": [
-                          {"event": get_event_name(event),
-                                  "calls": [{
-                        "id": call.id,
-                        "name": get_event_name(call),
-                        "date_from": call.date_from,
-                        "date_to": call.date_to,
-                        "region": call.point1.point + " - " + call.point2.point,
-                        "index1": call.index1.name,
-                        "comments1": call.comments1
-                    }
-                                      for call in all_calls.filter(id_parent=event).exclude(index1_id=5)]}
-                                 for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
-                    for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
+
+
     return JsonResponse(data, safe=False)
 
 # чтобы передавать фронту нужно
