@@ -118,7 +118,7 @@ class Point(models.Model):
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
-	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, blank=True, null=True)
+	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE,related_name='parents', blank=True, null=True)
 	name = models.CharField('Название', max_length=100)
 	inter_code = models.CharField('Международное обозначение', max_length=100, blank=True, null=True)
 	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.SET_NULL, blank=True, null=True)
