@@ -122,3 +122,4 @@ def get_total_amount_active_channels(obj, instance):
             cir.save()
             cir = cir.id_parent
 
+

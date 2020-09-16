@@ -32,7 +32,7 @@ from apps.opu.services import ListWithPKMixin
 
 from apps.opu.objects.services import get_active_channels
 
-from apps.opu.circuits.views import get_total_amount_active_channels_1
+
 
 
 class TPOListView(viewsets.ModelViewSet):
