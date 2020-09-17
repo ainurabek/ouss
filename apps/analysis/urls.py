@@ -11,9 +11,6 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
 
-
-
-
     path('', include(router.urls)),
 
 ]

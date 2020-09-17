@@ -14,7 +14,8 @@ from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
 
-from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer, PointListSerializer
+from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer, PointListSerializer, \
+    IPListSerializer
 
 now = date.today()
 from django.shortcuts import get_object_or_404
@@ -47,7 +48,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     #фильтр по хвостам + за сегодня
 
         today = datetime.date.today()
-        queryset1 = self.queryset.exclude(index1_id=5)
+        queryset1 = self.queryset.exclude(index1_id=11)
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2).order_by('id')
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
@@ -59,7 +60,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         name = self.request.query_params.get('name', None)
 
         if created_at is not None and created_at != '':
-            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1=5)
+            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1=11)
             q2 = self.queryset.filter(created_at=created_at)
             queryset = q1.union(q2)
 
@@ -84,10 +85,10 @@ class EventListAPIView(viewsets.ModelViewSet):
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all()
-    serializer_class = PointListSerializer
+    queryset = IP.objects.all()
+    serializer_class = IPListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name', 'point')
+    filterset_fields = ('point_id')
 
 
 class EventIPCreateViewAPI(APIView):
@@ -95,7 +96,7 @@ class EventIPCreateViewAPI(APIView):
     permission_classes = (IsAuthenticated,)
     """Создания Event"""
     def post(self, request, pk):
-        ip = Point.objects.get(pk=pk)
+        ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
@@ -389,7 +390,7 @@ class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1=5)
+    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1=11)
 
 
 
@@ -398,8 +399,8 @@ def get_report_object(request):
     if date is None or date == "":
         date = datetime.date.today()
 
-    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=5)
-    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1_id=5)
+    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1_id=11)
+    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1_id=11)
     all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
     type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
@@ -450,7 +451,7 @@ def get_report_object(request):
                              "region": None,
                              "index1": None,
                              "comments1": None})
-                for call in all_calls.filter(id_parent=event).exclude(index1_id=5):
+                for call in all_calls.filter(id_parent=event).exclude(index1_id=11):
                     data.append({"outfit": None,
                                  "name": get_event_name(call),
                                  "type_journal": None,

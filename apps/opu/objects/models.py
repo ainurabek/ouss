@@ -154,13 +154,13 @@ class Object(models.Model):
 
 
 class IP(models.Model):
-	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
+	point_id = models.OneToOneField(Point, on_delete=models.CASCADE, related_name='ip_point')
 	tpo_id = models.ForeignKey(TPO, on_delete=models.SET_NULL, null=True, blank=True)
 
 	class Meta:
 		verbose_name = 'ИП'
-		verbose_name_plural = 'ИП'
+		verbose_name_plural = 'ИПы'
 		ordering = ('id',)
 
 	def __str__(self):
