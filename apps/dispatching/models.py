@@ -81,7 +81,7 @@ class Event(models.Model):
                                           null=True, blank=True,  related_name='dispatch_send_outfit')
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='event_obj', verbose_name="КО",  null=True, blank=True)
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, related_name='event_cir', verbose_name="Каналы", null=True, blank=True)
-    ips = models.ForeignKey(Point, on_delete=models.CASCADE, verbose_name="ИП", related_name='event_ips', null=True, blank=True)
+    ips = models.ForeignKey(IP, on_delete=models.CASCADE, verbose_name="ИПы", related_name='event_ips', null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
@@ -99,17 +99,5 @@ class Event(models.Model):
     def __str__(self):
         return str(self.id)
 
-    def get_period(self):
-        if self.date_to !=None and self.date_from !=None:
-            date = (self.date_to) - (self.date_from)
-            period_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-            return period_time
 
-    # def get_end(self):
-    #     calls = self.objects.filter(id_parent = self.id)
-    #     print(calls)
-    #     for call in calls:
-    #         if call != None:
-    #             self.date_to = call.date_from.latest()
-    #             return self.date_to
 
