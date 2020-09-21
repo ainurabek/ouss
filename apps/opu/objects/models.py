@@ -7,6 +7,9 @@ from apps.accounts.models import Profile
 from django.db.models.signals import post_save
 from sortedm2m.fields import SortedManyToManyField
 
+
+
+
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100)
 
@@ -49,9 +52,18 @@ class TypeOfLocation(models.Model):
 	def __str__(self):
 		return self.name
 
+class AnalysisTypeLine(models.Model):
+	name = models.CharField('Название', max_length=100)
+	class Meta:
+		verbose_name = 'Тип линии АК'
+		verbose_name_plural = 'Типы линии АК'
+
+	def __str__(self):
+		return f'{self.name}, {self.id}'
 
 class LineType(models.Model):
 	name = models.CharField('Название', max_length=100)
+	analysis_type_line = models.ForeignKey(AnalysisTypeLine, related_name='analysis_type', on_delete=models.CASCADE, blank=True, null=True )
 
 
 	class Meta:
@@ -60,6 +72,7 @@ class LineType(models.Model):
 
 	def __str__(self):
 		return f'{self.name}, {self.id}'
+
 
 
 class Category(models.Model):
