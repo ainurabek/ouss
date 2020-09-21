@@ -10,6 +10,9 @@ router = routers.DefaultRouter()
 
 
 urlpatterns = [
+
+    path('disp/report/', views.DispEvent1ListAPIView.as_view({'get': 'list'}), name="disp_list_event"),
+
     path("api/form/", views.get_report),
     path('', include(router.urls)),
 

@@ -98,28 +98,41 @@ def get_active_channels(obj):
     active_channels = Circuit.objects.filter(first = True, id_object = obj).count()
     Object.objects.filter(pk=obj.pk).update(num = int(active_channels))
 
-
-def get_total_amount_active_channels(obj, instance):
+def get_total_amount_active_channels(instance):
     cir = instance.id_object
     while True:
-        if cir.id_parent is None:
-            if instance.first ==True:
-                cir.total_amount_active_channels = int(cir.total_amount_active_channels)+1
-                cir.save()
-            else:
-                cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
-                cir.save()
-
-            break
-
-        if instance.first == True:
+        if instance.first:
             cir.total_amount_active_channels = int(cir.total_amount_active_channels) + 1
-            cir.save()
-            cir = cir.id_parent
         else:
-
             cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
-            cir.save()
+
+        cir.save()
+
+        if cir.id_parent is None:
+            break
+        else:
             cir = cir.id_parent
+# def get_total_amount_active_channels(obj, instance):
+#     cir = instance.id_object
+#     while True:
+#         if cir.id_parent is None:
+#             if instance.first ==True:
+#                 cir.total_amount_active_channels = int(cir.total_amount_active_channels)+1
+#                 cir.save()
+#             else:
+#                 cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
+#                 cir.save()
+#
+#             break
+#
+#         if instance.first == True:
+#             cir.total_amount_active_channels = int(cir.total_amount_active_channels) + 1
+#             cir.save()
+#             cir = cir.id_parent
+#         else:
+#
+#             cir.total_amount_active_channels = int(cir.total_amount_active_channels) - 1
+#             cir.save()
+#             cir = cir.id_parent
 
 

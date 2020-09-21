@@ -4,6 +4,7 @@ from apps.opu.customer.models import Customer
 from apps.accounts.models import Profile
 from sortedm2m.fields import SortedManyToManyField
 
+
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100)
 
@@ -51,8 +52,8 @@ class MainLineType(models.Model):
 	name = models.CharField(max_length=50)
 
 	class Meta:
-		verbose_name = 'Тип линии'
-		verbose_name_plural = 'Типы линии'
+		verbose_name = 'Тип линии АК'
+		verbose_name_plural = 'Типы линии АК'
 
 	def __str__(self):
 		return self.name
