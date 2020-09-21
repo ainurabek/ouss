@@ -1,8 +1,5 @@
 from django.db import models
 from apps.accounts.models import Profile
-
-from apps.accounts.models import DepartmentKT, SubdepartmentKT
-
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
 
@@ -87,7 +84,6 @@ class Event(models.Model):
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
-    period_of_time = models.CharField("Сумма часов, за которое устранили аварию", max_length=100, blank=True, null=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:

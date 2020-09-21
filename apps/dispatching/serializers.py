@@ -132,12 +132,11 @@ class EventListSerializer(serializers.ModelSerializer):
     ips = IPListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
-    period_of_time = ReadOnlyField(source='get_period')
+
    
     class Meta:
         model = Event
-        fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name',
-                  "period_of_time", "responsible_outfit", )
+        fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'name', "responsible_outfit", )
         depth=1
 
 
@@ -160,14 +159,14 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
-    period_of_time = ReadOnlyField(source='get_period')
+
 
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2', "period_of_time")
+                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
 
@@ -190,7 +189,6 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
-    period_of_time = ReadOnlyField(source='get_period')
 
 
 
@@ -201,7 +199,7 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'created_by', 'point1',
-                  'point2', "period_of_time", 'date_calls')
+                  'point2', 'date_calls')
 
         depth = 2
 
@@ -221,15 +219,14 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
-    period_of_time = ReadOnlyField(source='get_period')
+
 
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name',
-                  "period_of_time")
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'created_by', 'point1', 'point2', 'name')
 
 class ReportSerializer(serializers.ModelSerializer):
 
