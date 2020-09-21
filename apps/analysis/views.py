@@ -20,7 +20,7 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         today = datetime.date.today()
-        queryset = self.queryset.filter(created_at=today,  index1__id=8)
+        queryset = self.queryset.filter(created_at=today,  index1__id=8, callsorevent=False)
 
         responsible_outfit = self.request.query_params.get('responsible_outfit', None)
         date_from = self.request.query_params.get('date_from', None)
