@@ -89,7 +89,7 @@ class IPEventListAPIView(ListAPIView):
     queryset = IP.objects.all()
     serializer_class = IPListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('point_id')
+    filterset_fields = ('point_id',)
 
 
 class EventIPCreateViewAPI(APIView):
