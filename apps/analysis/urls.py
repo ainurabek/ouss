@@ -10,7 +10,7 @@ router = routers.DefaultRouter()
 
 
 urlpatterns = [
-
+    path("api/form/", views.get_report),
     path('', include(router.urls)),
 
 ]
