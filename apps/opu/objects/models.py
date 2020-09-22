@@ -1,13 +1,8 @@
 from django.db import models
-
 # Create your models here.
 from apps.opu.customer.models import Customer
-
 from apps.accounts.models import Profile
-from django.db.models.signals import post_save
 from sortedm2m.fields import SortedManyToManyField
-
-
 
 
 class InOut(models.Model):
@@ -52,19 +47,22 @@ class TypeOfLocation(models.Model):
 	def __str__(self):
 		return self.name
 
-class AnalysisTypeLine(models.Model):
-	name = models.CharField('Название', max_length=100)
+
+class MainLineType(models.Model):
+	name = models.CharField(max_length=50)
+
 	class Meta:
 		verbose_name = 'Тип линии АК'
 		verbose_name_plural = 'Типы линии АК'
 
 	def __str__(self):
-		return f'{self.name}, {self.id}'
+		return self.name
+
 
 class LineType(models.Model):
 	name = models.CharField('Название', max_length=100)
-	analysis_type_line = models.ForeignKey(AnalysisTypeLine, related_name='analysis_type', on_delete=models.CASCADE, blank=True, null=True )
-
+	main_line_type = models.ForeignKey(MainLineType, related_name="main_line_type",
+									   on_delete=models.CASCADE,blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Тип линии'
@@ -72,7 +70,6 @@ class LineType(models.Model):
 
 	def __str__(self):
 		return f'{self.name}, {self.id}'
-
 
 
 class Category(models.Model):

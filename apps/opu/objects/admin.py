@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocation,\
-    TypeOfTrakt, Category, OutfitWorker
+from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocation, \
+    TypeOfTrakt, Category, OutfitWorker, MainLineType
 
 
 class IpInline(admin.StackedInline):
@@ -38,10 +38,14 @@ class ObjectAdmin(admin.ModelAdmin):
     list_display = ('id', 'id_parent', 'name', 'point1', 'point2', 'amount_channels', 'num', 'total_amount_active_channels')
     search_fields = ('name',)
 
+@admin.register(MainLineType)
+class MainLineTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', "name",)
+    search_fields = ('name',)
 
 
 admin.site.register(InOut)
-# admin.site.register(TPO)
+# admin.site.register(MainLineType)
 admin.site.register(TypeOfTrakt)
 admin.site.register(TypeOfLocation)
 admin.site.register(LineType)
