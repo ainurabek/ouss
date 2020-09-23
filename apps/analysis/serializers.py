@@ -13,7 +13,7 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
     ips = IPListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
-    period_of_time = ReadOnlyField(source='get_period')
+
 
     class Meta:
         model = Event
