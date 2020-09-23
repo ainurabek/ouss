@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.dispatching.models import Event
+from apps.dispatching.models import Event, HistoricalEvent
 
 from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSerializer
 from apps.opu.objects.serializers import IPListSerializer
@@ -19,4 +19,11 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to",
                   "point1", 'point2', "comments1", 'reason', 'responsible_outfit')
+        depth = 1
+
+
+class HistoryEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistoricalEvent
+        fields = ('id', 'history_id', "history_date", "history_change_reason", "history_user", 'history_type')
         depth = 1

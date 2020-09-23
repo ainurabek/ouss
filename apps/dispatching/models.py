@@ -6,8 +6,11 @@ from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Outfit, Object, IP, Point
 
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
+from simple_history.models import HistoricalRecords
+from simple_history import register
+from django.contrib.auth import get_user_model
 
-
+User = get_user_model()
 
 
 class TypeOfJournal(models.Model):
@@ -85,6 +88,7 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Журнал событий'
@@ -95,5 +99,5 @@ class Event(models.Model):
     def __str__(self):
         return str(self.id)
 
-
+register(Profile, excluded_fields=['online'])
 

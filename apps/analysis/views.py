@@ -3,12 +3,15 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from knox.auth import TokenAuthentication
 import datetime
 
-from apps.analysis.serializers import DispEvent1ListSerializer
-from django.http import JsonResponse
+from apps.analysis.serializers import DispEvent1ListSerializer, HistoryEventSerializer
+from django.http import JsonResponse, HttpResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels
-from apps.dispatching.models import Event
+from apps.dispatching.models import Event, HistoricalEvent
 from apps.dispatching.services import get_event_name
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
 
 
 def get_report(request):
@@ -115,3 +118,20 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
             queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to, index1__id=8)
 
         return queryset
+
+# class DispEventHistory(viewsets.ModelViewSet):
+#     permission_classes = (IsAuthenticatedOrReadOnly,)
+#     authentication_classes = (TokenAuthentication,)
+#     queryset = HistoricalEvent.objects.all()
+#     lookup_field = 'pk'
+#     serializer_class = HistoryEventSerializer
+
+class DispEventHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        event = Event.objects.get(pk=pk)
+        history = HistoricalEvent.objects.filter(id=event.pk)
+        serializer = HistoryEventSerializer(history, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
