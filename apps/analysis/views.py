@@ -21,7 +21,7 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.get("responsible_outfit")
 
-    all_event = Event.objects.filter(index1_id=6, callsorevent=False)
+    all_event = Event.objects.filter(index1_id=3, callsorevent=False)
 
     if responsible_outfit != "":
         all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
@@ -67,6 +67,12 @@ def get_report(request):
                 elif call.reason.id == 2:
                     total_period_of_time["2"] += period
                     period_reason["2"] = period
+                elif call.reason.id == 3:
+                    total_period_of_time["3"] += period
+                    period_reason["3"] = period
+                elif call.reason.id == 4:
+                    total_period_of_time["4"] += period
+                    period_reason["4"] = period
 
                 data.append({
                     "name": None, "date_from": call.date_from,
@@ -103,7 +109,7 @@ def get_report(request):
 class DispEvent1ListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.filter(callsorevent=False, index1__id=8)
+    queryset = Event.objects.filter(callsorevent=False, index1__id=3)
     lookup_field = 'pk'
     serializer_class = DispEvent1ListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
