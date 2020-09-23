@@ -45,7 +45,8 @@ def get_report(request):
                 "name": get_event_name(event),
                 "date_from": None, "comments": None,
                 "reason": None, "type_line": None,
-                "period_of_time": None, "amount_of_channels": None
+                "period_of_time": {"1": None, "2": None, "3": None, "4": None},
+                "amount_of_channels": None
             })
             total_period_of_time = {"1": 0, "2": 0, "3": 0, "4": 0}
 
@@ -53,16 +54,19 @@ def get_report(request):
                 period = get_period(call, date_to)
                 type_line = get_type_line(call)
                 amount_of_channels = get_amount_of_channels(call)
+                period_reason = {"1": None, "2": None, "3": None, "4": None}
                 if call.reason.id == 1:
                     total_period_of_time["1"] += period
+                    period_reason["1"] = period
                 elif call.reason.id == 2:
                     total_period_of_time["2"] += period
+                    period_reason["2"] = period
 
                 data.append({
                     "name": None, "date_from": call.date_from,
                     "date_to": call.date_to, "comments": call.comments1,
                     "reason": call.reason.id, "type_line": type_line,
-                    "period_of_time": period, "amount_of_channels": amount_of_channels
+                    "period_of_time": period_reason, "amount_of_channels": amount_of_channels
                 })
 
             total = dict(total_period_of_time)
@@ -72,19 +76,19 @@ def get_report(request):
             data.append({
                 "name": "всего", "date_from": "час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "total_hours": total_period_of_time
+                "period_of_time": total_period_of_time
             })
 
             data.append({
                 "name": "всего", "date_from": "час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "total_channel_in_hours": total
+                "period_of_time": total
             })
 
         data.append({
             "name": "всего", "date_from": "час", "comments": None,
             "reason": None, "type_line": get_type_line(event),
-            "total_outfit": total_outfit
+            "period_of_time": total_outfit
         })
 
     return JsonResponse(data, safe=False)
