@@ -37,4 +37,4 @@ class Region53Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Region
-        fields = ("id", "name", "slug",)
+        fields = ("id", "name",)
