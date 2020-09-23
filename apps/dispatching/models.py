@@ -59,10 +59,6 @@ class Index(models.Model):
         return self.index
 
 
-class EventHistoryUser(models.Model):
-    user_id = models.ForeignKey(Profile, verbose_name='ФИО', on_delete=models.SET_NULL, null=True, blank=True)
-
-
 class Event(models.Model):
     '''Событие'''
     id_parent = models.ForeignKey('Event', related_name='event_id_parent', on_delete=models.CASCADE, null=True, blank=True)
@@ -91,7 +87,7 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
-    history = HistoricalRecords(user_model=EventHistoryUser)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Журнал событий'
@@ -102,13 +98,7 @@ class Event(models.Model):
     def __str__(self):
         return str(self.id)
 
-    @property
-    def _history_user(self):
-        return self.created_by
 
-    @_history_user.setter
-    def _history_user(self, value):
-        self.created_by = value
 
 
 
