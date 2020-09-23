@@ -12,12 +12,15 @@ from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 
 def get_report(request):
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.get("responsible_outfit")
+
     all_event = Event.objects.filter(index1_id=6, callsorevent=False)
 
     if responsible_outfit != "":
@@ -99,6 +102,8 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
     queryset = Event.objects.filter(callsorevent=True)
     lookup_field = 'pk'
     serializer_class = DispEvent1ListSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('object', 'ips', 'circuit',)
 
     def get_queryset(self):
         today = datetime.date.today()
@@ -107,6 +112,7 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
         responsible_outfit = self.request.query_params.get('responsible_outfit', None)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
+
 
         if responsible_outfit is not None and responsible_outfit != '':
             queryset = self.queryset.filter(responsible_outfit=responsible_outfit, index1__id=8)
