@@ -15,6 +15,8 @@ from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
+from apps.analysis.service import changed_fields
+
 
 def get_report(request):
     date_from = request.GET.get("date_from")
@@ -117,20 +119,17 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         today = datetime.date.today()
-        self.queryset = self.queryset.filter(created_at=today)
-
-
+        queryset = self.queryset.filter(created_at=today)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
-
         if date_to == "" and date_from != '':
-            self.queryset = self.queryset.filter(created_at=date_from)
+            queryset = self.queryset.filter(created_at=date_from)
         elif date_to != '' and date_from == '':
-            self.queryset = self.queryset.filter(created_at=date_to)
+            queryset = self.queryset.filter(created_at=date_to)
         elif date_to != '' and date_from != '':
-            self.queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
+            queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
 
-        return self.queryset
+        return queryset
 
 # class DispEventHistory(viewsets.ModelViewSet):
 #     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -139,12 +138,19 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 #     lookup_field = 'pk'
 #     serializer_class = HistoryEventSerializer
 
+
+
+
+
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
+        # event.history.all()
+
         history = HistoricalEvent.objects.filter(id=event.pk)
         serializer = HistoryEventSerializer(history, many=True)
+        changed_fields(obj=event, instance = history)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -8,8 +8,10 @@ admin.site.register(Index)
 
 class SimpleHistoryAdmin(SimpleHistoryAdmin):
     list_display = ["id", "name", "instance"]
-    history_list_display = ["history_id"]
+    history_list_display = ["history_id", 'history_changed_fields']
     search_fields = ['name', 'user__username']
+
+
 
 @admin.register(Event)
 class EventAdmin(SimpleHistoryAdmin):
