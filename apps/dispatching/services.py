@@ -53,3 +53,4 @@ def get_event_name(event_object) -> str:
 #         print(instance.period_of_time)
 #         instance.save()
 #         print(instance.period_of_time)
+

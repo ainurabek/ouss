@@ -23,7 +23,9 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
 
 
 class HistoryEventSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = HistoricalEvent
-        fields = ('id', 'history_id', "history_date", "history_change_reason", "history_user", 'history_type')
+        fields = ('id', 'history_id', "history_date", "history_change_reason",
+                  "history_user", 'history_type', 'name')
         depth = 1

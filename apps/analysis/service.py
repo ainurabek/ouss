@@ -48,3 +48,21 @@ def get_amount_of_channels(obj):
         return obj.ips.object_id.total_amount_active_channels
     elif obj.circuit is not None:
         return obj.circuit.id_object.total_amount_active_channels
+
+def changed_fields(obj, instance):
+    all = obj.history.all()
+    first = all.first()
+    last = all.last()
+    delta = last.diff_against(first)
+    history = ""
+    for change in delta.changes:
+        history += " {} изменился от {} к {}".format(change.field, change.old, change.new)
+    print(instance)
+    instance.update(name= history)
+
+
+
+
+
+
+
