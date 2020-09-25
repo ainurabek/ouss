@@ -10,6 +10,7 @@ from .serializers import EventListSerializer, CircuitEventList, ObjectEventSeria
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name
 
+
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -228,6 +229,7 @@ class EventUpdateAPIView(UpdateAPIView):
                 instance.previous.save()
             serializer.save()
 
+
 #удаление события - Ainur
 class EventDeleteAPIView(DestroyAPIView):
     """Удаления event"""
@@ -246,6 +248,7 @@ class EventDeleteAPIView(DestroyAPIView):
             previous_event.date_to = None
             previous_event.save()
         instance.delete()
+
         if main_event.event_id_parent.count() == 0:
             main_event.delete()
 

@@ -6,9 +6,10 @@ from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Outfit, Object, IP, Point
 
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
-from simple_history.models import HistoricalRecords
-from simple_history import register
+
 from django.contrib.auth import get_user_model
+from simple_history.models import HistoricalRecords
+
 
 User = get_user_model()
 
@@ -59,6 +60,7 @@ class Index(models.Model):
         return self.index
 
 
+
 class Event(models.Model):
     '''Событие'''
     id_parent = models.ForeignKey('Event', related_name='event_id_parent', on_delete=models.CASCADE, null=True, blank=True)
@@ -87,7 +89,11 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
-    history = HistoricalRecords()
+    updated_by = models.ForeignKey(Profile, verbose_name='ФИО кто изменил', on_delete=models.SET_NULL, null=True,
+                                   blank=True, related_name="history_author",)
+    changed_field = models.CharField('Название', max_length=100500, null=True, blank=True)
+    updated_date = models.DateField('Дата измнения', blank=True, null=True)
+    history = HistoricalRecords(related_name='history_log')
 
     class Meta:
         verbose_name = 'Журнал событий'

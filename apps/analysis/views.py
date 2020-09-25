@@ -15,7 +15,6 @@ from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
-from apps.analysis.service import changed_fields
 
 
 def get_report(request):
@@ -148,9 +147,26 @@ class DispEventHistory(APIView):
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
-        # event.history.all()
+        histories = event.history_log.filter(id=pk)
+        old = histories.first()
+        new = histories.last()
+        delta = new.diff_against(old)
+        for change in delta.changes:
+            text = ("{} изменился от {} к {}".format(change.field, change.old, change.new))
+        data = []
+        for history in histories:
+            h = {}
+            h['id']=history.history_id
+            h['date'] = history.history_date
+            h['user'] = history.history_user.username
+            h['type'] = history.history_type
+            h['object'] = history.history_object.id
+            if history.history_type is '~':
+                h['changed_field'] = str(text)
+            elif history.history_type is '+':
+                h['changed_field'] = str("Создан обьект")
+            elif history.history_type is '-':
+                h['changed_field'] = str("Удален обьект")
+            data.append(h)
+        return Response(data, status=status.HTTP_200_OK)
 
-        history = HistoricalEvent.objects.filter(id=event.pk)
-        serializer = HistoryEventSerializer(history, many=True)
-        changed_fields(obj=event, instance = history)
-        return Response(serializer.data, status=status.HTTP_200_OK)
