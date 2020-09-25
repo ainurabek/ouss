@@ -7,6 +7,8 @@ from apps.opu.objects.serializers import IPListSerializer
 from rest_framework.fields import ReadOnlyField
 
 
+
+
 class DispEvent1ListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
@@ -21,11 +23,10 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
                   "point1", 'point2', "comments1", 'reason', 'responsible_outfit')
         depth = 1
 
-
 class HistoryEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistoricalEvent
         fields = ('id', 'history_id', "history_date", "history_change_reason",
-                  "history_user", 'history_type', 'name')
+                  "history_user", 'history_type')
         depth = 1

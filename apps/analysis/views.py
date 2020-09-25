@@ -15,7 +15,6 @@ from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
-from apps.analysis.service import changed_fields
 
 
 def get_report(request):
@@ -41,7 +40,7 @@ def get_report(request):
 
     data = []
     for outfit in outfits:
-        total_outfit = {"1": 0, "2": 0, "3": 0, "4": 0}
+        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
         data.append({
             "name": outfit.responsible_outfit.outfit,
             "date_from": None, "comments": None,
@@ -56,25 +55,25 @@ def get_report(request):
                 "period_of_time": {"1": None, "2": None, "3": None, "4": None},
                 "amount_of_channels": None
             })
-            total_period_of_time = {"1": 0, "2": 0, "3": 0, "4": 0}
+            total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
                 type_line = get_type_line(call)
                 amount_of_channels = get_amount_of_channels(call)
-                period_reason = {"1": None, "2": None, "3": None, "4": None}
+                period_reason = {"name1": None, "name2": None, "name3": None, "name4": None}
                 if call.reason.id == 1:
-                    total_period_of_time["1"] += period
-                    period_reason["1"] = period
+                    total_period_of_time["name1"] += period
+                    period_reason["name1"] = period
                 elif call.reason.id == 2:
-                    total_period_of_time["2"] += period
-                    period_reason["2"] = period
+                    total_period_of_time["name2"] += period
+                    period_reason["name2"] = period
                 elif call.reason.id == 3:
-                    total_period_of_time["3"] += period
-                    period_reason["3"] = period
+                    total_period_of_time["name3"] += period
+                    period_reason["name3"] = period
                 elif call.reason.id == 4:
-                    total_period_of_time["4"] += period
-                    period_reason["4"] = period
+                    total_period_of_time["name4"] += period
+                    period_reason["name4"] = period
 
                 data.append({
                     "name": None, "date_from": call.date_from,
@@ -94,14 +93,14 @@ def get_report(request):
             })
 
             data.append({
-                "name": "всего", "date_from": "час", "comments": None,
+                "name": "всего", "date_from": "кнл/час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
                 "period_of_time": total
             })
 
         data.append({
-            "name": "всего", "date_from": "час", "comments": None,
-            "reason": None, "type_line": get_type_line(event),
+            "name": "Общий итог", "date_from": None, "comments": None,
+            "reason": None, "type_line": None,
             "period_of_time": total_outfit
         })
 
@@ -148,9 +147,26 @@ class DispEventHistory(APIView):
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
-        # event.history.all()
+        histories = event.history_log.filter(id=pk)
+        old = histories.first()
+        new = histories.last()
+        delta = new.diff_against(old)
+        for change in delta.changes:
+            text = ("{} изменился от {} к {}".format(change.field, change.old, change.new))
+        data = []
+        for history in histories:
+            h = {}
+            h['id']=history.history_id
+            h['date'] = history.history_date
+            h['user'] = history.history_user.username
+            h['type'] = history.history_type
+            h['object'] = history.history_object.id
+            if history.history_type is '~':
+                h['changed_field'] = str(text)
+            elif history.history_type is '+':
+                h['changed_field'] = str("Создан обьект")
+            elif history.history_type is '-':
+                h['changed_field'] = str("Удален обьект")
+            data.append(h)
+        return Response(data, status=status.HTTP_200_OK)
 
-        history = HistoricalEvent.objects.filter(id=event.pk)
-        serializer = HistoryEventSerializer(history, many=True)
-        changed_fields(obj=event, instance = history)
-        return Response(serializer.data, status=status.HTTP_200_OK)
