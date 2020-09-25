@@ -1,7 +1,4 @@
-from datetime import datetime
 
-from apps.dispatching.models import Event
-from apps.opu.objects.models import Object
 from datetime import datetime
 
 
@@ -16,6 +13,10 @@ def get_period(obj, date_to):
     if obj.date_to == None:
         if date_to is not None and date_to != "":
             date_to = datetime.fromisoformat(date_to + "T23:59:59")
+            print(date_to)
+            print(type(date_to))
+            print(obj.date_from)
+            print(type(obj.date_from))
             date = date_to - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
             return period_of_time
@@ -37,6 +38,8 @@ def get_type_line(obj):
 
 def get_calls_list(all_event, obj):
     if obj.object is not None:
+        print(obj)
+        print(all_event)
         return all_event.filter(object=obj.object)
     elif obj.ips is not None:
         return all_event.filter(ips=obj.ips)
