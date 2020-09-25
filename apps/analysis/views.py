@@ -52,7 +52,7 @@ def get_report(request):
                 "name": get_event_name(event),
                 "date_from": None, "comments": None,
                 "reason": None, "type_line": None,
-                "period_of_time": {"1": None, "2": None, "3": None, "4": None},
+                "period_of_time": {"name1": None, "name2": None, "name3": None, "name4": None},
                 "amount_of_channels": None
             })
             total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
