@@ -41,41 +41,57 @@ def get_report(request):
 
     data = []
     for outfit in outfits:
-        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
+        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0, 'name5':0, 'name6':0, 'name7':0, 'name8':0 }
         data.append({
             "name": outfit.responsible_outfit.outfit,
             "date_from": None, "comments": None,
             "reason": None, "type_line": None, "color":'1',
-            "period_of_time": {"name1": None, "name2": None, "name3": None, "name4": None}, "amount_of_channels": None
+            "period_of_time": {"name1": None, "name2": None, "name3": None,
+                               "name4": None, "name5":None, "name6":None }, "amount_of_channels": None
         })
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
             data.append({
                 "name": get_event_name(event),
                 "date_from": None, "comments": None,
                 "reason": None, "type_line": None,
-                "period_of_time": {"name1": None, "name2": None, "name3": None, "name4": None},
+                "period_of_time": {"name1": None, "name2": None, "name3": None,
+                                   "name4": None, "name5":None, "name6":None},
                 "amount_of_channels": None
             })
-            total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
+            total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0,
+                                    'name5':0, 'name6':0, 'name7':0, 'name8':0}
 
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
                 type_line = get_type_line(call)
                 amount_of_channels = get_amount_of_channels(call)
-                period_reason = {"name1": None, "name2": None, "name3": None, "name4": None}
-                if call.reason.id == 1:
+                period_reason = {"name1": None, "name2": None, "name3": None, "name4": None,
+                                 "name5":None, "name6":None, "name7":None, "name8":None}
+                if call.reason.id == 1 and type_line == 1:
                     total_period_of_time["name1"] += period
                     period_reason["name1"] = period
-                elif call.reason.id == 2:
+                elif call.reason.id ==1 and type_line ==2:
                     total_period_of_time["name2"] += period
                     period_reason["name2"] = period
-                elif call.reason.id == 3:
+                elif call.reason.id == 2 and type_line==1:
                     total_period_of_time["name3"] += period
                     period_reason["name3"] = period
-                elif call.reason.id == 4:
+                elif call.reason.id == 2 and type_line==2:
                     total_period_of_time["name4"] += period
                     period_reason["name4"] = period
+                elif call.reason.id == 3 and type_line == 1:
+                    total_period_of_time["name5"] += period
+                    period_reason["name5"] = period
+                elif call.reason.id == 3 and type_line == 2:
+                    total_period_of_time["name6"] += period
+                    period_reason["name6"] = period
+                elif call.reason.id == 4 and type_line ==1:
+                    total_period_of_time["name7"] += period
+                    period_reason["name7"] = period
+                elif call.reason.id == 4 and type_line ==2:
+                    total_period_of_time["name8"] += period
+                    period_reason["name8"] = period
 
                 data.append({
                     "name": None, "date_from": call.date_from,
