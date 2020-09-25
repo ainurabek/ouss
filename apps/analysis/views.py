@@ -35,8 +35,9 @@ def get_report(request):
         all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     all_event_name = all_event.order_by("ips_id", "object_id", "circuit_id").distinct("ips_id", "object_id", "circuit_id")
-
+    print(all_event_name)
     outfits = all_event.order_by("responsible_outfit").distinct("responsible_outfit")
+
 
     data = []
     for outfit in outfits:
@@ -44,8 +45,8 @@ def get_report(request):
         data.append({
             "name": outfit.responsible_outfit.outfit,
             "date_from": None, "comments": None,
-            "reason": None, "type_line": None,
-            "period_of_time": None, "amount_of_channels": None
+            "reason": None, "type_line": None, "color":'1',
+            "period_of_time": {"name1": None, "name2": None, "name3": None, "name4": None}, "amount_of_channels": None
         })
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
             data.append({
@@ -56,6 +57,7 @@ def get_report(request):
                 "amount_of_channels": None
             })
             total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0}
+
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
@@ -89,19 +91,19 @@ def get_report(request):
             data.append({
                 "name": "всего", "date_from": "час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": total_period_of_time
+                "period_of_time": total_period_of_time, "color":'2'
             })
 
             data.append({
                 "name": "всего", "date_from": "кнл/час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": total
+                "period_of_time": total, "color":'3'
             })
 
         data.append({
             "name": "Общий итог", "date_from": None, "comments": None,
             "reason": None, "type_line": None,
-            "period_of_time": total_outfit
+            "period_of_time": total_outfit, "color":'4'
         })
 
     return JsonResponse(data, safe=False)
