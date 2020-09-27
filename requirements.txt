@@ -25,6 +25,5 @@ Pillow==7.0.0
 django-sortedm2m==3.0.0
 django-cors-headers==3.2.1
 django-contrib-comments==1.9.2
-python ==3.7.2
 
 
