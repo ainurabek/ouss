@@ -166,6 +166,7 @@ class EventObjectCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,

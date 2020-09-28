@@ -1,13 +1,13 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from knox.auth import TokenAuthentication
 import datetime
 
-from apps.analysis.serializers import DispEvent1ListSerializer, HistoryEventSerializer
-from django.http import JsonResponse, HttpResponse
+from apps.analysis.serializers import DispEvent1ListSerializer
+from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels
-from apps.dispatching.models import Event, HistoricalEvent
+from apps.dispatching.models import Event
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -169,18 +169,20 @@ class DispEventHistory(APIView):
         old = histories.first()
         new = histories.last()
         delta = new.diff_against(old)
+        b = ''
         for change in delta.changes:
             text = ("{} изменился от {} к {}".format(change.field, change.old, change.new))
+            b = text
         data = []
         for history in histories:
             h = {}
             h['id']=history.history_id
             h['date'] = history.history_date
-            h['user'] = history.history_user.username
+            h['user'] = f"{history.history_user.first_name} {history.history_user.last_name}"
             h['type'] = history.history_type
             h['object'] = history.history_object.id
             if history.history_type is '~':
-                h['changed_field'] = str(text)
+                h['changed_field'] = b
             elif history.history_type is '+':
                 h['changed_field'] = str("Создан обьект")
             elif history.history_type is '-':

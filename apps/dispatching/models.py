@@ -89,11 +89,8 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
-    updated_by = models.ForeignKey(Profile, verbose_name='ФИО кто изменил', on_delete=models.SET_NULL, null=True,
-                                   blank=True, related_name="history_author",)
     changed_field = models.CharField('Название', max_length=100500, null=True, blank=True)
-    updated_date = models.DateField('Дата измнения', blank=True, null=True)
-    history = HistoricalRecords(related_name='history_log')
+    history = HistoricalRecords(related_name='history_log', user_model=Profile)
 
     class Meta:
         verbose_name = 'Журнал событий'
@@ -103,6 +100,14 @@ class Event(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+    @property
+    def _history_user(self):
+        return self.created_by
+
+    @_history_user.setter
+    def _history_user(self, value):
+        self.created_by = value
 
 
 
