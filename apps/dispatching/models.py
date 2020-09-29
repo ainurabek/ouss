@@ -93,7 +93,6 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
-    changed_field = models.CharField('Название', max_length=100500, null=True, blank=True)
     history = HistoricalRecords(related_name='history_log')
 
     class Meta:
@@ -105,20 +104,6 @@ class Event(models.Model):
     def __str__(self):
         return str(self.id)
 
-
-class EventHistory(models.Model):
-    project = models.ForeignKey(Event, related_name='event_history', on_delete=models.CASCADE, null=True, blank=True)
-    changed_field = models.CharField("field_name", max_length=100500, null=True, blank=True)
-    changed_data = models.TextField()
-    chaged_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        verbose_name = 'История событий'
-        verbose_name_plural = 'История событий'
-
-
-    def __str__(self):
-        return str(self.id)
 
 
 
