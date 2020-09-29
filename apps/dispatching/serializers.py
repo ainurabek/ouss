@@ -196,10 +196,6 @@ class CallsCreateSerializer(serializers.ModelSerializer):
     circuit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Circuit.objects.all(), allow_null=True)
 
-
-
-
-
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',

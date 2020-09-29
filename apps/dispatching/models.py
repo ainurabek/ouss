@@ -93,7 +93,7 @@ class Event(models.Model):
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
     changed_field = models.CharField('Название', max_length=100500, null=True, blank=True)
-    history = HistoricalRecords(related_name='history_log', user_model=Profile)
+    history = HistoricalRecords(related_name='history_log')
 
     class Meta:
         verbose_name = 'Журнал событий'
@@ -116,13 +116,13 @@ class Event(models.Model):
 #                                    )
 
 
-    @property
-    def _history_user(self):
-        return self.created_by
-
-    @_history_user.setter
-    def _history_user(self, value):
-        self.created_by = value
+    # @property
+    # def _history_user(self):
+    #     return self.created_by
+    #
+    # @_history_user.setter
+    # def _history_user(self, value):
+    #     self.created_by = value
 
 
 
