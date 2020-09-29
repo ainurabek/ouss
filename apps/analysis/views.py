@@ -7,7 +7,7 @@ import datetime
 from apps.analysis.serializers import DispEvent1ListSerializer, HistoryEventSerializer
 from django.http import JsonResponse
 
-from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, changed_fields
+from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels
 from apps.dispatching.models import Event
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-
+from apps.analysis.service import get_diff
 
 
 def get_report(request):
@@ -168,34 +168,17 @@ class DispEventHistory(APIView):
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
-        history = event.history.all()
-        serializer = HistoryEventSerializer(history, many=True)
-        changed_fields(obj=event, instance=history)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-        # event = Event.objects.get(pk=pk)
-        # histories = event.history.all()
-        # print(histories)
-        # for h in histories:
-        #     if h.prev_record:
-        #         delta = h.diff_against(h.prev_record)
-        #
-        #         b = ''
-        #         for change in delta.changes:
-        #             text = ("{} изменился от {} к {};".format(change.field, change.old, change.new))
-        #             b += text
-        #             a = {}
-        #             data = []
-        #             a['id'] = h.history_id
-        #             a['date'] = h.history_date
-        #             a['user'] = f"{h.history_user.first_name} {h.history_user.last_name}"
-        #             a['type'] = h.history_type
-        #             a['changed_field'] = b
-        #             data.append(a)
-        #             return Response(data, status=status.HTTP_200_OK)
-        #     if h.history_type == '+':
-        #         return Response("Создан обьект:{} Дата:{} Кем:{}".format(h.instance, h.history_date, h.history_user))
-        #     elif h.history_type == '-':
-        #         return Response("Удален обьект:{} Дата:{} Кем:{}".format(h.instance, h.history_date, h.history_user))
+        histories = event.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)
 

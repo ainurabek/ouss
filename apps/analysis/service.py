@@ -1,6 +1,9 @@
 
 from datetime import datetime
-
+from django import template
+register = template.Library()
+from django.db.models import Q
+from django.utils.safestring import mark_safe
 
 
 
@@ -50,21 +53,19 @@ def get_amount_of_channels(obj):
     elif obj.circuit is not None:
         return obj.circuit.id_object.total_amount_active_channels
 
-def changed_fields(obj, instance):
-    all = obj.history.all()
-    exact_history = all.first()
-    print(exact_history.history_id)
-    history = ""
-    for h in all:
-        #все предыдущие истории перед последним, у последнего нет
-        if h.prev_record:
-            delta = h.diff_against(h.prev_record) # сравнивается все истории с предыдущими историями
 
-            for change in delta.changes:
-                history = " {} изменился от {} к {}".format(change.field, change.old, change.new)
-            print(history)
-    exact_history.changed_field = history
-    exact_history.save()
+@register.simple_tag
+def get_diff(history):
+    message = ''
+    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
+
+    if history and old_record:
+        delta = history.diff_against(old_record)
+        for change in delta.changes:
+            message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
+        return mark_safe(message)
+
+
 
 
 
