@@ -23,7 +23,8 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.get("responsible_outfit")
 
-    all_event = Event.objects.filter(index1_id=3, callsorevent=False)
+    all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason__in =[1,2,3,4])
+
 
     if responsible_outfit != "":
         all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
@@ -51,6 +52,7 @@ def get_report(request):
                                "name4": None, "name5":None, "name6":None, 'name7':None, 'name8':None }, "amount_of_channels": None
         })
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+
             data.append({
                 "name": get_event_name(event),
                 "date_from": None, "comments": None,
