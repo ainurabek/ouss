@@ -16,7 +16,6 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
 
-
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to",
@@ -27,6 +26,5 @@ class HistoryEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistoricalEvent
-        fields = ('id', 'history_id', "history_date", "changed_field",
-                  "history_user", 'history_type')
-        depth = 1
+        fields = ('history_id', "history_date", "history_user", 'history_type',
+                  'get_history_type_display')

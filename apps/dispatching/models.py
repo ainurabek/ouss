@@ -11,6 +11,7 @@ from apps.opu.objects.models import Outfit, Object, IP, Point
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
 
@@ -104,25 +105,21 @@ class Event(models.Model):
     def __str__(self):
         return str(self.id)
 
-# @receiver(pre_save, sender=Event)
-# def do_something_if_changed(sender, instance, **kwargs):
-#     try:
-#         obj = sender.objects.get(pk=instance.pk)
-#     except sender.DoesNotExist:
-#         pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
-#     else:
-#         if not obj.index1 == instance.index1:
-#             History.objects.create(updated_at = datetime.now, updated_by = request.user.profile,
-#                                    )
+
+class EventHistory(models.Model):
+    project = models.ForeignKey(Event, related_name='event_history', on_delete=models.CASCADE, null=True, blank=True)
+    changed_field = models.CharField("field_name", max_length=100500, null=True, blank=True)
+    changed_data = models.TextField()
+    chaged_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = 'История событий'
+        verbose_name_plural = 'История событий'
 
 
-    # @property
-    # def _history_user(self):
-    #     return self.created_by
-    #
-    # @_history_user.setter
-    # def _history_user(self, value):
-    #     self.created_by = value
+    def __str__(self):
+        return str(self.id)
+
 
 
 
