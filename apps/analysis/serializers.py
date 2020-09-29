@@ -27,6 +27,6 @@ class HistoryEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistoricalEvent
-        fields = ('id', 'history_id', "history_date", "history_change_reason",
+        fields = ('id', 'history_id', "history_date", "changed_field",
                   "history_user", 'history_type')
         depth = 1
