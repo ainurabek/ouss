@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 from apps.accounts.models import Profile
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
@@ -100,6 +103,18 @@ class Event(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+# @receiver(pre_save, sender=Event)
+# def do_something_if_changed(sender, instance, **kwargs):
+#     try:
+#         obj = sender.objects.get(pk=instance.pk)
+#     except sender.DoesNotExist:
+#         pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
+#     else:
+#         if not obj.index1 == instance.index1:
+#             History.objects.create(updated_at = datetime.now, updated_by = request.user.profile,
+#                                    )
+
 
     @property
     def _history_user(self):

@@ -1,12 +1,13 @@
+from django.views.generic import DetailView
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from knox.auth import TokenAuthentication
 import datetime
 
-from apps.analysis.serializers import DispEvent1ListSerializer
+from apps.analysis.serializers import DispEvent1ListSerializer, HistoryEventSerializer
 from django.http import JsonResponse
 
-from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels
+from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, changed_fields
 from apps.dispatching.models import Event
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
@@ -47,7 +48,7 @@ def get_report(request):
             "date_from": None, "comments": None,
             "reason": None, "type_line": None, "color":'1',
             "period_of_time": {"name1": None, "name2": None, "name3": None,
-                               "name4": None, "name5":None, "name6":None }, "amount_of_channels": None
+                               "name4": None, "name5":None, "name6":None, 'name7':None, 'name8':None }, "amount_of_channels": None
         })
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
             data.append({
@@ -55,7 +56,7 @@ def get_report(request):
                 "date_from": None, "comments": None,
                 "reason": None, "type_line": None,
                 "period_of_time": {"name1": None, "name2": None, "name3": None,
-                                   "name4": None, "name5":None, "name6":None},
+                                   "name4": None, "name5":None, "name6":None, 'name7':None, 'name8':None },
                 "amount_of_channels": None
             })
             total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0,
@@ -165,28 +166,34 @@ class DispEventHistory(APIView):
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
-        histories = event.history_log.filter(id=pk)
-        old = histories.first()
-        new = histories.last()
-        delta = new.diff_against(old)
-        b = ''
-        for change in delta.changes:
-            text = ("{} изменился от {} к {}".format(change.field, change.old, change.new))
-            b = text
-        data = []
-        for history in histories:
-            h = {}
-            h['id']=history.history_id
-            h['date'] = history.history_date
-            h['user'] = f"{history.history_user.first_name} {history.history_user.last_name}"
-            h['type'] = history.history_type
-            h['object'] = history.history_object.id
-            if history.history_type is '~':
-                h['changed_field'] = b
-            elif history.history_type is '+':
-                h['changed_field'] = str("Создан обьект")
-            elif history.history_type is '-':
-                h['changed_field'] = str("Удален обьект")
-            data.append(h)
-        return Response(data, status=status.HTTP_200_OK)
+        history = event.history.all()
+        serializer = HistoryEventSerializer(history, many=True)
+        changed_fields(obj=event, instance=history)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+        # event = Event.objects.get(pk=pk)
+        # histories = event.history.all()
+        # print(histories)
+        # for h in histories:
+        #     if h.prev_record:
+        #         delta = h.diff_against(h.prev_record)
+        #
+        #         b = ''
+        #         for change in delta.changes:
+        #             text = ("{} изменился от {} к {};".format(change.field, change.old, change.new))
+        #             b += text
+        #             a = {}
+        #             data = []
+        #             a['id'] = h.history_id
+        #             a['date'] = h.history_date
+        #             a['user'] = f"{h.history_user.first_name} {h.history_user.last_name}"
+        #             a['type'] = h.history_type
+        #             a['changed_field'] = b
+        #             data.append(a)
+        #             return Response(data, status=status.HTTP_200_OK)
+        #     if h.history_type == '+':
+        #         return Response("Создан обьект:{} Дата:{} Кем:{}".format(h.instance, h.history_date, h.history_user))
+        #     elif h.history_type == '-':
+        #         return Response("Удален обьект:{} Дата:{} Кем:{}".format(h.instance, h.history_date, h.history_user))
 
