@@ -52,19 +52,16 @@ def get_amount_of_channels(obj):
 
 def changed_fields(obj, instance):
     all = obj.history.all()
+
     for h in all:
-
-        print(h.prev_record) #все предыдущие истории перед последним, у последнего нет
-
+        #все предыдущие истории перед последним, у последнего нет
         if h.prev_record:
             delta = h.diff_against(h.prev_record) # сравнивается все истории с предыдущими историями
             history = ""
             for change in delta.changes:
                 history = " {} изменился от {} к {}".format(change.field, change.old, change.new)
-
-
             print(history)
-
+    all.first().changed_field = history
 
 
 

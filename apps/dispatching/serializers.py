@@ -189,6 +189,12 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
+    object = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Object.objects.all(), allow_empty=True)
+    ips = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=IP.objects.all(), allow_empty=True)
+    circuit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Circuit.objects.all(), allow_empty=True)
 
 
 
