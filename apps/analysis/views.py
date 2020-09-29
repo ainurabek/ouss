@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from knox.auth import TokenAuthentication
 import datetime
 
-from apps.analysis.serializers import DispEvent1ListSerializer, HistoryEventSerializer
+from apps.analysis.serializers import DispEvent1ListSerializer
 from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels

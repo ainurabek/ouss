@@ -22,9 +22,3 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
                   "point1", 'point2', "comments1", 'reason', 'responsible_outfit')
         depth = 1
 
-class HistoryEventSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = HistoricalEvent
-        fields = ('history_id', "history_date", "history_user", 'history_type',
-                  'get_history_type_display')
