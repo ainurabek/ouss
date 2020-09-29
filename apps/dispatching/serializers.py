@@ -186,15 +186,15 @@ class CallsCreateSerializer(serializers.ModelSerializer):
     point1 = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     point2 = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
+        read_only=False,  queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
     object = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Object.objects.all(), allow_empty=True)
+        read_only=False, queryset=Object.objects.all(), allow_null=True)
     ips = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=IP.objects.all(), allow_empty=True)
+        read_only=False, queryset=IP.objects.all(), allow_null=True)
     circuit = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Circuit.objects.all(), allow_empty=True)
+        read_only=False, queryset=Circuit.objects.all(), allow_null=True)
 
 
 
