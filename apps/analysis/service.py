@@ -40,8 +40,6 @@ def get_type_line(obj):
 
 def get_calls_list(all_event, obj):
     if obj.object is not None:
-        print(obj)
-        print(all_event)
         return all_event.filter(object=obj.object)
     elif obj.ips is not None:
         return all_event.filter(ips=obj.ips)
@@ -76,6 +74,7 @@ def get_diff(history):
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
+
 
 
 

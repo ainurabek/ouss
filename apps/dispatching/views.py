@@ -325,7 +325,7 @@ def get_dates_and_counts_today(request):
     dates = Event.objects.filter(date_from__gte=time).\
         exclude(previous__isnull=True, callsorevent=False).order_by('date_from').distinct('date_from')
     teams_data = [
-        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).
+        {"time": date.date_from, "counts": Event.objects.filter(date_from=date.date_from).
             exclude(previous__isnull=True, callsorevent=False).count()}
         for date in dates
     ]

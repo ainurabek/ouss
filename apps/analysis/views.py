@@ -1,11 +1,13 @@
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from knox.auth import TokenAuthentication
 import datetime
 
 from apps.analysis.serializers import DispEvent1ListSerializer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels
 from apps.dispatching.models import Event
@@ -17,8 +19,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from apps.analysis.service import get_diff
 
+from apps.analysis.models import Punkt5
+
+from apps.analysis.serializers import Punkt5CreateSerializer
+
+from apps.analysis.models import FormAK
+
+from apps.analysis.serializers import Punkt5Serializer
+
 
 def get_report(request):
+    # front = request.data
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.get("responsible_outfit")
@@ -37,7 +48,7 @@ def get_report(request):
         all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     all_event_name = all_event.order_by("ips_id", "object_id", "circuit_id").distinct("ips_id", "object_id", "circuit_id")
-    print(all_event_name)
+
     outfits = all_event.order_by("responsible_outfit").distinct("responsible_outfit")
 
 
@@ -125,7 +136,19 @@ def get_report(request):
             "period_of_time": total_outfit, "color":'4'
         })
 
+
+
+
+
+
+
+        # if front['save_in'] == True:
+        #     Punkt5.objects.create(outfit=outfit, )
+        # elif front['save_in'] == False:
+        #     pass
+
     return JsonResponse(data, safe=False)
+
 
 
 class DispEvent1ListAPIView(viewsets.ModelViewSet):
@@ -151,16 +174,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 
         return queryset
 
-# class DispEventHistory(viewsets.ModelViewSet):
-#     permission_classes = (IsAuthenticatedOrReadOnly,)
-#     authentication_classes = (TokenAuthentication,)
-#     queryset = HistoricalEvent.objects.all()
-#     lookup_field = 'pk'
-#     serializer_class = HistoryEventSerializer
-
-
-
-
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -181,4 +194,89 @@ class DispEventHistory(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
+
+def punkt5(request):
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+
+    responsible_outfit = request.GET.get("responsible_outfit")
+    all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason__in=[1, 2, 3, 4])
+    all_event_name = all_event.order_by("ips_id", "object_id", "circuit_id").distinct("ips_id", "object_id",
+                                                                                      "circuit_id")
+
+    outfits = all_event.order_by("responsible_outfit").distinct("responsible_outfit")
+
+    for outfit in outfits:
+        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0, 'name5': 0, 'name6': 0}
+        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+            total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0,
+                                    'name5': 0, 'name6': 0}
+            for call in get_calls_list(all_event, event):
+                period = get_period(call, date_to)
+                type_line = get_type_line(call)
+                amount_of_channels = get_amount_of_channels(call)
+                period_reason = {"name1": None, "name2": None,
+                                 "name3":None, "name4":None, "name5":None, "name6":None}
+                if call.reason.id == 2 and type_line==1:
+                    total_period_of_time["name1"] += period
+                    period_reason["name1"] = period
+                elif call.reason.id == 2 and type_line==2:
+                    total_period_of_time["name2"] += period
+                    period_reason["name2"] = period
+                elif call.reason.id == 3 and type_line == 1:
+                    total_period_of_time["name3"] += period
+                    period_reason["name3"] = period
+                elif call.reason.id == 3 and type_line == 2:
+                    total_period_of_time["name4"] += period
+                    period_reason["name4"] = period
+                elif call.reason.id == 4 and type_line ==1:
+                    total_period_of_time["name5"] += period
+                    period_reason["name5"] = period
+                elif call.reason.id == 4 and type_line ==2:
+                    total_period_of_time["name6"] += period
+                    period_reason["name6"] = period
+
+            total = dict(total_period_of_time)
+            for i in total:
+                total[i] = total[i] * int(get_amount_of_channels(event))
+                total_outfit[i] += total[i]
+
+                print(total)
+            kls = total["name1"]+total['name3']+total["name5"]
+            rrl = total["name2"] + total['name4'] + total["name6"]
+
+
+
+            form_ak = FormAK.objects.create(outfit=outfit.responsible_outfit,
+                                            punkt5_total_outfit_kls = kls,
+                                            punkt5_total_outfit_rrl = rrl)
+
+            print(form_ak)
+
+
+            return HttpResponse(status=status.HTTP_201_CREATED)
+
+class Punkt5CreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request, pk):
+        form_ak = get_object_or_404(FormAK, pk=pk)
+        serializer = Punkt5CreateSerializer(data=request.data)
+
+        if serializer.is_valid():
+            data = serializer.save(form_ak=form_ak)
+
+            response = {"data": "Пункт №5 создан успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Punkt5ListAPIView(ListAPIView):
+    """Список Формы 5.1"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = Punkt5Serializer
+    queryset = Punkt5.objects.all()
 
