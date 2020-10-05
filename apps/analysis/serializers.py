@@ -6,7 +6,7 @@ from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSeri
 from apps.opu.objects.serializers import IPListSerializer
 from rest_framework.fields import ReadOnlyField
 
-
+from apps.analysis.models import Punkt5
 
 
 class DispEvent1ListSerializer(serializers.ModelSerializer):
@@ -22,3 +22,15 @@ class DispEvent1ListSerializer(serializers.ModelSerializer):
                   "point1", 'point2', "comments1", 'reason', 'responsible_outfit')
         depth = 1
 
+class Punkt5CreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Punkt5
+        fields = ("id", "name", "total_outfit_region_kls", "total_outfit_region_kls")
+
+class Punkt5Serializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Punkt5
+        fields = ("__all__")
+        depth=1
