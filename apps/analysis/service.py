@@ -1,9 +1,6 @@
-
 from datetime import datetime
 from django import template
-
 from apps.dispatching.models import Reason, Index
-
 register = template.Library()
 from django.db.models import Q
 from django.utils.safestring import mark_safe
@@ -38,6 +35,7 @@ def get_type_line(obj):
         return obj.ips.object_id.type_line.main_line_type.id
 
 
+
 def get_calls_list(all_event, obj):
     if obj.object is not None:
         return all_event.filter(object=obj.object)
@@ -55,7 +53,7 @@ def get_amount_of_channels(obj):
         return obj.circuit.id_object.total_amount_active_channels
 
 
-@register.simple_tag
+
 def get_diff(history):
     message = ''
     old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
@@ -74,19 +72,5 @@ def get_diff(history):
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
