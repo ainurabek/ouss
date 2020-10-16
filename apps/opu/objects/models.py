@@ -165,7 +165,7 @@ class Object(models.Model):
 
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
-	point_id = models.OneToOneField(Point, on_delete=models.CASCADE, related_name='ip_point')
+	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
 	tpo_id = models.ForeignKey(TPO, on_delete=models.SET_NULL, null=True, blank=True)
 
 	class Meta:
