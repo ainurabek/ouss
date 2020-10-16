@@ -277,7 +277,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object", 'num', "total_amount_channels", 'total_amount_active_channels')
+                  "ip_object", 'num', 'amount_channels', "total_amount_channels", 'total_amount_active_channels')
 
 
 
