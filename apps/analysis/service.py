@@ -1,14 +1,8 @@
-
 from datetime import datetime
 
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
 from apps.opu.objects.models import MainLineType
-from django import template
-from apps.dispatching.models import Reason, Index
-register = template.Library()
-from django.db.models import Q
-from django.utils.safestring import mark_safe
 
 
 def division(a: float, b: float) -> float:
@@ -97,7 +91,6 @@ def get_type_line(obj) -> int:
         return obj.circuit.id_object.type_line.main_line_type.id
     elif obj.ips is not None:
         return obj.ips.object_id.type_line.main_line_type.id
-
 
 
 def get_calls_list(all_event, obj):
@@ -406,29 +399,12 @@ def update_type_line_value_punkt7(total_data: TotalData):
     total_data.vls = division(total_data.punkt7.total_number_vls*100, total_data.total_length)
     total_data.rrl = division(total_data.punkt7.total_number_rrl*100, total_data.total_length)
     total_data.save()
-def get_diff(history):
-    message = ''
-    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
 
 
 def update_total_object(punkt7: Punkt7):
     punkt7.total_data7.total_length = punkt7.total_number_kls+punkt7.total_number_vls+punkt7.total_number_rrl
     punkt7.total_data7.save()
     update_type_line_value_punkt7(punkt7.total_data7)
-    if history and old_record:
-        delta = history.diff_against(old_record)
-        for change in delta.changes:
-            if "reason" == change.field:
-                old_reason = Reason.objects.get(pk=change.old)
-                new_reason = Reason.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_reason, new_reason)
-            elif "index1" == change.field:
-                old_index = Index.objects.get(pk=change.old)
-                new_index = Index.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_index, new_index)
-            else:
-                message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
-        return mark_safe(message)
 
 
 def update_total_coefficient_punkt7(total_data: TotalData):

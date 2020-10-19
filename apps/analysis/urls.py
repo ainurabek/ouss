@@ -21,8 +21,6 @@ urlpatterns = [
     path("punkt7/update/<int:pk>/", views.Punkt7UpdateAPIView.as_view()),
     path("punkt7/delete/<int:pk>/", views.Punkt7DeleteAPIView.as_view()),
     path("punkt7/list/<int:pk>/", views.Punkt7ListAPIView.as_view()),
-
-
     path('', include(router.urls)),
 
 ]
