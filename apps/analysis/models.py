@@ -1,5 +1,4 @@
 from django.db import models
-
 from apps.accounts.models import Profile
 from apps.opu.objects.models import Outfit, MainLineType
 
@@ -27,13 +26,12 @@ class FormAnalysis(models.Model):
         return f"{self.id}"
 
     class Meta:
-        verbose_name = "ср.Кфт"
-        verbose_name_plural = "ср.Кфт"
+        verbose_name = "Средний Кеффициент"
+        verbose_name_plural = "Средний Кеффициент"
 
 
 class Punkt5(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
-
     outfit_period_of_time_kls = models.FloatField("Продолжительность всех ПВ кан*час КЛС", blank=True, null=True, default=0)
     length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
     downtime_kls = models.FloatField("Простои КЛС", default=0, blank=True, null=True)
