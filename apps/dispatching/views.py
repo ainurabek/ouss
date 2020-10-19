@@ -166,6 +166,7 @@ class EventObjectCreateViewAPI(APIView):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
@@ -324,7 +325,7 @@ def get_dates_and_counts_today(request):
     dates = Event.objects.filter(date_from__gte=time).\
         exclude(previous__isnull=True, callsorevent=False).order_by('date_from').distinct('date_from')
     teams_data = [
-        {"time": date.date_from.time(), "counts": Event.objects.filter(date_from=date.date_from).
+        {"time": date.date_from, "counts": Event.objects.filter(date_from=date.date_from).
             exclude(previous__isnull=True, callsorevent=False).count()}
         for date in dates
     ]

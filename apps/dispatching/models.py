@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 from apps.accounts.models import Profile
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
@@ -8,6 +11,7 @@ from apps.opu.objects.models import Outfit, Object, IP, Point
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
 
@@ -89,10 +93,6 @@ class Event(models.Model):
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
-    updated_by = models.ForeignKey(Profile, verbose_name='ФИО кто изменил', on_delete=models.SET_NULL, null=True,
-                                   blank=True, related_name="history_author",)
-    changed_field = models.CharField('Название', max_length=100500, null=True, blank=True)
-    updated_date = models.DateField('Дата измнения', blank=True, null=True)
     history = HistoricalRecords(related_name='history_log')
     period_of_time = models.CharField(max_length=20, blank=True, null=True)
 
@@ -111,6 +111,8 @@ class Event(models.Model):
                 date = (self.date_to) - (self.date_from)
                 self.period_of_time = round((((date.total_seconds() / 60) * 100) / 60) / 100, 2)
         super().save(*args, **kwargs)
+
+
 
 
 
