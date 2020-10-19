@@ -3,19 +3,14 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from knox.auth import TokenAuthentication
 import datetime
 
-from apps.analysis.models import FormAnalysis, Item5, OutfitItem5, SpecificGravityOfLength, \
-    SpecificGravityOfLengthTypeLine, Item7
-from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, \
-    FormAnalysisDetailSerializer, OutfitItem5ListSerializer, Item5UpdateSerializer, \
-    Item5CreateSerializer, Item7CreateSerializer, Item7UpdateSerializer
+from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
+from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
+    Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
+    Punkt7ListSerializer
 from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
-    create_item5, update_item5, update_downtime_and_coefficient, update_total_length, \
-    update_total_length_and_total_coefficient, create_spec_type_line, check_object, get_parent_item5, \
-    sum_total_coefficient, item5_delete, update_item7_coefficient_and_match_percentage, \
-    update_total_coefficient_and_total_length_item7, update_item7, item7_delete, update_form_coefficient, \
-    update_outfit_period_of_time_and_length_republic, update_total_object_and_corresponding_norm
+    create_item, update_punkt5, delete_punkt5, update_punkt7, delete_punkt7
 
 from apps.dispatching.models import Event, HistoricalEvent
 from apps.dispatching.services import get_event_name
@@ -176,7 +171,7 @@ class CreateFormAPIView(APIView):
         date_to = request.data["date_to"]
         date_from = request.data["date_from"]
         outfit = request.data["outfit"]
-        func = threading.Thread(target=create_item5(), args=(date_to, date_from, outfit))
+        func = threading.Thread(target=create_item(), args=(date_to, date_from, outfit))
         func.start()
         data = {"response": "Отчет успешно создан"}
         return Response(data, status=status.HTTP_200_OK)
@@ -215,33 +210,28 @@ class DispEventHistory(APIView):
 class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = FormAnalysis.objects.filter(id_parent=None)
-    serializer_class = FormAnalysisSerializer
+    queryset = FormAnalysis.objects.filter(main=True)
 
     def get_serializer_class(self):
         if self.action == "retrieve":
             return FormAnalysisDetailSerializer
-        return FormAnalysisSerializer
+        elif self.action == "update":
+            return FormAnalysisUpdateSerializer
+        else:
+            return FormAnalysisSerializer
+
 
     def perform_create(self, serializer):
         """Создание парентев для обектов"""
-        total_for_item5 = SpecificGravityOfLength.objects.create()
-        total_for_item7 = SpecificGravityOfLength.objects.create()
-        type_line = SpecificGravityOfLengthTypeLine.objects.create(specific_gravity_of_length=total_for_item5,
-                                                                   type_line_id=1)
-        type_line7 = SpecificGravityOfLengthTypeLine.objects.create(specific_gravity_of_length=total_for_item7,
-                                                                    type_line_id=1)
-        item5out = OutfitItem5.objects.create(total_coefficient=total_for_item5)
-        item7out = OutfitItem5.objects.create(total_coefficient=total_for_item7)
-        item5out.id_parent = item5out
-        item5out.save()
-        item7out.id_parent = item7out
-        item7out.save()
-        form = serializer.save(user=self.request.user.profile, coefficient_item5=item5out, coefficient_item7=item7out)
-        Item5.objects.create(date_from=form.date_from, date_to=form.date_to, outfit_item5=item5out, type_line_id=1,
-                             type_line_value=type_line)
-        Item7.objects.create(date_from=form.date_from, date_to=form.date_to, outfit_item5=item7out, type_line_id=1,
-                             type_line_value=type_line7)
+
+        punkt5 = Punkt5.objects.create(user=self.request.user.profile)
+        punkt7 = Punkt7.objects.create(user=self.request.user.profile)
+
+        TotalData.objects.create(punkt5=punkt5)
+        TotalData.objects.create(punkt7=punkt7)
+        analysis_form = serializer.save(user=self.request.user.profile, main=True, punkt7=punkt7, punkt5=punkt5)
+        analysis_form.id_parent = analysis_form
+        analysis_form.save()
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
@@ -250,7 +240,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class FormAnalysisCreateAPIViewItem5(APIView):
+class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -260,127 +250,68 @@ class FormAnalysisCreateAPIViewItem5(APIView):
         date_to = request.data["date_to"]
         outfit = request.data["outfit"]
         parent = FormAnalysis.objects.get(pk=pk)
-        create_item5(date_from, date_to, outfit, parent)
+        create_item(date_from, date_to, outfit, parent, request.user.profile)
         data = {"response": "Успешно создан"}
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class OutfitItem5ListAPIView(APIView, ListWithPKMixin):
+class Punkt5ListAPIView(APIView, ListWithPKMixin):
     """Список п.5"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    model = OutfitItem5
-    serializer = OutfitItem5ListSerializer
-    field_for_filter = "id_parent"
+    model = Punkt5
+    serializer = Punkt5ListSerializer
+    field_for_filter = "form_analysis5__id_parent"
 
 
-class Item5UpdateAPIView(generics.UpdateAPIView):
+class Punkt7ListAPIView(APIView, ListWithPKMixin):
+    """Список п.5"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    model = Punkt7
+    serializer = Punkt7ListSerializer
+    field_for_filter = "form_analysis7__id_parent"
+
+
+class Punkt5UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     lookup_field = "pk"
-    queryset = Item5.objects.all()
-    serializer_class = Item5UpdateSerializer
+    queryset = Punkt5.objects.all()
+    serializer_class = Punkt5UpdateSerializer
 
     def perform_update(self, serializer):
-        item5 = serializer.save()
-        update_item5(new_item5=item5)  # обновление п.5
+        punkt5 = serializer.save()
+        update_punkt5(punkt5)
 
 
-class Item5CreateAPIView(APIView):
-    """Создание п.5"""
+class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-
-    def post(self, request, pk):
-        out_item5 = OutfitItem5.objects.get(pk=pk)
-        serializer = Item5CreateSerializer(data=request.data)
-        if serializer.is_valid():
-            item5 = serializer.save(outfit_item5=out_item5)
-            update_downtime_and_coefficient(item5)
-            update_total_length_and_total_coefficient(out_item5)
-            create_spec_type_line(out_item5, item5)
-            ############################################################
-            if check_object(out_item5, item5):
-                parent_item5 = get_parent_item5(out_item5, item5)
-                update_outfit_period_of_time_and_length_republic(parent_item5.outfit_item5, parent_item5)
-                update_downtime_and_coefficient(parent_item5)
-                update_total_length(out_item5.id_parent)
-                sum_total_coefficient(out_item5.id_parent)
-            else:
-                rep_item5 = Item5.objects.create(outfit_item5=out_item5.id_parent,
-                                                 type_line=item5.type_line, length=item5.length,
-                                                 outfit_period_of_time=item5.outfit_period_of_time)
-                update_downtime_and_coefficient(rep_item5)
-                update_total_length(out_item5.id_parent)
-                create_spec_type_line(out_item5.id_parent, rep_item5)
-                sum_total_coefficient(out_item5.id_parent)
-                update_form_coefficient(out_item5.id_parent.form_item5)
-
-            update_form_coefficient(out_item5.form_item5)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class Item5DeleteAPIVIew(generics.DestroyAPIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Item5.objects.all()
+    queryset = Punkt5.objects.all()
 
     def perform_destroy(self, instance):
-        item5_delete(instance)
+        delete_punkt5(instance)
 
 
-class Item7CreateAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, pk):
-        out_item5 = OutfitItem5.objects.get(pk=pk)
-        serializer = Item7CreateSerializer(data=request.data)
-        if serializer.is_valid():
-            item7 = serializer.save(outfit_item5=out_item5)
-            update_item7_coefficient_and_match_percentage(item7)
-            update_total_coefficient_and_total_length_item7(out_item5)
-            create_spec_type_line(out_item5, item7, item7=True)
-            if check_object(out_item5, item7, item7=True):
-                parent_item7 = get_parent_item5(out_item5, item7, item7=True)
-                update_total_object_and_corresponding_norm(out_item5.id_parent, parent_item7)
-                update_item7_coefficient_and_match_percentage(parent_item7)
-                update_total_coefficient_and_total_length_item7(parent_item7.outfit_item5)
-            else:
-                rep_item7 = Item7.objects.create(outfit_item5=out_item5.id_parent, type_line=item7.type_line,
-                                                 total_object=item7.total_object,
-                                                 corresponding_norm=item7.corresponding_norm)
-                update_item7_coefficient_and_match_percentage(rep_item7)
-                create_spec_type_line(out_item5.id_parent, rep_item7, item7=True)
-                update_total_coefficient_and_total_length_item7(rep_item7.outfit_item5)
-                update_form_coefficient(out_item5.id_parent.form_item7)
-
-            update_form_coefficient(out_item5.form_item7)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class Item7UpdateAPIView(generics.UpdateAPIView):
+class Punkt7UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.7"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     lookup_field = "pk"
-    queryset = Item7.objects.all()
-    serializer_class = Item7UpdateSerializer
+    queryset = Punkt7.objects.all()
+    serializer_class = Punkt7UpdateSerializer
 
     def perform_update(self, serializer):
-        item7 = serializer.save()
-        update_item7(item7)
+        puknkt5 = serializer.save()
+        update_punkt7(puknkt5)
 
 
-class Item7DeleteAPIView(generics.DestroyAPIView):
+class Punkt7DeleteAPIView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Item7.objects.all()
+    queryset = Punkt7.objects.all()
 
     def perform_destroy(self, instance):
-        item7_delete(instance)
+        delete_punkt7(instance)

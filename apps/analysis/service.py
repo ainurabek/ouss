@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from apps.analysis.models import Item5, SpecificGravityOfLength, SpecificGravityOfLengthTypeLine, OutfitItem5, \
-    FormAnalysis, Item7
+from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
+from apps.opu.objects.models import MainLineType
 
 
 def division(a: float, b: float) -> float:
@@ -84,7 +84,7 @@ def get_coefficient_rrl(downtime):
                             return 0
 
 
-def get_type_line(obj):
+def get_type_line(obj) -> int:
     if obj.object is not None:
         return obj.object.type_line.main_line_type.id
     elif obj.circuit is not None:
@@ -142,440 +142,336 @@ def event_distinct(events, *args):
     return events.order_by(*args).distinct(*args)
 
 
-def create_item5(date_from, date_to, outfit, parent_obj):
+def get_type_line_vls_and_kls():
+    return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ВЛС")
+
+
+def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
     """Создание п.5"""
     all_event = calls_filter_for_item5(date_from, date_to, outfit)
-    parent_spec = parent_obj.coefficient_item5.total_coefficient
-    parent_outfit = parent_obj.coefficient_item5
-    parent_spec7 = parent_obj.coefficient_item7.total_coefficient
-    parent_outfit7 = parent_obj.coefficient_item7
     outfits = event_distinct(all_event, "responsible_outfit")
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
-    total_rep = 0
+    kls, vls = get_type_line_vls_and_kls()
+
+    total_rep_kls = 0
+    total_rep_rrl = 0
     if outfits.count() != 0:
         for out in outfits:
-            reason = 0
+            reason_1 = 0
+            reason_2 = 0
             amount_of_channels = 0
             for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
                 amount_of_channels += int(get_amount_of_channels(event))
 
             for call in all_event.filter(responsible_outfit=out.responsible_outfit):
-                reason += get_period_date_to(call, date_to)
+                if get_type_line(call) == kls.id:
+                    reason_1 += get_period_date_to(call, date_to)
+                elif get_type_line(call) == vls.id:
+                    reason_2 += get_period_date_to(call, date_to)
 
-            total_out = reason*amount_of_channels
+            total_out_kls = reason_1*amount_of_channels
+            total_out_rrl = reason_2*amount_of_channels
+            total_rep_kls += total_out_kls
+            total_rep_rrl += total_out_rrl
             #####################################################################################################
-            # create Item5
-            space = SpecificGravityOfLength.objects.create(id_parent=parent_spec)
-            type_line_value = SpecificGravityOfLengthTypeLine.objects.create(specific_gravity_of_length=space, type_line_id=1)
-            out_item = OutfitItem5.objects.create(outfit=out.responsible_outfit, id_parent=parent_outfit,
-                                                  total_coefficient=space)
-            Item5.objects.create(date_from=date_from, date_to=date_to, type_line_id=1,
-                                 outfit_period_of_time=total_out, outfit_item5=out_item,
-                                 type_line_value=type_line_value)
+            punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
+                                           outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
+                                           date_from=date_from, date_to=date_to, user=user)
+            punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
+                                           user=user)
+            TotalData.objects.create(punkt5=punkt5)
+            TotalData.objects.create(punkt7=punkt7)
 
-            total_rep += total_out
-            ############################################################################################################
-            # Create Item7
-            space7 = SpecificGravityOfLength.objects.create(id_parent=parent_spec7)
-            type_line_value = SpecificGravityOfLengthTypeLine.objects.create(
-                specific_gravity_of_length=space7, type_line_id=1)
-            out_item7 = OutfitItem5.objects.create(outfit=out.responsible_outfit, id_parent=parent_outfit7,
-                                                   total_coefficient=space7)
-            Item7.objects.create(date_to=date_to, date_from=date_from, type_line_id=1, outfit_item5=out_item7,
-                                 type_line_value=type_line_value)
+            FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7,
+                                        outfit=out.responsible_outfit, date_from=date_from,
+                                        date_to=date_to, user=user, id_parent=parent_obj)
 
-            FormAnalysis.objects.create(id_parent=parent_obj, date_from=date_from,
-                                        date_to=date_to, outfit=out.responsible_outfit, coefficient_item5=out_item,
-                                        coefficient_item7=out_item7)
-
-            update_form_coefficient(out_item.form_item5)
-            update_form_coefficient(out_item7.form_item7)
     else:
-        space = SpecificGravityOfLength.objects.create(id_parent=parent_spec)
-        type_line_value = SpecificGravityOfLengthTypeLine.objects.create(specific_gravity_of_length=space, type_line_id=1)
-        out_item = OutfitItem5.objects.create(outfit=outfit, id_parent=parent_outfit,
-                                              total_coefficient=space)
-        Item5.objects.create(date_from=date_from, date_to=date_to, type_line_id=1,
-                             outfit_period_of_time=0, outfit_item5=out_item, type_line_value=type_line_value)
+        punkt5 = Punkt5.objects.create(utfit=outfit, date_from=date_from, date_to=date_to, user=user)
+        punkt7 = Punkt7.objects.create(outfit=outfit, date_to=date_to, date_from=date_from, user=user)
 
-        ###############################################################################################################
-        # Create Item7
-        space7 = SpecificGravityOfLength.objects.create(id_parent=parent_spec7)
-        type_line_value = SpecificGravityOfLengthTypeLine.objects.create(specific_gravity_of_length=space7, type_line_id=1)
-        out_item7 = OutfitItem5.objects.create(outfit=outfit, id_parent=parent_outfit7,
-                                               total_coefficient=space7)
-        Item7.objects.create(date_to=date_to, date_from=date_from, type_line_id=1, outfit_item5=out_item7,
-                             type_line_value=type_line_value)
+        TotalData.objects.create(punkt5=punkt5)
+        TotalData.objects.create(punkt7=punkt7)
 
-        FormAnalysis.objects.create(id_parent=parent_obj, date_from=date_from,
-                                    date_to=date_to, outfit=outfit, coefficient_item5=out_item,
-                                    coefficient_item7=out_item7)
-        update_form_coefficient(out_item.form_item5)
-        update_form_coefficient(out_item7.form_item7)
-
-    for parent_item5 in parent_outfit.item5.all():
-        parent_item5.outfit_period_of_time = total_rep
-        parent_item5.save()
+        FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7, outfit=outfit, date_from=date_from, date_to=date_to,
+                                    user=user, id_parent=parent_obj)
 
 
-def get_coefficient(item5):
+    parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
+    parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
+    parent_obj.punkt5.save()
+
+
+def get_coefficient_punkt7_kls(percentage_compliance: int) -> int:
+    if percentage_compliance < 85:
+        return 1
+    else:
+        if percentage_compliance >= 85:
+            if percentage_compliance < 92:
+                return 3
+            else:
+                if percentage_compliance >= 92:
+                    if percentage_compliance < 99:
+                        return 4
+                    else:
+                        if percentage_compliance > 99:
+                            return 5
+                        else:
+                            return 0
+
+
+def get_coefficient_punkt7_rrl(percentage_compliance: int) -> int:
+    if percentage_compliance < 85:
+        return 1
+    else:
+        if percentage_compliance >= 85:
+            if percentage_compliance < 95:
+                return 3
+            else:
+                if percentage_compliance >= 95:
+                    if percentage_compliance < 99:
+                        return 4
+                    else:
+                        if percentage_compliance > 99:
+                            return 5
+                        else:
+                            return 0
+
+
+def get_coefficient_punkt7_vls(percentage_compliance: int) -> int:
+    if percentage_compliance < 84:
+        return 1
+    else:
+        if percentage_compliance >= 84:
+            if percentage_compliance < 90:
+                return 3
+            else:
+                if percentage_compliance >= 90:
+                    if percentage_compliance < 98:
+                        return 4
+                    else:
+                        if percentage_compliance > 98:
+                            return 5
+                        else:
+                            return 0
+
+
+def update_downtime(punkt5: Punkt5):
+    punkt5.downtime_kls = division(punkt5.outfit_period_of_time_kls, punkt5.length_kls)
+    punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.length_rrl)
+    punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.length_vls)
+    punkt5.save()
+
+
+def update_coefficient(punkt5: Punkt5):
+    punkt5.coefficient_kls = get_coefficient_kls(punkt5.downtime_kls)
+    punkt5.coefficient_rrl = get_coefficient_rrl(punkt5.downtime_rrl)
+    punkt5.coefficient_vls = get_coefficient_vls(punkt5.downtime_vls)
+    punkt5.save()
+
+
+def update_total_coefficient(total_data: TotalData):
+    punkt5 = total_data.punkt5
+    total_data.total_coefficient = division((
+            punkt5.coefficient_kls*total_data.kls+punkt5.coefficient_vls*total_data.vls+
+            punkt5.coefficient_rrl*total_data.rrl), 100)
+    total_data.save()
+
+
+def update_republic_coefficient(punkt5: Punkt5):
     coefficient = 0
-    if item5.type_line.name == "КЛС":
-        coefficient += get_coefficient_kls(item5.downtime)
-    elif item5.type_line.name == "ЦРРЛ":
-        coefficient += get_coefficient_rrl(item5.downtime)
-    elif item5.type_line.name == "ВОЛС":
-        coefficient += get_coefficient_vls(item5.downtime)
-    return coefficient
+    for form in punkt5.form_analysis5.formanalysis_set.all():
+        if punkt5.form_analysis5.id_parent != form:
+            coefficient += form.punkt5.total_data5.total_coefficient
+    punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis5.formanalysis_set.count()-1)
+    punkt5.total_data5.save()
 
 
-def update_coefficient(item5):
-    """Обновление коэффициент качества"""
-    coefficient = get_coefficient(item5)
-    item5.coefficient = coefficient
-    item5.save()
-
-
-def update_downtime(item5):
-    item5.downtime = division(item5.outfit_period_of_time, item5.length)
-    item5.save()
-
-
-def update_downtime_and_coefficient(item5):
-    update_downtime(item5)
-    update_coefficient(item5)
-
-
-def update_type_line(out_item5, item7=False):
-    if item7:
-        for type_line in out_item5.total_coefficient.space.all():
-            total_object = 0
-            for item in out_item5.item7.filter(type_line=type_line.type_line):
-                total_object += item.total_object
-
-            type_line.value = division((total_object * 100), out_item5.total_coefficient.total_length)
-            type_line.save()
-    else:
-        for type_line in out_item5.total_coefficient.space.all():
-            length = 0
-            for item in out_item5.item5.filter(type_line=type_line.type_line):
-                length += item.length
-
-            type_line.value = division((length * 100), out_item5.total_coefficient.total_length)
-            type_line.save()
-
-
-def sum_total_length(out_item5):
-    length = 0
-    for item5 in out_item5.item5.all():
-        length += item5.length
-    return length
-
-
-def sum_total_length_for_item7(out_item5):
-    length = 0
-    for item7 in out_item5.item7.all():
-        length += item7.total_object
-    return length
-
-
-def update_total_length(out_item5):
-    out_item5.total_coefficient.total_length = sum_total_length(out_item5)
-    out_item5.total_coefficient.save()
-    update_type_line(out_item5)
-
-
-def sum_coefficient(out_item):
-    """Суммирование коэффицента"""
-    total_coefficient = 0
-
-    for item5 in Item5.objects.filter(outfit_item5=out_item):
-        total_coefficient += item5.coefficient
-    return total_coefficient
-
-
-def sum_total_coefficient(out_item5):
-    total = 0.0
-    for space in out_item5.total_coefficient.specificgravityoflength_set.all():
-        total += space.coefficient
-    out_item5.total_coefficient.coefficient = division(total, OutfitItem5.objects.filter(id_parent=out_item5).count()-1)
-    out_item5.total_coefficient.save()
-
-
-def update_total_coefficient(out_item, item7=False):
-    if item7:
-        res = 0
-        for type_line in out_item.total_coefficient.space.all():
-            for item in out_item.item7.filter(type_line=type_line.type_line):
-                res += type_line.value * item.coefficient
-        out_item.total_coefficient.coefficient = division(res, 100)
-        out_item.total_coefficient.save()
-    else:
-        res = 0
-        for type_line in out_item.total_coefficient.space.all():
-            for item in out_item.item5.filter(type_line=type_line.type_line):
-                res += type_line.value * item.coefficient
-        out_item.total_coefficient.coefficient = division(res, 100)
-        out_item.total_coefficient.save()
-
-
-def update_total_length_and_total_coefficient(out_item):
-    update_total_length(out_item)
-    update_total_coefficient(out_item)
-
-
-def create_spec_type_line(out_item5, item5, item7=False):
-    """Создание !!!!"""
-    if item7:
-        type_line = SpecificGravityOfLengthTypeLine.objects.create(type_line=item5.type_line,
-                                                       value=division((item5.total_object * 100),
-                                                                      out_item5.total_coefficient.total_length),
-                                                       specific_gravity_of_length=out_item5.total_coefficient)
-        item5.type_line_value = type_line
-        item5.save()
-    else:
-        type_line = SpecificGravityOfLengthTypeLine.objects.create(type_line=item5.type_line,
-                                                       value=division(
-                                                           (item5.length*100),out_item5.total_coefficient.total_length),
-                                                       specific_gravity_of_length=out_item5.total_coefficient)
-
-        item5.type_line_value = type_line
-        item5.save()
-
-def check_object(out_item, item5, item7=False):
-    if item7:
-        if out_item.id_parent.item7.filter(type_line=item5.type_line).exists():
-            return True
-        return False
-    else:
-        if out_item.id_parent.item5.filter(type_line=item5.type_line).exists():
-            return True
-        return False
-
-
-def get_parent_item5(out_item5, item5, item7=False):
-    if item7:
-        return out_item5.id_parent.item7.filter(type_line=item5.type_line).get(
-            type_line=item5.type_line)
-    else:
-        return out_item5.id_parent.item5.filter(type_line=item5.type_line).get(type_line=item5.type_line)
-
-
-def delete_out_item5_and_total(out_item5):
-    if out_item5.total_coefficient.space.count() == 0:
-        SpecificGravityOfLength.objects.get(pk=out_item5.total_coefficient.id).delete()
-        out_item5.delete()
-
-
-
-def get_outfit_period_of_time_republic(parent_out_item5, item5, item7=False) -> int:
-    rep_outfit_period_of_time = 0
-    if item7:
-        for out_item in parent_out_item5.parent_out.all():
-            if out_item != parent_out_item5:
-                for item in out_item.item7.filter(type_line=item5.type_line):
-                    rep_outfit_period_of_time += item.total_object
-    else:
-        for out_item in parent_out_item5.parent_out.all():
-            if out_item != parent_out_item5:
-                for item in out_item.item5.filter(type_line=item5.type_line):
-                    rep_outfit_period_of_time += item.outfit_period_of_time
-    return rep_outfit_period_of_time
-
-
-def update_outfit_period_of_time_republic(parent_out_item5, item5):
-    item5.outfit_period_of_time = get_outfit_period_of_time_republic(parent_out_item5, item5)
-    item5.save()
-
-
-def get_republic_length(parent_out_item5, item5, item7=False) -> int:
-    rep_length = 0
-    if item7:
-        for out_item in parent_out_item5.parent_out.all():
-            if out_item != parent_out_item5:
-                for item in out_item.item7.filter(type_line=item5.type_line):
-                    rep_length += item.match_percentage
-    else:
-        for out_item in parent_out_item5.parent_out.all():
-            if out_item != parent_out_item5:
-                for item in out_item.item5.filter(type_line=item5.type_line):
-                    rep_length += item.length
-
-    return rep_length
-
-
-def update_length_republic(parent_out_item5, item5):
-    item5.length = get_republic_length(parent_out_item5, item5)
-    item5.save()
-
-
-def update_outfit_period_of_time_and_length_republic(parent_out_item5, item5):
-    update_outfit_period_of_time_republic(parent_out_item5, item5)
-    update_length_republic(parent_out_item5, item5)
-
-
-def update_item5(new_item5):
-    parent_item5 = get_parent_item5(new_item5.outfit_item5, new_item5)
-    update_outfit_period_of_time_and_length_republic(new_item5.outfit_item5.id_parent, parent_item5)
-    update_downtime_and_coefficient(new_item5)
-    update_downtime_and_coefficient(parent_item5)
-    update_total_length_and_total_coefficient(new_item5.outfit_item5)
-    update_total_length(parent_item5.outfit_item5)
-    sum_total_coefficient(parent_item5.outfit_item5)
-    update_form_coefficient(parent_item5.outfit_item5.form_item5)
-    update_form_coefficient(new_item5.outfit_item5.form_item5)
-
-
-def item5_delete(item5):
-    parent_item5 = get_parent_item5(item5.outfit_item5, item5)
-    out_item5 = item5.outfit_item5
-    item5.delete()
-    update_outfit_period_of_time_and_length_republic(parent_item5.outfit_item5, parent_item5)
-    delete_out_item5_and_total(out_item5)
-    update_downtime_and_coefficient(parent_item5)
-    update_total_length(parent_item5.outfit_item5)
-    if str(out_item5) != "None":
-        update_total_length_and_total_coefficient(out_item5)
-        update_form_coefficient(out_item5.form_item5)
-    sum_total_coefficient(parent_item5.outfit_item5)
-    update_form_coefficient(parent_item5.outfit_item5.form_item5)
-
-
-def update_match_percentage(item7):
-    item7.match_percentage = division((item7.corresponding_norm*100), item7.total_object)
-    item7.save()
-
-
-def get_coefficient_item7_kls(match_percentage: int) -> int:
-    if match_percentage < 85:
-        return 1
-    else:
-        if match_percentage >= 85:
-            if match_percentage < 92:
-                return 3
-            else:
-                if match_percentage >= 92:
-                    if match_percentage < 99:
-                        return 4
-                    else:
-                        if match_percentage > 99:
-                            return 5
-                        else:
-                            return 0
-
-
-def get_coefficient_item7_rrl(match_percentage: int) -> int:
-    if match_percentage < 85:
-        return 1
-    else:
-        if match_percentage >= 85:
-            if match_percentage < 95:
-                return 3
-            else:
-                if match_percentage >= 95:
-                    if match_percentage < 99:
-                        return 4
-                    else:
-                        if match_percentage > 99:
-                            return 5
-                        else:
-                            return 0
-
-
-def get_coefficient_item7_vls(match_percentage: int) -> int:
-    if match_percentage < 84:
-        return 1
-    else:
-        if match_percentage >= 84:
-            if match_percentage < 90:
-                return 3
-            else:
-                if match_percentage >= 90:
-                    if match_percentage < 98:
-                        return 4
-                    else:
-                        if match_percentage > 98:
-                            return 5
-                        else:
-                            return 0
-
-
-def get_coefficient_item7(item7) -> int:
-    coefficient = None
-    if item7.type_line.name == "КЛС":
-        coefficient = get_coefficient_item7_kls(item7.match_percentage)
-    elif item7.type_line.name == "ЦРРЛ":
-        coefficient = get_coefficient_item7_rrl(item7.match_percentage)
-    elif item7.type_line.name == "ВОЛС":
-        coefficient = get_coefficient_item7_vls(item7.match_percentage)
-    return coefficient
-
-
-def update_item7_coefficient(item7):
-    item7.coefficient = get_coefficient_item7(item7)
-    item7.save()
-
-
-def update_item7_coefficient_and_match_percentage(item7):
-    update_match_percentage(item7)
-    update_item7_coefficient(item7)
-
-
-def update_total_length_item7(out_item):
-    out_item.total_coefficient.total_length = sum_total_length_for_item7(out_item)
-    out_item.total_coefficient.save()
-    update_type_line(out_item, item7=True)
-
-
-def update_total_coefficient_and_total_length_item7(out_item):
-    update_total_length_item7(out_item)
-    update_total_coefficient(out_item, item7=True)
-
-
-def update_total_object(parent_out_item7, item7):
-    item7.total_object = get_outfit_period_of_time_republic(parent_out_item7, item7, item7=True)
-    item7.save()
-
-
-def update_corresponding_norm(parent_out_item7, item7):
-    item7.corresponding_norm = get_republic_length(parent_out_item7, item7, item7=True)
-    item7.save()
-
-
-def update_total_object_and_corresponding_norm(parent_out_item7, item7):
-    update_total_object(parent_out_item7, item7)
-    update_corresponding_norm(parent_out_item7, item7)
-
-
-def update_item7(new_item7):
-    update_item7_coefficient_and_match_percentage(new_item7)
-    update_total_coefficient_and_total_length_item7(new_item7.outfit_item5)
-    parent_item7 = get_parent_item5(new_item7.outfit_item5, new_item7, item7=True)
-    update_total_object_and_corresponding_norm(parent_item7.outfit_item5, parent_item7)
-    update_item7_coefficient_and_match_percentage(parent_item7)
-    update_total_coefficient_and_total_length_item7(parent_item7.outfit_item5)
-    update_form_coefficient(parent_item7.outfit_item5.form_item7)
-    update_form_coefficient(new_item7.outfit_item5.form_item7)
-
-
-def item7_delete(item7):
-    parent_item7 = get_parent_item5(item7.outfit_item5, item7, item7=True)
-    outfit_item7 = item7.outfit_item5
-    item7.delete()
-    delete_out_item5_and_total(outfit_item7)
-    update_total_object_and_corresponding_norm(parent_item7.outfit_item5, parent_item7)
-    update_item7_coefficient_and_match_percentage(parent_item7)
-    update_total_coefficient_and_total_length_item7(parent_item7.outfit_item5)
-    update_form_coefficient(parent_item7.form_item7)
-    if str(outfit_item7) != "None":
-        update_total_coefficient_and_total_length_item7(outfit_item7)
-        update_form_coefficient(outfit_item7.form_item7)
-
-
-def update_form_coefficient(form_analysis):
-    if form_analysis.coefficient_item5 is not None and form_analysis.coefficient_item7 is not None:
-        coefficient_item7_and_item5 = form_analysis.coefficient_item5.total_coefficient.coefficient +\
-                                      form_analysis.coefficient_item7.total_coefficient.coefficient
-        form_analysis.coefficient = division(coefficient_item7_and_item5, 2)
-        form_analysis.save()
+
+def update_type_line_value(total_data: TotalData):
+    total_data.kls = division(total_data.punkt5.length_kls*100, total_data.total_length)
+    total_data.vls = division(total_data.punkt5.length_vls*100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt5.length_rrl*100, total_data.total_length)
+    total_data.save()
+
+
+def update_total_length(punkt5: Punkt5):
+    punkt5.total_data5.total_length = punkt5.length_vls + punkt5.length_kls + punkt5.length_rrl
+    punkt5.total_data5.save()
+    update_type_line_value(punkt5.total_data5)
+
+
+def update_length_and_outfit_period_of_time(form: FormAnalysis):
+    outfit_period_of_time_kls = 0
+    outfit_period_of_time_rrl = 0
+    outfit_period_of_time_vls = 0
+
+    length_kls = 0
+    length_rrl = 0
+    length_vls = 0
+
+    for analysis_form in form.formanalysis_set.all():
+        if analysis_form != form:
+            outfit_period_of_time_kls += analysis_form.punkt5.outfit_period_of_time_kls
+            outfit_period_of_time_rrl += analysis_form.punkt5.outfit_period_of_time_rrl
+            outfit_period_of_time_vls = analysis_form.punkt5.outfit_period_of_time_vls
+
+            length_kls += analysis_form.punkt5.length_kls
+            length_rrl += analysis_form.punkt5.length_rrl
+            length_vls += analysis_form.punkt5.length_vls
+
+    form.punkt5.outfit_period_of_time_kls = outfit_period_of_time_kls
+    form.punkt5.outfit_period_of_time_rrl = outfit_period_of_time_rrl
+    form.punkt5.outfit_period_of_time_vls = outfit_period_of_time_vls
+
+    form.punkt5.length_kls = length_kls
+    form.punkt5.length_rrl = length_rrl
+    form.punkt5.length_vls = length_vls
+
+    form.punkt5.save()
+
+
+def update_punkt5(punkt5: Punkt5):
+    update_downtime(punkt5)
+    update_coefficient(punkt5)
+    update_total_length(punkt5)
+    update_total_coefficient(punkt5.total_data5)
+
+    update_length_and_outfit_period_of_time(punkt5.form_analysis5.id_parent)
+    update_downtime(punkt5.form_analysis5.id_parent.punkt5)
+    update_coefficient(punkt5.form_analysis5.id_parent.punkt5)
+    update_total_length(punkt5.form_analysis5.id_parent.punkt5)
+
+    update_republic_coefficient(punkt5.form_analysis5.id_parent.punkt5)
+    update_analysis_form_coefficient(punkt5.form_analysis5.id_parent)
+
+
+def delete_punkt5(punkt5: Punkt5):
+    parent_analysis = punkt5.form_analysis5.id_parent
+    punkt5_rep = punkt5.form_analysis5.id_parent.punkt5
+    if punkt5 == punkt5_rep:
+        punkt5.form_analysis5.punkt7.delete()
+        punkt5.delete()
+        return
+    punkt5.form_analysis5.punkt7.delete()
+    punkt5.delete()
+    update_length_and_outfit_period_of_time(parent_analysis)
+    update_downtime(punkt5_rep)
+    update_total_length(punkt5_rep)
+    update_republic_coefficient(punkt5_rep)
+
+    update_republic_total_number_and_corresponding_norm(parent_analysis)
+    update_percentage_compliance_and_coefficient(parent_analysis.punkt7)
+    update_total_object(parent_analysis.punkt7)
+    update_total_coefficient_punkt7(parent_analysis.punkt7.total_data7)
+
+    update_analysis_form_coefficient(parent_analysis)
+
+
+def update_analysis_form_coefficient(form_analysis: FormAnalysis):
+    form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
+                                         form_analysis.punkt7.total_data7.total_coefficient, 2)
+    form_analysis.save()
+
+
+def update_percentage_compliance(punkt7: Punkt7):
+    punkt7.percentage_compliance_kls = division(punkt7.total_number_kls*100, punkt7.corresponding_norm_kls)
+    punkt7.percentage_compliance_rrl = division(punkt7.total_number_rrl*100, punkt7.corresponding_norm_rrl)
+    punkt7.percentage_compliance_vls = division(punkt7.total_number_vls*100, punkt7.corresponding_norm_vls)
+    punkt7.save()
+
+
+def update_coefficient_punkt7(punkt7: Punkt7):
+    punkt7.coefficient_kls = get_coefficient_punkt7_kls(punkt7.percentage_compliance_kls)
+    punkt7.coefficient_vls = get_coefficient_punkt7_vls(punkt7.percentage_compliance_vls)
+    punkt7.coefficient_rrl = get_coefficient_punkt7_rrl(punkt7.percentage_compliance_rrl)
+    punkt7.save()
+
+
+def update_percentage_compliance_and_coefficient(punkt7: Punkt7):
+    update_percentage_compliance(punkt7)
+    update_coefficient_punkt7(punkt7)
+
+
+def update_type_line_value_punkt7(total_data: TotalData):
+    total_data.kls = division(total_data.punkt7.total_number_kls*100, total_data.total_length)
+    total_data.vls = division(total_data.punkt7.total_number_vls*100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt7.total_number_rrl*100, total_data.total_length)
+    total_data.save()
+
+
+def update_total_object(punkt7: Punkt7):
+    punkt7.total_data7.total_length = punkt7.total_number_kls+punkt7.total_number_vls+punkt7.total_number_rrl
+    punkt7.total_data7.save()
+    update_type_line_value_punkt7(punkt7.total_data7)
+
+
+def update_total_coefficient_punkt7(total_data: TotalData):
+    punkt7 = total_data.punkt7
+    total_data.total_coefficient = division((
+            punkt7.coefficient_kls*total_data.kls+punkt7.coefficient_vls*total_data.vls+
+            punkt7.coefficient_rrl*total_data.rrl), 100)
+    total_data.save()
+
+
+def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
+    total_number_kls = 0
+    total_number_rrl = 0
+    total_number_vls = 0
+
+    corresponding_norm_kls = 0
+    corresponding_norm_rrl = 0
+    corresponding_norm_vls = 0
+
+    for analysis_form in form.formanalysis_set.all():
+        if form != analysis_form:
+            total_number_kls += analysis_form.punkt7.total_number_kls
+            total_number_vls += analysis_form.punkt7.total_number_vls
+            total_number_rrl += analysis_form.punkt7.total_number_rrl
+
+            corresponding_norm_kls += analysis_form.punkt7.corresponding_norm_kls
+            corresponding_norm_rrl += analysis_form.punkt7.corresponding_norm_rrl
+            corresponding_norm_vls += analysis_form.punkt7.corresponding_norm_vls
+
+    form.id_parent.punkt7.total_number_kls = total_number_kls
+    form.id_parent.punkt7.total_number_rrl = total_number_rrl
+    form.id_parent.punkt7.total_number_vls = total_number_vls
+
+    form.id_parent.punkt7.corresponding_norm_kls = corresponding_norm_kls
+    form.id_parent.punkt7.corresponding_norm_rrl = corresponding_norm_rrl
+    form.id_parent.punkt7.corresponding_norm_vls = corresponding_norm_vls
+
+    form.id_parent.punkt7.save()
+
+
+def update_punkt7(punkt7: Punkt7):
+    update_percentage_compliance_and_coefficient(punkt7)
+    update_total_object(punkt7)
+    update_total_coefficient_punkt7(punkt7.total_data7)
+    update_republic_total_number_and_corresponding_norm(punkt7.form_analysis7.id_parent)
+    update_percentage_compliance_and_coefficient(punkt7.form_analysis7.id_parent.punkt7)
+    update_total_object(punkt7.form_analysis7.id_parent.punkt7)
+    update_total_coefficient_punkt7(punkt7.form_analysis7.id_parent.punkt7.total_data7)
+    update_analysis_form_coefficient(punkt7.form_analysis7)
+
+
+def delete_punkt7(punkt7: Punkt7):
+    rep_punkt7 = punkt7.form_analysis7.id_parent.punkt7
+    analysis_form = punkt7.form_analysis7.id_parent
+    if punkt7 == rep_punkt7:
+        punkt7.total_data7.punkt5.delete()
+        punkt7.delete()
+        return
+    punkt7.form_analysis7.punkt5.delete()
+    punkt7.delete()
+    update_republic_total_number_and_corresponding_norm(analysis_form)
+    update_total_object(rep_punkt7)
+    update_total_coefficient_punkt7(analysis_form.punkt7.total_data7)
+
+    update_downtime(punkt7.form_analysis7.id_parent.punkt5)
+    update_coefficient(punkt7.form_analysis7.id_parent.punkt5)
+    update_total_length(punkt7.form_analysis7.id_parent.punkt5)
+    update_republic_coefficient(punkt7.form_analysis7.id_parent.punkt5)
+
+    update_analysis_form_coefficient(analysis_form)
