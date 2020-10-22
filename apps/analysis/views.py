@@ -198,6 +198,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = FormAnalysis.objects.filter(main=True)
+    lookup_field = 'pk'
 
     def get_serializer_class(self):
         if self.action == "retrieve":
