@@ -188,7 +188,7 @@ def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
                                         date_to=date_to, user=user, id_parent=parent_obj)
 
     else:
-        punkt5 = Punkt5.objects.create(utfit=outfit, date_from=date_from, date_to=date_to, user=user)
+        punkt5 = Punkt5.objects.create(outfit=outfit, date_from=date_from, date_to=date_to, user=user)
         punkt7 = Punkt7.objects.create(outfit=outfit, date_to=date_to, date_from=date_from, user=user)
 
         TotalData.objects.create(punkt5=punkt5)

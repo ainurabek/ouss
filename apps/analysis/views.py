@@ -163,19 +163,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 #     serializer_class = HistoryEventSerializer
 
 
-class CreateFormAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        date_to = request.data["date_to"]
-        date_from = request.data["date_from"]
-        outfit = request.data["outfit"]
-        func = threading.Thread(target=create_item(), args=(date_to, date_from, outfit))
-        func.start()
-        data = {"response": "Отчет успешно создан"}
-        return Response(data, status=status.HTTP_200_OK)
-
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
