@@ -203,8 +203,6 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "retrieve":
             return FormAnalysisDetailSerializer
-        elif self.action == "update":
-            return FormAnalysisUpdateSerializer
         else:
             return FormAnalysisSerializer
 
@@ -227,6 +225,13 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(form_list, many=True)
         return Response(serializer.data)
 
+class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
+    """Редактирование п.5"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "pk"
+    queryset = FormAnalysis.objects.all()
+    serializer_class = FormAnalysisUpdateSerializer
 
 class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
