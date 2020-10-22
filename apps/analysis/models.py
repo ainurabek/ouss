@@ -5,7 +5,7 @@ from apps.opu.objects.models import Outfit, MainLineType
 
 class FormAnalysis(models.Model):
     id_parent = models.ForeignKey("FormAnalysis", on_delete=models.CASCADE, blank=True, null=True)
-    name = models.CharField("Название", max_length=255)
+    name = models.CharField("Название", max_length=255, blank=True, null=True)
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     average_coefficient = models.FloatField("Средний коэффициент качества", default=0, blank=True, null=True)
     coefficient = models.FloatField("Коэффициент качества", default=0, blank=True, null=True)
