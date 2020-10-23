@@ -4,7 +4,6 @@ from apps.analysis.models import FormAnalysis, Punkt5, TotalData, Punkt7
 from apps.dispatching.models import Event, HistoricalEvent
 
 from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSerializer
-from apps.opu.objects.models import MainLineType, Outfit
 from apps.opu.objects.serializers import IPListSerializer
 
 
@@ -60,7 +59,7 @@ class Punkt5ListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Punkt5
-        fields = "__all__"
+        exclude = ("form_analysis",)
 
 
 class FormAnalysisSerializer(serializers.ModelSerializer):
@@ -109,4 +108,11 @@ class Punkt7ListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Punkt7
-        fields = "__all__"
+        exclude = ("form_analysis",)
+
+
+class FormAnalysisCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FormAnalysis
+        fields = ("id", "date_from", "date_to")

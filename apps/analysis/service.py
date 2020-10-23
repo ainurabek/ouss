@@ -121,7 +121,7 @@ def get_period_date_to(call, date_to):
         return float(call.period_of_time)
 
 
-def calls_filter_for_item5(date_from, date_to, outfit):
+def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
     all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason_id__in=[2, 3])
 
@@ -146,9 +146,9 @@ def get_type_line_vls_and_kls():
     return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ВЛС")
 
 
-def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
+def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
     """Создание п.5"""
-    all_event = calls_filter_for_item5(date_from, date_to, outfit)
+    all_event = calls_filter_for_punkt5(date_from, date_to, outfit)
     outfits = event_distinct(all_event, "responsible_outfit")
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
@@ -156,46 +156,43 @@ def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
 
     total_rep_kls = 0
     total_rep_rrl = 0
-    if outfits.count() != 0:
+    if outfits.count() > 0:
         for out in outfits:
             reason_1 = 0
             reason_2 = 0
             amount_of_channels = 0
             for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
                 amount_of_channels += int(get_amount_of_channels(event))
-
-            for call in all_event.filter(responsible_outfit=out.responsible_outfit):
-                if get_type_line(call) == kls.id:
-                    reason_1 += get_period_date_to(call, date_to)
-                elif get_type_line(call) == vls.id:
-                    reason_2 += get_period_date_to(call, date_to)
+                if get_type_line(event) == kls.id:
+                    reason_1 += get_period_date_to(event, date_to)
+                elif get_type_line(event) == vls.id:
+                    reason_2 += get_period_date_to(event, date_to)
 
             total_out_kls = reason_1*amount_of_channels
             total_out_rrl = reason_2*amount_of_channels
             total_rep_kls += total_out_kls
             total_rep_rrl += total_out_rrl
             #####################################################################################################
+            analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
+                                                        date_to=date_to, user=user, id_parent=parent_obj)
             punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
                                            outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
-                                           date_from=date_from, date_to=date_to, user=user)
+                                           date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
             punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
-                                           user=user)
+                                           user=user, form_analysis=analysis_form)
             TotalData.objects.create(punkt5=punkt5)
             TotalData.objects.create(punkt7=punkt7)
 
-            FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7,
-                                        outfit=out.responsible_outfit, date_from=date_from,
-                                        date_to=date_to, user=user, id_parent=parent_obj)
-
     else:
-        punkt5 = Punkt5.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user)
-        punkt7 = Punkt7.objects.create(outfit_id=outfit, date_to=date_to, date_from=date_from, user=user)
+        analysis_form = FormAnalysis.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
+                                    id_parent=parent_obj)
+        punkt5 = Punkt5.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
+                                       form_analysis=analysis_form)
+        punkt7 = Punkt7.objects.create(outfit_id=outfit, date_to=date_to, date_from=date_from, user=user,
+                                       form_analysis=analysis_form)
 
         TotalData.objects.create(punkt5=punkt5)
         TotalData.objects.create(punkt7=punkt7)
-
-        FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7, outfit_id=outfit, date_from=date_from, date_to=date_to,
-                                    user=user, id_parent=parent_obj)
 
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
@@ -280,10 +277,10 @@ def update_total_coefficient(total_data: TotalData):
 
 def update_republic_coefficient(punkt5: Punkt5):
     coefficient = 0
-    for form in punkt5.form_analysis5.formanalysis_set.all():
-        if punkt5.form_analysis5.id_parent != form:
+    for form in punkt5.form_analysis.formanalysis_set.all():
+        if punkt5.form_analysis.id_parent != form:
             coefficient += form.punkt5.total_data5.total_coefficient
-    punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis5.formanalysis_set.count()-1)
+    punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis.formanalysis_set.count()-1)
     punkt5.total_data5.save()
 
 
@@ -337,24 +334,22 @@ def update_punkt5(punkt5: Punkt5):
     update_total_length(punkt5)
     update_total_coefficient(punkt5.total_data5)
 
-    update_length_and_outfit_period_of_time(punkt5.form_analysis5.id_parent)
-    update_downtime(punkt5.form_analysis5.id_parent.punkt5)
-    update_coefficient(punkt5.form_analysis5.id_parent.punkt5)
-    update_total_length(punkt5.form_analysis5.id_parent.punkt5)
+    update_length_and_outfit_period_of_time(punkt5.form_analysis.id_parent)
+    update_downtime(punkt5.form_analysis.id_parent.punkt5)
+    update_coefficient(punkt5.form_analysis.id_parent.punkt5)
+    update_total_length(punkt5.form_analysis.id_parent.punkt5)
 
-    update_republic_coefficient(punkt5.form_analysis5.id_parent.punkt5)
-    update_analysis_form_coefficient(punkt5.form_analysis5.id_parent)
+    update_republic_coefficient(punkt5.form_analysis.id_parent.punkt5)
+    update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
 
 
 def delete_punkt5(punkt5: Punkt5):
-    parent_analysis = punkt5.form_analysis5.id_parent
-    punkt5_rep = punkt5.form_analysis5.id_parent.punkt5
+    parent_analysis = punkt5.form_analysis.id_parent
+    punkt5_rep = punkt5.form_analysis.id_parent.punkt5
     if punkt5 == punkt5_rep:
-        punkt5.form_analysis5.punkt7.delete()
-        punkt5.delete()
+        punkt5.form_analysis.delete()
         return
-    punkt5.form_analysis5.punkt7.delete()
-    punkt5.delete()
+    punkt5.form_analysis.delete()
     update_length_and_outfit_period_of_time(parent_analysis)
     update_downtime(punkt5_rep)
     update_total_length(punkt5_rep)
@@ -433,44 +428,44 @@ def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
             corresponding_norm_rrl += analysis_form.punkt7.corresponding_norm_rrl
             corresponding_norm_vls += analysis_form.punkt7.corresponding_norm_vls
 
-    form.id_parent.punkt7.total_number_kls = total_number_kls
-    form.id_parent.punkt7.total_number_rrl = total_number_rrl
-    form.id_parent.punkt7.total_number_vls = total_number_vls
+    form.punkt7.total_number_kls = total_number_kls
+    form.punkt7.total_number_rrl = total_number_rrl
+    form.punkt7.total_number_vls = total_number_vls
 
-    form.id_parent.punkt7.corresponding_norm_kls = corresponding_norm_kls
-    form.id_parent.punkt7.corresponding_norm_rrl = corresponding_norm_rrl
-    form.id_parent.punkt7.corresponding_norm_vls = corresponding_norm_vls
+    form.punkt7.corresponding_norm_kls = corresponding_norm_kls
+    form.punkt7.corresponding_norm_rrl = corresponding_norm_rrl
+    form.punkt7.corresponding_norm_vls = corresponding_norm_vls
 
-    form.id_parent.punkt7.save()
+    form.punkt7.save()
 
 
 def update_punkt7(punkt7: Punkt7):
     update_percentage_compliance_and_coefficient(punkt7)
     update_total_object(punkt7)
     update_total_coefficient_punkt7(punkt7.total_data7)
-    update_republic_total_number_and_corresponding_norm(punkt7.form_analysis7.id_parent)
-    update_percentage_compliance_and_coefficient(punkt7.form_analysis7.id_parent.punkt7)
-    update_total_object(punkt7.form_analysis7.id_parent.punkt7)
-    update_total_coefficient_punkt7(punkt7.form_analysis7.id_parent.punkt7.total_data7)
-    update_analysis_form_coefficient(punkt7.form_analysis7)
+    update_republic_total_number_and_corresponding_norm(punkt7.form_analysis.id_parent)
+    update_percentage_compliance_and_coefficient(punkt7.form_analysis.id_parent.punkt7)
+    update_total_object(punkt7.form_analysis.id_parent.punkt7)
+    update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
+    update_analysis_form_coefficient(punkt7.form_analysis)
 
 
 def delete_punkt7(punkt7: Punkt7):
-    rep_punkt7 = punkt7.form_analysis7.id_parent.punkt7
-    analysis_form = punkt7.form_analysis7.id_parent
+    rep_punkt7 = punkt7.form_analysis.id_parent.punkt7
+    analysis_form = punkt7.form_analysis.id_parent
     if punkt7 == rep_punkt7:
-        punkt7.total_data7.punkt5.delete()
+        punkt7.form_analysis.delete()
         punkt7.delete()
         return
-    punkt7.form_analysis7.punkt5.delete()
-    punkt7.delete()
+    punkt7.form_analysis.delete()
     update_republic_total_number_and_corresponding_norm(analysis_form)
+    update_percentage_compliance_and_coefficient(rep_punkt7)
     update_total_object(rep_punkt7)
     update_total_coefficient_punkt7(analysis_form.punkt7.total_data7)
 
-    update_downtime(punkt7.form_analysis7.id_parent.punkt5)
-    update_coefficient(punkt7.form_analysis7.id_parent.punkt5)
-    update_total_length(punkt7.form_analysis7.id_parent.punkt5)
-    update_republic_coefficient(punkt7.form_analysis7.id_parent.punkt5)
+    update_downtime(analysis_form.punkt5)
+    update_coefficient(analysis_form.punkt5)
+    update_total_length(analysis_form.punkt5)
+    update_republic_coefficient(analysis_form.punkt5)
 
     update_analysis_form_coefficient(analysis_form)

@@ -17,11 +17,6 @@ class FormAnalysis(models.Model):
     date_to = models.DateField("Конец", blank=True, null=True)
     main = models.BooleanField(default=False)
 
-    punkt5 = models.OneToOneField("Punkt5", on_delete=models.CASCADE, blank=True, null=True,
-                         verbose_name="Форма анализа", related_name="form_analysis5")
-    punkt7 = models.OneToOneField("Punkt7", on_delete=models.CASCADE, blank=True, null=True,
-                         verbose_name="Форма анализа", related_name="form_analysis7")
-
     def __str__(self):
         return f"{self.id}"
 
@@ -32,6 +27,9 @@ class FormAnalysis(models.Model):
 
 class Punkt5(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
+    form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
+                                         verbose_name="Форма анализа", related_name="punkt5")
+
     outfit_period_of_time_kls = models.FloatField("Продолжительность всех ПВ кан*час КЛС", blank=True, null=True, default=0)
     length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
     downtime_kls = models.FloatField("Простои КЛС", default=0, blank=True, null=True)
@@ -62,6 +60,8 @@ class Punkt5(models.Model):
 
 class Punkt7(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
+    form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
+                                         verbose_name="Форма анализа", related_name="punkt7")
 
     total_number_kls = models.IntegerField("Общее количество линейных трактов КЛС", default=0, blank=True, null=True)
     corresponding_norm_kls = models.IntegerField("Соответствующих норме КЛС", default=0, blank=True, null=True)

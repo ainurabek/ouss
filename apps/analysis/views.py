@@ -6,11 +6,11 @@ import datetime
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
 from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
-    Punkt7ListSerializer
+    Punkt7ListSerializer, FormAnalysisCreateSerializer
 from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
-    create_item, update_punkt5, delete_punkt5, update_punkt7, delete_punkt7
+    update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct
 
 from apps.dispatching.models import Event, HistoricalEvent
 from apps.dispatching.services import get_event_name
@@ -19,8 +19,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-import threading
-
 from apps.opu.services import ListWithPKMixin
 
 
@@ -41,11 +39,11 @@ def get_report(request):
     elif date_from != "" and date_to != "":
         all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
-    all_event_name = all_event.order_by("ips_id", "object_id", "circuit_id").distinct("ips_id", "object_id", "circuit_id")
-    outfits = all_event.order_by("responsible_outfit").distinct("responsible_outfit")
-
+    all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+    outfits = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
     data = []
+
     for outfit in outfits:
         total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0, 'name5':0, 'name6':0, 'name7':0, 'name8':0 }
         data.append({
@@ -163,7 +161,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 #     serializer_class = HistoryEventSerializer
 
 
-
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -206,24 +203,23 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         else:
             return FormAnalysisSerializer
 
-
     def perform_create(self, serializer):
         """Создание парентев для обектов"""
-
-        punkt5 = Punkt5.objects.create(user=self.request.user.profile)
-        punkt7 = Punkt7.objects.create(user=self.request.user.profile)
+        analysis_form = serializer.save(user=self.request.user.profile, main=True)
+        analysis_form.id_parent = analysis_form
+        analysis_form.save()
+        punkt5 = Punkt5.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
+        punkt7 = Punkt7.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
 
         TotalData.objects.create(punkt5=punkt5)
         TotalData.objects.create(punkt7=punkt7)
-        analysis_form = serializer.save(user=self.request.user.profile, main=True, punkt7=punkt7, punkt5=punkt5)
-        analysis_form.id_parent = analysis_form
-        analysis_form.save()
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
         form_list = FormAnalysis.objects.filter(id_parent=self.get_object().pk)
         serializer = self.get_serializer(form_list, many=True)
         return Response(serializer.data)
+
 
 class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
@@ -233,19 +229,23 @@ class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
     queryset = FormAnalysis.objects.all()
     serializer_class = FormAnalysisUpdateSerializer
 
+
 class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, pk):
-        date_from = request.data["date_from"]
-        date_to = request.data["date_to"]
-        outfit = request.data["outfit"]
-        parent = FormAnalysis.objects.get(pk=pk)
-        create_item(date_from, date_to, outfit, parent, request.user.profile)
-        data = {"response": "Успешно создан"}
-        return Response(data, status=status.HTTP_201_CREATED)
+        serializer = FormAnalysisCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            date_from = request.data["date_from"]
+            date_to = request.data["date_to"]
+            outfit = request.data["outfit"]
+            parent = FormAnalysis.objects.get(pk=pk)
+            create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent, request.user.profile)
+            data = {"response": "Успешно создан"}
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Punkt5ListAPIView(APIView, ListWithPKMixin):
@@ -254,7 +254,7 @@ class Punkt5ListAPIView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     model = Punkt5
     serializer = Punkt5ListSerializer
-    field_for_filter = "form_analysis5__id_parent"
+    field_for_filter = "form_analysis__id_parent"
 
 
 class Punkt7ListAPIView(APIView, ListWithPKMixin):
@@ -263,7 +263,7 @@ class Punkt7ListAPIView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     model = Punkt7
     serializer = Punkt7ListSerializer
-    field_for_filter = "form_analysis7__id_parent"
+    field_for_filter = "form_analysis__id_parent"
 
 
 class Punkt5UpdateAPIView(generics.UpdateAPIView):
@@ -283,6 +283,7 @@ class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Punkt5.objects.all()
+    lookup_field = "pk"
 
     def perform_destroy(self, instance):
         delete_punkt5(instance)
@@ -305,6 +306,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Punkt7.objects.all()
+    lookup_field = "pk"
 
     def perform_destroy(self, instance):
         delete_punkt7(instance)
