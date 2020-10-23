@@ -7,7 +7,7 @@ from apps.opu.objects.models import MainLineType
 
 def division(a: float, b: float) -> float:
     if a != 0 and b != 0:
-        return a/b
+        return round(a/b, 2)
     return 0
 
 
