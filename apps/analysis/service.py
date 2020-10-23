@@ -188,13 +188,13 @@ def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
                                         date_to=date_to, user=user, id_parent=parent_obj)
 
     else:
-        punkt5 = Punkt5.objects.create(utfit=outfit, date_from=date_from, date_to=date_to, user=user)
-        punkt7 = Punkt7.objects.create(outfit=outfit, date_to=date_to, date_from=date_from, user=user)
+        punkt5 = Punkt5.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user)
+        punkt7 = Punkt7.objects.create(outfit_id=outfit, date_to=date_to, date_from=date_from, user=user)
 
         TotalData.objects.create(punkt5=punkt5)
         TotalData.objects.create(punkt7=punkt7)
 
-        FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7, outfit=outfit, date_from=date_from, date_to=date_to,
+        FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7, outfit_id=outfit, date_from=date_from, date_to=date_to,
                                     user=user, id_parent=parent_obj)
 
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls

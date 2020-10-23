@@ -163,19 +163,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
 #     serializer_class = HistoryEventSerializer
 
 
-class CreateFormAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        date_to = request.data["date_to"]
-        date_from = request.data["date_from"]
-        outfit = request.data["outfit"]
-        func = threading.Thread(target=create_item(), args=(date_to, date_from, outfit))
-        func.start()
-        data = {"response": "Отчет успешно создан"}
-        return Response(data, status=status.HTTP_200_OK)
-
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -211,12 +198,11 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = FormAnalysis.objects.filter(main=True)
+    lookup_field = 'pk'
 
     def get_serializer_class(self):
         if self.action == "retrieve":
             return FormAnalysisDetailSerializer
-        elif self.action == "update":
-            return FormAnalysisUpdateSerializer
         else:
             return FormAnalysisSerializer
 
@@ -239,6 +225,13 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(form_list, many=True)
         return Response(serializer.data)
 
+class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
+    """Редактирование п.5"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "pk"
+    queryset = FormAnalysis.objects.all()
+    serializer_class = FormAnalysisUpdateSerializer
 
 class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
