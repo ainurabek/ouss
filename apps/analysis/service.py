@@ -124,6 +124,7 @@ def get_period_date_to(call, date_to):
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
     all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason_id__in=[2, 3])
+    print(all_event)
 
     if outfit is not None:
         all_event = all_event.filter(responsible_outfit_id=outfit)
@@ -149,7 +150,9 @@ def get_type_line_vls_and_kls():
 def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
     """Создание п.5"""
     all_event = calls_filter_for_punkt5(date_from, date_to, outfit)
+    print(all_event)
     outfits = event_distinct(all_event, "responsible_outfit")
+    print(outfits)
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
     kls, vls = get_type_line_vls_and_kls()
@@ -174,6 +177,7 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_ob
         #####################################################################################################
         analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
+        print(analysis_form.outfit.outfit)
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
                                        outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
@@ -300,7 +304,7 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
         if analysis_form != form:
             outfit_period_of_time_kls += analysis_form.punkt5.outfit_period_of_time_kls
             outfit_period_of_time_rrl += analysis_form.punkt5.outfit_period_of_time_rrl
-            outfit_period_of_time_vls = analysis_form.punkt5.outfit_period_of_time_vls
+            outfit_period_of_time_vls += analysis_form.punkt5.outfit_period_of_time_vls
 
             length_kls += analysis_form.punkt5.length_kls
             length_rrl += analysis_form.punkt5.length_rrl
