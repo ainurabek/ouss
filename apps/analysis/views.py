@@ -236,11 +236,11 @@ class FormAnalysisCreateAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, pk):
+        date_from = request.data["date_from"]
+        date_to = request.data["date_to"]
+        outfit = request.data["outfit"]
         serializer = FormAnalysisCreateSerializer(data=request.data)
         if serializer.is_valid():
-            date_from = request.data["date_from"]
-            date_to = request.data["date_to"]
-            outfit = request.data["outfit"]
             parent = FormAnalysis.objects.get(pk=pk)
             create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent, request.user.profile)
             data = {"response": "Успешно создан"}

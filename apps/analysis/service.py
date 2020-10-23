@@ -156,43 +156,32 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_ob
 
     total_rep_kls = 0
     total_rep_rrl = 0
-    if outfits.count() > 0:
-        for out in outfits:
-            reason_1 = 0
-            reason_2 = 0
-            amount_of_channels = 0
-            for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
-                amount_of_channels += int(get_amount_of_channels(event))
-                if get_type_line(event) == kls.id:
-                    reason_1 += get_period_date_to(event, date_to)
-                elif get_type_line(event) == vls.id:
-                    reason_2 += get_period_date_to(event, date_to)
+    for out in outfits:
+        reason_1 = 0
+        reason_2 = 0
+        amount_of_channels = 0
+        for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
+            amount_of_channels += int(get_amount_of_channels(event))
+            if get_type_line(event) == kls.id:
+                reason_1 += get_period_date_to(event, date_to)
+            elif get_type_line(event) == vls.id:
+                reason_2 += get_period_date_to(event, date_to)
 
-            total_out_kls = reason_1*amount_of_channels
-            total_out_rrl = reason_2*amount_of_channels
-            total_rep_kls += total_out_kls
-            total_rep_rrl += total_out_rrl
-            #####################################################################################################
-            analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
-                                                        date_to=date_to, user=user, id_parent=parent_obj)
-            punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
-                                           outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
-                                           date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
-            punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
-                                           user=user, form_analysis=analysis_form)
-            TotalData.objects.create(punkt5=punkt5)
-            TotalData.objects.create(punkt7=punkt7)
-
-    else:
-        analysis_form = FormAnalysis.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
-                                    id_parent=parent_obj)
-        punkt5 = Punkt5.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
-                                       form_analysis=analysis_form)
-        punkt7 = Punkt7.objects.create(outfit_id=outfit, date_to=date_to, date_from=date_from, user=user,
-                                       form_analysis=analysis_form)
-
+        total_out_kls = reason_1*amount_of_channels
+        total_out_rrl = reason_2*amount_of_channels
+        total_rep_kls += total_out_kls
+        total_rep_rrl += total_out_rrl
+        #####################################################################################################
+        analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
+                                                    date_to=date_to, user=user, id_parent=parent_obj)
+        punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
+                                       outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
+                                       date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
+        punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
+                                       user=user, form_analysis=analysis_form)
         TotalData.objects.create(punkt5=punkt5)
         TotalData.objects.create(punkt7=punkt7)
+
 
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
