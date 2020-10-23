@@ -197,7 +197,6 @@ def create_item(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
         FormAnalysis.objects.create(punkt5=punkt5, punkt7=punkt7, outfit=outfit, date_from=date_from, date_to=date_to,
                                     user=user, id_parent=parent_obj)
 
-
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
     parent_obj.punkt5.save()

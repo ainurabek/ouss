@@ -1,15 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/KT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/KT.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0002_auto_20201001_1637.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0003_auto_20201001_1645.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0004_auto_20201002_1201.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0005_auto_20201002_1218.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0006_auto_20201002_1616.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0007_remove_item5_id_parent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0008_auto_20201002_1633.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0009_auto_20201002_1636.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0010_auto_20201002_1638.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0011_auto_20201007_1738.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0012_auto_20201009_1034.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0013_auto_20201012_1136.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0014_auto_20201012_1408.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0015_auto_20201012_1654.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0016_auto_20201013_1105.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0017_auto_20201013_1358.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0018_auto_20201014_1036.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0019_item5_type_line_value.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0020_auto_20201014_1221.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0021_specificgravityoflength_id_parent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/migrations/0022_auto_20201015_1049.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/migrations/0003_auto_20200928_1533.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Pull.Settings">
+    <option name="BRANCH" value="master" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -24,6 +67,12 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
   </component>
   <component name="RunManager">
     <configuration name="KT" type="Python.DjangoServer" factoryName="Django server">
@@ -58,7 +107,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1603171192386</updated>
-      <workItem from="1603171193434" duration="350000" />
+      <workItem from="1603171193434" duration="569000" />
+      <workItem from="1603171780861" duration="1429000" />
+      <workItem from="1603257580653" duration="900000" />
+      <workItem from="1603381966262" duration="1045000" />
+      <workItem from="1603361704931" duration="985000" />
+      <workItem from="1603427722572" duration="346000" />
     </task>
     <servers />
   </component>
@@ -75,5 +129,12 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="757" y="237" width="395" height="640" key="RollbackChangesDialog" timestamp="1603171542932">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="757" y="237" width="395" height="640" key="RollbackChangesDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1603171542932" />
   </component>
 </project>
