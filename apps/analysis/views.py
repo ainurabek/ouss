@@ -194,7 +194,7 @@ class DispEventHistory(APIView):
 class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = FormAnalysis.objects.filter(main=True)
+    queryset = FormAnalysis.objects.filter(main=True).order_by('-id')
     lookup_field = 'pk'
 
     def get_serializer_class(self):

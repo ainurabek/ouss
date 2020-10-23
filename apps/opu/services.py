@@ -33,7 +33,7 @@ class ListWithPKMixin:
 
     def get(self, request, pk):
         kwargs = {self.field_for_filter: pk}
-        object = self.model.objects.filter(**kwargs)
+        object = self.model.objects.filter(**kwargs).order_by('-id')
         serializer = self.serializer(object, many=True)
         return Response(serializer.data)
 
