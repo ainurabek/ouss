@@ -131,8 +131,8 @@ def get_period_date_to(call, date_to):
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name=['ПВ аппаратура',
-                                                                                          'Линейные ПВ'])
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason_in=[Reason.objects.get(name='ПВ аппаратура'),
+                                                                                              Reason.objects.get(name='Линейные ПВ')])
 
 
     if outfit is not None:
