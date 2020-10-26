@@ -3,6 +3,13 @@ from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
 from apps.opu.objects.models import MainLineType
+from django.utils.safestring import mark_safe
+from django import template
+
+from apps.dispatching.models import Reason, Index
+
+register = template.Library()
+from django.db.models import Q
 
 
 def division(a: float, b: float) -> float:
@@ -462,3 +469,24 @@ def delete_punkt7(punkt7: Punkt7):
     update_republic_coefficient(analysis_form.punkt5)
 
     update_analysis_form_coefficient(analysis_form)
+
+@register.simple_tag
+def get_diff(history):
+    message = ''
+    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
+    if history and old_record:
+        delta = history.diff_against(old_record)
+        for change in delta.changes:
+            if "reason" == change.field:
+                old_reason = Reason.objects.get(pk=change.old)
+                new_reason = Reason.objects.get(pk=change.new)
+                message += "{}:{} ->-> {}".format(change.field, old_reason, new_reason)
+            elif "index1" == change.field:
+                old_index = Index.objects.get(pk=change.old)
+                new_index = Index.objects.get(pk=change.new)
+                message += "{}:{} ->-> {}".format(change.field, old_index, new_index)
+            else:
+                message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
+        return mark_safe(message)
+
+
