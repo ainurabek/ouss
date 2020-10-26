@@ -21,6 +21,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from apps.opu.services import ListWithPKMixin
 
+from apps.analysis.service import get_diff
+
 
 def get_report(request):
     date_from = request.GET.get("date_from")
@@ -153,41 +155,24 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
         return queryset
 
 
-# class DispEventHistory(viewsets.ModelViewSet):
-#     permission_classes = (IsAuthenticatedOrReadOnly,)
-#     authentication_classes = (TokenAuthentication,)
-#     queryset = HistoricalEvent.objects.all()
-#     lookup_field = 'pk'
-#     serializer_class = HistoryEventSerializer
-
-
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
-        histories = event.history_log.filter(id=pk)
-        old = histories.first()
-        new = histories.last()
-        delta = new.diff_against(old)
-        for change in delta.changes:
-            text = ("{} изменился от {} к {}".format(change.field, change.old, change.new))
+        histories = event.history.all()
         data = []
-        for history in histories:
-            h = {}
-            h['id']=history.history_id
-            h['date'] = history.history_date
-            h['user'] = history.history_user.username
-            h['type'] = history.history_type
-            h['object'] = history.history_object.id
-            if history.history_type is '~':
-                h['changed_field'] = str(text)
-            elif history.history_type is '+':
-                h['changed_field'] = str("Создан обьект")
-            elif history.history_type is '-':
-                h['changed_field'] = str("Удален обьект")
-            data.append(h)
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
         return Response(data, status=status.HTTP_200_OK)
 
 
