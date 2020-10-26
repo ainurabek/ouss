@@ -93,11 +93,11 @@ def get_coefficient_rrl(downtime):
 
 def get_type_line(obj) -> int:
     if obj.object is not None:
-        return obj.object.type_line.main_line_type.id
+        return obj.object.type_line.main_line_type.name
     elif obj.circuit is not None:
-        return obj.circuit.id_object.type_line.main_line_type.id
+        return obj.circuit.id_object.type_line.main_line_type.name
     elif obj.ips is not None:
-        return obj.ips.object_id.type_line.main_line_type.id
+        return obj.ips.object_id.type_line.main_line_type.name
 
 
 def get_calls_list(all_event, obj):
@@ -130,8 +130,13 @@ def get_period_date_to(call, date_to):
 
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
+<<<<<<< HEAD
     all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason_id__in=[2, 3])
     print(all_event)
+=======
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['ПВ аппаратура',
+                                                                                              'Линейные ПВ'])
+>>>>>>> backend
 
     if outfit is not None:
         all_event = all_event.filter(responsible_outfit_id=outfit)
@@ -172,9 +177,9 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_ob
         amount_of_channels = 0
         for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
             amount_of_channels += int(get_amount_of_channels(event))
-            if get_type_line(event) == kls.id:
+            if get_type_line(event) == kls.name:
                 reason_1 += get_period_date_to(event, date_to)
-            elif get_type_line(event) == vls.id:
+            elif get_type_line(event) == vls.name:
                 reason_2 += get_period_date_to(event, date_to)
 
         total_out_kls = reason_1*amount_of_channels

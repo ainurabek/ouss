@@ -29,7 +29,7 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.get("responsible_outfit")
 
-    all_event = Event.objects.filter(index1_id=3, callsorevent=False)
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False)
 
     if responsible_outfit != "":
         all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
@@ -47,13 +47,15 @@ def get_report(request):
     data = []
 
     for outfit in outfits:
-        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0, 'name5':0, 'name6':0, 'name7':0, 'name8':0 }
+        total_outfit = {"name1": 0, "name2": 0, "name3": 0, "name4": 0, 'name5':0, 'name6':0,
+                        'name7':0, 'name8':0, 'name9':0, 'name10':0 }
         data.append({
             "name": outfit.responsible_outfit.outfit,
             "date_from": None, "comments": None,
             "reason": None, "type_line": None, "color":'1',
             "period_of_time": {"name1": None, "name2": None, "name3": None,
-                               "name4": None, "name5":None, "name6":None }, "amount_of_channels": None
+                               "name4": None, "name5":None, "name6":None,
+                               "name7": None, "name8":None, "name9":None, 'name10':None}, "amount_of_channels": None
         })
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
             data.append({
@@ -61,11 +63,13 @@ def get_report(request):
                 "date_from": None, "comments": None,
                 "reason": None, "type_line": None,
                 "period_of_time": {"name1": None, "name2": None, "name3": None,
-                                   "name4": None, "name5":None, "name6":None},
+                                   "name4": None, "name5":None, "name6":None,
+                                   "name7": None, "name8": None, "name9": None, 'name10': None
+                                   },
                 "amount_of_channels": None
             })
             total_period_of_time = {"name1": 0, "name2": 0, "name3": 0, "name4": 0,
-                                    'name5':0, 'name6':0, 'name7':0, 'name8':0}
+                                    'name5':0, 'name6':0, 'name7':0, 'name8':0, 'name9':0, 'name10':0}
 
 
             for call in get_calls_list(all_event, event):
@@ -73,31 +77,38 @@ def get_report(request):
                 type_line = get_type_line(call)
                 amount_of_channels = get_amount_of_channels(call)
                 period_reason = {"name1": None, "name2": None, "name3": None, "name4": None,
-                                 "name5":None, "name6":None, "name7":None, "name8":None}
-                if call.reason.id == 1 and type_line == 1:
+                                 "name5":None, "name6":None, "name7":None, "name8":None, 'name9':None,
+                                 'name10':None}
+                if call.reason.name == 'Откл. ЭЭ' and type_line == 'КЛС':
                     total_period_of_time["name1"] += period
                     period_reason["name1"] = period
-                elif call.reason.id ==1 and type_line ==2:
+                elif call.reason.name == 'Откл. ЭЭ' and type_line == 'ЦРРЛ':
                     total_period_of_time["name2"] += period
                     period_reason["name2"] = period
-                elif call.reason.id == 2 and type_line==1:
+                elif call.reason.name == 'ПВ аппаратура' and type_line=='КЛС':
                     total_period_of_time["name3"] += period
                     period_reason["name3"] = period
-                elif call.reason.id == 2 and type_line==2:
+                elif call.reason.name == 'ПВ аппаратура' and type_line=='ЦРРЛ':
                     total_period_of_time["name4"] += period
                     period_reason["name4"] = period
-                elif call.reason.id == 3 and type_line == 1:
+                elif call.reason.name == 'Линейные ПВ' and type_line == 'КЛС':
                     total_period_of_time["name5"] += period
                     period_reason["name5"] = period
-                elif call.reason.id == 3 and type_line == 2:
+                elif call.reason.name == 'Линейные ПВ' and type_line == 'ЦРРЛ':
                     total_period_of_time["name6"] += period
                     period_reason["name6"] = period
-                elif call.reason.id == 4 and type_line ==1:
+                elif call.reason.name == 'Хищения на ЛС' and type_line =='КЛС':
                     total_period_of_time["name7"] += period
                     period_reason["name7"] = period
-                elif call.reason.id == 4 and type_line ==2:
+                elif call.reason.name == 'Хищения на ЛС' and type_line =='ЦРРЛ':
                     total_period_of_time["name8"] += period
                     period_reason["name8"] = period
+                elif call.reason.name == 'ПВ за счет стихии' and type_line =='КЛС':
+                    total_period_of_time["name9"] += period
+                    period_reason["name9"] = period
+                elif call.reason.name == 'ПВ за счет стихии' and type_line =='ЦРРЛ':
+                    total_period_of_time["name10"] += period
+                    period_reason["name10"] = period
 
                 data.append({
                     "name": None, "date_from": call.date_from,
@@ -134,7 +145,7 @@ def get_report(request):
 class DispEvent1ListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.filter(callsorevent=False, index1__id=3)
+    queryset = Event.objects.filter(callsorevent=False, index1__index="1")
     lookup_field = 'pk'
     serializer_class = DispEvent1ListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
