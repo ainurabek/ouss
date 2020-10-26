@@ -212,7 +212,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
-        form_list = FormAnalysis.objects.filter(id_parent=self.get_object().pk)
+        form_list = FormAnalysis.objects.filter(id_parent=self.get_object().pk).order_by('-id')
         serializer = self.get_serializer(form_list, many=True)
         return Response(serializer.data)
 
