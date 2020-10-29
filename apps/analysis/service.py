@@ -374,9 +374,9 @@ def update_analysis_form_coefficient(form_analysis: FormAnalysis):
 
 
 def update_percentage_compliance(punkt7: Punkt7):
-    punkt7.percentage_compliance_kls = division(punkt7.total_number_kls, punkt7.corresponding_norm_kls*100)
-    punkt7.percentage_compliance_rrl = division(punkt7.total_number_rrl, punkt7.corresponding_norm_rrl*100)
-    punkt7.percentage_compliance_vls = division(punkt7.total_number_vls, punkt7.corresponding_norm_vls*100)
+    punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls)*100
+    punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl)*100
+    punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls)*100
     punkt7.save()
 
 
