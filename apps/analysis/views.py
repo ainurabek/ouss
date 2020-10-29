@@ -200,15 +200,37 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
             return FormAnalysisSerializer
 
     def perform_create(self, serializer):
+        form_analysis=self.request.data['form_analysis']
         """Создание парентев для обектов"""
         analysis_form = serializer.save(user=self.request.user.profile, main=True)
         analysis_form.id_parent = analysis_form
         analysis_form.save()
         punkt5 = Punkt5.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
-        punkt7 = Punkt7.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
+        if form_analysis:
+            form_AK=FormAnalysis.objects.get(pk=form_analysis)
+            for form in FormAnalysis.objects.filter(id_parent=form_AK):
+                fin_punkt7=Punkt7.objects.create(form_analysis=analysis_form, user=self.request.user.profile,
+                                                 total_number_kls=form.punkt7.total_number_kls,
+                                                 corresponding_norm_kls = form.punkt7.corresponding_norm_kls,
+                                                 percentage_compliance_kls = form.punkt7.percentage_compliance_kls,
+                                                 coefficient_kls = form.punkt7.coefficient_kls,
 
+                                                 total_number_vls=form.punkt7.total_number_vls,
+                                                 corresponding_norm_vls=form.punkt7.corresponding_norm_vls,
+                                                 percentage_compliance_vls=form.punkt7.percentage_compliance_vls,
+                                                 coefficient_vls=form.punkt7.coefficient_vls,
+
+                                                 total_number_rrl=form.punkt7.total_number_rrl,
+                                                 corresponding_norm_rrl=form.punkt7.corresponding_norm_rrl,
+                                                 percentage_compliance_rrl=form.punkt7.percentage_compliance_rrl,
+                                                 coefficient_rrl=form.punkt7.coefficient_rrl,
+                                                 )
+                TotalData.objects.create(punkt7=fin_punkt7)
+        else:
+            punkt7 = Punkt7.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
+            TotalData.objects.create(punkt7=punkt7)
         TotalData.objects.create(punkt5=punkt5)
-        TotalData.objects.create(punkt7=punkt7)
+
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
