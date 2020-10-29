@@ -337,6 +337,7 @@ def update_punkt5(punkt5: Punkt5):
     update_total_length(punkt5.form_analysis.id_parent.punkt5)
 
     update_republic_coefficient(punkt5.form_analysis.id_parent.punkt5)
+    update_analysis_form_coefficient(punkt5.form_analysis)
     update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
 
 
@@ -363,6 +364,7 @@ def delete_punkt5(punkt5: Punkt5):
 def update_analysis_form_coefficient(form_analysis: FormAnalysis):
     form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
                                          form_analysis.punkt7.total_data7.total_coefficient, 2)
+
     form_analysis.save()
 
 
@@ -445,6 +447,7 @@ def update_punkt7(punkt7: Punkt7):
     update_total_object(punkt7.form_analysis.id_parent.punkt7)
     update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
     update_analysis_form_coefficient(punkt7.form_analysis)
+    update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
 
 
 def delete_punkt7(punkt7: Punkt7):
