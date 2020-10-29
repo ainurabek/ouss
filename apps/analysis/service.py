@@ -187,7 +187,7 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         if punkt7_AK:
             form = FormAnalysis.objects.get(outfit=outfit, id_parent=punkt7_AK)
 
-            fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
+            fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user, outfit=outfit,
                                                total_number_kls=form.punkt7.total_number_kls,
                                                corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
                                                percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
