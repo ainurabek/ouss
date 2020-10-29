@@ -233,17 +233,22 @@ class FormAnalysisCreateAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, pk):
-        date_from = request.data["date_from"]
-        date_to = request.data["date_to"]
-        outfit = request.data["outfit"]
-        punkt7 = request.data["form_analysis"]
-        serializer = FormAnalysisCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            parent = FormAnalysis.objects.get(pk=pk)
-            create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7, parent, request.user.profile)
-            data = {"response": "Успешно создан"}
-            return Response(data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if FormAnalysis.objects.filter(id_parent_id=pk, outfit_id=request.data["outfit"]).exists():
+            content = {'По такому предприятию уже существует Средний Коэффициент'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+        else:
+            date_from = request.data["date_from"]
+            date_to = request.data["date_to"]
+            outfit = request.data["outfit"]
+            punkt7_AK = request.data["form_analysis"]
+            serializer = FormAnalysisCreateSerializer(data=request.data)
+            if serializer.is_valid():
+                parent = FormAnalysis.objects.get(pk=pk)
+                create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK, parent, request.user.profile)
+                data = {"response": "Успешно создан"}
+                return Response(data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class Punkt5ListAPIView(APIView, ListWithPKMixin):
