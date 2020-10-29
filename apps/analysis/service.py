@@ -154,7 +154,7 @@ def get_type_line_vls_and_kls():
     return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ВЛС")
 
 
-def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
+def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK, parent_obj: FormAnalysis, user):
     """Создание п.5"""
     all_event = calls_filter_for_punkt5(date_from, date_to, outfit)
     outfits = event_distinct(all_event, "responsible_outfit")
@@ -182,13 +182,40 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_ob
         #####################################################################################################
         analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
+        if punkt7_AK:
+            form = FormAnalysis.objects.get(outfit=outfit, id_parent=punkt7_AK)
+
+            fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
+                                               total_number_kls=form.punkt7.total_number_kls,
+                                               corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
+                                               percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
+                                               coefficient_kls=form.punkt7.coefficient_kls,
+
+                                               total_number_vls=form.punkt7.total_number_vls,
+                                               corresponding_norm_vls=form.punkt7.corresponding_norm_vls,
+                                               percentage_compliance_vls=form.punkt7.percentage_compliance_vls,
+                                               coefficient_vls=form.punkt7.coefficient_vls,
+
+                                               total_number_rrl=form.punkt7.total_number_rrl,
+                                               corresponding_norm_rrl=form.punkt7.corresponding_norm_rrl,
+                                               percentage_compliance_rrl=form.punkt7.percentage_compliance_rrl,
+                                               coefficient_rrl=form.punkt7.coefficient_rrl,
+                                               )
+            total_data7 = form.punkt7.total_data7
+            TotalData.objects.create(punkt7=fin_punkt7, total_length=total_data7.total_length,
+                                     total_coefficient=total_data7.total_coefficient, kls=total_data7.kls,
+                                     vls = total_data7.vls, rrl=total_data7.rrl)
+        else:
+            punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
+                                           user=user, form_analysis=analysis_form)
+            TotalData.objects.create(punkt7=punkt7)
+
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
                                        outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
-        punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
-                                       user=user, form_analysis=analysis_form)
+
         TotalData.objects.create(punkt5=punkt5)
-        TotalData.objects.create(punkt7=punkt7)
+
 
 
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
