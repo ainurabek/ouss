@@ -7,6 +7,8 @@ from django.utils.safestring import mark_safe
 from django import template
 
 from apps.dispatching.models import Reason, Index
+from rest_framework import status
+from rest_framework.response import Response
 
 register = template.Library()
 from django.db.models import Q
@@ -210,6 +212,7 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             TotalData.objects.create(punkt7=fin_punkt7, total_length=total_data7.total_length,
                                      total_coefficient=total_data7.total_coefficient, kls=total_data7.kls,
                                      vls = total_data7.vls, rrl=total_data7.rrl)
+
         else:
             punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
                                            user=user, form_analysis=analysis_form)

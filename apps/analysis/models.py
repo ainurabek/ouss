@@ -6,8 +6,7 @@ from apps.opu.objects.models import Outfit, MainLineType
 class FormAnalysis(models.Model):
     id_parent = models.ForeignKey("FormAnalysis", on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField("Название", max_length=255, blank=True, null=True)
-    outfit = models.OneToOneField(Outfit, on_delete=models.SET_NULL, blank=True, null=True,
-                               unique=True, verbose_name="Предприятия")
+    outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     average_coefficient = models.FloatField("Средний коэффициент качества", default=0, blank=True, null=True)
     coefficient = models.FloatField("Коэффициент качества", default=0, blank=True, null=True)
     tv_coefficient = models.FloatField("Коэффициент качества ТВ", default=0, blank=True, null=True)
@@ -27,8 +26,7 @@ class FormAnalysis(models.Model):
 
 
 class Punkt5(models.Model):
-    outfit = models.OneToOneField(Outfit, on_delete=models.SET_NULL, blank=True,
-                               unique=True,  null=True, verbose_name="Предприятия")
+    outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
                                          verbose_name="Форма анализа", related_name="punkt5")
 
@@ -61,8 +59,7 @@ class Punkt5(models.Model):
 
 
 class Punkt7(models.Model):
-    outfit = models.OneToOneField(Outfit, on_delete=models.SET_NULL, blank=True, null=True,
-                               unique=True, verbose_name="Предприятия")
+    outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
                                          verbose_name="Форма анализа", related_name="punkt7")
 
