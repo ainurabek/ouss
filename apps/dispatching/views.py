@@ -396,12 +396,12 @@ class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True, callsorevent=False).exclude(index1__index='4')
-
-
+    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True,
+                                                          callsorevent=False).exclude(index1__index='4')
 
 def get_report_object(request):
     date = request.GET.get("date")
+    index = request.GET.get("index")
     if date is None or date == "":
         date = datetime.date.today()
 
@@ -409,27 +409,12 @@ def get_report_object(request):
     all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1__index='4')
     all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
+    if index is not None and index != "":
+        all_calls = all_calls.filter(index1_id=index)
     type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
     outfits = (all_event_completed | all_event_uncompleted).order_by("responsible_outfit").distinct("responsible_outfit")
     data = []
-    # data = [
-    #     {"type_journal": type.type_journal.name,
-    #      "outfits":
-    #          [{"outfit": outfit.responsible_outfit.outfit,
-    #                   "events": [
-    #                       {"event": get_event_name(event),
-    #                               "calls": [{
-    #                     "id": call.id,
-    #                     "name": get_event_name(call),
-    #                     "date_from": call.date_from,
-    #                     "date_to": call.date_to,
-    #                     "region": call.point1.point + " - " + call.point2.point,
-    #                     "index1": call.index1.name,
-    #                     "comments1": call.comments1
-    #                 }
-    #                                   for call in all_calls.filter(id_parent=event).exclude(index1_id=5)]}
-    #                              for event in all_event.filter(responsible_outfit=outfit.responsible_outfit, type_journal=type.type_journal)]}
-    #                 for outfit in outfits.filter(type_journal=type.type_journal)]} for type in type_journal]
+
     for type in type_journal:
         data.append({"type_journal": type.type_journal.name,
                      "outfit": None,
@@ -457,6 +442,7 @@ def get_report_object(request):
                              "region": None,
                              "index1": None,
                              "comments1": None})
+                calls_count = 0
                 for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
                     data.append({"outfit": None,
                                  "name": get_event_name(call),
@@ -466,10 +452,12 @@ def get_report_object(request):
                                  "region": call.point1.point + " - " + call.point2.point,
                                  "index1": call.index1.index,
                                  "comments1": call.comments1})
-
-
+                    calls_count += 1
+                if calls_count == 0:
+                    data.pop()
 
     return JsonResponse(data, safe=False)
+
 
 # чтобы передавать фронту нужно
 class OutfitWorkerGet(APIView):
@@ -483,7 +471,7 @@ class OutfitWorkerGet(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-#возможность создавать сотрудников предприятий диспетчерам
+# возможность создавать сотрудников предприятий диспетчерам
 class OutfitWorkerAPIView(ListAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerListSerializer
@@ -493,8 +481,7 @@ class OutfitWorkerAPIView(ListAPIView):
     filterset_fields = ('outfit', 'name')
 
 
-
-#создание сотрудника - Ainur
+# создание сотрудника - Ainur
 class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
@@ -502,7 +489,7 @@ class OutfitWorkerCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
-#редактирование сотрудника - Ainur
+# редактирование сотрудника - Ainur
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = OutfitWorker.objects.all()
@@ -511,7 +498,7 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
-#сотрудника удаление - Ainur
+# сотрудника удаление - Ainur
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
@@ -520,8 +507,7 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
     lookup_field = 'pk'
 
 
-
-#Создание, удаление и список комментариеиив
+# Создание, удаление и список комментариеиив
 class CommentModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -529,7 +515,8 @@ class CommentModelViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
 
-#Создание, удаление и список видо журналов
+
+# Создание, удаление и список видо журналов
 class TypeJournalModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -537,7 +524,8 @@ class TypeJournalModelViewSet(viewsets.ModelViewSet):
     serializer_class = TypeJournalSerializer
     lookup_field = 'pk'
 
-#Создание, удаление и список Reason
+
+# Создание, удаление и список Reason
 class ReasonModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -545,7 +533,8 @@ class ReasonModelViewSet(viewsets.ModelViewSet):
     serializer_class = ReasonSerializer
     lookup_field = 'pk'
 
-#Создание, удаление и список Reason
+
+# Создание, удаление и список Reason
 class IndexModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
