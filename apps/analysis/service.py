@@ -3,11 +3,20 @@ from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
 from apps.opu.objects.models import MainLineType
+from django.utils.safestring import mark_safe
+from django import template
+
+from apps.dispatching.models import Reason, Index
+from rest_framework import status
+from rest_framework.response import Response
+
+register = template.Library()
+from django.db.models import Q
 
 
 def division(a: float, b: float) -> float:
     if a != 0 and b != 0:
-        return a/b
+        return round(a/b, 2)
     return 0
 
 
@@ -86,11 +95,11 @@ def get_coefficient_rrl(downtime):
 
 def get_type_line(obj) -> int:
     if obj.object is not None:
-        return obj.object.type_line.main_line_type.id
+        return obj.object.type_line.main_line_type.name
     elif obj.circuit is not None:
-        return obj.circuit.id_object.type_line.main_line_type.id
+        return obj.circuit.id_object.type_line.main_line_type.name
     elif obj.ips is not None:
-        return obj.ips.object_id.type_line.main_line_type.id
+        return obj.ips.object_id.type_line.main_line_type.name
 
 
 def get_calls_list(all_event, obj):
@@ -123,7 +132,10 @@ def get_period_date_to(call, date_to):
 
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
-    all_event = Event.objects.filter(index1_id=3, callsorevent=False, reason_id__in=[2, 3])
+
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__in=[Reason.objects.get(name='ПВ аппаратура'),
+                                                                                    Reason.objects.get(name='Линейные ПВ')])
+
 
     if outfit is not None:
         all_event = all_event.filter(responsible_outfit_id=outfit)
@@ -146,53 +158,74 @@ def get_type_line_vls_and_kls():
     return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ВЛС")
 
 
-def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, parent_obj: FormAnalysis, user):
+def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK, parent_obj: FormAnalysis, user):
     """Создание п.5"""
     all_event = calls_filter_for_punkt5(date_from, date_to, outfit)
+    print(all_event)
     outfits = event_distinct(all_event, "responsible_outfit")
+    print(outfits)
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
     kls, vls = get_type_line_vls_and_kls()
 
     total_rep_kls = 0
     total_rep_rrl = 0
-    if outfits.count() > 0:
-        for out in outfits:
-            reason_1 = 0
-            reason_2 = 0
-            amount_of_channels = 0
-            for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
-                amount_of_channels += int(get_amount_of_channels(event))
-                if get_type_line(event) == kls.id:
-                    reason_1 += get_period_date_to(event, date_to)
-                elif get_type_line(event) == vls.id:
-                    reason_2 += get_period_date_to(event, date_to)
+    for out in outfits:
+        reason_1 = 0
+        reason_2 = 0
+        amount_of_channels = 0
+        for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
+            amount_of_channels += int(get_amount_of_channels(event))
+            if get_type_line(event) == kls.name:
+                reason_1 += get_period_date_to(event, date_to)
+            elif get_type_line(event) == vls.name:
+                reason_2 += get_period_date_to(event, date_to)
 
-            total_out_kls = reason_1*amount_of_channels
-            total_out_rrl = reason_2*amount_of_channels
-            total_rep_kls += total_out_kls
-            total_rep_rrl += total_out_rrl
-            #####################################################################################################
-            analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
-                                                        date_to=date_to, user=user, id_parent=parent_obj)
-            punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
-                                           outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
-                                           date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
+        total_out_kls = reason_1*amount_of_channels
+        total_out_rrl = reason_2*amount_of_channels
+        total_rep_kls += total_out_kls
+        total_rep_rrl += total_out_rrl
+        #####################################################################################################
+        analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
+                                                    date_to=date_to, user=user, id_parent=parent_obj)
+
+        if punkt7_AK:
+            form = FormAnalysis.objects.get(outfit=out.responsible_outfit, id_parent=punkt7_AK)
+
+            fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user, outfit=out.responsible_outfit,
+                                               total_number_kls=form.punkt7.total_number_kls,
+                                               corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
+                                               percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
+                                               coefficient_kls=form.punkt7.coefficient_kls,
+
+                                               total_number_vls=form.punkt7.total_number_vls,
+                                               corresponding_norm_vls=form.punkt7.corresponding_norm_vls,
+                                               percentage_compliance_vls=form.punkt7.percentage_compliance_vls,
+                                               coefficient_vls=form.punkt7.coefficient_vls,
+
+                                               total_number_rrl=form.punkt7.total_number_rrl,
+                                               corresponding_norm_rrl=form.punkt7.corresponding_norm_rrl,
+                                               percentage_compliance_rrl=form.punkt7.percentage_compliance_rrl,
+                                               coefficient_rrl=form.punkt7.coefficient_rrl,
+                                               )
+            total_data7 = form.punkt7.total_data7
+            TotalData.objects.create(punkt7=fin_punkt7, total_length=total_data7.total_length,
+                                     total_coefficient=total_data7.total_coefficient, kls=total_data7.kls,
+                                     vls = total_data7.vls, rrl=total_data7.rrl)
+
+        else:
             punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
                                            user=user, form_analysis=analysis_form)
-            TotalData.objects.create(punkt5=punkt5)
             TotalData.objects.create(punkt7=punkt7)
 
-    else:
-        analysis_form = FormAnalysis.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
-                                    id_parent=parent_obj)
-        punkt5 = Punkt5.objects.create(outfit_id=outfit, date_from=date_from, date_to=date_to, user=user,
-                                       form_analysis=analysis_form)
-        punkt7 = Punkt7.objects.create(outfit_id=outfit, date_to=date_to, date_from=date_from, user=user,
-                                       form_analysis=analysis_form)
+
+        punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
+                                       outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
+                                       date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
 
         TotalData.objects.create(punkt5=punkt5)
-        TotalData.objects.create(punkt7=punkt7)
+
+
 
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
@@ -311,7 +344,7 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
         if analysis_form != form:
             outfit_period_of_time_kls += analysis_form.punkt5.outfit_period_of_time_kls
             outfit_period_of_time_rrl += analysis_form.punkt5.outfit_period_of_time_rrl
-            outfit_period_of_time_vls = analysis_form.punkt5.outfit_period_of_time_vls
+            outfit_period_of_time_vls += analysis_form.punkt5.outfit_period_of_time_vls
 
             length_kls += analysis_form.punkt5.length_kls
             length_rrl += analysis_form.punkt5.length_rrl
@@ -340,6 +373,7 @@ def update_punkt5(punkt5: Punkt5):
     update_total_length(punkt5.form_analysis.id_parent.punkt5)
 
     update_republic_coefficient(punkt5.form_analysis.id_parent.punkt5)
+    update_analysis_form_coefficient(punkt5.form_analysis)
     update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
 
 
@@ -366,13 +400,14 @@ def delete_punkt5(punkt5: Punkt5):
 def update_analysis_form_coefficient(form_analysis: FormAnalysis):
     form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
                                          form_analysis.punkt7.total_data7.total_coefficient, 2)
+
     form_analysis.save()
 
 
 def update_percentage_compliance(punkt7: Punkt7):
-    punkt7.percentage_compliance_kls = division(punkt7.total_number_kls*100, punkt7.corresponding_norm_kls)
-    punkt7.percentage_compliance_rrl = division(punkt7.total_number_rrl*100, punkt7.corresponding_norm_rrl)
-    punkt7.percentage_compliance_vls = division(punkt7.total_number_vls*100, punkt7.corresponding_norm_vls)
+    punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls)*100
+    punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl)*100
+    punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls)*100
     punkt7.save()
 
 
@@ -448,6 +483,7 @@ def update_punkt7(punkt7: Punkt7):
     update_total_object(punkt7.form_analysis.id_parent.punkt7)
     update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
     update_analysis_form_coefficient(punkt7.form_analysis)
+    update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
 
 
 def delete_punkt7(punkt7: Punkt7):
@@ -469,3 +505,24 @@ def delete_punkt7(punkt7: Punkt7):
     update_republic_coefficient(analysis_form.punkt5)
 
     update_analysis_form_coefficient(analysis_form)
+
+@register.simple_tag
+def get_diff(history):
+    message = ''
+    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
+    if history and old_record:
+        delta = history.diff_against(old_record)
+        for change in delta.changes:
+            if "reason" == change.field:
+                old_reason = Reason.objects.get(pk=change.old)
+                new_reason = Reason.objects.get(pk=change.new)
+                message += "{}:{} ->-> {}".format(change.field, old_reason, new_reason)
+            elif "index1" == change.field:
+                old_index = Index.objects.get(pk=change.old)
+                new_index = Index.objects.get(pk=change.new)
+                message += "{}:{} ->-> {}".format(change.field, old_index, new_index)
+            else:
+                message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
+        return mark_safe(message)
+
+

@@ -336,7 +336,7 @@ class CreateLeftTrassaView(APIView):
             pass
         else:
             main_obj.transit.add(obj)
-            Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
+            Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
             num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else \
                 obj.circ_obj.count()
@@ -364,7 +364,7 @@ class CreateRightTrassaView(APIView):
             pass
         else:
             main_obj.transit2.add(obj)
-            Object.objects.filter(pk=pk).update(maker_trassa=request.user.profile)
+            Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
             num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else\
                 obj.circ_obj.count()

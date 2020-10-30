@@ -25,8 +25,8 @@ class HistoryEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HistoricalEvent
-        fields = ('id', 'history_id', "history_date", "history_change_reason",
-                  "history_user", 'history_type')
+        fields = ('history_id', "history_date", "history_user", 'history_type',
+                  'get_history_type_display')
         depth = 1
 
 
@@ -112,6 +112,8 @@ class Punkt7ListSerializer(serializers.ModelSerializer):
 
 
 class FormAnalysisCreateSerializer(serializers.ModelSerializer):
+    date_from = serializers.DateField(read_only=False, allow_null=False)
+    date_to = serializers.DateField(read_only=False, allow_null=False)
 
     class Meta:
         model = FormAnalysis
