@@ -204,7 +204,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
 
 class LPCreateSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Category.objects.all())
+        read_only=False, allow_null=True, queryset=Category.objects.all())
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
@@ -214,13 +214,13 @@ class LPCreateSerializer(serializers.ModelSerializer):
     point2 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Point.objects.all())
     id_outfit = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Outfit.objects.all())
+        read_only=False, allow_null=True, queryset=Outfit.objects.all())
     type_line = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=LineType.objects.all())
+        read_only=False, allow_null=True, queryset=LineType.objects.all())
     our = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeOfLocation.objects.all())
+        read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Customer.objects.all())
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
 
     class Meta:
         model = Object
@@ -242,11 +242,11 @@ class LPEditSerializer(serializers.ModelSerializer):
     type_line = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=LineType.objects.all())
     our = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=TypeOfLocation.objects.all())
+        read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
     category = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Category.objects.all())
+        read_only=False, allow_null=True, queryset=Category.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Customer.objects.all())
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
 
 
 
