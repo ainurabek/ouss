@@ -19,10 +19,11 @@ from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
-
+from apps.opu.form_customer.service import get_form_customer_diff
 
 #API
 #######################################################################################################################
+
 
 
 class CustomerFormListView(ListAPIView):
@@ -132,3 +133,23 @@ class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model_for_delete = OrderCusPhoto
+
+class FormCustomerHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        form_customer = Form_Customer.objects.get(pk=pk)
+        histories = form_customer.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_form_customer_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)

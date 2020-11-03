@@ -9,6 +9,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from apps.accounts.permissions import IsOpuOnly
+from rest_framework.views import APIView
+
+from apps.opu.customer.service import get_customer_diff
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -47,3 +50,24 @@ def customer_delete_view(request, pk):
 		else:
 			data["failure"] = "Арендатор успешно удален"
 		return Response(data=data)
+
+class CustomerHistory(APIView):
+	authentication_classes = (TokenAuthentication,)
+	permission_classes = (IsAuthenticated,)
+
+	def get(self, request, pk):
+		customer = Customer.objects.get(pk=pk)
+		histories = customer.history.all()
+		data = []
+		for h in histories:
+			a = {}
+			a['history_id'] = h.history_id
+			a['updated_date'] = h.history_date
+			a['updated_by'] = h.history_user.username
+			a['change_method'] = h.get_history_type_display()
+			a['changes'] = get_customer_diff(history=h)
+			if a['changes'] == "" and h.history_type =='~':
+				continue
+			data.append(a)
+		return Response(data, status=status.HTTP_200_OK)
+

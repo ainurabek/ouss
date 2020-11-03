@@ -3,6 +3,7 @@ from django.db import models
 from apps.opu.customer.models import Customer
 from apps.accounts.models import Profile
 from sortedm2m.fields import SortedManyToManyField
+from simple_history.models import HistoricalRecords
 
 
 class InOut(models.Model):
@@ -94,6 +95,7 @@ class Outfit(models.Model):
 	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.SET_NULL)
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+	history = HistoricalRecords(related_name='history_outfit_log')
 
 
 	class Meta:
@@ -120,6 +122,7 @@ class Point(models.Model):
 	name = models.CharField('Название', max_length=100)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
+	history = HistoricalRecords(related_name='history_point_log')
 
 	def __str__(self):
 		return self.point
@@ -153,6 +156,7 @@ class Object(models.Model):
 	add_time = models.DateTimeField(blank=True, null=True)
 	total_amount_channels = models.CharField(max_length=25, blank=True, null=True)
 	total_amount_active_channels = models.CharField(max_length=25, blank=True, null=True)
+	history = HistoricalRecords(related_name='history_object_log')
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
@@ -162,11 +166,23 @@ class Object(models.Model):
 	def __str__(self):
 		return str(self.name)
 
+class SchemaObjectPhoto(models.Model):
+	src = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
+	object = models.ManyToManyField(Object, verbose_name="Схема",
+                                 blank=True, related_name="schema_object_photo")
+
+
+class OrderObjectPhoto(models.Model):
+	src = models.ImageField('Схема', upload_to='object/order/', blank=True)
+	object = models.ManyToManyField(Object, verbose_name="Распоряжение",
+                                 blank=True, related_name="order_object_photo")
+
 
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
 	tpo_id = models.ForeignKey(TPO, on_delete=models.SET_NULL, null=True, blank=True)
+	history = HistoricalRecords(related_name='history_ip_log')
 
 	class Meta:
 		verbose_name = 'ИП'
@@ -175,4 +191,20 @@ class IP(models.Model):
 
 	def __str__(self):
 		return self.point_id.point
+
+class Order(models.Model):
+	name = models.CharField('Название', max_length=1000)
+	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
+	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+	src = models.ImageField('Распоряжение', upload_to='object/orders/', blank=True)
+	created_date = models.DateTimeField('Дата создания', auto_now_add=True, blank=True, null=True)
+	history = HistoricalRecords(related_name='history_order_log')
+
+	class Meta:
+		verbose_name = 'Распоряжение'
+		verbose_name_plural = 'Распоряжения'
+		ordering = ('id',)
+
+	def __str__(self):
+		return self.name
 

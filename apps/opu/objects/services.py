@@ -1,6 +1,7 @@
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object
 from django.http import JsonResponse
+from apps.opu.services import get_field_name_for_create_img
 
 
 def check_parent_type_of_trakt(parent):
@@ -136,3 +137,9 @@ def get_total_amount_active_channels(instance):
 #             cir = cir.id_parent
 
 
+def create_photo_for_object(model, model_photo, obj, field_name: str, request):
+    img_field, obj_field = get_field_name_for_create_img(model, model_photo)
+    for img in request.FILES.getlist(field_name):
+        kwargs = {img_field: img}
+        obj_photo = model_photo.objects.create(**kwargs)
+        obj_photo.form53.add(obj)

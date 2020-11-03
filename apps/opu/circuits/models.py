@@ -3,6 +3,7 @@ from django.db import models
 from apps.opu.objects.models import IP, Object, Category, InOut, Point
 from apps.opu.customer.models import Customer
 from sortedm2m.fields import SortedManyToManyField
+from simple_history.models import HistoricalRecords
 
 from apps.accounts.models import Profile
 
@@ -81,6 +82,7 @@ class Circuit(models.Model):
 
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
+	history = HistoricalRecords(related_name='history_circuit_log')
 
 	class Meta:
 		verbose_name = 'Канал для Формы 5.3'

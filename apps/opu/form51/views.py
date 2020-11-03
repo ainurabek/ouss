@@ -14,7 +14,7 @@ from apps.opu.objects.models import Object
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
-
+from apps.opu.form51.service import get_form51_diff
 
 
 
@@ -153,3 +153,24 @@ class SchemaPhotoDeleteView(APIView, PhotoDeleteMixin):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model = Form51
     model_for_delete = SchemaPhoto
+
+
+class Form51History(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        form51 = Form51.objects.get(pk=pk)
+        histories = form51.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_form51_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)

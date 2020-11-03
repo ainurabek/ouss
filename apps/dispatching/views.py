@@ -98,10 +98,11 @@ class EventIPCreateViewAPI(APIView):
     permission_classes = (IsAuthenticated,)
     """Создания Event"""
     def post(self, request, pk):
+
         ip = IP.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save(ips=ip, created_by=self.request.user.profile, created_at=now)
+            event = serializer.save(ips=ip, created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
@@ -134,7 +135,7 @@ class EventCircuitCreateViewAPI(APIView):
         circuit = get_object_or_404(Circuit, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save(circuit=circuit, created_by=self.request.user.profile, created_at=now)
+            event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
@@ -165,7 +166,7 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save(object=object, created_by=self.request.user.profile, created_at=now)
+            event = serializer.save(object=object, created_by=self.request.user.profile)
 
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
@@ -191,7 +192,7 @@ class EventCallsCreateViewAPI(APIView):
         previous_event = get_object_or_404(Event, pk=id)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save(id_parent=event, created_by=self.request.user.profile, created_at=now,
+            instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False, previous=previous_event)
             response = {"data": "Звонок создано успешно"}
             event.date_to = instance.date_from
@@ -275,7 +276,7 @@ class EventUnknownCreateViewAPI(APIView):
     def post(self, request):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save( created_by=self.request.user.profile, created_at=now)
+            event = serializer.save( created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
