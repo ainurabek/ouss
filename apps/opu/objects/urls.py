@@ -64,6 +64,7 @@ urlpatterns = [
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
 
+    path("amount_channel/list/", views.AmountChannelListAPIView.as_view(), name="amount_channel_list"),
 
     path('', include(router.urls))
 
