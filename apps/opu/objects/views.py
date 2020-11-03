@@ -3,7 +3,6 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
-
     Category, SchemaObjectPhoto, OrderObjectPhoto, Order, AmountChannel
 
 from rest_framework.views import APIView

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocation, \
-    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel
+    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel, Order
 
 
 

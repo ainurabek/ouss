@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-
     AmountChannel, SchemaObjectPhoto, OrderObjectPhoto, Order
 
 from ..circuits.serializers import CategorySerializer
