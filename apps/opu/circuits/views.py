@@ -45,7 +45,7 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
         instance = serializer.save(created_by=self.request.user.profile)
         if a != instance.first:
             get_total_amount_active_channels(instance=instance)
-        get_active_channels(obj= instance.id_object)
+        get_active_channels(obj=instance.id_object)
 
 class MeasureAPIView(ModelViewSet):
     authentication_classes = (TokenAuthentication,)

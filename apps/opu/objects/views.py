@@ -3,7 +3,9 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
-    Category, SchemaObjectPhoto, OrderObjectPhoto, Order
+
+    Category, SchemaObjectPhoto, OrderObjectPhoto, Order, AmountChannel
+
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -14,12 +16,12 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, OrderSerializer
+    LineTypeSerializer, AmountChannelListSerializer, OrderSerializer
+
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from apps.opu.circuits.models import Circuit
 from apps.opu.form51.models import Form51
 from apps.opu.form_customer.models import Form_Customer
 from apps.opu.objects.serializers import LPEditSerializer
@@ -28,9 +30,16 @@ from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
     update_circuit, update_total_amount_channels, create_photo_for_object
-from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
-    get_ip_diff, get_order_diff, get_point_diff, get_outfit_diff
 
+from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
+get_ip_diff, get_order_diff, get_point_diff, get_outfit_diff
+
+
+class AmountChannelListAPIView(ListAPIView):
+    queryset = AmountChannel.objects.all()
+    serializer_class = AmountChannelListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -176,9 +185,10 @@ class LPCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user.profile,
-                                   total_amount_channels=self.request.data["amount_channels"], total_amount_active_channels="0")
-        create_circuit(model=Circuit, obj=instance, request=self.request)
+        instance = serializer.save(created_by=self.request.user.profile)
+        instance.total_amount_channels = instance.amount_channels.value
+        instance.save()
+        create_circuit(obj=instance, request=self.request)
         update_total_amount_channels(obj=instance)
         create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
                                 obj=instance, field_name="schema", request=self.request)
@@ -194,10 +204,9 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
-        old_obj= save_old_object(self.get_object())
+        old_obj = save_old_object(self.get_object())
         instance = serializer.save(created_by=self.request.user.profile)
-        update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
-
+        update_circuit(old_obj=old_obj, obj=instance)
 
 
 class ObjectAllView(viewsets.ModelViewSet):
@@ -233,7 +242,6 @@ class ObjectDetailView(RetrieveDestroyAPIView):
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
-
 # ПГ ВГ ТГ ЧГ РГ
 
 
@@ -249,7 +257,6 @@ class ObjectCreateView(APIView):
         if check_parent_type_of_trakt(parent):
             type_obj = get_type_of_trakt(parent)
             request.data["type_of_trakt"] = type_obj.pk
-
         if serializer.is_valid():
             instance = serializer.save(
                 id_parent=parent,
@@ -258,11 +265,10 @@ class ObjectCreateView(APIView):
                 our=parent.our,
                 created_by=request.user.profile,
                 name=parent.name+'-'+request.data["name"],
-                total_amount_channels=request.data['amount_channels'],
-                total_amount_active_channels = "0"
             )
-
-            create_circuit(model=Circuit, obj=instance, request=request)
+            instance.total_amount_channels = instance.amount_channels.value
+            instance.save()
+            create_circuit(obj=instance, request=request)
             update_total_amount_channels(obj=instance)
             create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
                                     obj=instance, field_name="schema", request=request)
@@ -284,7 +290,7 @@ class ObjectEditView(APIView):
         serializer = ObjectCreateSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            update_circuit(model=Circuit, old_obj=old_obj, obj=instance)
+            update_circuit(old_obj=old_obj, obj=instance)
             response = {"data": "Объект успешно отредактирован"}
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

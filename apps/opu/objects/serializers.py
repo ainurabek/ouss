@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    SchemaObjectPhoto, OrderObjectPhoto, Order
+
+    AmountChannel, SchemaObjectPhoto, OrderObjectPhoto, Order
+
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
@@ -297,7 +299,6 @@ class ObjectSerializer(serializers.ModelSerializer):
                   'order_object_photo', 'schema_object_photo')
 
 
-
 class ObjectCreateSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Category.objects.all())
@@ -319,14 +320,13 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
 
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
-
-
+    amount_channels = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=AmountChannel.objects.all())
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
-                  'point1', 'tpo2', 'point2', 'type_of_trakt',
-               'amount_channels', 'our', 'num',
+                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our', 'num',
                   'transit', 'transit2', 'category', 'comments', 'customer')
 
 
@@ -374,7 +374,14 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
         fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer')
 
 
+class AmountChannelListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AmountChannel
+        fields = ("id", "name")
+
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'name', 'src', 'created_date')
+

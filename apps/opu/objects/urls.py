@@ -65,6 +65,8 @@ urlpatterns = [
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
 
+    path("amount_channel/list/", views.AmountChannelListAPIView.as_view(), name="amount_channel_list"),
+
 #orderphoto
     path("orderphoto/create/<int:pk>/", views.ObjectOrderPhotoCreateView.as_view()),
     path("orderphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.ObjectOrderPhotoDeleteView.as_view()),
@@ -78,7 +80,6 @@ urlpatterns = [
     path("history/order/<int:pk>/", views.OrderHistory.as_view(), name='order_history'),
     path("history/point/<int:pk>/", views.PointHistory.as_view(), name='point_history'),
     path("history/outfit/<int:pk>/", views.OutfitHistory.as_view(), name='outfit_history'),
-
 
     path('', include(router.urls))
 
