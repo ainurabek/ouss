@@ -24,6 +24,8 @@ urlpatterns = [
     path("api/ordercusphoto/create/<int:pk>/", views.OrderCusPhotoCreateView.as_view()),
     path("api/ordercusphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderCusPhotoDeleteView.as_view()),
 
+    path("history/form_customer/<int:pk>/", views.FormCustomerHistory.as_view(), name='form_customer_history'),
+
 
     path('', include(router.urls))
 ]

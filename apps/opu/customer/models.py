@@ -1,4 +1,5 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 # Create your models here.
 
@@ -11,6 +12,7 @@ class Customer(models.Model):
 	reuisits = models.CharField('Реквизиты', max_length=200, blank=True, null=True)
 	created_at = models.DateField('Дата', auto_now_add=True)
 	adding = models.CharField("Примечание", max_length=250, blank=True, null=True)
+	history = HistoricalRecords(related_name='history_customer_log')
 
 
 

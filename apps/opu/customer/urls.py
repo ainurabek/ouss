@@ -15,6 +15,8 @@ urlpatterns = [
     url(r'^edit/(?P<pk>\S+)/$', CustomerEditView.as_view(), name='customer_edit'),
     url(r'^delete/(?P<pk>\S+)/$', views.customer_delete_view, name='customer_delete'),
 
+    path("history/customer/<int:pk>/", views.CustomerHistory.as_view(), name='customer_history'),
+
     path('', include(router.urls))
 
 ]

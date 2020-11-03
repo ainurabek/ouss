@@ -13,10 +13,12 @@ from apps.opu.form53.serializers import Region53Serializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.form53.services import create_photo_for_form53
 from apps.opu.services import PhotoDeleteMixin
+from apps.opu.form53.services import get_form53_diff
 
 
 # API
 #############################################################################################
+
 
 
 class Form53CreateViewAPI(APIView):
@@ -138,3 +140,24 @@ class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model_for_delete = Schema53Photo
+
+
+class Form53History(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        form53 = Form53.objects.get(pk=pk)
+        histories = form53.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_form53_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)

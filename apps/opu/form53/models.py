@@ -3,6 +3,7 @@
 from apps.opu.circuits.models import Circuit
 from django.db import models
 from apps.accounts.models import Profile
+from simple_history.models import HistoricalRecords
 
 
 
@@ -12,6 +13,7 @@ class Form53(models.Model):
     comments = models.CharField(max_length=100, blank=True, null=True)
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords(related_name='history_form53_log')
 
     class Meta:
         verbose_name = 'Форма 5.3'

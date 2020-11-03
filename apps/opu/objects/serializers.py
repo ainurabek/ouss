@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel
+
+    AmountChannel, SchemaObjectPhoto, OrderObjectPhoto, Order
+
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
@@ -179,6 +181,15 @@ class LPSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2', 'num')
 
+class ObjectOrderPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderObjectPhoto
+        fields = ("id", "src")
+
+class ObjectSchemaPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchemaObjectPhoto
+        fields = ("id", "src")
 
 class LPDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
@@ -193,12 +204,15 @@ class LPDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
+    order_object_photo = ObjectOrderPhotoSerializer(many=True)
+    schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels', 'total_amount_active_channels')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels',
+                  'total_amount_active_channels', 'order_object_photo', 'schema_object_photo')
 
         depth = 1
 
@@ -258,6 +272,7 @@ class LPEditSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+
 class ObjectSerializer(serializers.ModelSerializer):
     id_parent=ParentSerializer()
     tpo1 = TPOSerializer()
@@ -273,12 +288,15 @@ class ObjectSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
+    order_object_photo = ObjectOrderPhotoSerializer(many=True)
+    schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object", 'num', 'amount_channels', "total_amount_channels", 'total_amount_active_channels')
+                  "ip_object", 'num', 'amount_channels', "total_amount_channels", 'total_amount_active_channels',
+                  'order_object_photo', 'schema_object_photo')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -361,3 +379,9 @@ class AmountChannelListSerializer(serializers.ModelSerializer):
     class Meta:
         model = AmountChannel
         fields = ("id", "name")
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('id', 'name', 'src', 'created_date')
+

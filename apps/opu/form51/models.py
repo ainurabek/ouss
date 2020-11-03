@@ -2,6 +2,7 @@ from django.db import models
 from apps.accounts.models import Profile
 from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Object
+from simple_history.models import HistoricalRecords
 
 class Region(models.Model):
     name = models.CharField(max_length=150)
@@ -28,6 +29,7 @@ class Form51(models.Model):
     reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)
     report_num = models.CharField('Номер донесения', max_length=200, blank=True, null=True)
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
+    history = HistoricalRecords(related_name='history_form51_log')
 
     class Meta:
         verbose_name = 'Форма 5.1'

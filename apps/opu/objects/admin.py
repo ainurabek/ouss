@@ -3,6 +3,7 @@ from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocat
     TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel
 
 
+
 class IpInline(admin.StackedInline):
     model = IP
     can_delete = True
@@ -57,6 +58,9 @@ admin.site.register(TypeOfTrakt)
 admin.site.register(TypeOfLocation)
 admin.site.register(LineType)
 admin.site.register(Category)
+
+
+admin.site.register(Order)
 
 admin.site.register(IP)
 

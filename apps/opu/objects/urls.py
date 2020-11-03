@@ -18,6 +18,7 @@ router.register('lp', views.LPListView, basename='lp_list')
 router.register('objects', views.ObjectAllView, basename='all_objects')
 router.register('line-type', views.LineTypeAPIVIew, basename='line_type')
 router.register('category', views.CategoryAPIVIew, basename='category')
+router.register('order', views.OrderAPIVIew, basename='order')
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
 router.register('in-out', views.InOutAPIVIew, basename='in_out')
 
@@ -65,6 +66,20 @@ urlpatterns = [
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
 
     path("amount_channel/list/", views.AmountChannelListAPIView.as_view(), name="amount_channel_list"),
+
+#orderphoto
+    path("orderphoto/create/<int:pk>/", views.ObjectOrderPhotoCreateView.as_view()),
+    path("orderphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.ObjectOrderPhotoDeleteView.as_view()),
+
+#schemaphoto
+    path("schemaphoto/create/<int:pk>/", views.ObjectSchemaPhotoCreateView.as_view()),
+    path("schemaphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.ObjectSchemaPhotoDeleteView.as_view()),
+
+    path("history/obj/<int:pk>/", views.ObjectHistory.as_view(), name='object_history'),
+    path("history/ip/<int:pk>/", views.IPHistory.as_view(), name='ip_history'),
+    path("history/order/<int:pk>/", views.OrderHistory.as_view(), name='order_history'),
+    path("history/point/<int:pk>/", views.PointHistory.as_view(), name='point_history'),
+    path("history/outfit/<int:pk>/", views.OutfitHistory.as_view(), name='outfit_history'),
 
     path('', include(router.urls))
 

@@ -3,7 +3,7 @@ from apps.accounts.models import Profile
 from apps.opu.customer.models import Customer
 from apps.opu.objects.models import Object
 from apps.opu.circuits.models import Circuit
-
+from simple_history.models import HistoricalRecords
 
 class Signalization(models.Model):
     name = models.CharField('Название', max_length=100)
@@ -30,6 +30,7 @@ class Form_Customer(models.Model):
     comments = models.CharField("Примечание", max_length=250, blank=True, null=True)
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    history = HistoricalRecords(related_name='history_form_customer_log')
 
     class Meta:
         verbose_name = 'Форма для Арендаторов'

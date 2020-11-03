@@ -3,7 +3,9 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
-    Category, AmountChannel
+
+    Category, SchemaObjectPhoto, OrderObjectPhoto, Order, AmountChannel
+
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +16,8 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, AmountChannelListSerializer
+    LineTypeSerializer, AmountChannelListSerializer, OrderSerializer
+
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -26,8 +29,10 @@ from apps.opu.objects.serializers import LPDetailSerializer
 from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
-    update_circuit, update_total_amount_channels
-from apps.opu.services import ListWithPKMixin
+    update_circuit, update_total_amount_channels, create_photo_for_object
+
+from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
+get_ip_diff, get_order_diff, get_point_diff, get_outfit_diff
 
 
 class AmountChannelListAPIView(ListAPIView):
@@ -185,6 +190,10 @@ class LPCreateView(generics.CreateAPIView):
         instance.save()
         create_circuit(obj=instance, request=self.request)
         update_total_amount_channels(obj=instance)
+        create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
+                                obj=instance, field_name="schema", request=self.request)
+        create_photo_for_object(model=Object, model_photo=OrderObjectPhoto,
+                                obj=instance, field_name="order", request=self.request)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -261,6 +270,10 @@ class ObjectCreateView(APIView):
             instance.save()
             create_circuit(obj=instance, request=request)
             update_total_amount_channels(obj=instance)
+            create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
+                                    obj=instance, field_name="schema", request=request)
+            create_photo_for_object(model=Object, model_photo=OrderObjectPhoto,
+                                    obj=instance, field_name="order", request=request)
             response = {"data": "Объект успешно создан"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -607,3 +620,138 @@ class CategoryAPIVIew(ModelViewSet):
     queryset = Category.objects.all()
 
 
+class ObjectOrderPhotoCreateView(APIView, PhotoCreateMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Object
+    model_photo = OrderObjectPhoto
+    search_field_for_img = "order"
+
+
+class ObjectOrderPhotoDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Object
+    model_for_delete = OrderObjectPhoto
+
+
+class ObjectSchemaPhotoCreateView(APIView, PhotoCreateMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Object
+    model_photo = SchemaObjectPhoto
+    search_field_for_img = "schema"
+
+
+class ObjectSchemaPhotoDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Object
+    model_for_delete = SchemaObjectPhoto
+
+class OrderAPIVIew(ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = Order.objects.all()
+
+class ObjectHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        object = Object.objects.get(pk=pk)
+        histories = object.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_object_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)
+
+class IPHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        ip = IP.objects.get(pk=pk)
+        histories = ip.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_ip_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)
+
+class OrderHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        order = Order.objects.get(pk=pk)
+        histories = order.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_order_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)
+
+class PointHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        point = Point.objects.get(pk=pk)
+        histories = point.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_point_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)
+
+class OutfitHistory(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        outfit = Outfit.objects.get(pk=pk)
+        histories = outfit.history.all()
+        data = []
+        for h in histories:
+            a = {}
+            a['history_id'] = h.history_id
+            a['updated_date'] = h.history_date
+            a['updated_by'] = h.history_user.username
+            a['change_method'] = h.get_history_type_display()
+            a['changes'] = get_outfit_diff(history=h)
+            if a['changes'] == "" and h.history_type =='~':
+                continue
+            data.append(a)
+        return Response(data, status=status.HTTP_200_OK)

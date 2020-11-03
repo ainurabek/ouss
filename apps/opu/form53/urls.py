@@ -27,6 +27,8 @@ urlpatterns = [
     path("api/schema53photo/create/<int:pk>/", views.Schema53PhotoCreateView.as_view()),
     path("api/schema53photo/delete/<int:obj_pk>/<int:deleted_pk>/", views.Schema53PhotoDeleteView.as_view()),
 
+    path("history/form53/<int:pk>/", views.Form53History.as_view(), name='form53_history'),
+
     path('', include(router.urls))
 ]
 
