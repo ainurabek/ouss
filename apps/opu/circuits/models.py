@@ -71,12 +71,12 @@ class Circuit(models.Model):
 	transit = SortedManyToManyField("Circuit", related_name='cir_transit_obj1', blank=True)
 	transit2 = SortedManyToManyField("Circuit", related_name='cir_transit_obj2', blank=True)
 	in_out = models.ForeignKey(InOut, related_name='circ_in', on_delete=models.SET_NULL, blank=True, null=True)
-	first = models.BooleanField('Используется/Не используется', default = False)
+	first = models.BooleanField('Используется/Не используется', default = True)
 
 	point1 = models.ForeignKey(Point, related_name='circ_ip1', on_delete=models.SET_NULL, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='circ_ip2', on_delete=models.SET_NULL, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='circ_cust', on_delete=models.SET_NULL, blank=True, null=True)
-	id_object = models.ForeignKey(Object, related_name='circ_obj', on_delete=models.CASCADE, blank=True, null=True)
+	id_object = models.ManyToManyField(Object, related_name='circ_obj', blank=True)
 	mode = models.ForeignKey(Mode, related_name='circ_mode', on_delete=models.SET_NULL, blank=True, null=True)
 	type_com = models.ForeignKey(TypeCom, related_name='circ_type_com', on_delete=models.SET_NULL, blank=True, null=True)
 

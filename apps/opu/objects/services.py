@@ -34,11 +34,28 @@ def get_type_of_trakt(parent_obj: Object):
 
 
 def create_circuit(obj: Object, request):
-    if obj.amount_channels:
-        for num_cir in range(1, obj.amount_channels.value+1):
-            Circuit.objects.create(name=obj.name + '/' + str(num_cir), id_object=obj, num_circuit=num_cir,
-                                 category=obj.category, point1=obj.point1, point2=obj.point2,
-                                 created_by=request.user.profile)
+    if obj.type_of_trakt.name == 'ПГ':
+        if obj.amount_channels:
+            for num_cir in range(1, obj.amount_channels.value+1):
+                c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
+                                     category=obj.category, point1=obj.point1, point2=obj.point2,
+                                     created_by=request.user.profile)
+                obj.circ_obj.add(c)
+            id_parent = obj.id_parent
+
+            while True:
+                if id_parent.id_parent is None:
+                    id_parent.circ_obj.add(*obj.circ_obj.all())
+                    id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
+                    id_parent.total_amount_channels = id_parent.circ_obj.count()
+                    id_parent.save()
+                    break
+                id_parent.circ_obj.add(*obj.circ_obj.all())
+                id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
+                id_parent.total_amount_channels = id_parent.circ_obj.count()
+                id_parent.save()
+                id_parent = id_parent.id_parent
+
 
 
 def save_old_object(obj):
@@ -86,18 +103,21 @@ def update_total_amount_channels(obj: Object, flag=True):
             _update_object_total_amount_channels(obj, flag, count)
 
 
+
 def get_active_channels(obj: Object):
     active_channels = Circuit.objects.filter(first=True, id_object=obj).count()
     Object.objects.filter(pk=obj.pk).update(num=active_channels)
+
+
 
 
 def get_total_amount_active_channels(instance: Circuit):
     cir = instance.id_object
     while True:
         if instance.first:
-            cir.total_amount_active_channels = cir.total_amount_active_channels + 1
-        else:
             cir.total_amount_active_channels = cir.total_amount_active_channels - 1
+        else:
+            cir.total_amount_active_channels = cir.total_amount_active_channels + 1
 
         cir.save()
 

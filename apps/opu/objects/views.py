@@ -186,9 +186,11 @@ class LPCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
         instance.total_amount_channels = instance.amount_channels.value
+        instance.total_amount_active_channels = instance.amount_channels.value
         instance.save()
-        create_circuit(obj=instance, request=self.request)
-        update_total_amount_channels(obj=instance)
+
+        # create_circuit(obj=instance, request=self.request)
+        # update_total_amount_channels(obj=instance)
         create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
                                 obj=instance, field_name="schema", request=self.request)
         create_photo_for_object(model=Object, model_photo=OrderObjectPhoto,
@@ -266,9 +268,11 @@ class ObjectCreateView(APIView):
                 name=parent.name+'-'+request.data["name"],
             )
             instance.total_amount_channels = instance.amount_channels.value
+            instance.total_amount_active_channels = instance.amount_channels.value
             instance.save()
+
             create_circuit(obj=instance, request=request)
-            update_total_amount_channels(obj=instance)
+            # update_total_amount_channels(obj=instance)
             create_photo_for_object(model=Object, model_photo=SchemaObjectPhoto,
                                     obj=instance, field_name="schema", request=request)
             create_photo_for_object(model=Object, model_photo=OrderObjectPhoto,
