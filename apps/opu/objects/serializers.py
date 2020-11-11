@@ -235,6 +235,8 @@ class LPCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
+    amount_channels = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=AmountChannel.objects.all())
 
     class Meta:
         model = Object

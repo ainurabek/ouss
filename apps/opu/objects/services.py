@@ -34,7 +34,7 @@ def get_type_of_trakt(parent_obj: Object):
 
 
 def create_circuit(obj: Object, request):
-    if obj.amount_channels.auto_add:
+    if obj.amount_channels:
         for num_cir in range(1, obj.amount_channels.value+1):
             Circuit.objects.create(name=obj.name + '/' + str(num_cir), id_object=obj, num_circuit=num_cir,
                                  category=obj.category, point1=obj.point1, point2=obj.point2,
