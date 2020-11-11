@@ -45,7 +45,8 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         a = bool(self.get_object().first)
         instance = serializer.save(created_by=self.request.user.profile)
-        update_circuit_fisrt(obj=instance.id_object.all()[0])
+        print(instance.id_object.all())
+        update_circuit_fisrt(obj=instance.id_object.all().last())
         # if a != instance.first:
         #     get_total_amount_active_channels(instance=instance)
         # get_active_channels(obj=instance.id_object)

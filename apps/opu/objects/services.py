@@ -55,7 +55,7 @@ def create_circuit(obj: Object, request):
                 c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
                                      category=obj.category, point1=obj.point1, point2=obj.point2,
                                      created_by=request.user.profile)
-                obj.circ_obj.add(c)
+                c.id_object.add(obj)
             update_circuit_fisrt(obj=obj)
 
 
