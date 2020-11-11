@@ -20,6 +20,8 @@ from apps.opu.objects.models import Object
 
 from apps.opu.circuits.service import get_circuit_diff
 
+from apps.opu.objects.services import update_circuit_fisrt
+
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
@@ -43,6 +45,7 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         a = bool(self.get_object().first)
         instance = serializer.save(created_by=self.request.user.profile)
+        update_circuit_fisrt(obj=instance.id_object.all()[0])
         # if a != instance.first:
         #     get_total_amount_active_channels(instance=instance)
         # get_active_channels(obj=instance.id_object)

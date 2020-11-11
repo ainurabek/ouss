@@ -32,6 +32,21 @@ def get_type_of_trakt(parent_obj: Object):
         return type_obj
     return None
 
+def update_circuit_fisrt(obj:Object):
+    id_parent = obj.id_parent
+
+    while True:
+        if id_parent.id_parent is None:
+            id_parent.circ_obj.add(*obj.circ_obj.all())
+            id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
+            id_parent.total_amount_channels = id_parent.circ_obj.count()
+            id_parent.save()
+            break
+        id_parent.circ_obj.add(*obj.circ_obj.all())
+        id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
+        id_parent.total_amount_channels = id_parent.circ_obj.count()
+        id_parent.save()
+        id_parent = id_parent.id_parent
 
 def create_circuit(obj: Object, request):
     if obj.type_of_trakt.name == 'ПГ':
@@ -41,21 +56,7 @@ def create_circuit(obj: Object, request):
                                      category=obj.category, point1=obj.point1, point2=obj.point2,
                                      created_by=request.user.profile)
                 obj.circ_obj.add(c)
-            id_parent = obj.id_parent
-
-            while True:
-                if id_parent.id_parent is None:
-                    id_parent.circ_obj.add(*obj.circ_obj.all())
-                    id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
-                    id_parent.total_amount_channels = id_parent.circ_obj.count()
-                    id_parent.save()
-                    break
-                id_parent.circ_obj.add(*obj.circ_obj.all())
-                id_parent.total_amount_active_channels = id_parent.circ_obj.filter(first=True).count()
-                id_parent.total_amount_channels = id_parent.circ_obj.count()
-                id_parent.save()
-                id_parent = id_parent.id_parent
-
+            update_circuit_fisrt(obj=obj)
 
 
 def save_old_object(obj):
