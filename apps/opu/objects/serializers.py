@@ -16,6 +16,11 @@ class PointList(serializers.ModelSerializer):
         model = Point
         fields = ('id', 'point')
 
+class AmountChannelListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AmountChannel
+        fields = ("id", "name", 'value')
 
 class LineTypeSerializer(serializers.ModelSerializer):
 
@@ -205,6 +210,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()
     order_object_photo = ObjectOrderPhotoSerializer(many=True)
     schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
+    amount_channels = AmountChannelListSerializer()
 
     class Meta:
         model = Object
@@ -291,6 +297,7 @@ class ObjectSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()
     order_object_photo = ObjectOrderPhotoSerializer(many=True)
     schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
+    amount_channels = AmountChannelListSerializer()
 
     class Meta:
         model = Object
@@ -375,11 +382,7 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
         fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer')
 
 
-class AmountChannelListSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = AmountChannel
-        fields = ("id", "name")
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
