@@ -167,8 +167,8 @@ class Object(models.Model):
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
-	total_amount_channels = models.CharField(max_length=25, blank=True, null=True)
-	total_amount_active_channels = models.CharField(max_length=25, blank=True, null=True)
+	total_amount_channels = models.IntegerField(default=0, blank=True, null=True)
+	total_amount_active_channels = models.IntegerField(default=0, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_object_log')
 
 

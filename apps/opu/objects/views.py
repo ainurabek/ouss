@@ -654,6 +654,8 @@ class OrderAPIVIew(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
     queryset = Order.objects.all()
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('created_date', 'name',)
 
 class ObjectHistory(APIView):
     authentication_classes = (TokenAuthentication,)
