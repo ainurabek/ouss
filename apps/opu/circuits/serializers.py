@@ -72,7 +72,7 @@ class TransitCircSerializer(serializers.ModelSerializer):
         fields = ('id', 'point1', 'name', 'point2')
 
 class CircuitList(serializers.ModelSerializer):
-    id_object = ObjectCircSerializer()
+    # id_object = ObjectCircSerializer()
     point1=PointCircSerializer()
     point2=PointCircSerializer()
     transit = TransitCircSerializer(many=True)

@@ -1,3 +1,4 @@
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
@@ -43,7 +44,11 @@ class ListWithPKMixin:
     def get(self, request, pk):
         kwargs = {self.field_for_filter: pk}
         object = self.model.objects.filter(**kwargs).order_by('-id')
+
+
         serializer = self.serializer(object, many=True)
+
+
         return Response(serializer.data)
 
 
