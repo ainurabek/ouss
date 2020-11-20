@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel, SchemaObjectPhoto, OrderObjectPhoto, Order
+    AmountChannel
 
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
@@ -104,7 +104,7 @@ class PointListSerializer(serializers.ModelSerializer):
     id_outfit = OutfitListSerializer()
     class Meta:
         model = Point
-        fields = ('id', 'point', 'name', 'id_outfit', 'tpo')
+        fields = ('id', 'point', 'name', 'id_outfit', 'tpo', 'region', 'type_equipment')
         depth = 1
 
 
@@ -116,7 +116,7 @@ class PointCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Point
-        fields = ('point', 'name', 'id_outfit', 'tpo')
+        fields = ('point', 'name', 'id_outfit', 'tpo', 'region', 'type_equipment')
         depth = 1
 
 
@@ -185,15 +185,6 @@ class LPSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2', 'num')
 
-class ObjectOrderPhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderObjectPhoto
-        fields = ("id", "src")
-
-class ObjectSchemaPhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SchemaObjectPhoto
-        fields = ("id", "src")
 
 class LPDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
@@ -208,8 +199,6 @@ class LPDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
-    order_object_photo = ObjectOrderPhotoSerializer(many=True)
-    schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
     amount_channels = AmountChannelListSerializer()
 
     class Meta:
@@ -217,7 +206,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
                   'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels',
-                  'total_amount_active_channels', 'order_object_photo', 'schema_object_photo')
+                  'total_amount_active_channels')
 
         depth = 1
 
@@ -295,8 +284,6 @@ class ObjectSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
-    order_object_photo = ObjectOrderPhotoSerializer(many=True)
-    schema_object_photo = ObjectSchemaPhotoSerializer(many=True)
     amount_channels = AmountChannelListSerializer()
 
     class Meta:
@@ -304,7 +291,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
                   "ip_object", 'num', 'amount_channels', "total_amount_channels", 'total_amount_active_channels',
-                  'order_object_photo', 'schema_object_photo')
+                  'order', 'src')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -335,7 +322,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our', 'num',
-                  'transit', 'transit2', 'category', 'comments', 'customer')
+                  'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):
@@ -382,10 +369,4 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
         fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer')
 
 
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ('id', 'name', 'src', 'created_date')
 

@@ -143,16 +143,6 @@ def get_ip_diff(history):
         return mark_safe(message)
 
 @register.simple_tag
-def get_order_diff(history):
-    message = ''
-    old_record = history.instance.history_order_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
-    if history and old_record:
-        delta = history.diff_against(old_record)
-        for change in delta.changes:
-            message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
-        return mark_safe(message)
-
-@register.simple_tag
 def get_point_diff(history):
     message = ''
     old_record = history.instance.history_point_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()

@@ -95,9 +95,10 @@ class LogoutView(APIView):
         if request.user.role.id == 1:
             pass
         else:
-            profile = Profile.objects.get(user__username=request.user.username)
-            profile.online = False
-            profile.save()
+            if request.user.is_profile_created:
+                profile = Profile.objects.get(user__username=request.user.username)
+                profile.online = False
+                profile.save()
         logout(request)
         return Response(status=status.HTTP_200_OK)
 

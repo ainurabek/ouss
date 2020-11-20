@@ -157,3 +157,6 @@ def create_photo_for_object(model, model_photo, obj, field_name: str, request):
         obj_photo = model_photo.objects.create(**kwargs)
         obj_photo.form53.add(obj)
 
+def adding_an_object_to_trassa(obj: Object):
+    obj.transit.add(obj)
+

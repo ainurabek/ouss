@@ -21,8 +21,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
 	authentication_classes = (TokenAuthentication,)
 	permission_classes = (IsAuthenticated,)
 	filter_backends = (SearchFilter, DjangoFilterBackend)
-	search_fields = ('customer', 'abr', 'adding', 'contact_name')
-	filterset_fields =  ('customer', 'abr', 'adding', 'contact_name')
+	search_fields = ('customer', 'abr', 'adding', 'contact_name', 'diapozon')
+	filterset_fields =  ('customer', 'abr', 'adding', 'contact_name', 'diapozon')
 
 
 class CustomerEditView(generics.RetrieveUpdateAPIView):

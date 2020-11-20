@@ -122,6 +122,8 @@ class Point(models.Model):
 	name = models.CharField('Название', max_length=100)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
+	region = models.CharField('Район', max_length=150, blank=True, null=True)
+	type_equipment = models.CharField('Тип оборудования', max_length=150, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_point_log')
 
 	def __str__(self):
@@ -169,6 +171,8 @@ class Object(models.Model):
 	add_time = models.DateTimeField(blank=True, null=True)
 	total_amount_channels = models.IntegerField(default=0, blank=True, null=True)
 	total_amount_active_channels = models.IntegerField(default=0, blank=True, null=True)
+	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
+	src = models.ImageField('Скан распоряжения', upload_to='object/orders/', blank=True)
 	history = HistoricalRecords(related_name='history_object_log')
 
 
@@ -179,18 +183,6 @@ class Object(models.Model):
 
 	def __str__(self):
 		return str(self.name)
-
-class SchemaObjectPhoto(models.Model):
-	src = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
-	object = models.ManyToManyField(Object, verbose_name="Схема",
-                                 blank=True, related_name="schema_object_photo")
-
-
-class OrderObjectPhoto(models.Model):
-	src = models.ImageField('Схема', upload_to='object/order/', blank=True)
-	object = models.ManyToManyField(Object, verbose_name="Распоряжение",
-                                 blank=True, related_name="order_object_photo")
-
 
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
@@ -207,19 +199,4 @@ class IP(models.Model):
 		return self.point_id.point
 
 
-class Order(models.Model):
-	name = models.CharField('Название', max_length=1000)
-	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
-	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-	src = models.ImageField('Распоряжение', upload_to='object/orders/', blank=True)
-	created_date = models.DateTimeField('Дата создания', auto_now_add=True, blank=True, null=True)
-	history = HistoricalRecords(related_name='history_order_log')
-
-	class Meta:
-		verbose_name = 'Распоряжение'
-		verbose_name_plural = 'Распоряжения'
-		ordering = ('id',)
-
-	def __str__(self):
-		return self.name
 

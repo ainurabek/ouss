@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocation, \
-    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel, Order
+    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel
 
 
 
@@ -58,10 +58,6 @@ admin.site.register(TypeOfTrakt)
 admin.site.register(TypeOfLocation)
 admin.site.register(LineType)
 admin.site.register(Category)
-
-
-admin.site.register(Order)
-
 admin.site.register(IP)
 
 admin.site.register(OutfitWorker)
