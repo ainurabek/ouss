@@ -27,12 +27,11 @@ from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
 from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
-from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, create_circuit, save_old_object, \
-    update_circuit, update_total_amount_channels, create_photo_for_object
+from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, save_old_object, \
+    update_circuit, update_total_amount_channels
 
 from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
 get_ip_diff, get_point_diff, get_outfit_diff
-
 from apps.opu.objects.services import adding_an_object_to_trassa
 
 
@@ -62,6 +61,7 @@ class TPOCreateView(generics.CreateAPIView):
 
     def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
+
 
 
 class TPOEditView(generics.RetrieveUpdateAPIView):
@@ -189,14 +189,8 @@ class LPCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
         instance.total_amount_channels = instance.amount_channels.value
-        instance.total_amount_active_channels = instance.amount_channels.value
         instance.save()
-
         adding_an_object_to_trassa(obj=instance)
-
-        # create_circuit(obj=instance, request=self.request)
-        # update_total_amount_channels(obj=instance)
-
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -239,7 +233,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        update_total_amount_channels(obj=instance, flag=False)
+        update_total_amount_channels(instance=instance, flag=False)
         self.perform_destroy(instance)
         response = {"data": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -269,14 +263,12 @@ class ObjectCreateView(APIView):
                 created_by=request.user.profile,
                 name=parent.name+'-'+request.data["name"],
             )
+            # if instance.type_of_trakt.name == 'ПГ':
             instance.total_amount_channels = instance.amount_channels.value
-            instance.total_amount_active_channels = instance.amount_channels.value
             instance.save()
-
-            create_circuit(obj=instance, request=request)
+            # create_circuit(obj=instance, request=request)
             adding_an_object_to_trassa(obj=instance)
-            # update_total_amount_channels(obj=instance)
-
+            update_total_amount_channels(instance=instance)
             response = {"data": "Объект успешно создан"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

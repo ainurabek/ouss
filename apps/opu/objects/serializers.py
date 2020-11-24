@@ -183,7 +183,7 @@ class LPSerializer(serializers.ModelSerializer):
     point2 = PointList()
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2', 'num')
+        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2')
 
 
 class LPDetailSerializer(serializers.ModelSerializer):
@@ -205,8 +205,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'num', 'total_amount_channels',
-                  'total_amount_active_channels')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels')
 
         depth = 1
 
@@ -264,7 +263,7 @@ class LPEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'customer', 'num')
+        'comments', 'customer')
         depth = 1
 
 
@@ -290,8 +289,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object", 'num', 'amount_channels', "total_amount_channels", 'total_amount_active_channels',
-                  'order', 'src')
+                  "ip_object",  'amount_channels', "total_amount_channels",'order', 'src')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -321,7 +319,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
-                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our', 'num',
+                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
 

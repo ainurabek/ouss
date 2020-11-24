@@ -14,13 +14,16 @@ from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
 from django.http import JsonResponse
 
-from apps.opu.objects.services import get_active_channels, get_total_amount_active_channels
+# from apps.opu.objects.services import get_active_channels, get_total_amount_active_channels
 
 from apps.opu.objects.models import Object
 
 from apps.opu.circuits.service import get_circuit_diff
 
-from apps.opu.objects.services import update_circuit_fisrt
+# from apps.opu.objects.services import update_circuit_fisrt
+from apps.opu.circuits.service import create_circuit
+
+from apps.opu.circuits.service import update_circuit_active
 
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
@@ -34,6 +37,15 @@ class CircuitListViewSet(APIView, ListWithPKMixin):
     serializer = CircuitList
     field_for_filter = "id_object"
 
+class CircuitCreate(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self, request, pk):
+        object = Object.objects.get(pk=pk)
+        create_circuit(object, request=request)
+
+        return Response(status=status.HTTP_200_OK)
 
 class CircuitEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
@@ -43,13 +55,9 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
-        a = bool(self.get_object().first)
         instance = serializer.save(created_by=self.request.user.profile)
-        print(instance.id_object.all())
-        update_circuit_fisrt(obj=instance.id_object.all().last())
-        # if a != instance.first:
-        #     get_total_amount_active_channels(instance=instance)
-        # get_active_channels(obj=instance.id_object)
+        update_circuit_active(object=instance.object)
+
 
 class MeasureAPIView(ModelViewSet):
     authentication_classes = (TokenAuthentication,)

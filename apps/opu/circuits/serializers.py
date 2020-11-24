@@ -135,6 +135,7 @@ class CircuitEdit(serializers.ModelSerializer):
         instance.point1 = validated_data.get('point1', instance.point1)
         instance.point2 = validated_data.get('point2', instance.point2)
         instance.first = validated_data.get('first', instance.first)
+
         instance.save()
         return instance
 

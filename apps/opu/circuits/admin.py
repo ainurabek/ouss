@@ -6,7 +6,7 @@ from .models import Measure, Speed, Mode, TypeCom, Circuit, Bypass, AssignPart
 
 @admin.register(Circuit)
 class CircuitAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_parent', 'name', 'first')
+    list_display = ('id', 'name', 'first')
     search_fields = ('name',)
 admin.site.register(Measure)
 

@@ -9,6 +9,9 @@ from apps.opu.customer.models import Customer
 
 from apps.opu.circuits.models import Measure, Mode, TypeCom
 
+from apps.opu.circuits.models import Circuit
+
+from apps.opu.objects.services import update_total_amount_channels
 
 register = template.Library()
 from django.db.models import Q
@@ -59,3 +62,21 @@ def get_circuit_diff(history):
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
+
+def create_circuit(obj: Object, request):
+    active = request.data['active']
+
+    if request.data['create_circuit']:
+        for num_cir in range(1, obj.amount_channels.value+1):
+            c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
+                                 category=obj.category, point1=obj.point1, point2=obj.point2,
+                                 created_by=request.user.profile, first=active, object=obj)
+            c.id_object.add(obj)
+        update_circuit_active(object=obj)
+
+def update_circuit_active(object: Object):
+    update_total_amount_channels(object, flag=False)
+    object.total_amount_channels = object.circuit_object_parent.filter(first=True).count()
+    object.save()
+    update_total_amount_channels(object)
+

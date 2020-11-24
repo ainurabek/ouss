@@ -155,12 +155,11 @@ class Object(models.Model):
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.SET_NULL, blank=True, null=True)
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.SET_NULL, blank=True, null=True)
 	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
-	num = models.IntegerField('Количество задейственных каналов', default=0, blank=True, null=True)
 	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
-	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Количество каналов',
+	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',
 										blank=True, null=True, on_delete=models.SET_NULL)
 	save_in = models.BooleanField('Сохранить', blank=True, null=True)
 	type_line = models.ForeignKey(LineType, related_name='obj_type_line',on_delete=models.SET_NULL, blank=True, null=True)
@@ -169,8 +168,7 @@ class Object(models.Model):
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	add_time = models.DateTimeField(blank=True, null=True)
-	total_amount_channels = models.IntegerField(default=0, blank=True, null=True)
-	total_amount_active_channels = models.IntegerField(default=0, blank=True, null=True)
+	total_amount_channels = models.IntegerField('Задействованные каналы', default=0, blank=True, null=True)
 	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
 	src = models.ImageField('Скан распоряжения', upload_to='object/orders/', blank=True)
 	history = HistoricalRecords(related_name='history_object_log')

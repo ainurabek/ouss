@@ -53,7 +53,7 @@ class Mode(models.Model):
 class Circuit(models.Model):
 	"""Каналы"""
 
-	id_parent = models.ForeignKey('Circuit', on_delete=models.CASCADE, blank=True, null=True)
+	object = models.ForeignKey(Object, related_name='circuit_object_parent', on_delete=models.CASCADE, blank=True, null=True)
 	num_circuit = models.CharField('Номер канала', max_length=100, blank=True, null=True)
 	final_destination = models.ForeignKey(Point, related_name='circ_final_dest',on_delete=models.CASCADE, blank=True, null=True)
 	name = models.CharField(unique=True, max_length=100, blank=True, null=True)
