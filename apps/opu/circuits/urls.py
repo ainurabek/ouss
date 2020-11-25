@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from apps.opu.circuits.views import CircuitListViewSet, CircuitEditView, CircuitCreate
+from apps.opu.circuits.views import CircuitListViewSet, CircuitEditView
 from . import views
 
 app_name = 'circuits'

@@ -65,7 +65,6 @@ def get_circuit_diff(history):
 
 def create_circuit(obj: Object, request):
     active = request.data['active']
-
     if request.data['create_circuit']:
         for num_cir in range(1, obj.amount_channels.value+1):
             c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
