@@ -27,7 +27,6 @@ def get_type_of_trakt(parent_obj: Object):
         return type_obj
     return None
 
-
 def save_old_object(obj):
     obj_name = str(obj.name)
     obj_point1 = str(obj.point1)

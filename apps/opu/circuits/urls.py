@@ -15,11 +15,7 @@ router.register('speed', views.SpeedAPIView, basename='speed')
 urlpatterns = [
     path('trakt/<int:pk>/', CircuitListViewSet.as_view(), name = 'circuit_list '),
     path('edit/<int:pk>/', CircuitEditView.as_view(), name='circuit_edit'),
-
     path("history/circuit/<int:pk>/", views.CircuitHistory.as_view(), name='circuit_history'),
-
-    path('create/<int:pk>/', CircuitCreate.as_view(), name = 'circuit_create '),
-
     path('', include(router.urls))
 
 ]
