@@ -37,15 +37,6 @@ class CircuitListViewSet(APIView, ListWithPKMixin):
     serializer = CircuitList
     field_for_filter = "id_object"
 
-class CircuitCreate(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-
-    def post(self, request, pk):
-        object = Object.objects.get(pk=pk)
-        create_circuit(object, request=request)
-
-        return Response(status=status.HTTP_200_OK)
 
 class CircuitEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'

@@ -34,6 +34,8 @@ from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixi
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.objects.services import adding_an_object_to_trassa
 
+from apps.opu.circuits.service import create_circuit
+
 
 class AmountChannelListAPIView(ListAPIView):
     queryset = AmountChannel.objects.all()
@@ -190,6 +192,7 @@ class LPCreateView(generics.CreateAPIView):
         instance = serializer.save(created_by=self.request.user.profile)
         instance.total_amount_channels = instance.amount_channels.value
         instance.save()
+        create_circuit(instance, self.request)
         adding_an_object_to_trassa(obj=instance)
 
 
@@ -269,6 +272,7 @@ class ObjectCreateView(APIView):
             # create_circuit(obj=instance, request=request)
             adding_an_object_to_trassa(obj=instance)
             update_total_amount_channels(instance=instance)
+            create_circuit(instance, self.request)
             response = {"data": "Объект успешно создан"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
