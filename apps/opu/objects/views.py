@@ -36,6 +36,8 @@ from apps.opu.objects.services import adding_an_object_to_trassa
 
 from apps.opu.circuits.service import create_circuit
 
+from apps.opu.objects.serializers import ObjectEditSerializer
+
 
 class AmountChannelListAPIView(ListAPIView):
     queryset = AmountChannel.objects.all()
@@ -286,7 +288,7 @@ class ObjectEditView(APIView):
         obj = get_object_or_404(Object, pk=pk)
         old_obj = save_old_object(obj)
 
-        serializer = ObjectCreateSerializer(obj, data=request.data)
+        serializer = ObjectEditSerializer(obj, data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
             update_circuit(old_obj=old_obj, obj=instance)
