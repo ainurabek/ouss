@@ -322,6 +322,34 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
+class ObjectEditSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Category.objects.all())
+    our = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
+
+    tpo1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TPO.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+         read_only=False, allow_null=True, queryset=Point.objects.all())
+    tpo2 = serializers.PrimaryKeyRelatedField(
+        read_only=False,  allow_null=True, queryset=TPO.objects.all())
+    point2 = serializers.PrimaryKeyRelatedField(
+         read_only=False, allow_null=True, queryset=Point.objects.all())
+    type_of_trakt = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True,  queryset=TypeOfTrakt.objects.all())
+    customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Customer.objects.all())
+
+    id_outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Outfit.objects.all())
+
+
+    class Meta:
+        model = Object
+        fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
+                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
+                  'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
 class SelectObjectSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
