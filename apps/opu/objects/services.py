@@ -69,13 +69,13 @@ def add_to_amount_channels(instance:Object, value, flag):
 def update_total_amount_channels(instance: Object, flag=True):
     value = instance.total_amount_channels
     id_parent_instance = instance.id_parent
-
-    while True:
-        if id_parent_instance.id_parent is None:
+    if id_parent_instance is not None:
+        while True:
+            if id_parent_instance.id_parent is None:
+                add_to_amount_channels(id_parent_instance, value, flag)
+                break
             add_to_amount_channels(id_parent_instance, value, flag)
-            break
-        add_to_amount_channels(id_parent_instance, value, flag)
-        id_parent_instance = id_parent_instance.id_parent
+            id_parent_instance = id_parent_instance.id_parent
 
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)
