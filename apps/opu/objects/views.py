@@ -258,7 +258,9 @@ class ObjectCreateView(APIView):
 
         if check_parent_type_of_trakt(parent):
             type_obj = get_type_of_trakt(parent)
-            request.data["type_of_trakt"] = type_obj.pk
+            if not request.data._mutable:
+                request.data._mutable = True
+                request.data["type_of_trakt"] = type_obj.pk
         if serializer.is_valid():
             instance = serializer.save(
                 id_parent=parent,
