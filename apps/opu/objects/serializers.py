@@ -203,7 +203,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
+        fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
                   'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels', 'order', 'src')
 
@@ -234,7 +234,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
                   'comments',  'customer', 'amount_channels', 'order', 'src')
 
 
@@ -262,7 +262,7 @@ class LPEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
+        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
         'comments', 'customer', 'order', 'src')
         depth = 1
 
@@ -287,7 +287,7 @@ class ObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent', 'name', 'trakt', 'id_outfit', 'category', 'point1', 'point2',
+        fields = ('id', 'id_parent', 'name', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
                   "ip_object",  'amount_channels', "total_amount_channels",'order', 'src')
 
@@ -318,7 +318,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
+        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
@@ -347,7 +347,7 @@ class ObjectEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent','name', 'id_outfit', 'trakt', 'tpo1',
+        fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
 
