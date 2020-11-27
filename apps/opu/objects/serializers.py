@@ -205,7 +205,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'trakt', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels', 'order', 'src')
 
         depth = 1
 
@@ -235,7 +235,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-                  'comments',  'customer', 'amount_channels')
+                  'comments',  'customer', 'amount_channels', 'order', 'src')
 
 
 class LPEditSerializer(serializers.ModelSerializer):
@@ -263,7 +263,7 @@ class LPEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'trakt', 'type_line', 'our',
-        'comments', 'customer')
+        'comments', 'customer', 'order', 'src')
         depth = 1
 
 
