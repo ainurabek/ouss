@@ -154,7 +154,6 @@ class Object(models.Model):
 	tpo2 = models.ForeignKey(TPO, related_name='obj_tpo2', on_delete=models.SET_NULL, blank=True, null=True)
 	point2 = models.ForeignKey(Point, related_name='obj_point2', verbose_name='ИП пер', on_delete=models.SET_NULL, blank=True, null=True)
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.SET_NULL, blank=True, null=True)
-	trakt= models.BooleanField('Тракт/Линия', blank=True, null=True)
 	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
@@ -182,6 +181,9 @@ class Object(models.Model):
 	def __str__(self):
 		return str(self.name)
 
+
+
+
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
@@ -195,6 +197,5 @@ class IP(models.Model):
 
 	def __str__(self):
 		return self.point_id.point
-
 
 
