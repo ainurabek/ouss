@@ -42,6 +42,6 @@ class Form_Customer(models.Model):
 
 
 class OrderCusPhoto(models.Model):
-    order = models.ImageField('Схема', upload_to='object/order/', blank=True, null=True)
+    order = models.FileField('Схема', upload_to='files/', blank=True, null=True)
     form_customer = models.ForeignKey(Form_Customer, on_delete=models.CASCADE, verbose_name="Распоряжение",
                                  blank=True, null=True, related_name="order_cust_photo")

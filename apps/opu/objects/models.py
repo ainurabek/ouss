@@ -6,6 +6,14 @@ from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
 
 
+from django.db.models.signals import post_delete
+import os
+from django.core.files.storage import default_storage
+from django.db.models import FileField
+from django.dispatch.dispatcher import receiver
+
+
+
 class InOut(models.Model):
 	name = models.CharField('Название', max_length=100)
 
@@ -199,3 +207,7 @@ class IP(models.Model):
 		return self.point_id.point
 
 
+class OrderObjectPhoto(models.Model):
+	src = models.FileField('Схема', null=True, blank=True, upload_to='files/')
+	object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Распоряжение",
+                                 blank=True, related_name="order_object_photo")

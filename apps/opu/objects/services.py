@@ -1,6 +1,8 @@
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object
 
+
+
 def check_parent_type_of_trakt(parent: Object):
     return True if parent.type_of_trakt is not None else False
 
@@ -80,4 +82,6 @@ def update_total_amount_channels(instance: Object, flag=True):
 
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)
+
+
 
