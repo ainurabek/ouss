@@ -38,6 +38,10 @@ from apps.opu.circuits.service import create_circuit
 
 from apps.opu.objects.serializers import ObjectEditSerializer
 
+from apps.opu.objects.models import OrderObjectPhoto
+
+from apps.opu.services import create_photo
+
 
 class AmountChannelListAPIView(ListAPIView):
     queryset = AmountChannel.objects.all()
@@ -261,6 +265,7 @@ class ObjectCreateView(APIView):
             if not request.data._mutable:
                 request.data._mutable = True
                 request.data["type_of_trakt"] = type_obj.pk
+
         if serializer.is_valid():
             instance = serializer.save(
                 id_parent=parent,
@@ -704,3 +709,18 @@ class OutfitHistory(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
+class OrderFileUploader(APIView, PhotoCreateMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    search_field_for_img = "object_order"
+    model = Object
+    model_photo = OrderObjectPhoto
+
+
+
+class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    model = Object
+    model_for_delete = OrderObjectPhoto

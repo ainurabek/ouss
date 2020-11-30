@@ -3,13 +3,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
-from django.db.models.fields.files import ImageField
+from django.db.models.fields.files import FileField
 from django.utils.safestring import mark_safe
 from django import template
 
 from apps.opu.objects.models import TPO, Outfit,Point, Category, LineType, TypeOfTrakt, Object, TypeOfLocation
 
 from apps.opu.customer.models import Customer
+import os
 
 register = template.Library()
 from django.db.models import Q
@@ -20,7 +21,7 @@ def get_field_name_for_create_img(model, model_photo):
     img_field = None
     obj_field = None
     for field in model_fields_name:
-        if type(field) == ImageField:
+        if type(field) == FileField:
             img_field = str(field.name)
         if field.related_model == model:
             obj_field = str(field.name)
@@ -64,11 +65,19 @@ class PhotoCreateMixin:
         return Response(response, status=status.HTTP_201_CREATED)
 
 
+def delete_file(file):
+    os.remove(file.src.path)
+
+
+
+
 class PhotoDeleteMixin:
     model_for_delete = None
 
     def delete(self, request, obj_pk, deleted_pk):
-        get_object_or_404(self.model_for_delete, pk=deleted_pk).delete()
+        photo = get_object_or_404(self.model_for_delete, pk=deleted_pk)
+        delete_file(photo)
+        photo.delete()
         response = {"data": "Изображение успешно удалено"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 

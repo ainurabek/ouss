@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel
+    AmountChannel, OrderObjectPhoto
 
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
@@ -170,6 +170,11 @@ class IPSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
+class OrderObjectPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderObjectPhoto
+        fields = ("id", "src")
+
 class AllObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -200,12 +205,14 @@ class LPDetailSerializer(serializers.ModelSerializer):
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
     amount_channels = AmountChannelListSerializer()
+    order_object_photo = OrderObjectPhotoSerializer(many=True)
+
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels', 'order', 'src')
+                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels', 'order_object_photo')
 
         depth = 1
 
@@ -235,7 +242,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
-                  'comments',  'customer', 'amount_channels', 'order', 'src')
+                  'comments',  'customer', 'amount_channels')
 
 
 class LPEditSerializer(serializers.ModelSerializer):
@@ -263,7 +270,7 @@ class LPEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
-        'comments', 'customer', 'order', 'src')
+        'comments', 'customer')
         depth = 1
 
 
@@ -284,12 +291,13 @@ class ObjectSerializer(serializers.ModelSerializer):
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
     amount_channels = AmountChannelListSerializer()
+    order_object_photo = OrderObjectPhotoSerializer(many=True)
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object",  'amount_channels', "total_amount_channels",'order', 'src')
+                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -320,7 +328,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
-                  'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
+                  'transit', 'transit2', 'category', 'comments', 'customer')
 
 class ObjectEditSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
@@ -349,7 +357,7 @@ class ObjectEditSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
-                  'transit', 'transit2', 'category', 'comments', 'customer', 'order', 'src')
+                  'transit', 'transit2', 'category', 'comments', 'customer')
 
 class SelectObjectSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)

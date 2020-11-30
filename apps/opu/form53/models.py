@@ -24,12 +24,12 @@ class Form53(models.Model):
         return self.circuit.name
 
 class Schema53Photo(models.Model):
-    src = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
+    src = models.FileField('Схема', upload_to='files/', blank=True, null=True)
     form53 = models.ManyToManyField(Form53, verbose_name="Схема",
                                  blank=True, related_name="schema53_photo")
 
 
 class Order53Photo(models.Model):
-    src = models.ImageField('Схема', upload_to='object/order/', blank=True)
+    src = models.FileField('Схема', upload_to='files/', blank=True)
     form53 = models.ManyToManyField(Form53, verbose_name="Распоряжение",
                                  blank=True, related_name="order53_photo")

@@ -73,6 +73,9 @@ urlpatterns = [
     path("history/point/<int:pk>/", views.PointHistory.as_view(), name='point_history'),
     path("history/outfit/<int:pk>/", views.OutfitHistory.as_view(), name='outfit_history'),
 
+    path("order/<int:pk>/", views.OrderFileUploader.as_view(), name='order_object'),
+    path("order/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderObjectFileDeleteView.as_view(), name='order_object_delete'),
+
     path('', include(router.urls))
 
 ]

@@ -42,12 +42,12 @@ class Form51(models.Model):
 
 
 class SchemaPhoto(models.Model):
-    src = models.ImageField('Схема', upload_to='object/schema/', blank=True, null=True)
+    src = models.FileField('Схема', upload_to='files/', blank=True, null=True)
     form51 = models.ForeignKey(Form51, on_delete=models.CASCADE, verbose_name="Схема",
                                  blank=True, null=True, related_name="schema_photo")
 
 
 class OrderPhoto(models.Model):
-    src = models.ImageField('Схема', upload_to='object/order/', blank=True, null=True)
+    src = models.FileField('Схема', upload_to='files/', blank=True, null=True)
     form51 = models.ForeignKey(Form51, on_delete=models.CASCADE, verbose_name="Распоряжение",
                                  blank=True, null=True, related_name="order_photo")
