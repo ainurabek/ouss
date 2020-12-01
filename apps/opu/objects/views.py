@@ -283,7 +283,7 @@ class ObjectCreateView(APIView):
             update_total_amount_channels(instance=instance)
             create_circuit(instance, self.request)
             response = {"data": "Объект успешно создан"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
