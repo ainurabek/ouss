@@ -241,7 +241,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
+        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
                   'comments',  'customer', 'amount_channels')
 
 
@@ -269,7 +269,7 @@ class LPEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
+        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
         'comments', 'customer')
         depth = 1
 
