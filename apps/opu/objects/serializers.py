@@ -204,7 +204,6 @@ class LPDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
-    amount_channels = AmountChannelListSerializer()
     order_object_photo = OrderObjectPhotoSerializer(many=True)
 
 
@@ -212,7 +211,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'amount_channels', 'total_amount_channels', 'order_object_photo')
+                  'customer', 'ip_object', 'our', 'total_amount_channels', 'order_object_photo')
 
         depth = 1
 
@@ -236,13 +235,12 @@ class LPCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
-    amount_channels = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=AmountChannel.objects.all())
+
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
-                  'comments',  'customer', 'amount_channels')
+                  'comments',  'customer')
 
 
 class LPEditSerializer(serializers.ModelSerializer):

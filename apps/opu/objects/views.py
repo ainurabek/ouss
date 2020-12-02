@@ -196,9 +196,9 @@ class LPCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
-        instance.total_amount_channels = instance.amount_channels.value
+        # instance.total_amount_channels = instance.amount_channels.value
         instance.save()
-        create_circuit(instance, self.request)
+        # create_circuit(instance, self.request)
         adding_an_object_to_trassa(obj=instance)
 
 
@@ -242,8 +242,8 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        update_total_amount_channels(instance=instance, flag=False)
         self.perform_destroy(instance)
+        update_total_amount_channels(instance=instance)
         response = {"data": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 

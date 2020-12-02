@@ -57,28 +57,32 @@ def update_circuit(old_obj, obj: Object):
                 point2=obj.point2.id)
 
 
-def add_to_amount_channels(instance:Object, value, flag):
-    if instance.parents.count() == 1:
-        instance.total_amount_channels -= instance.total_amount_channels
-        instance.save()
-    if flag:
-        instance.total_amount_channels += value
-        instance.save()
-    else:
-        instance.total_amount_channels -= value
-        instance.save()
+def get_count_active_channels(instance: Object):
+    count = 0
+
+    for obj in instance.parents.all():
+        print(instance.parents.all())
+        print(obj)
+        count += obj.total_amount_channels
+    return count
 
 
-def update_total_amount_channels(instance: Object, flag=True):
-    value = instance.total_amount_channels
+def update_total_amount_channels(instance: Object):
     id_parent_instance = instance.id_parent
-    if id_parent_instance is not None:
-        while True:
-            if id_parent_instance.id_parent is None:
-                add_to_amount_channels(id_parent_instance, value, flag)
-                break
-            add_to_amount_channels(id_parent_instance, value, flag)
-            id_parent_instance = id_parent_instance.id_parent
+    print(id_parent_instance)
+    while True:
+        if id_parent_instance.id_parent is None:
+            id_parent_instance.total_amount_channels = 0
+            id_parent_instance.save()
+            id_parent_instance.total_amount_channels = get_count_active_channels(id_parent_instance)
+            id_parent_instance.save()
+            break
+        id_parent_instance.total_amount_channels = 0
+        id_parent_instance.save()
+        id_parent_instance.total_amount_channels = get_count_active_channels(id_parent_instance)
+        id_parent_instance.save()
+        id_parent_instance = id_parent_instance.id_parent
+
 
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)
