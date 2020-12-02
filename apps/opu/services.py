@@ -66,17 +66,16 @@ class PhotoCreateMixin:
 
 
 def delete_file(file):
-    os.remove(file.src.path)
-
-
-
+    if os.path.exists(file.src.path):
+        os.remove(file.src.path)
 
 class PhotoDeleteMixin:
     model_for_delete = None
 
     def delete(self, request, obj_pk, deleted_pk):
         photo = get_object_or_404(self.model_for_delete, pk=deleted_pk)
-        delete_file(photo)
+        if photo:
+            delete_file(photo)
         photo.delete()
         response = {"data": "Изображение успешно удалено"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
