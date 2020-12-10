@@ -106,10 +106,11 @@ class Event(models.Model):
         return str(self.id)
 
     def save(self, *args, **kwargs):
-        if self.index1.index == "1":
+        if self.index1.index in ["1", "0а", "0д", "0тв"]:
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
                 self.period_of_time = round((((date.total_seconds() / 60) * 100) / 60) / 100, 2)
+
         super().save(*args, **kwargs)
 
 

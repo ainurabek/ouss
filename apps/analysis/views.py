@@ -1,13 +1,14 @@
+from django.db.models import Sum
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from knox.auth import TokenAuthentication
 import datetime
-
+import re
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
 from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
     Punkt7ListSerializer, FormAnalysisCreateSerializer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct
@@ -20,8 +21,9 @@ from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from apps.opu.services import ListWithPKMixin
-
 from apps.analysis.service import get_diff
+from collections import defaultdict
+from apps.dispatching.models import Index
 
 
 def get_report(request):
@@ -313,3 +315,206 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance):
         delete_punkt7(instance)
+
+
+def get_diesele_accum_report(request):
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    responsible_outfit = request.GET.get("responsible_outfit")
+
+    #the list of all filtered events with the indexes Oa, Od, Otv
+    all_event = Event.objects.filter(index1__in=[Index.objects.get(index="0а"), Index.objects.get(index="0д"),
+                                          Index.objects.get(index="0тв")], callsorevent=False)
+    if responsible_outfit != "":
+        all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
+
+    if date_from != "" and date_to == "":
+        all_event = all_event.filter(created_at=date_from)
+    elif date_from == "" and date_to != "":
+        all_event = all_event.filter(created_at=date_to)
+    elif date_from != "" and date_to != "":
+        all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
+
+    all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+    outfits = event_distinct(all_event, "responsible_outfit")
+
+    data = []
+    total_country = {"0d": 0, "0a": 0, "0tv": 0} #total(stops) for whole country
+    total_country_count = {"0d": 0, "0a": 0, "0tv": 0} #total(counts of stops) for whole country
+    total_both_country = {'Сумма': 0, "Раз": 0} #total (stops and counts) for whole country
+    for outfit in outfits:
+        total_outfit = {"0d": 0, "0a": 0, "0tv": 0} #total(stops) for a single outfit
+        total_outfit_count = {"0d": 0, "0a": 0, "0tv": 0} #total(counts of stops) for single outfit
+        total_both_outfit = {'Сумма': 0, "Раз": 0} #total (stops and counts) for single outfit
+        data.append({
+            "name": outfit.responsible_outfit.outfit,
+            "Сумма": {"0d": 0, "0a": 0, "0tv": 0},
+            "Раз": {"0d": 0, "0a": 0, "0tv": 0},
+            "Итого": 0})
+        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+            total_object = {"0d": 0, "0a": 0, "0tv": 0}  # total(stops) for a single object
+            total_object_count = {"0d": 0, "0a": 0, "0tv": 0}  # total(counts of stops) for single object
+            total_both_objects = {'Сумма': 0, "Раз": 0}  # total (stops and counts) for single object
+            for call in get_calls_list(all_event, event):
+                period = get_period(call, date_to)
+                count_Oa = all_event.filter(index1__index='0а', object_id=call.object_id, ips=call.ips,
+                                            circuit=call.circuit).count()
+                count_Od = all_event.filter(index1__index='0д', object_id=call.object_id, ips=call.ips,
+                                            circuit=call.circuit).count()
+                count_Otv = all_event.filter(index1__index='0тв', object_id=call.object_id, ips=call.ips,
+                                             circuit=call.circuit).count()
+
+                if call.index1.index == '0д':
+                    total_object["0d"] += period
+                    total_object_count["0d"] += count_Od
+
+                elif call.index1.index == '0а':
+                    total_object["0a"] += period
+                    total_object_count["0a"] = count_Oa
+
+                elif call.index1.index == '0тв':
+                    total_object["0tv"] = period
+                    total_object_count["0tv"] = count_Otv
+
+            total_both_objects['Сумма'] += sum(total_object.values())
+            total_both_objects['Раз'] += sum(total_object_count.values())
+            data.append({"name": get_event_name(event),
+                        "Сумма": total_object,
+                        "Раз":total_object_count,
+                        "Итого":total_both_objects
+
+            })
+            total_outfit['0a'] += int(total_object['0a'])
+            total_outfit_count['0a'] += int(total_object_count['0a'])
+            total_outfit['0d'] += int(total_object['0d'])
+            total_outfit_count['0d'] += int(total_object_count['0d'])
+            total_outfit['0tv'] += int(total_object['0tv'])
+            total_outfit_count['0tv'] += int(total_object_count['0tv'])
+        total_both_outfit['Сумма'] += sum(total_outfit.values())
+        total_both_outfit['Раз'] += sum(total_outfit_count.values())
+        data.append({
+            "name": "Итоги за {}.".format(outfit.responsible_outfit),
+            "Сумма": total_outfit,
+            "Раз":total_outfit_count,
+            'Итого':total_both_outfit})
+
+        total_country['0a'] += int(total_outfit['0a'])
+        total_country_count['0a'] += int(total_outfit_count['0a'])
+        total_country['0d'] += int(total_outfit['0d'])
+        total_country_count['0d'] += int(total_outfit_count['0d'])
+        total_country['0tv'] += int(total_outfit['0tv'])
+        total_country_count['0tv'] += int(total_outfit_count['0tv'])
+    total_both_country['Сумма'] += sum(total_country.values())
+    total_both_country['Раз'] += sum(total_country_count.values())
+    data.append({
+        "name": "Общий итог за Республику",
+        "Сумма": total_country,
+        "Раз": total_country_count,
+        'Итого': total_both_country
+    })
+
+    return JsonResponse(data, safe=False)
+
+
+def get_winners_rating(request):
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    responsible_outfit = request.GET.get("responsible_outfit")
+    od = Event.objects.filter(index1__index="0д", callsorevent=False)
+    all_event = Event.objects.filter(index1__index="0а", callsorevent=False)
+
+    if responsible_outfit != "":
+        all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
+
+    if date_from != "" and date_to == "":
+        all_event = all_event.filter(created_at=date_from)
+    elif date_from == "" and date_to != "":
+        all_event = all_event.filter(created_at=date_to)
+    elif date_from != "" and date_to != "":
+        all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
+
+    all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+    outfits = event_distinct(all_event, "responsible_outfit")
+    winner = [] #list which collects accum stops
+    winner_d = [] #list which collects diesel stops
+    data = []
+    for outfit in outfits:
+        #data for accum
+        data.append({
+            "name": outfit.responsible_outfit.outfit, "type":"Аккумулятор",
+            "Час": 0, "Раз":None, 'position': None})
+        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+            total_object = 0  # total(stops) for a single object
+            total_object_count = 0
+            first = 0
+            second = 0
+            third = 0
+            for call in get_calls_list(all_event, event):
+                period = get_period(call, date_to)
+                count_Oa = all_event.filter(index1__index='0а', object_id=call.object_id, ips=call.ips,
+                                                            circuit=call.circuit).count()
+                if call.index1.index == '0а':
+                    total_object += period
+                    total_object_count +=count_Oa
+            winner.append(total_object)
+            sorted_list = sorted(winner) #отсортированный список по возрастанию, где есть все простои одного предприятия
+
+            if total_object >= sorted_list[-1]:
+                first += total_object
+                data.append({"name": get_event_name(event), "type": "Аккумулятор",
+                             "Час": first, "Раз":total_object_count, "position": "1"
+                             })
+            elif total_object >= sorted_list[-2]:
+                second +=total_object
+                data.append({"name": get_event_name(event), "type": "Аккумулятор",
+                             "sum_period_of_time": second, "Раз":total_object_count, "position": "2"
+                             })
+            elif total_object >= sorted_list[-3]:
+                third += total_object
+                data.append({"name": get_event_name(event), "type": "Аккумулятор",
+                             "sum_period_of_time": third, "Раз":total_object_count, "position": "3"
+                             })
+        #data for diesel
+        data.append({
+            "name": outfit.responsible_outfit.outfit, "type": "Дизель",
+            "Час": 0, "Раз": None, 'position': None})
+
+        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+
+            total_object_d = 0  # total(stops) for a single object
+            total_object_count_d = 0
+
+            first_d = 0
+            second_d = 0
+            third_d = 0
+            for call in get_calls_list(all_event, event):
+                period = get_period(call, date_to)
+
+                count_Od = all_event.filter(index1__index='0д', object_id=call.object_id, ips=call.ips,
+                                            circuit=call.circuit).count()
+
+                if call.index1.index == '0д':
+                    total_object_d += period
+                    total_object_count_d += count_Od
+            winner_d.append(total_object_d)
+            sorted_list_d = sorted(winner_d)
+
+            if total_object_d >= sorted_list_d[-1]:
+                first_d += total_object_d
+                data.append({"name": get_event_name(event), "type": "Дизель",
+                             "Час": first_d, "Раз":total_object_count_d, "position": "1"
+                             })
+            elif total_object_d >= sorted_list_d[-2]:
+                second_d +=total_object_d
+                data.append({"name": get_event_name(event), "type": "Дизель",
+                             "sum_period_of_time": second_d, "Раз":total_object_count_d, "position": "2"
+                             })
+            elif total_object_d >= sorted_list_d[-3]:
+                third_d += total_object_d
+                data.append({"name": get_event_name(event), "type": "Дизель",
+                             "sum_period_of_time": third_d, "Раз":total_object_count_d, "position": "3"
+                             })
+
+    return JsonResponse(data, safe=False)
+
+

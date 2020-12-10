@@ -116,6 +116,7 @@ def get_amount_of_channels(obj):
         return obj.circuit.id_object.total_amount_active_channels
 
 
+
 def get_period_date_to(call, date_to):
     if call.date_to is None:
         date_to = datetime.fromisoformat(date_to + "T23:59:59")
