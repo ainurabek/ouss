@@ -61,15 +61,12 @@ def get_count_active_channels(instance: Object):
     count = 0
 
     for obj in instance.parents.all():
-        print(instance.parents.all())
-        print(obj)
         count += obj.total_amount_channels
     return count
 
 
 def update_total_amount_channels(instance: Object):
     id_parent_instance = instance.id_parent
-    print(id_parent_instance)
     while True:
         if id_parent_instance.id_parent is None:
             id_parent_instance.total_amount_channels = 0
