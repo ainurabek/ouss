@@ -77,7 +77,6 @@ class EventListAPIView(viewsets.ModelViewSet):
 
         return queryset
 
-
     def retrieve(self, request, pk=None):
         calls = Event.objects.filter(id_parent_id=pk).order_by("-id")
         serializer = self.get_serializer(calls, many=True)
@@ -276,7 +275,7 @@ class EventUnknownCreateViewAPI(APIView):
     def post(self, request):
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save( created_by=self.request.user.profile)
+            event = serializer.save(created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,

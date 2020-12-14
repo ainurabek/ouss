@@ -10,10 +10,12 @@ from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSeri
 from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
-    update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct
+    update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
+    event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
+    set_response_for_winners, get_winners
 
-from apps.dispatching.models import Event, HistoricalEvent
-from apps.dispatching.services import get_event_name
+from apps.dispatching.models import Event, HistoricalEvent, Index
+from apps.dispatching.services import get_event_name, get_event
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -30,17 +32,7 @@ def get_report(request):
     responsible_outfit = request.GET.get("responsible_outfit")
 
     all_event = Event.objects.filter(index1__index='1', callsorevent=False)
-
-    if responsible_outfit != "":
-        all_event = all_event.filter(responsible_outfit_id=responsible_outfit)
-
-    if date_from != "" and date_to == "":
-        all_event = all_event.filter(created_at=date_from)
-    elif date_from == "" and date_to != "":
-        all_event = all_event.filter(created_at=date_to)
-    elif date_from != "" and date_to != "":
-        all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
-
+    all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
     outfits = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
@@ -200,7 +192,6 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
             return FormAnalysisSerializer
 
     def perform_create(self, serializer):
-
         """Создание парентев для обектов"""
         analysis_form = serializer.save(user=self.request.user.profile, main=True)
         analysis_form.id_parent = analysis_form
@@ -209,7 +200,6 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         punkt7 = Punkt7.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
         TotalData.objects.create(punkt7=punkt7)
         TotalData.objects.create(punkt5=punkt5)
-
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
@@ -313,3 +303,149 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance):
         delete_punkt7(instance)
+
+
+class ReportOaAndOdApiView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        outfit = request.GET.get("outfit")
+        od = Index.objects.get(index="0д")
+        oa = Index.objects.get(index="0а")
+        otv = Index.objects.get(index="Отв")
+
+        all_event = Event.objects.filter(index1__in=[od, oa, otv],
+                                         callsorevent=False)
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
+        outfits = event_distinct(all_event, "responsible_outfit")
+        all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+        data = []
+
+        winners_otv = {
+            "first": {"value": 0, "index": None},
+            "second": {"value": 0, "index": None},
+            "third": {"value": 0, "index": None}
+        }
+
+        winners_oa = {
+            "first": {"value": 0, "index": None},
+            "second": {"value": 0, "index": None},
+            "third": {"value": 0, "index": None}
+        }
+
+        winners_od = {
+            "first": {"value": 0, "index": None},
+            "second": {"value": 0, "index": None},
+            "third": {"value": 0, "index": None}
+        }
+        rep = {
+            "outfit": None,
+            "events": [],
+            "oa": {"sum": 0, "count": 0},
+            "od": {"sum": 0, "count": 0},
+            "otv": {"sum": 0, "count": 0}
+
+        }
+
+        for out in outfits:
+            outfit = out.responsible_outfit
+            base = {"outfit": outfit.outfit, "events": [], "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+                    "otv": {"sum": 0, "count": 0}}
+
+            for event in all_event_name.filter(responsible_outfit=outfit):
+                count_od = get_count_event(all_event, get_event(event), od, outfit)
+                count_oa = get_count_event(all_event, get_event(event), oa, outfit)
+                count_otv = get_count_event(all_event, get_event(event), otv, outfit)
+                sum_oa = get_sum_period_of_time_event(all_event, get_event(event), oa, outfit)
+                sum_otv = get_sum_period_of_time_event(all_event, get_event(event), otv, outfit)
+                sum_od = get_sum_period_of_time_event(all_event, get_event(event), od, outfit)
+
+                winner_index = len(base["events"])
+                winners_otv = determine_the_winner(winners_otv, sum_otv, winner_index)
+                winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
+                winners_od = determine_the_winner(winners_od, sum_od, winner_index)
+
+                base["events"].append({"name": get_event_name(event),
+                                       "oa": {"sum": sum_oa, "count": count_oa, "color": None},
+                                       "od": {"sum": sum_od, "count": count_od, "color": None},
+                                       "otv": {"sum": sum_otv, "count": count_otv, "color": None}})
+                base["oa"]["count"] += count_oa
+                base["od"]["count"] += count_od
+                base["otv"]["count"] += count_otv
+                base["oa"]["sum"] += sum_oa
+                base["od"]["sum"] += sum_od
+                base["otv"]["sum"] += sum_otv
+
+            rep["oa"]["count"] +=  base["oa"]["count"]
+            rep["od"]["count"] +=  base["od"]["count"]
+            rep["otv"]["count"] +=  base["otv"]["count"]
+            rep["oa"]["sum"] += base["oa"]["sum"]
+            rep["od"]["sum"] += base["od"]["sum"]
+            rep["otv"]["sum"] += base["otv"]["sum"]
+
+            winners_oa = set_response_for_winners(winners_oa, "oa", base["events"])
+            winners_od = set_response_for_winners(winners_od, "od", base["events"])
+            winners_otv = set_response_for_winners(winners_otv, "otv", base["events"])
+            data.append(base)
+        data.append(rep)
+        return JsonResponse(data, safe=False)
+
+
+class WinnerReportAPIView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        outfit = request.GET.get("outfit")
+        od = Index.objects.get(index="0д")
+        oa = Index.objects.get(index="0а")
+        otv = Index.objects.get(index="Отв")
+
+        all_event = Event.objects.filter(index1__in=[od, oa, otv], callsorevent=False)
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
+        outfits = event_distinct(all_event, "responsible_outfit")
+        all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+        data = []
+
+        winners_oa = [
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+        ]
+
+        winners_otv = [
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+        ]
+
+        winners_od = [
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+            {"name": None, "sum": 0, "count": 0},
+        ]
+        for out in outfits:
+            outfit = out.responsible_outfit
+
+            for event in all_event_name.filter(responsible_outfit=outfit):
+                sum_oa = get_sum_period_of_time_event(all_event, get_event(event), oa, outfit)
+                sum_otv = get_sum_period_of_time_event(all_event, get_event(event), otv, outfit)
+                sum_od = get_sum_period_of_time_event(all_event, get_event(event), od, outfit)
+                count_od = get_count_event(all_event, get_event(event), od, outfit)
+                count_oa = get_count_event(all_event, get_event(event), oa, outfit)
+                count_otv = get_count_event(all_event, get_event(event), otv, outfit)
+                event_name = get_event_name(event)
+                winners_oa = get_winners(winners_oa, event_name, sum_oa, count_oa)
+                winners_od = get_winners(winners_od, event_name, sum_od, count_od)
+                winners_otv = get_winners(winners_otv, event_name, sum_otv, count_otv)
+
+            data.append({"outfit": outfit.outfit, "index": oa.name, "winners": winners_oa})
+            data.append({"outfit": outfit.outfit, "index": od.name, "winners": winners_od})
+            data.append({"outfit": outfit.outfit, "index": otv.name, "winners": winners_otv})
+
+        return JsonResponse(data, safe=False)

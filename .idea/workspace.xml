@@ -20,19 +20,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/circuits/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/circuits/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Pull.Settings">
     <option name="BRANCH" value="master" />
@@ -42,23 +53,32 @@
   </component>
   <component name="JupyterTrust" id="3d5ea230-c4a4-42e2-860e-ca31efe4ed13" />
   <component name="ProjectId" id="1j822WtSJT3qKhmZoGVIxKmvF57" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="add_unversioned_files" value="$PROJECT_DIR$/log/log.log" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/example_project/fast_api_project" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docker" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Django Server.Unnamed">
     <configuration name="KT" type="Python.DjangoServer" factoryName="Django server">
       <module name="KT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -68,7 +88,7 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="launchJavascriptDebuger" value="false" />
@@ -82,6 +102,33 @@
       <option name="customRunCommand" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Unnamed" type="Python.DjangoServer" factoryName="Django server" nameIsGenerated="true">
+      <module name="KT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="http://127.0.0.1:8000/" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Django Server.KT" />
+      <item itemvalue="Django Server.Unnamed" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -113,6 +160,53 @@
       <workItem from="1604377604208" duration="1793000" />
       <workItem from="1604379411718" duration="1796000" />
       <workItem from="1604381220725" duration="1331000" />
+      <workItem from="1605242949340" duration="990000" />
+      <workItem from="1605247109857" duration="1796000" />
+      <workItem from="1605257999723" duration="1796000" />
+      <workItem from="1605260177899" duration="1795000" />
+      <workItem from="1605261990557" duration="1911000" />
+      <workItem from="1605263943869" duration="1639000" />
+      <workItem from="1605436859695" duration="1520000" />
+      <workItem from="1605502563701" duration="1409000" />
+      <workItem from="1605506012464" duration="792000" />
+      <workItem from="1605507751155" duration="1773000" />
+      <workItem from="1605509541297" duration="1798000" />
+      <workItem from="1605517315458" duration="1606000" />
+      <workItem from="1605519693319" duration="599000" />
+      <workItem from="1605523372534" duration="1829000" />
+      <workItem from="1605588162614" duration="1420000" />
+      <workItem from="1605590340765" duration="599000" />
+      <workItem from="1605629065972" duration="622000" />
+      <workItem from="1605630983396" duration="1687000" />
+      <workItem from="1605634251116" duration="1101000" />
+      <workItem from="1605773663224" duration="772000" />
+      <workItem from="1605851295504" duration="1798000" />
+      <workItem from="1605854297849" duration="2273000" />
+      <workItem from="1606110989795" duration="806000" />
+      <workItem from="1606120547405" duration="1956000" />
+      <workItem from="1606123163619" duration="1173000" />
+      <workItem from="1606194423069" duration="596000" />
+      <workItem from="1606379029968" duration="2132000" />
+      <workItem from="1606381374673" duration="1047000" />
+      <workItem from="1606383337161" duration="992000" />
+      <workItem from="1606390036043" duration="594000" />
+      <workItem from="1606460063379" duration="882000" />
+      <workItem from="1606885609497" duration="1730000" />
+      <workItem from="1606887540878" duration="1146000" />
+      <workItem from="1606889463524" duration="525000" />
+      <workItem from="1606897795580" duration="1719000" />
+      <workItem from="1606901599775" duration="1769000" />
+      <workItem from="1606903544388" duration="1354000" />
+      <workItem from="1606905443652" duration="2203000" />
+      <workItem from="1606972154662" duration="1794000" />
+      <workItem from="1606974102024" duration="9986000" />
+      <workItem from="1607060897487" duration="1475000" />
+      <workItem from="1607079286474" duration="12000" />
+      <workItem from="1607317753047" duration="16225000" />
+      <workItem from="1607489957853" duration="97000" />
+      <workItem from="1607490070979" duration="10396000" />
+      <workItem from="1607575848744" duration="11858000" />
+      <workItem from="1607928592446" duration="546000" />
     </task>
     <servers />
   </component>
@@ -130,15 +224,5 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl" timestamp="1603775273014">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state x="743" y="311" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1603775273014" />
-    <state x="757" y="237" width="395" height="640" key="RollbackChangesDialog" timestamp="1604032762772">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state x="757" y="237" width="395" height="640" key="RollbackChangesDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1604032762772" />
   </component>
 </project>
