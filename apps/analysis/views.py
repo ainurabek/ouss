@@ -192,6 +192,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
             return FormAnalysisSerializer
 
     def perform_create(self, serializer):
+
         """Создание парентев для обектов"""
         analysis_form = serializer.save(user=self.request.user.profile, main=True)
         analysis_form.id_parent = analysis_form
@@ -200,6 +201,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         punkt7 = Punkt7.objects.create(user=self.request.user.profile, form_analysis=analysis_form)
         TotalData.objects.create(punkt7=punkt7)
         TotalData.objects.create(punkt5=punkt5)
+
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """

@@ -74,7 +74,7 @@ def create_circuit(obj: Object, request):
         update_circuit_active(object=obj)
 
 def update_circuit_active(object: Object):
-    update_total_amount_channels(object, flag=False)
+    # update_total_amount_channels(object)
     object.total_amount_channels = object.circuit_object_parent.filter(first=True).count()
     object.save()
     update_total_amount_channels(object)
