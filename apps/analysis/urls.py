@@ -22,8 +22,7 @@ urlpatterns = [
     path("punkt7/delete/<int:pk>/", views.Punkt7DeleteAPIView.as_view()),
     path("punkt7/list/<int:pk>/", views.Punkt7ListAPIView.as_view()),
 
-    path("report/od_oa/", views.get_diesele_accum_report),
-    path("winners/", views.get_winners_rating),
+
     path('', include(router.urls)),
 
 ]
