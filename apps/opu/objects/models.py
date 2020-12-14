@@ -126,7 +126,7 @@ class OutfitWorker(models.Model):
 
 
 class Point(models.Model):
-	point = models.CharField('ИП', max_length=100)
+	point = models.CharField('ИП', max_length=100, unique=True)
 	name = models.CharField('Название', max_length=100)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
