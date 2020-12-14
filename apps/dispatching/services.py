@@ -3,6 +3,8 @@ from datetime import timedelta
 
 from rest_framework.generics import ListAPIView
 
+from apps.dispatching.models import Event
+
 
 class ListFilterAPIView(ListAPIView):
 
@@ -43,6 +45,18 @@ def get_event_name(event_object) -> str:
         event_name = event_object.name
     return event_name
 
+
+def get_event(event_object) -> Event:
+    event = None
+    if event_object.object is not None:
+        event = event_object.object
+    elif event_object.ips is not None:
+        event = event_object.ips.point_id
+    elif event_object.circuit is not None:
+        event = event_object.circuit
+    elif event_object.name is not None:
+        event = event_object
+    return event
 
 # def update_period_of_time(instance):
 #     if instance.date_from is not None and instance.date_to is not None:

@@ -1,7 +1,8 @@
 from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
-from apps.opu.objects.models import MainLineType
+from apps.opu.circuits.models import Circuit
+from apps.opu.objects.models import MainLineType, Object, IP
 from django.utils.safestring import mark_safe
 from django import template
 from apps.dispatching.models import Reason, Index
@@ -12,15 +13,13 @@ register = template.Library()
 
 def division(a: float, b: float) -> float:
     if a != 0 and b != 0:
-        return round(a/b, 2)
+        return round(a / b, 2)
     return 0
 
 
 def get_period(obj, date_to):
     if obj.date_to is not None and obj.date_from is not None:
-        date = (obj.date_to) - (obj.date_from)
-        period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-        return period_of_time
+        return obj.period_of_time
 
     if obj.date_to is None:
         if date_to is not None and date_to != "":
@@ -127,26 +126,29 @@ def get_period_date_to(call, date_to):
         return float(call.period_of_time)
 
 
+def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
+    if outfit != "" and outfit is not None:
+        event = event.filter(responsible_outfit_id=outfit)
+    if (date_from is not None or date_from != "") and (date_to is None or date_to == ""):
+        event = event.filter(created_at=date_from)
+    elif (date_from is None or date_from == "") and (date_to is not None or date_to != ""):
+        event = event.filter(created_at=date_to)
+    elif (date_from is not None or date_from != "") and (date_to is not None or date_to != ""):
+        event = event.filter(created_at__gte=date_from, created_at__lte=date_to)
+
+    return event
+
+
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__in=[Reason.objects.get(name='ПВ аппаратура'),
-                                                                                    Reason.objects.get(name='Линейные ПВ')])
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False,
+                                     reason__in=[Reason.objects.get(name='ПВ аппаратура'),
+                                                 Reason.objects.get(name='Линейные ПВ')])
+    return event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
 
 
-    if outfit is not None:
-        all_event = all_event.filter(responsible_outfit_id=outfit)
-    if date_from is not None and date_to is None:
-        all_event = all_event.filter(created_at=date_from)
-    elif date_from is None and date_to is not None:
-        all_event = all_event.filter(created_at=date_to)
-    elif date_from is not None and date_to is not None:
-        all_event = all_event.filter(created_at__gte=date_from, created_at__lte=date_to)
-
-    return all_event
-
-
-def event_distinct(events, *args):
+def event_distinct(events: Event, *args):
     """Группировка по филду"""
     return events.order_by(*args).distinct(*args)
 
@@ -176,8 +178,8 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             elif get_type_line(event) == vls.name:
                 reason_2 += get_period_date_to(event, date_to)
 
-        total_out_kls = reason_1*amount_of_channels
-        total_out_rrl = reason_2*amount_of_channels
+        total_out_kls = reason_1 * amount_of_channels
+        total_out_rrl = reason_2 * amount_of_channels
         total_rep_kls += total_out_kls
         total_rep_rrl += total_out_rrl
         #####################################################################################################
@@ -192,7 +194,8 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
                                                user=user, form_analysis=analysis_form)
                 TotalData.objects.create(punkt7=punkt7)
             else:
-                fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user, outfit=out.responsible_outfit,
+                fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
+                                                   outfit=out.responsible_outfit,
                                                    total_number_kls=form.punkt7.total_number_kls,
                                                    corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
                                                    percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
@@ -299,8 +302,8 @@ def update_coefficient(punkt5: Punkt5):
 def update_total_coefficient(total_data: TotalData):
     punkt5 = total_data.punkt5
     total_data.total_coefficient = division((
-            punkt5.coefficient_kls*total_data.kls+punkt5.coefficient_vls*total_data.vls+
-            punkt5.coefficient_rrl*total_data.rrl), 100)
+            punkt5.coefficient_kls * total_data.kls + punkt5.coefficient_vls * total_data.vls +
+            punkt5.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
 
 
@@ -309,15 +312,14 @@ def update_republic_coefficient(punkt5: Punkt5):
     for form in punkt5.form_analysis.formanalysis_set.all():
         if punkt5.form_analysis.id_parent != form:
             coefficient += form.punkt5.total_data5.total_coefficient
-    punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis.formanalysis_set.count()-1)
+    punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis.formanalysis_set.count() - 1)
     punkt5.total_data5.save()
 
 
-
 def update_type_line_value(total_data: TotalData):
-    total_data.kls = division(total_data.punkt5.length_kls*100, total_data.total_length)
-    total_data.vls = division(total_data.punkt5.length_vls*100, total_data.total_length)
-    total_data.rrl = division(total_data.punkt5.length_rrl*100, total_data.total_length)
+    total_data.kls = division(total_data.punkt5.length_kls * 100, total_data.total_length)
+    total_data.vls = division(total_data.punkt5.length_vls * 100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt5.length_rrl * 100, total_data.total_length)
     total_data.save()
 
 
@@ -401,9 +403,9 @@ def update_analysis_form_coefficient(form_analysis: FormAnalysis):
 
 
 def update_percentage_compliance(punkt7: Punkt7):
-    punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls)*100
-    punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl)*100
-    punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls)*100
+    punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls) * 100
+    punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl) * 100
+    punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls) * 100
     punkt7.save()
 
 
@@ -420,14 +422,14 @@ def update_percentage_compliance_and_coefficient(punkt7: Punkt7):
 
 
 def update_type_line_value_punkt7(total_data: TotalData):
-    total_data.kls = division(total_data.punkt7.total_number_kls*100, total_data.total_length)
-    total_data.vls = division(total_data.punkt7.total_number_vls*100, total_data.total_length)
-    total_data.rrl = division(total_data.punkt7.total_number_rrl*100, total_data.total_length)
+    total_data.kls = division(total_data.punkt7.total_number_kls * 100, total_data.total_length)
+    total_data.vls = division(total_data.punkt7.total_number_vls * 100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt7.total_number_rrl * 100, total_data.total_length)
     total_data.save()
 
 
 def update_total_object(punkt7: Punkt7):
-    punkt7.total_data7.total_length = punkt7.total_number_kls+punkt7.total_number_vls+punkt7.total_number_rrl
+    punkt7.total_data7.total_length = punkt7.total_number_kls + punkt7.total_number_vls + punkt7.total_number_rrl
     punkt7.total_data7.save()
     update_type_line_value_punkt7(punkt7.total_data7)
 
@@ -435,8 +437,8 @@ def update_total_object(punkt7: Punkt7):
 def update_total_coefficient_punkt7(total_data: TotalData):
     punkt7 = total_data.punkt7
     total_data.total_coefficient = division((
-            punkt7.coefficient_kls*total_data.kls+punkt7.coefficient_vls*total_data.vls+
-            punkt7.coefficient_rrl*total_data.rrl), 100)
+            punkt7.coefficient_kls * total_data.kls + punkt7.coefficient_vls * total_data.vls +
+            punkt7.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
 
 
@@ -502,10 +504,12 @@ def delete_punkt7(punkt7: Punkt7):
 
     update_analysis_form_coefficient(analysis_form)
 
+
 @register.simple_tag
 def get_diff(history):
     message = ''
-    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by('history_date').last()
+    old_record = history.instance.history_log.filter(Q(history_date__lt=history.history_date)).order_by(
+        'history_date').last()
     if history and old_record:
         delta = history.diff_against(old_record)
         for change in delta.changes:
@@ -522,3 +526,111 @@ def get_diff(history):
         return mark_safe(message)
 
 
+def filter_event(events: Event, instance, index, outfit):
+    if isinstance(instance, Object):
+        return events.filter(object=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
+                             date_to__isnull=False)
+    elif isinstance(instance, IP):
+        return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+                             date_to__isnull=False)
+    elif isinstance(instance, Circuit):
+        return events.filter(circuit=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+                             date_to__is_null=False)
+    else:
+        return events.filter(name=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+                             date_to__is_null=False)
+
+
+def get_count_event(events: Event, obj, index, outfit) -> int:
+    return filter_event(events, obj, index, outfit).count()
+
+
+def get_sum_period_of_time_event(events: Event, instance, index, outfit):
+    a = 0
+    for event in filter_event(events, instance, index, outfit):
+        a += event.period_of_time
+
+    return a
+
+
+def determine_the_winner(winners: dict, sum_p: float, winner_index: int) -> dict:
+    first = winners["first"]
+    second = winners["second"]
+    third = winners["third"]
+
+    if sum_p > first["value"]:
+        third["value"] = second["value"]
+        third["index"] = second["index"]
+
+        second["value"] = first["value"]
+        second["index"] = first["index"]
+
+        first["value"] = sum_p
+        first["index"] = winner_index
+
+    elif sum_p > second["value"]:
+
+        third["value"] = second["value"]
+        third["index"] = second["index"]
+
+        second["value"] = sum_p
+        second["index"] = winner_index
+
+    elif sum_p > third["value"]:
+
+        third["value"] = sum_p
+        third["index"] = winner_index
+
+    return winners
+
+
+def set_response_for_winners(winners: dict, index_name: str, data) -> (list, dict):
+    first = winners["first"]["index"]
+    second = winners["second"]["index"]
+    third = winners["third"]["index"]
+
+    if first is not None:
+        data[first][index_name]["color"] = True
+    if second is not None:
+        data[second][index_name]["color"] = True
+    if third is not None:
+        data[third][index_name]["color"] = True
+    winners = {
+        "first": {"value": 0, "index": None},
+        "second": {"value": 0, "index": None},
+        "third": {"value": 0, "index": None}
+    }
+    return winners
+
+
+def swap_winners(win1, win2):
+    win1["sum"] = win2["sum"]
+    win1["name"] = win2["name"]
+    win1["count"] = win2["count"]
+    return win1, win2
+
+
+def swap_winners_first_stage(win, name, sum_p, count):
+    win["sum"] = sum_p
+    win["name"] = name
+    win["count"] = count
+    return win
+
+
+def get_winners(winners: list, name, sum_p, count):
+    first = winners[0]
+    second = winners[1]
+    third = winners[2]
+    if sum_p > first["sum"]:
+        third, second = swap_winners(third, second)
+        second, first = swap_winners(second, first)
+        first = swap_winners_first_stage(first, name, sum_p, count)
+
+    elif sum_p > second["sum"]:
+        third, second = swap_winners(third, second)
+        second = swap_winners_first_stage(second, name, sum_p, count)
+
+    elif sum_p > third["sum"]:
+        third = swap_winners_first_stage(third, name, sum_p, count)
+
+    return winners

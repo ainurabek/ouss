@@ -94,7 +94,7 @@ class Event(models.Model):
     callsorevent = models.BooleanField(default=True)
     previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
     history = HistoricalRecords(related_name='history_log')
-    period_of_time = models.CharField(max_length=20, blank=True, null=True)
+    period_of_time = models.FloatField(default=0, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Журнал событий'
@@ -106,11 +106,10 @@ class Event(models.Model):
         return str(self.id)
 
     def save(self, *args, **kwargs):
-        if self.index1.index in ["1", "0а", "0д", "0тв"]:
+        if self.index1.index in ["1", "0д", "0а", "Отв"]:
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
                 self.period_of_time = round((((date.total_seconds() / 60) * 100) / 60) / 100, 2)
-
         super().save(*args, **kwargs)
 
 
