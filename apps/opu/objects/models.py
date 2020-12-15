@@ -1,7 +1,11 @@
+# coding: utf-8
+
 from django.db import models
 # Create your models here.
 from apps.opu.customer.models import Customer
 from apps.accounts.models import Profile
+from django.utils.encoding import smart_str
+
 from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
 
@@ -189,9 +193,6 @@ class Object(models.Model):
 	def __str__(self):
 		return str(self.name)
 
-
-
-
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
@@ -208,6 +209,12 @@ class IP(models.Model):
 
 
 class OrderObjectPhoto(models.Model):
-	src = models.FileField('Схема', null=True, blank=True, upload_to='files/')
+	src = models.FileField(upload_to='object/orders/', blank=True, null=True)
 	object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Распоряжение",
                                  blank=True, related_name="order_object_photo")
+
+
+
+
+
+

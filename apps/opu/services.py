@@ -37,6 +37,7 @@ def create_photo(model, model_photo, obj, field_name, request):
 
 
 
+
 class ListWithPKMixin:
     model = None
     serializer = None
@@ -187,3 +188,5 @@ def get_outfit_diff(history):
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
+
+

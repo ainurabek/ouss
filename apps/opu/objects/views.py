@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django.http import HttpResponse
 from rest_framework.viewsets import ModelViewSet
 
@@ -41,6 +43,8 @@ from apps.opu.objects.serializers import ObjectEditSerializer
 from apps.opu.objects.models import OrderObjectPhoto
 
 from apps.opu.services import create_photo
+
+from apps.opu.objects.serializers import OrderObjectPhotoSerializer
 
 
 class AmountChannelListAPIView(ListAPIView):
@@ -716,7 +720,6 @@ class OrderFileUploader(APIView, PhotoCreateMixin):
     search_field_for_img = "object_order"
     model = Object
     model_photo = OrderObjectPhoto
-
 
 
 class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):

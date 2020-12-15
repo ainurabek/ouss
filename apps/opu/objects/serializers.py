@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+
+
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
     AmountChannel, OrderObjectPhoto
 
@@ -171,6 +173,7 @@ class IPSerializer(serializers.ModelSerializer):
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
 class OrderObjectPhotoSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = OrderObjectPhoto
         fields = ("id", "src")

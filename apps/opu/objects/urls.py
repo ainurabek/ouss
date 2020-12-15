@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django.conf.urls import url
 from django.urls import path, include
 from rest_framework import routers
@@ -21,6 +23,7 @@ router.register('category', views.CategoryAPIVIew, basename='category')
 
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
 router.register('in-out', views.InOutAPIVIew, basename='in_out')
+
 
 
 
@@ -64,10 +67,7 @@ urlpatterns = [
     path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
-
     path("amount_channel/list/", views.AmountChannelListAPIView.as_view(), name="amount_channel_list"),
-
-
     path("history/obj/<int:pk>/", views.ObjectHistory.as_view(), name='object_history'),
     path("history/ip/<int:pk>/", views.IPHistory.as_view(), name='ip_history'),
     path("history/point/<int:pk>/", views.PointHistory.as_view(), name='point_history'),

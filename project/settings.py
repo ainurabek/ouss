@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+# coding: utf-8
+
 import os
+
 
 
 
@@ -109,6 +112,7 @@ DATABASES = {
         'PASSWORD': 'ainura123',
         'HOST': 'localhost',
         'PORT': '5432',
+
     }
 }
 
