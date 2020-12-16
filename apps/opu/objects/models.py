@@ -181,7 +181,7 @@ class Object(models.Model):
 	add_time = models.DateTimeField(blank=True, null=True)
 	total_amount_channels = models.IntegerField('Задействованные каналы', default=0, blank=True, null=True)
 	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
-	src = models.ImageField('Скан распоряжения', upload_to='object/orders/', blank=True)
+	src = models.ImageField('Скан распоряжения', upload_to='files/', blank=True)
 	history = HistoricalRecords(related_name='history_object_log')
 
 
@@ -209,7 +209,7 @@ class IP(models.Model):
 
 
 class OrderObjectPhoto(models.Model):
-	src = models.FileField(upload_to='object/orders/', blank=True, null=True)
+	src = models.FileField(upload_to='files/', blank=True, null=True)
 	object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Распоряжение",
                                  blank=True, related_name="order_object_photo")
 
