@@ -137,25 +137,26 @@ def get_report(request):
 class DispEvent1ListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.filter(callsorevent=False, index1__index="1")
+    queryset = Event.objects.filter(callsorevent=False)
     lookup_field = 'pk'
     serializer_class = DispEvent1ListSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'ips', 'circuit', 'responsible_outfit',)
 
     def get_queryset(self):
         today = datetime.date.today()
-        queryset = self.queryset.filter(created_at=today)
+        self.queryset = self.queryset.filter(created_at=today)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
+        index = self.request.query_params.get('index', None)
+        if index is not None and index != '':
+            self.queryset = self.queryset.filter(index1=index)
         if date_to == "" and date_from != '':
-            queryset = self.queryset.filter(created_at=date_from)
+            self.queryset = self.queryset.filter(created_at=date_from)
         elif date_to != '' and date_from == '':
-            queryset = self.queryset.filter(created_at=date_to)
+            self.queryset = self.queryset.filter(created_at=date_to)
         elif date_to != '' and date_from != '':
-            queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
+            self.queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
 
-        return queryset
+        return self.queryset
 
 
 class DispEventHistory(APIView):
@@ -317,7 +318,7 @@ class ReportOaAndOdApiView(APIView):
         outfit = request.GET.get("outfit")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
-        otv = Index.objects.get(index="Отв")
+        otv = Index.objects.get(index="0тв")
 
         all_event = Event.objects.filter(index1__in=[od, oa, otv],
                                          callsorevent=False)
@@ -406,7 +407,7 @@ class WinnerReportAPIView(APIView):
         outfit = request.GET.get("outfit")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
-        otv = Index.objects.get(index="Отв")
+        otv = Index.objects.get(index="0тв")
 
         all_event = Event.objects.filter(index1__in=[od, oa, otv], callsorevent=False)
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
