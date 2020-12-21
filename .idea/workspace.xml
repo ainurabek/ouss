@@ -19,7 +19,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="" />
+    <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/views.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -193,7 +196,9 @@
       <workItem from="1607489957853" duration="97000" />
       <workItem from="1607490070979" duration="10396000" />
       <workItem from="1607575848744" duration="11858000" />
-      <workItem from="1607928592446" duration="898000" />
+      <workItem from="1607928592446" duration="11235000" />
+      <workItem from="1608008072234" duration="10158000" />
+      <workItem from="1608548660933" duration="4913000" />
     </task>
     <servers />
   </component>
