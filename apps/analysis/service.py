@@ -129,11 +129,11 @@ def get_period_date_to(call, date_to):
 def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
     if outfit != "" and outfit is not None:
         event = event.filter(responsible_outfit_id=outfit)
-    if (date_from is not None or date_from != "") and (date_to is None or date_to == ""):
+    if (date_from is not None and date_from != "") and (date_to is None or date_to == ""):
         event = event.filter(created_at=date_from)
-    elif (date_from is None or date_from == "") and (date_to is not None or date_to != ""):
+    elif (date_from is None or date_from == "") and (date_to is not None and date_to != ""):
         event = event.filter(created_at=date_to)
-    elif (date_from is not None or date_from != "") and (date_to is not None or date_to != ""):
+    elif (date_from is not None and date_from != "") and (date_to is not None and date_to != ""):
         event = event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     return event
@@ -535,10 +535,10 @@ def filter_event(events: Event, instance, index, outfit):
                              date_to__isnull=False)
     elif isinstance(instance, Circuit):
         return events.filter(circuit=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
-                             date_to__is_null=False)
+                             date_to__isnull=False)
     else:
         return events.filter(name=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
-                             date_to__is_null=False)
+                             date_to__isnull=False)
 
 
 def get_count_event(events: Event, obj, index, outfit) -> int:
