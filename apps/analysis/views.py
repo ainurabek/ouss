@@ -352,7 +352,7 @@ class ReportOaAndOdApiView(APIView):
 
         for out in outfits:
             outfit = out.responsible_outfit
-            base = {"outfit": outfit.outfit, "events": [], "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+            base = {"outfit": outfit.outfit, "events": [], "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
                     "otv": {"sum": 0, "count": 0}}
 
             for event in all_event_name.filter(responsible_outfit=outfit):
@@ -378,6 +378,8 @@ class ReportOaAndOdApiView(APIView):
                 base["oa"]["sum"] += sum_oa
                 base["od"]["sum"] += sum_od
                 base["otv"]["sum"] += sum_otv
+                base['total_sum']['sum'] += sum_oa+sum_od+sum_otv
+                base['total_sum']['count'] += count_oa + count_od + count_otv
 
             rep["oa"]["count"] +=  base["oa"]["count"]
             rep["od"]["count"] +=  base["od"]["count"]
@@ -385,6 +387,8 @@ class ReportOaAndOdApiView(APIView):
             rep["oa"]["sum"] += base["oa"]["sum"]
             rep["od"]["sum"] += base["od"]["sum"]
             rep["otv"]["sum"] += base["otv"]["sum"]
+            rep['total_sum']['sum'] += base["oa"]["sum"] + base["od"]["sum"]+base["otv"]["sum"]
+            rep['total_sum']['count'] += base["oa"]["count"]+base["od"]["count"]+base["otv"]["count"]
 
             winners_oa = set_response_for_winners(winners_oa, "oa", base["events"])
             winners_od = set_response_for_winners(winners_od, "od", base["events"])
