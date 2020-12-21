@@ -382,7 +382,7 @@ class ReportOaAndOdApiView(APIView):
                 outfit_data["oa"]["sum"] += sum_oa
                 outfit_data["od"]["sum"] += sum_od
                 outfit_data["otv"]["sum"] += sum_otv
-                outfit_data['total_sum']['sum'] += sum_oa+sum_od+sum_otv
+                outfit_data['total_sum']['sum'] = round(outfit_data['total_sum']['sum']+ sum_oa+sum_od+sum_otv, 2)
                 outfit_data['total_sum']['count'] += count_oa + count_od + count_otv
 
             rep["oa"]["count"] +=  outfit_data["oa"]["count"]
@@ -391,9 +391,8 @@ class ReportOaAndOdApiView(APIView):
             rep["oa"]["sum"] += outfit_data["oa"]["sum"]
             rep["od"]["sum"] += outfit_data["od"]["sum"]
             rep["otv"]["sum"] += outfit_data["otv"]["sum"]
-            rep['total_sum']['sum'] += outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]+outfit_data["otv"]["sum"]
+            rep['total_sum']['sum'] = round(rep['total_sum']['sum'] + outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]+outfit_data["otv"]["sum"], 2)
             rep['total_sum']['count'] +=outfit_data["oa"]["count"]+outfit_data["od"]["count"]+outfit_data["otv"]["count"]
-
             winners_oa = set_response_for_winners(winners_oa, "oa", data)
             winners_od = set_response_for_winners(winners_od, "od", data)
             winners_otv = set_response_for_winners(winners_otv, "otv", data)

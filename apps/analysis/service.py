@@ -552,7 +552,6 @@ def get_sum_period_of_time_event(events: Event, instance, index, outfit):
     for event in filter_event(events, instance, index, outfit):
         a += event.period_of_time
 
-
     return a
 
 
