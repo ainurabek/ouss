@@ -346,7 +346,8 @@ class ReportOaAndOdApiView(APIView):
             "events": [],
             "oa": {"sum": 0, "count": 0},
             "od": {"sum": 0, "count": 0},
-            "otv": {"sum": 0, "count": 0}
+            "otv": {"sum": 0, "count": 0},
+            "total_sum": {"sum": 0, "count": 0}
 
         }
 
@@ -369,6 +370,7 @@ class ReportOaAndOdApiView(APIView):
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
                 base["events"].append({"name": get_event_name(event),
+                                       "total_sum": {"sum": sum_oa+sum_od+sum_otv, "count": count_oa + count_od + count_otv, "color": None},
                                        "oa": {"sum": sum_oa, "count": count_oa, "color": None},
                                        "od": {"sum": sum_od, "count": count_od, "color": None},
                                        "otv": {"sum": sum_otv, "count": count_otv, "color": None}})
