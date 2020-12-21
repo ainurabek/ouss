@@ -122,7 +122,7 @@ class CircuitEventListAPIView(ListAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEventList
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('id_object', 'customer', 'name', 'type_using')
+    filterset_fields = ('object', 'customer', 'name', 'type_using',)
 
 #cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
@@ -153,7 +153,7 @@ class ObjectEventListAPIView(ListAPIView):
     queryset = Object.objects.all()
     serializer_class = ObjectEventSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer')
+    filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer',)
 
 #obj create - Ainur
 class EventObjectCreateViewAPI(APIView):

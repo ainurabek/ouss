@@ -51,7 +51,7 @@ def get_event(event_object) -> Event:
     if event_object.object is not None:
         event = event_object.object
     elif event_object.ips is not None:
-        event = event_object.ips.point_id
+        event = event_object.ips
     elif event_object.circuit is not None:
         event = event_object.circuit
     elif event_object.name is not None:

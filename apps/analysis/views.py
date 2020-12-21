@@ -360,6 +360,7 @@ class ReportOaAndOdApiView(APIView):
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, get_event(event), od, outfit)
                 count_oa = get_count_event(all_event, get_event(event), oa, outfit)
+
                 count_otv = get_count_event(all_event, get_event(event), otv, outfit)
                 sum_oa = get_sum_period_of_time_event(all_event, get_event(event), oa, outfit)
                 sum_otv = get_sum_period_of_time_event(all_event, get_event(event), otv, outfit)

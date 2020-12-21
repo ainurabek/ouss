@@ -527,10 +527,12 @@ def get_diff(history):
 
 
 def filter_event(events: Event, instance, index, outfit):
+
     if isinstance(instance, Object):
         return events.filter(object=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
     elif isinstance(instance, IP):
+
         return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
     elif isinstance(instance, Circuit):
@@ -549,6 +551,7 @@ def get_sum_period_of_time_event(events: Event, instance, index, outfit):
     a = 0
     for event in filter_event(events, instance, index, outfit):
         a += event.period_of_time
+
 
     return a
 
