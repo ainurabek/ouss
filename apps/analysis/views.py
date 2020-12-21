@@ -343,7 +343,7 @@ class ReportOaAndOdApiView(APIView):
         }
         rep = {
             "outfit": None,
-            "events": [],
+            "name": None,
             "oa": {"sum": 0, "count": 0},
             "od": {"sum": 0, "count": 0},
             "otv": {"sum": 0, "count": 0},
@@ -353,9 +353,9 @@ class ReportOaAndOdApiView(APIView):
 
         for out in outfits:
             outfit = out.responsible_outfit
-            data.append({"name": outfit.outfit, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
+            data.append({"outfit": outfit.outfit, "name": None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
                     "otv": {"sum": None, "count": None}})
-            outfit_data = {"name": outfit.outfit, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+            outfit_data = {"outfit": outfit.outfit, "name": None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
                     "otv": {"sum": 0, "count": 0}}
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, get_event(event), od, outfit)
@@ -370,7 +370,7 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                data.append({"name": get_event_name(event),
+                data.append({"name": get_event_name(event), "outfit": None,
                                        "total_sum": {"sum": sum_oa+sum_od+sum_otv, "count": count_oa + count_od + count_otv, "color": None},
                                        "oa": {"sum": sum_oa, "count": count_oa, "color": None},
                                        "od": {"sum": sum_od, "count": count_od, "color": None},
