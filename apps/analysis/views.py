@@ -353,9 +353,10 @@ class ReportOaAndOdApiView(APIView):
 
         for out in outfits:
             outfit = out.responsible_outfit
-            base = {"outfit": outfit.outfit, "events": [], "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+            data.append({"name": outfit.outfit, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
+                    "otv": {"sum": None, "count": None}})
+            outfit_data = {"name": outfit.outfit, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
                     "otv": {"sum": 0, "count": 0}}
-
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, get_event(event), od, outfit)
                 count_oa = get_count_event(all_event, get_event(event), oa, outfit)
@@ -364,38 +365,38 @@ class ReportOaAndOdApiView(APIView):
                 sum_otv = get_sum_period_of_time_event(all_event, get_event(event), otv, outfit)
                 sum_od = get_sum_period_of_time_event(all_event, get_event(event), od, outfit)
 
-                winner_index = len(base["events"])
+                winner_index = len(data)
                 winners_otv = determine_the_winner(winners_otv, sum_otv, winner_index)
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                base["events"].append({"name": get_event_name(event),
+                data.append({"name": get_event_name(event),
                                        "total_sum": {"sum": sum_oa+sum_od+sum_otv, "count": count_oa + count_od + count_otv, "color": None},
                                        "oa": {"sum": sum_oa, "count": count_oa, "color": None},
                                        "od": {"sum": sum_od, "count": count_od, "color": None},
                                        "otv": {"sum": sum_otv, "count": count_otv, "color": None}})
-                base["oa"]["count"] += count_oa
-                base["od"]["count"] += count_od
-                base["otv"]["count"] += count_otv
-                base["oa"]["sum"] += sum_oa
-                base["od"]["sum"] += sum_od
-                base["otv"]["sum"] += sum_otv
-                base['total_sum']['sum'] += sum_oa+sum_od+sum_otv
-                base['total_sum']['count'] += count_oa + count_od + count_otv
+                outfit_data["oa"]["count"] += count_oa
+                outfit_data["od"]["count"] += count_od
+                outfit_data["otv"]["count"] += count_otv
+                outfit_data["oa"]["sum"] += sum_oa
+                outfit_data["od"]["sum"] += sum_od
+                outfit_data["otv"]["sum"] += sum_otv
+                outfit_data['total_sum']['sum'] += sum_oa+sum_od+sum_otv
+                outfit_data['total_sum']['count'] += count_oa + count_od + count_otv
 
-            rep["oa"]["count"] +=  base["oa"]["count"]
-            rep["od"]["count"] +=  base["od"]["count"]
-            rep["otv"]["count"] +=  base["otv"]["count"]
-            rep["oa"]["sum"] += base["oa"]["sum"]
-            rep["od"]["sum"] += base["od"]["sum"]
-            rep["otv"]["sum"] += base["otv"]["sum"]
-            rep['total_sum']['sum'] += base["oa"]["sum"] + base["od"]["sum"]+base["otv"]["sum"]
-            rep['total_sum']['count'] += base["oa"]["count"]+base["od"]["count"]+base["otv"]["count"]
+            rep["oa"]["count"] +=  outfit_data["oa"]["count"]
+            rep["od"]["count"] +=  outfit_data["od"]["count"]
+            rep["otv"]["count"] +=  outfit_data["otv"]["count"]
+            rep["oa"]["sum"] += outfit_data["oa"]["sum"]
+            rep["od"]["sum"] += outfit_data["od"]["sum"]
+            rep["otv"]["sum"] += outfit_data["otv"]["sum"]
+            rep['total_sum']['sum'] += outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]+outfit_data["otv"]["sum"]
+            rep['total_sum']['count'] +=outfit_data["oa"]["count"]+outfit_data["od"]["count"]+outfit_data["otv"]["count"]
 
-            winners_oa = set_response_for_winners(winners_oa, "oa", base["events"])
-            winners_od = set_response_for_winners(winners_od, "od", base["events"])
-            winners_otv = set_response_for_winners(winners_otv, "otv", base["events"])
-            data.append(base)
+            winners_oa = set_response_for_winners(winners_oa, "oa", data)
+            winners_od = set_response_for_winners(winners_od, "od", data)
+            winners_otv = set_response_for_winners(winners_otv, "otv", data)
+            data.append(outfit_data)
         data.append(rep)
         return JsonResponse(data, safe=False)
 
