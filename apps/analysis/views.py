@@ -142,8 +142,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
     serializer_class = DispEvent1ListSerializer
 
     def get_queryset(self):
-        today = datetime.date.today()
-        self.queryset = self.queryset.filter(created_at=today)
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
         index = self.request.query_params.get('index', None)
@@ -155,7 +153,6 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
             self.queryset = self.queryset.filter(created_at=date_to)
         elif date_to != '' and date_from != '':
             self.queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
-
         return self.queryset
 
 
