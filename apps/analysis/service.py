@@ -531,13 +531,13 @@ def filter_event(events: Event, instance, index, outfit):
         return events.filter(object=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
     elif isinstance(instance, IP):
-        return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+        return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
     elif isinstance(instance, Circuit):
-        return events.filter(circuit=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+        return events.filter(circuit=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
     else:
-        return events.filter(name=instance, index1=index, responsible_outfit=outfit, date_from__is_null=False,
+        return events.filter(name=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
 
 
