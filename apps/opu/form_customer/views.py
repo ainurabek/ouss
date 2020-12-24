@@ -39,7 +39,7 @@ class FormCustomerListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'circuit', 'customer')
+    filterset_fields = ('object', 'circuit', 'customer',)
     queryset = Form_Customer.objects.all()
     serializer_class = FormCustomerSerializer
 
@@ -73,7 +73,7 @@ class FormCustomerCircCreateAPIView(APIView):
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
-            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
+            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="src", request=request)
             response = {"data": "Форма арендатора успешно создана"}
             return Response(response, status=status.HTTP_201_CREATED)
 

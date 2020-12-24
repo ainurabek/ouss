@@ -36,7 +36,7 @@ class CircuitTransitSerializer(serializers.ModelSerializer):
 
 
 class CircuitListSerializer(serializers.ModelSerializer):
-    object = serializers.SlugRelatedField(slug_field='point', read_only=True)
+
     point1 = PointSerializer()
     point2 = PointSerializer()
     transit = CircuitTransitSerializer(many=True)
@@ -44,7 +44,7 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('id', "object", "name", "point1", "point2", "transit", "transit2")
+        fields = ('id', "name", "point1", "point2", "transit", "transit2")
 
 
 class CircuitSerializer(serializers.ModelSerializer):

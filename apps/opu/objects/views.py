@@ -216,7 +216,7 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         old_obj = save_old_object(self.get_object())
         instance = serializer.save(created_by=self.request.user.profile)
-        update_circuit(old_obj=old_obj, obj=instance)
+
 
 
 class ObjectAllView(viewsets.ModelViewSet):

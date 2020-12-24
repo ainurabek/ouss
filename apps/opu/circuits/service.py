@@ -71,6 +71,16 @@ def create_circuit(obj: Object, request):
                                  category=obj.category, point1=obj.point1, point2=obj.point2,
                                  created_by=request.user.profile, first=active, object=obj)
             c.id_object.add(obj)
+        #чтобы добавлять каналы в список всех каналов id_parent
+        id_parent = obj.id_parent
+        while True:
+            if id_parent.id_parent is None:
+                id_parent.circ_obj.add(*obj.circ_obj.all())
+                id_parent.save()
+                break
+            id_parent.circ_obj.add(*obj.circ_obj.all())
+            id_parent.save()
+            id_parent = id_parent.id_parent
         update_circuit_active(object=obj)
 
 def update_circuit_active(object: Object):
