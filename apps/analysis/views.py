@@ -313,15 +313,19 @@ class ReportOaAndOdApiView(APIView):
     def get(self, request):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
-        outfit = request.GET.get("outfit")
+        outfit = request.GET.getlist("outfit")
         index = request.GET.get("index")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         otv = Index.objects.get(index="0тв")
-
-        all_event = Event.objects.filter(index1__in=[od, oa, otv],
+        print(outfit)
+        if index is None or index == '':
+            all_event = Event.objects.filter(index1__in=[od, oa, otv])
+        else:
+            all_event = Event.objects.filter(index1__in=[index],
                                          callsorevent=False)
-        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit, index)
+
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
@@ -410,51 +414,33 @@ class WinnerReportAPIView(APIView):
     def get(self, request):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
-        outfit = request.GET.get("outfit")
-        od = Index.objects.get(index="0д")
-        oa = Index.objects.get(index="0а")
-        otv = Index.objects.get(index="0тв")
+        outfit = request.GET.getlist("outfit")
+        index_id = request.GET.get('index')
+        if index_id is None:
+            od = Index.objects.get(index="0д")
+            oa = Index.objects.get(index="0а")
+            otv = Index.objects.get(index="0тв")
+            list_index = [oa, otv, od]
+        else:
+            list_index = [Index.objects.get(pk=index_id)]
 
-        all_event = Event.objects.filter(index1__in=[od, oa, otv], callsorevent=False)
+        all_event = Event.objects.filter(index1__in=list_index, callsorevent=False)
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+        winners = {i.index: [{"name": None, "sum": 0, "count": 0} for _ in range(3)] for i in list_index}
+        print(winners)
         data = []
 
-        winners_oa = [
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-        ]
-
-        winners_otv = [
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-        ]
-
-        winners_od = [
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-            {"name": None, "sum": 0, "count": 0},
-        ]
         for out in outfits:
             outfit = out.responsible_outfit
+            for index in list_index:
+                for event in all_event_name.filter(responsible_outfit=outfit, index1=index):
+                    sum = get_sum_period_of_time_event(all_event, get_event(event), index, outfit)
+                    count = get_count_event(all_event, get_event(event), index, outfit)
+                    event_name = get_event_name(event)
+                    get_winners(winners[index.index], event_name, sum, count)
 
-            for event in all_event_name.filter(responsible_outfit=outfit):
-                sum_oa = get_sum_period_of_time_event(all_event, get_event(event), oa, outfit)
-                sum_otv = get_sum_period_of_time_event(all_event, get_event(event), otv, outfit)
-                sum_od = get_sum_period_of_time_event(all_event, get_event(event), od, outfit)
-                count_od = get_count_event(all_event, get_event(event), od, outfit)
-                count_oa = get_count_event(all_event, get_event(event), oa, outfit)
-                count_otv = get_count_event(all_event, get_event(event), otv, outfit)
-                event_name = get_event_name(event)
-                winners_oa = get_winners(winners_oa, event_name, sum_oa, count_oa)
-                winners_od = get_winners(winners_od, event_name, sum_od, count_od)
-                winners_otv = get_winners(winners_otv, event_name, sum_otv, count_otv)
-
-            data.append({"outfit": outfit.outfit, "index": oa.name, "winners": winners_oa})
-            data.append({"outfit": outfit.outfit, "index": od.name, "winners": winners_od})
-            data.append({"outfit": outfit.outfit, "index": otv.name, "winners": winners_otv})
+                data.append({"outfit": outfit.outfit, "index": index.index, "winners": winners[index.index]})
 
         return JsonResponse(data, safe=False)

@@ -127,8 +127,12 @@ def get_period_date_to(call, date_to):
 
 
 def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
+
+    if not isinstance(outfit, list):
+        outfit = [outfit]
+
     if outfit != "" and outfit is not None:
-        event = event.filter(responsible_outfit_id=outfit)
+        event = event.filter(responsible_outfit_id__in=outfit)
     if (date_from is not None and date_from != "") and (date_to is None or date_to == ""):
         event = event.filter(created_at=date_from)
     elif (date_from is None or date_from == "") and (date_to is not None and date_to != ""):
@@ -137,6 +141,8 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
         event = event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     return event
+
+
 
 
 def calls_filter_for_punkt5(date_from, date_to, outfit):
