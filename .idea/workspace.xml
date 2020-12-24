@@ -20,8 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/analysis/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,7 +54,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="add_unversioned_files" value="$PROJECT_DIR$/log/log.log" />
-    <property name="last_opened_file_path" value="$USER_HOME$/example_project/fast_api_project" />
+    <property name="last_opened_file_path" value="$USER_HOME$/front/docker-compose.yml" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -68,7 +69,29 @@
       <recent name="$PROJECT_DIR$/docker" />
     </key>
   </component>
-  <component name="RunManager" selected="Django Server.Unnamed">
+  <component name="RunManager" selected="Python.work_with_file">
+    <configuration name="work_with_file" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="KT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/folder" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/folder/work_with_file.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="KT" type="Python.DjangoServer" factoryName="Django server">
       <module name="KT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -118,7 +141,13 @@
     <list>
       <item itemvalue="Django Server.KT" />
       <item itemvalue="Django Server.Unnamed" />
+      <item itemvalue="Python.work_with_file" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.work_with_file" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -198,7 +227,9 @@
       <workItem from="1607575848744" duration="11858000" />
       <workItem from="1607928592446" duration="11235000" />
       <workItem from="1608008072234" duration="10158000" />
-      <workItem from="1608548660933" duration="4913000" />
+      <workItem from="1608548660933" duration="6940000" />
+      <workItem from="1608545779617" duration="2868000" />
+      <workItem from="1608703570539" duration="11861000" />
     </task>
     <servers />
   </component>
@@ -216,5 +247,8 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/KT$work_with_file.coverage" NAME="work_with_file Coverage Results" MODIFIED="1608718727768" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/folder" />
   </component>
 </project>

@@ -146,7 +146,6 @@ folder
 Dockerfile
 data.py
 docker-compose.yml
-log
 
 #**/migrations/
 #**/**/migrations

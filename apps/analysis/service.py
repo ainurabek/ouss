@@ -108,11 +108,11 @@ def get_calls_list(all_event, obj):
 
 def get_amount_of_channels(obj):
     if obj.object is not None:
-        return obj.object.total_amount_active_channels
+        return obj.object.total_amount_channels
     elif obj.ips is not None:
-        return obj.ips.object_id.total_amount_active_channels
+        return obj.ips.object_id.total_amount_channels
     elif obj.circuit is not None:
-        return obj.circuit.id_object.total_amount_active_channels
+        return obj.circuit.id_object.total_amount_channels
 
 
 
