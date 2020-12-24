@@ -127,11 +127,11 @@ def get_period_date_to(call, date_to):
 
 
 def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
-
+    print(outfit)
     if not isinstance(outfit, list):
         outfit = [outfit]
 
-    if outfit != "" and outfit is not None:
+    if outfit != [""] and outfit != []:
         event = event.filter(responsible_outfit_id__in=outfit)
     if (date_from is not None and date_from != "") and (date_to is None or date_to == ""):
         event = event.filter(created_at=date_from)
