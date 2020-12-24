@@ -145,6 +145,7 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
         index = self.request.query_params.get('index', None)
+        #outfit
         if index is not None and index != '':
             self.queryset = self.queryset.filter(index1=index)
         if date_to == "" and date_from != '':
@@ -313,13 +314,14 @@ class ReportOaAndOdApiView(APIView):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
         outfit = request.GET.get("outfit")
+        index = request.GET.get("index")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         otv = Index.objects.get(index="0тв")
 
         all_event = Event.objects.filter(index1__in=[od, oa, otv],
                                          callsorevent=False)
-        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit, index)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
