@@ -22,7 +22,7 @@ def get_period(obj, date_to):
         return obj.period_of_time
 
     if obj.date_to is None:
-        if date_to is not None and date_to != "":
+        if date_to is not None:
             date_to = datetime.fromisoformat(date_to + "T23:59:59")
             date = date_to - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
@@ -133,11 +133,11 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
 
     if outfit != [""] and outfit != []:
         event = event.filter(responsible_outfit_id__in=outfit)
-    if (date_from is not None and date_from != "") and (date_to is None or date_to == ""):
+    if date_from is not None and date_to is None:
         event = event.filter(created_at=date_from)
-    elif (date_from is None or date_from == "") and (date_to is not None and date_to != ""):
+    elif date_from is None and date_to is not None:
         event = event.filter(created_at=date_to)
-    elif (date_from is not None and date_from != "") and (date_to is not None and date_to != ""):
+    elif date_from is not None and date_to is not None:
         event = event.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     return event

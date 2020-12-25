@@ -146,15 +146,16 @@ class DispEvent1ListAPIView(viewsets.ModelViewSet):
         date_to = self.request.query_params.get('date_to', None)
         index = self.request.query_params.get('index', None)
         outfit = self.request.query_params.get('outfit', None)
-        if index is not None and index != '':
+        if index is not None:
             self.queryset = self.queryset.filter(index1=index)
-        if outfit is not None and outfit != '':
+        if outfit is not None:
             self.queryset = self.queryset.filter(responsible_outfit=outfit)
-        if date_to == "" and date_from != '':
+
+        if date_to is None and date_from is not None:
             self.queryset = self.queryset.filter(created_at=date_from)
-        elif date_to != '' and date_from == '':
+        elif date_to is not None and date_from is None:
             self.queryset = self.queryset.filter(created_at=date_to)
-        elif date_to != '' and date_from != '':
+        elif date_to is not None and date_from is not None:
             self.queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
         return self.queryset
 
