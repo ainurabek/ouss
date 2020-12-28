@@ -17,7 +17,7 @@ class CustomerFormSerializer(serializers.ModelSerializer):
 class OrderCusPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderCusPhoto
-        fields = ("id", "order")
+        fields = ("id", "src")
 
 class PointSerializer(serializers.ModelSerializer):
 
