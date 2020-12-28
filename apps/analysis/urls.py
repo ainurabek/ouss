@@ -10,7 +10,7 @@ router.register('form', views.FormAnalysisAPIViewSet, basename='index')
 
 urlpatterns = [
 
-    path('disp/report/', views.DispEvent1ListAPIView.as_view({'get': 'list'}), name="disp_list_event"),
+
     path("api/form/", views.get_report),
     path("history/<int:pk>/", views.DispEventHistory.as_view(), name='history'),
     path("form/<int:pk>/edit/", views.FormAnalysisUpdateAPIView.as_view(), name='update_form'),
@@ -23,6 +23,8 @@ urlpatterns = [
     path("punkt7/list/<int:pk>/", views.Punkt7ListAPIView.as_view()),
     path("report/od/oa/", views.ReportOaAndOdApiView.as_view()),
     path("winners/report/", views.WinnerReportAPIView.as_view()),
+
+    path("disp/report/", views.get_report_analysis),
     path('', include(router.urls)),
 
 ]

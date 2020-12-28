@@ -127,7 +127,7 @@ def get_period_date_to(call, date_to):
 
 
 def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
-    print(outfit)
+
     if not isinstance(outfit, list):
         outfit = [outfit]
 

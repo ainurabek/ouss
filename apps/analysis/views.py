@@ -134,31 +134,59 @@ def get_report(request):
     return JsonResponse(data, safe=False)
 
 
-class DispEvent1ListAPIView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.filter(callsorevent=False)
-    lookup_field = 'pk'
-    serializer_class = DispEvent1ListSerializer
+def get_report_analysis(request):
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    index = request.GET.get("index")
+    outfit = request.GET.getlist('outfit')
+    all_event_completed = Event.objects.filter(callsorevent=True, index1__index='4')
 
-    def get_queryset(self):
-        date_from = self.request.query_params.get('date_from', None)
-        date_to = self.request.query_params.get('date_to', None)
-        index = self.request.query_params.get('index', None)
-        outfit = self.request.query_params.get('outfit', None)
-        if index is not None:
-            self.queryset = self.queryset.filter(index1=index)
-        if outfit is not None:
-            self.queryset = self.queryset.filter(responsible_outfit=outfit)
+    all_event_completed = event_filter_date_from_date_to_and_outfit(all_event_completed, date_from, date_to, outfit)
 
-        if date_to is None and date_from is not None:
-            self.queryset = self.queryset.filter(created_at=date_from)
-        elif date_to is not None and date_from is None:
-            self.queryset = self.queryset.filter(created_at=date_to)
-        elif date_to is not None and date_from is not None:
-            self.queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
-        return self.queryset
+    all_event_uncompleted = Event.objects.filter(callsorevent=True).exclude(index1__index='4')
+    all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, outfit)
+    all_event = all_event_completed | all_event_uncompleted
+    all_calls = Event.objects.filter(callsorevent=False)
+    if index is not None:
+        all_calls = all_calls.filter(index1_id=index)
 
+    outfits = (all_event_completed | all_event_uncompleted).order_by("responsible_outfit").distinct(
+        "responsible_outfit")
+
+    data = []
+
+    for out in outfits:
+        data.append({"outfit": out.responsible_outfit.outfit,
+                 "name": None,
+                "reason": None,
+                 "date_from": None,
+                 "date_to": None,
+                 'region':None,
+                 "index1": None,
+                 "comments1": None})
+        for event in all_event.filter(responsible_outfit=out.responsible_outfit):
+            data.append({"outfit": None,
+                         "name": get_event_name(event),
+                         "reason": None,
+                         "date_from": None,
+                         "date_to": None,
+                         'region': None,
+                         "index1": None,
+                         "comments1": None})
+            calls_count = 0
+            for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
+                data.append({"outfit": None,
+                             "name": get_event_name(call),
+                             "reason": call.reason.name,
+                             "date_from": call.date_from,
+                             "date_to": call.date_to,
+                             'region': call.point1.point + " - " + call.point2.point,
+                             "index1": call.index1.index,
+                             "comments1": call.comments1})
+                calls_count += 1
+            if calls_count == 0:
+                data.pop()
+    return JsonResponse(data, safe=False)
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
