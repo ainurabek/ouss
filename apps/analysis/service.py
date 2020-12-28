@@ -132,7 +132,7 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
         outfit = [outfit]
 
     if outfit != [""] and outfit != []:
-        event = event.filter(responsible_outfit_id__in=outfit)
+        event = event.filter(responsible_outfit__in=outfit)
     if date_from is not None and date_to is None:
         event = event.filter(created_at=date_from)
     elif date_from is None and date_to is not None:
