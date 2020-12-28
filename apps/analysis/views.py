@@ -25,11 +25,11 @@ from apps.opu.services import ListWithPKMixin
 
 from apps.analysis.service import get_diff
 
-
+#Отчет по 1
 def get_report(request):
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
-    responsible_outfit = request.GET.get("responsible_outfit")
+    responsible_outfit = request.GET.getlist("responsible_outfit")
 
     all_event = Event.objects.filter(index1__index='1', callsorevent=False)
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
@@ -133,18 +133,18 @@ def get_report(request):
 
     return JsonResponse(data, safe=False)
 
-
+#Отчет дисп.службы по разным индексам
 def get_report_analysis(request):
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     index = request.GET.get("index")
-    outfit = request.GET.getlist('outfit')
+    responsible_outfit = request.GET.getlist('responsible_outfit')
     all_event_completed = Event.objects.filter(callsorevent=True, index1__index='4')
 
-    all_event_completed = event_filter_date_from_date_to_and_outfit(all_event_completed, date_from, date_to, outfit)
+    all_event_completed = event_filter_date_from_date_to_and_outfit(all_event_completed, date_from, date_to, responsible_outfit)
 
     all_event_uncompleted = Event.objects.filter(callsorevent=True).exclude(index1__index='4')
-    all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, outfit)
+    all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, responsible_outfit)
     all_event = all_event_completed | all_event_uncompleted
     all_calls = Event.objects.filter(callsorevent=False)
     if index is not None:
@@ -208,7 +208,7 @@ class DispEventHistory(APIView):
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
 
-
+#Отчет по коэф, пункт 5, пункт 7
 class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -336,7 +336,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         delete_punkt7(instance)
 
-
+#Отчет по Од, Оа, Отв
 class ReportOaAndOdApiView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -344,19 +344,19 @@ class ReportOaAndOdApiView(APIView):
     def get(self, request):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
-        outfit = request.GET.getlist("outfit")
+        responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         otv = Index.objects.get(index="0тв")
-        print(outfit)
+
         if index is None or index == '':
             all_event = Event.objects.filter(index1__in=[od, oa, otv])
         else:
             all_event = Event.objects.filter(index1__in=[index],
                                          callsorevent=False)
 
-        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
@@ -445,7 +445,7 @@ class WinnerReportAPIView(APIView):
     def get(self, request):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
-        outfit = request.GET.getlist("outfit")
+        responsible_outfit = request.GET.getlist("responsible_outfit")
         index_id = request.GET.get('index')
         if index_id is None:
             od = Index.objects.get(index="0д")
@@ -456,7 +456,7 @@ class WinnerReportAPIView(APIView):
             list_index = [Index.objects.get(pk=index_id)]
 
         all_event = Event.objects.filter(index1__in=list_index, callsorevent=False)
-        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
+        all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         winners = {i.index: [{"name": None, "sum": 0, "count": 0} for _ in range(3)] for i in list_index}
