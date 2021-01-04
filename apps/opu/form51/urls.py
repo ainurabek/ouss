@@ -10,11 +10,9 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
 
-    path("api/", views.FormListAPIView.as_view()),
-    path("api/regions/", views.RegionListAPIView.as_view()),
+    path("list/", views.FormListAPIView.as_view()),
     path("api/update/<int:pk>/", views.Form51UpdateAPIView.as_view()),
     path("api/delete/<int:pk>/", views.Form51DeleteAPIView.as_view()),
-    path("api/create/<int:pk>/", views.FormCreateViewAPI.as_view()),
     path("api/reserve/<int:pk>/", views.ReserveDetailAPIView.as_view()),
 
     path("api/reserve/delete/<int:form_pk>/<int:reserve_pk>/", views.ReserveDelete.as_view()),

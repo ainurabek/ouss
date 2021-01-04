@@ -25,11 +25,11 @@ class Form53(models.Model):
 
 class Schema53Photo(models.Model):
     src = models.FileField('Схема', upload_to='files/', blank=True, null=True)
-    form53 = models.ManyToManyField(Form53, verbose_name="Схема",
-                                 blank=True, related_name="schema53_photo")
+    form53 = models.ForeignKey(Form53, verbose_name="Схема",
+                               blank=True, null=True, on_delete=models.CASCADE, related_name="schema53_photo")
 
 
 class Order53Photo(models.Model):
     src = models.FileField('Схема', upload_to='files/', blank=True)
-    form53 = models.ManyToManyField(Form53, verbose_name="Распоряжение",
-                                 blank=True, related_name="order53_photo")
+    form53 = models.ForeignKey(Form53, verbose_name="Распоряжение",
+                               blank=True, null=True,  on_delete=models.CASCADE, related_name="order53_photo")

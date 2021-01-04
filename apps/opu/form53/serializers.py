@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.opu.form51.models import Region
+
 from apps.opu.form53.models import Form53, Order53Photo, Schema53Photo
 from apps.opu.circuits.serializers import CircuitList
 
@@ -32,9 +32,3 @@ class Form53Serializer(serializers.ModelSerializer):
         fields = ("id", "circuit",  "order53_photo", "schema53_photo", "comments", 'created_at')
         depth=1
 
-class Region53Serializer(serializers.ModelSerializer):
-    """ Регионы """
-
-    class Meta:
-        model = Region
-        fields = ("id", "name",)

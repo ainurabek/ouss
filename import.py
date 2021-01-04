@@ -10,9 +10,9 @@ import django
 django.setup()
 
 from apps.accounts.models import DepartmentKT, SubdepartmentKT, Role
-from apps.opu.objects.models import TPO, Category, LineType, TypeOfLocation, Outfit, Point, InOut, TypeOfTrakt
+from apps.opu.objects.models import TPO, Category, LineType, TypeOfLocation, Outfit, Point, InOut, TypeOfTrakt, Consumer
 from apps.opu.circuits.models import Measure, TypeCom, Mode
-from apps.opu.form51.models import Region
+
 from apps.opu.form_customer.models import Signalization
 from apps.dispatching.models import Index, TypeOfJournal, Reason
 
@@ -28,13 +28,14 @@ data_subdepartment = csv.reader(open("/home/ainura/Desktop/DB/subdepartment.csv"
 data_role= csv.reader(open("/home/ainura/Desktop/DB/role.csv"), delimiter=',')
 data_measure= csv.reader(open("/home/ainura/Desktop/DB/measure.csv"), delimiter=',')
 data_typecom= csv.reader(open("/home/ainura/Desktop/DB/type_com.csv"), delimiter=',')
-data_region= csv.reader(open("/home/ainura/Desktop/DB/region.csv"), delimiter=',')
+
 data_signal= csv.reader(open("/home/ainura/Desktop/DB/signalization.csv"), delimiter=',')
 data_inout= csv.reader(open("/home/ainura/Desktop/DB/inout.csv"), delimiter=',')
 data_trakt= csv.reader(open("/home/ainura/Desktop/DB/type_trakt.csv"), delimiter=',')
 data_index= csv.reader(open("/home/ainura/Desktop/DB/index.csv"), delimiter=',')
 data_typejournal= csv.reader(open("/home/ainura/Desktop/DB/type_journal.csv"), delimiter=',')
 data_reason= csv.reader(open("/home/ainura/Desktop/DB/reason.csv"), delimiter=',')
+data_consumer= csv.reader(open("/home/ainura/Desktop/DB/consumer.csv"), delimiter=',')
 
 
 
@@ -85,12 +86,11 @@ for row in data_trakt:
         trakt.save()
 
 
-for row in data_region:
+for row in data_consumer:
     if row[0] != 'id':
-        region = Region()
-        region.name = row[1]
-        region.slug = row[2]
-        region.save()
+        consumer = Consumer()
+        consumer.name = row[1]
+        consumer.save()
 
 
 for row in data_department:

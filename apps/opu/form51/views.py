@@ -6,9 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
-from apps.opu.form51.models import Form51, Region
-from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, RegionSerializer, \
-    Form51ReserveSerializer
+from apps.opu.form51.models import Form51
+from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, Form51ReserveSerializer
 from apps.opu.objects.models import Object
 # Templates
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
@@ -22,44 +21,6 @@ from apps.opu.form51.service import get_form51_diff
 #############################################################################################
 
 
-
-class FormCreateViewAPI(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-    """Создания Формы 5.1"""
-
-    def post(self, request, pk):
-        obj = get_object_or_404(Object, pk=pk)
-        serializer = Form51CreateSerializer(data=request.data)
-
-        if serializer.is_valid():
-            data = serializer.save(object=obj, created_by=request.user.profile)
-            create_photo(model=Form51, model_photo=SchemaPhoto, obj=data, field_name="schema", request=request)
-            create_photo(model=Form51, model_photo=OrderPhoto, obj=data, field_name="order", request=request)
-
-            for i in obj.transit.all():
-                if obj != i:
-                    Form51.objects.create(
-                        object=i, customer=data.customer,
-                        num_ouss=data.num_ouss,
-                        order=data.order, schema=data.schema,
-                        reserve=data.reserve
-                    )
-
-            for i in obj.transit2.all():
-                if obj != i:
-                    Form51.objects.create(
-                        object=i, customer=data.customer,
-                        num_ouss=data.num_ouss,
-                        order=data.order, schema=data.schema,
-                        reserve=data.reserve
-                    )
-            response = {"data": "Форма 5.1 создана успешно"}
-            return Response(response, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class FormListAPIView(ListAPIView):
     """Список Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
@@ -68,13 +29,13 @@ class FormListAPIView(ListAPIView):
 
     def get_queryset(self):
         queryset = Form51.objects.all()
-        region = self.request.query_params.get('region', None)
+        outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
 
-        if region is not None and region != "":
-            queryset = queryset.filter(object__id_outfit__outfit=region)
-        if customer is not None and customer != "":
-            queryset = queryset.filter(customer__customer=customer)
+        if outfit is not None:
+            queryset = queryset.filter(object__id_outfit=outfit)
+        if customer is not None:
+            queryset = queryset.filter(customer=customer)
 
         return queryset
 
@@ -92,14 +53,6 @@ class Form51DeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form51.objects.all()
-
-
-class RegionListAPIView(ListAPIView):
-    """Список Регоинов"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Region.objects.all()
-    serializer_class = RegionSerializer
 
 
 class ReserveDetailAPIView(APIView, ListWithPKMixin):

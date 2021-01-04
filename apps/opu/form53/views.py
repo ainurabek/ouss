@@ -8,8 +8,7 @@ from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-from apps.opu.form51.models import Region
-from apps.opu.form53.serializers import Region53Serializer
+
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.form53.services import create_photo_for_form53
 from apps.opu.services import PhotoDeleteMixin
@@ -38,20 +37,9 @@ class Form53CreateViewAPI(APIView):
             create_photo_for_form53(model=Form53, model_photo=Order53Photo,
                                     obj=data, field_name="order", request=request)
 
-            for i in circuit.transit.all():
-                if circuit != i:
-                    form53 = Form53.objects.create(
-                        circuit=i, comments= data.comments
-                    )
-                    form53.schema53_photo.add(*data.schema53_photo.all())
-                    form53.order53_photo.add(*data.order53_photo.all())
-            for i in circuit.transit2.all():
-                if circuit != i:
-                    form53 = Form53.objects.create(
-                        circuit=i, comments=data.comments
-                    )
-                    form53.schema53_photo.add(*data.schema53_photo.all())
-                    form53.order53_photo.add(*data.order53_photo.all())
+            #мы 4 января удалили возможность создавать форму 5.3 для транзитов в канале.
+            #Теперь будет создаваться форма 5.3 только для основного канала, который выбрали
+
             response = {"data": "Форма 5.3 создана успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -66,19 +54,14 @@ class Form53ListAPIView(ListAPIView):
 
     def get_queryset(self):
         queryset = Form53.objects.all()
-        region = self.request.query_params.get('region', None)
+        outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
-        category = self.request.query_params.get('category', None)
-        circuit = self.request.query_params.get('circuit', None)
 
-        if region is not None and region != "":
-            queryset = queryset.filter(circuit__id_object__id_outfit__outfit=region)
-        if customer is not None and customer != "":
+        if outfit is not None:
+            queryset = queryset.filter(circuit__id_object__id_outfit=outfit)
+        if customer is not None:
             queryset = queryset.filter(circuit__customer=customer)
-        if category is not None and category != "":
-            queryset = queryset.filter(circuit__category=category)
-        if circuit is not None and circuit != "":
-            queryset = queryset.filter(circuit__name=circuit)
+
         return queryset
 
 
@@ -96,14 +79,6 @@ class Form53DeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53
-
-
-class Region53ListAPIView(ListAPIView):
-    """Список Регоинов"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Region.objects.all()
-    serializer_class = Region53Serializer
 
 
 class Order53PhotoCreateView(APIView):

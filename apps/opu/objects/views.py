@@ -46,6 +46,8 @@ from apps.opu.services import create_photo
 
 from apps.opu.objects.serializers import OrderObjectPhotoSerializer
 
+from apps.opu.objects.services import create_form51
+
 
 class AmountChannelListAPIView(ListAPIView):
     queryset = AmountChannel.objects.all()
@@ -202,6 +204,7 @@ class LPCreateView(generics.CreateAPIView):
         instance = serializer.save(created_by=self.request.user.profile)
         # instance.total_amount_channels = instance.amount_channels.value
         instance.save()
+        create_form51(obj = instance)
         # create_circuit(instance, self.request)
         adding_an_object_to_trassa(obj=instance)
 
@@ -214,8 +217,8 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def perform_update(self, serializer):
-        old_obj = save_old_object(self.get_object())
         instance = serializer.save(created_by=self.request.user.profile)
+        instance.save()
 
 
 
@@ -282,6 +285,7 @@ class ObjectCreateView(APIView):
             # if instance.type_of_trakt.name == 'ПГ':
             instance.total_amount_channels = instance.amount_channels.value
             instance.save()
+            create_form51(obj = instance)
             # create_circuit(obj=instance, request=request)
             adding_an_object_to_trassa(obj=instance)
             update_total_amount_channels(instance=instance)

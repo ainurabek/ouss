@@ -1,6 +1,7 @@
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object
 
+from apps.opu.form51.models import Form51
 
 
 def check_parent_type_of_trakt(parent: Object):
@@ -83,5 +84,8 @@ def update_total_amount_channels(instance: Object):
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)
 
+
+def create_form51(obj:Object):
+    Form51.objects.create(object = obj, customer = obj.customer)
 
 

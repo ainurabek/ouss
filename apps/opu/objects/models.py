@@ -90,8 +90,8 @@ class Category(models.Model):
 	name = models.CharField('Обозначение', max_length=100)
 
 	class Meta:
-		verbose_name = 'Категория'
-		verbose_name_plural = 'Категории'
+		verbose_name = 'Индекс назначения КО'
+		verbose_name_plural = 'Индекс назначения КО'
 
 	def __str__(self):
 		return f'{self.index}, {self.id}'
@@ -154,6 +154,15 @@ class AmountChannel(models.Model):
 	def __str__(self):
 		return self.name
 
+class Consumer(models.Model):
+	name = models.CharField("Название", max_length=150)
+
+	class Meta:
+		verbose_name = "Потребитель"
+		verbose_name_plural = "Потребители"
+
+	def __str__(self):
+		return self.name
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
@@ -173,7 +182,7 @@ class Object(models.Model):
 	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',
 										blank=True, null=True, on_delete=models.SET_NULL)
 	save_in = models.BooleanField('Сохранить', blank=True, null=True)
-	type_line = models.ForeignKey(LineType, related_name='obj_type_line',on_delete=models.SET_NULL, blank=True, null=True)
+	type_line = models.ForeignKey(LineType, related_name='obj_type_line', on_delete=models.SET_NULL, blank=True, null=True)
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.SET_NULL, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
@@ -182,6 +191,7 @@ class Object(models.Model):
 	total_amount_channels = models.IntegerField('Задействованные каналы', default=0, blank=True, null=True)
 	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
 	src = models.ImageField('Скан распоряжения', upload_to='files/', blank=True)
+	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_object_log')
 
 

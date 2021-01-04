@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 
 
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel, OrderObjectPhoto
+    AmountChannel, OrderObjectPhoto, Consumer
 
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
@@ -274,6 +274,10 @@ class LPEditSerializer(serializers.ModelSerializer):
         'comments', 'customer')
         depth = 1
 
+class ConsumerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Consumer
+        fields = ('id', 'name')
 
 
 class ObjectSerializer(serializers.ModelSerializer):
@@ -291,6 +295,7 @@ class ObjectSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
+    consumer = ConsumerSerializer()
     amount_channels = AmountChannelListSerializer()
     order_object_photo = OrderObjectPhotoSerializer(many=True)
 
@@ -298,7 +303,7 @@ class ObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent', 'name', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'transit', 'transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo')
+                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -324,12 +329,14 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
     amount_channels = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=AmountChannel.objects.all())
+    consumer = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Consumer.objects.all())
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
-                  'transit', 'transit2', 'category', 'comments', 'customer')
+                  'transit', 'transit2', 'category', 'comments', 'customer', 'consumer')
 
 class ObjectEditSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
@@ -349,6 +356,8 @@ class ObjectEditSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True,  queryset=TypeOfTrakt.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
+    consumer = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Consumer.objects.all())
 
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
@@ -358,7 +367,7 @@ class ObjectEditSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
-                  'transit', 'transit2', 'category', 'comments', 'customer')
+                  'transit', 'transit2', 'category', 'comments', 'customer', 'consumer')
 
 class SelectObjectSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)

@@ -2,13 +2,15 @@ from rest_framework import serializers
 
 from apps.opu.customer.models import Customer
 from apps.opu.customer.serializers import CustomerSerializer
-from apps.opu.form51.models import Form51, Region
+from apps.opu.form51.models import Form51
 from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import TransitSerializer
 
 from apps.opu.circuits.serializers import CategorySerializer
 
 from apps.opu.form51.models import OrderPhoto, SchemaPhoto
+
+from apps.opu.objects.serializers import ConsumerSerializer
 
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
@@ -43,7 +45,7 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form51
-        fields = ("id", "customer", "num_ouss", "reserve", "report_num", "reserve_object")
+        fields = ("id", "customer", "num_order", "reserve", "comments", "reserve_object")
 
 
 
@@ -54,10 +56,11 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
     category = CategorySerializer()
+    consumer = ConsumerSerializer()
 
     class Meta:
         model = Object
-        fields = ("name", "transit", "transit2", "category", "point1", "point2")
+        fields = ("name", "transit", "transit2", "category", "point1", "point2", 'consumer')
         depth = 1
 
 
@@ -70,16 +73,10 @@ class Form51Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form51
-        fields = ("id", "object", "customer", "num_ouss", "order_photo", "schema_photo", "reserve", "report_num", "reserve_object")
+        fields = ("id", "object", "customer", "num_order", "order_photo", "schema_photo", "reserve", "reserve_object", 'comments')
         depth=1
 
 
-class RegionSerializer(serializers.ModelSerializer):
-    """ Регионы """
-
-    class Meta:
-        model = Region
-        fields = ("id", "name", )
 
 
 class ObjectReserveSerializer(serializers.ModelSerializer):
