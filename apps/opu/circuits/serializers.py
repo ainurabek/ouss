@@ -27,12 +27,12 @@ class PointCircSerializer(serializers.ModelSerializer):
         model = Point
         fields = ('id', 'name', 'point')
 
+
 class TypeComSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TypeCom
         fields = ('id', 'name')
-
 
 
 class MeasureCircSerializer(serializers.ModelSerializer):
@@ -41,11 +41,13 @@ class MeasureCircSerializer(serializers.ModelSerializer):
         model = Measure
         fields = ('id', 'name')
 
+
 class InOutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InOut
         fields = ('id', 'name')
+
 
 class ModeCircSerializer(serializers.ModelSerializer):
 
@@ -53,15 +55,18 @@ class ModeCircSerializer(serializers.ModelSerializer):
         model = Mode
         fields = ('id', 'name')
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('id', 'index', 'name')
 
+
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ('__all__')
+
 
 class TransitCircSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
@@ -70,6 +75,7 @@ class TransitCircSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circuit
         fields = ('id', 'point1', 'name', 'point2')
+
 
 class CircuitList(serializers.ModelSerializer):
     id_object = ObjectCircSerializer(many=True)
@@ -89,6 +95,7 @@ class CircuitList(serializers.ModelSerializer):
                   'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
                    'transit', 'transit2', 'in_out', 'first', 'point1', 'point2',
                   'customer', 'mode', 'type_com', 'first')
+
 
 class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(

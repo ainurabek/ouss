@@ -18,11 +18,13 @@ class PointList(serializers.ModelSerializer):
         model = Point
         fields = ('id', 'point')
 
+
 class AmountChannelListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AmountChannel
         fields = ("id", "name", 'value')
+
 
 class LineTypeSerializer(serializers.ModelSerializer):
 
@@ -72,6 +74,7 @@ class OutfitListSerializer(serializers.ModelSerializer):
         fields = ('id', 'outfit', 'adding', 'num_outfit', 'tpo', 'type_outfit', 'created_by')
         depth = 1
 
+
 class OutfitWorkerListSerializer(serializers.ModelSerializer):
     outfit = OutfitListSerializer()
 
@@ -79,6 +82,7 @@ class OutfitWorkerListSerializer(serializers.ModelSerializer):
         model = OutfitWorker
         fields = ('id', 'outfit', 'name')
         depth = 1
+
 
 class OutfitWorkerCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
@@ -88,6 +92,7 @@ class OutfitWorkerCreateSerializer(serializers.ModelSerializer):
         model = OutfitWorker
         fields = ('id', 'outfit', 'name')
         depth = 1
+
 
 class OutfitCreateSerializer(serializers.ModelSerializer):
     tpo = serializers.PrimaryKeyRelatedField(
@@ -126,7 +131,6 @@ class IPListSerializer(serializers.ModelSerializer):
     tpo_id = TPOSerializer()
     point_id = PointListSerializer()
 
-
     class Meta:
         model = IP
         fields = ('id', 'point_id', 'object_id', 'tpo_id')
@@ -164,6 +168,7 @@ class TransitSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'point1', 'name', 'point2')
 
+
 class IPSerializer(serializers.ModelSerializer):
     point_id=serializers.SlugRelatedField(slug_field='point', read_only=True)
     object_id=serializers.SlugRelatedField(slug_field='name', read_only=True)
@@ -172,17 +177,20 @@ class IPSerializer(serializers.ModelSerializer):
         model = IP
         fields = ('id', 'tpo_id', 'point_id', 'object_id' )
 
+
 class OrderObjectPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderObjectPhoto
         fields = ("id", "src")
 
+
 class AllObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
         fields = ('__all__')
+
 
 class LPSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True)
@@ -274,6 +282,7 @@ class LPEditSerializer(serializers.ModelSerializer):
         'comments', 'customer')
         depth = 1
 
+
 class ConsumerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consumer
@@ -338,6 +347,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'consumer')
 
+
 class ObjectEditSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Category.objects.all())
@@ -362,19 +372,18 @@ class ObjectEditSerializer(serializers.ModelSerializer):
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
 
-
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
                   'transit', 'transit2', 'category', 'comments', 'customer', 'consumer')
 
+
 class SelectObjectSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)
-
 
     class Meta:
         model = Object

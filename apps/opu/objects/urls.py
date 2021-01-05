@@ -23,12 +23,7 @@ router.register('category', views.CategoryAPIVIew, basename='category')
 
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
 router.register('in-out', views.InOutAPIVIew, basename='in_out')
-
-
-
-
-
-
+router.register('consumer', views.ConsumerModelViewSet, basename='consumer')
 
 
 urlpatterns = [

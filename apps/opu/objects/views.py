@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
-    Category, AmountChannel
+    Category, AmountChannel, Consumer
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
@@ -17,7 +17,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, AmountChannelListSerializer
+    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer
 
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
@@ -636,6 +636,13 @@ class CategoryAPIVIew(ModelViewSet):
     queryset = Category.objects.all()
 
 
+class ConsumerModelViewSet(ModelViewSet):
+    serializer_class = ConsumerSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    queryset = Consumer.objects.all()
+
 
 class ObjectHistory(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -656,6 +663,7 @@ class ObjectHistory(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
 
 class IPHistory(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -698,6 +706,7 @@ class PointHistory(APIView):
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
 
+
 class OutfitHistory(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -717,6 +726,7 @@ class OutfitHistory(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
 
 class OrderFileUploader(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
