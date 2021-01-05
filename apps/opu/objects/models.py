@@ -4,18 +4,9 @@ from django.db import models
 # Create your models here.
 from apps.opu.customer.models import Customer
 from apps.accounts.models import Profile
-from django.utils.encoding import smart_str
 
 from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
-
-
-from django.db.models.signals import post_delete
-import os
-from django.core.files.storage import default_storage
-from django.db.models import FileField
-from django.dispatch.dispatcher import receiver
-
 
 
 class InOut(models.Model):
@@ -154,6 +145,7 @@ class AmountChannel(models.Model):
 	def __str__(self):
 		return self.name
 
+
 class Consumer(models.Model):
 	name = models.CharField("Название", max_length=150)
 
@@ -163,6 +155,7 @@ class Consumer(models.Model):
 
 	def __str__(self):
 		return self.name
+
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''

@@ -20,9 +20,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/circuits/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/circuits/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/objects/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/objects/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/objects/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +57,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="add_unversioned_files" value="$PROJECT_DIR$/log/log.log" />
-    <property name="last_opened_file_path" value="$USER_HOME$/front/docker-compose.yml" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -230,6 +233,11 @@
       <workItem from="1608548660933" duration="6940000" />
       <workItem from="1608545779617" duration="2868000" />
       <workItem from="1608703570539" duration="11861000" />
+      <workItem from="1608785166050" duration="14468000" />
+      <workItem from="1609411221920" duration="18000" />
+      <workItem from="1609742297223" duration="13000" />
+      <workItem from="1609744361039" duration="14000" />
+      <workItem from="1609839632584" duration="402000" />
     </task>
     <servers />
   </component>
