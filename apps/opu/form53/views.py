@@ -59,7 +59,7 @@ class Form53ListAPIView(ListAPIView):
         customer = self.request.query_params.get('customer', None)
 
         if outfit is not None:
-            queryset = queryset.filter(circuit__id_object__id_outfit=outfit)
+            queryset = queryset.filter(circuit__object__id_outfit=outfit)
         if customer is not None:
             queryset = queryset.filter(circuit__customer=customer)
 
