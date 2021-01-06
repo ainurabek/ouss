@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from .models import Circuit, TypeCom, Mode, Speed, Measure
 from ..customer.models import Customer
 from ..objects.models import Category, Object, Point, InOut
@@ -8,49 +8,42 @@ User = get_user_model()
 
 
 class SpeedSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Speed
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class ObjectCircSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Object
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class PointCircSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Point
         fields = ('id', 'name', 'point')
 
 
 class TypeComSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TypeCom
         fields = ('id', 'name')
 
 
 class MeasureCircSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Measure
         fields = ('id', 'name')
 
 
 class InOutSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = InOut
         fields = ('id', 'name')
 
 
 class ModeCircSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Mode
         fields = ('id', 'name')
@@ -65,7 +58,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class TransitCircSerializer(serializers.ModelSerializer):
@@ -79,21 +72,22 @@ class TransitCircSerializer(serializers.ModelSerializer):
 
 class CircuitList(serializers.ModelSerializer):
     id_object = ObjectCircSerializer(many=True)
-    point1=PointCircSerializer()
-    point2=PointCircSerializer()
+    point1 = PointCircSerializer()
+    point2 = PointCircSerializer()
     transit = TransitCircSerializer(many=True)
     transit2 = TransitCircSerializer(many=True)
     type_com = TypeComSerializer()
     customer = CustomerSerializer()
     mode = ModeCircSerializer()
-    in_out=InOutSerializer()
+    in_out = InOutSerializer()
     measure = MeasureCircSerializer()
     category = CategorySerializer()
+
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'number', 'id_object', 'num_circuit', 'type_using', 'category', 'num_order',
                   'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
-                   'transit', 'transit2', 'in_out', 'first', 'point1', 'point2',
+                  'transit', 'transit2', 'in_out', 'first', 'point1', 'point2',
                   'customer', 'mode', 'type_com', 'first')
 
 
@@ -101,7 +95,7 @@ class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Category.objects.all())
     measure = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True,  queryset=Measure.objects.all())
+        read_only=False, allow_null=True, queryset=Measure.objects.all())
     in_out = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=InOut.objects.all())
     point1 = serializers.PrimaryKeyRelatedField(
@@ -111,14 +105,15 @@ class CircuitEdit(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
     mode = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True,  queryset=Mode.objects.all())
+        read_only=False, allow_null=True, queryset=Mode.objects.all())
     type_com = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeCom.objects.all())
+
     class Meta:
         model = Circuit
         fields = ('number', 'type_using', 'category', 'num_order',
                   'date_order', 'num_arenda', 'speed', 'measure', 'adding', 'comments',
-                   'in_out', 'first', 'point1', 'point2',
+                  'in_out', 'first', 'point1', 'point2',
                   'customer', 'mode', 'type_com', 'first')
 
     def update(self, instance, validated_data):
@@ -145,4 +140,3 @@ class CircuitEdit(serializers.ModelSerializer):
 
         instance.save()
         return instance
-

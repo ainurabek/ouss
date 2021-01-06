@@ -10,9 +10,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
 from apps.accounts.permissions import IsOpuOnly
-from apps.opu.form53.services import create_photo_for_form53
+
 from apps.opu.services import PhotoDeleteMixin
 from apps.opu.form53.services import get_form53_diff
+from apps.opu.services import create_photo
 
 
 # API
@@ -32,9 +33,9 @@ class Form53CreateViewAPI(APIView):
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
-            create_photo_for_form53(model=Form53, model_photo=Schema53Photo,
+            create_photo(model=Form53, model_photo=Schema53Photo,
                                     obj=data, field_name="schema", request=request)
-            create_photo_for_form53(model=Form53, model_photo=Order53Photo,
+            create_photo(model=Form53, model_photo=Order53Photo,
                                     obj=data, field_name="order", request=request)
 
             #мы 4 января удалили возможность создавать форму 5.3 для транзитов в канале.

@@ -450,14 +450,7 @@ class SaveTrassaView(APIView):
 
     def post(self, request, pk):
         main_obj = Object.objects.get(pk=pk)
-        data=request.data
-        if data['save_in'] == True:
-            if Form51.objects.filter(object=main_obj).exists():
-                return HttpResponse("В форме 5.1. уже есть такая трасса")
-            else:
-                Form51.objects.create(object=main_obj)
-        elif data['save_in'] == False:
-            pass
+        data = request.data
         if data['customer'] == True:
             if Form_Customer.objects.filter(object=main_obj).exists():
                 return HttpResponse("В форме арендаторов уже есть такая трасса")
