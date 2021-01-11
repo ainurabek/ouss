@@ -124,7 +124,7 @@ class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
     def post(self, request, pk):
         form_cus = Form_Customer.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
-            OrderCusPhoto.objects.create(order=img, form_customer=form_cus)
+            OrderCusPhoto.objects.create(src=img, form_customer=form_cus)
         response = {"data": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 

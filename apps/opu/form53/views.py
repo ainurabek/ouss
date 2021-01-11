@@ -81,14 +81,13 @@ class Form53DeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53
 
-
 class Order53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        create_photo_for_form53(model=Form53, model_photo=Order53Photo,
+        create_photo(model=Form53, model_photo=Order53Photo,
                                 obj=form53, field_name="order", request=request)
         response = {"data": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
