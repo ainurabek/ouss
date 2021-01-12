@@ -24,6 +24,7 @@ router.register('category', views.CategoryAPIVIew, basename='category')
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
 router.register('in-out', views.InOutAPIVIew, basename='in_out')
 router.register('consumer', views.ConsumerModelViewSet, basename='consumer')
+router.register('amount_channels', views.AmountChannelListAPIView, basename='amount_channels')
 
 
 urlpatterns = [
@@ -40,7 +41,7 @@ urlpatterns = [
     url(r'^point/edit/(?P<pk>\S+)/$', PointEditView.as_view()),
     # url(r'^point/delete/(?P<pk>\S+)/$', views.PointDeleteView.as_view(), name='point_delete'),
 
-    url(r'^ip/$', views.IPListView().as_view(), name='ip_list'),
+
     url(r'^ip/create/(?P<pk>\S+)/$', IPCreateView.as_view()),
     url(r'^ip/delete/(?P<pk>\S+)/$', views.IPDeleteView().as_view(), name='ip_delete'),
 
@@ -62,7 +63,7 @@ urlpatterns = [
     path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
-    path("amount_channel/list/", views.AmountChannelListAPIView.as_view(), name="amount_channel_list"),
+
     path("history/obj/<int:pk>/", views.ObjectHistory.as_view(), name='object_history'),
     path("history/ip/<int:pk>/", views.IPHistory.as_view(), name='ip_history'),
     path("history/point/<int:pk>/", views.PointHistory.as_view(), name='point_history'),
@@ -70,6 +71,8 @@ urlpatterns = [
 
     path("order/<int:pk>/", views.OrderFileUploader.as_view(), name='order_object'),
     path("order/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderObjectFileDeleteView.as_view(), name='order_object_delete'),
+
+    path("pg/list/", views.PGObjectView.as_view(), name='pg_object_list'),
 
     path('', include(router.urls))
 

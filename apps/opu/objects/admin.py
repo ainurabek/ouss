@@ -49,7 +49,7 @@ class MainLineTypeAdmin(admin.ModelAdmin):
 
 @admin.register(AmountChannel)
 class AmountChannelAdmin(admin.ModelAdmin):
-    list_display = ('id', "name", "value", "auto_add")
+    list_display = ('id', "name", "value", "is_read_only")
     search_fields = ('name',)
 
 

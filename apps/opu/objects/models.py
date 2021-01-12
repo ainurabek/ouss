@@ -136,7 +136,7 @@ class Point(models.Model):
 class AmountChannel(models.Model):
 	name = models.CharField("Название", max_length=150)
 	value = models.IntegerField("Значение")
-	auto_add = models.BooleanField(default=False)
+	is_read_only = models.BooleanField(default=False) #if True - то название канала нельзя редактировать
 
 	class Meta:
 		verbose_name = "Количество каналов"

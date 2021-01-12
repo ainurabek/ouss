@@ -57,11 +57,16 @@ class Form53ListAPIView(ListAPIView):
         queryset = Form53.objects.all()
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
+        pg_object = self.request.query_params.get('pg_object', None)
 
         if outfit is not None:
             queryset = queryset.filter(circuit__object__id_outfit=outfit)
         if customer is not None:
             queryset = queryset.filter(circuit__customer=customer)
+        #добавили в фильтр поиск по ПГ, у которых есть каналы
+        if pg_object is not None:
+            queryset = queryset.filter(circuit__object=pg_object)
+
 
         return queryset
 

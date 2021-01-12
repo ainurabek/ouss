@@ -23,7 +23,7 @@ class AmountChannelListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AmountChannel
-        fields = ("id", "name", 'value')
+        fields = ("id", "name", 'value', 'is_read_only')
 
 
 class LineTypeSerializer(serializers.ModelSerializer):
@@ -416,10 +416,11 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     id_outfit = serializers.SlugRelatedField(slug_field='outfit', read_only=True)
+    ip_object = IPSerializer(many=True)
 
     class Meta:
         model = Object
-        fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer')
+        fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer', 'ip_object')
 
 
 

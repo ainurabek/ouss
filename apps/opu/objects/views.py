@@ -49,7 +49,7 @@ from apps.opu.objects.serializers import OrderObjectPhotoSerializer
 from apps.opu.objects.services import create_form51
 
 
-class AmountChannelListAPIView(ListAPIView):
+class AmountChannelListAPIView(viewsets.ModelViewSet):
     queryset = AmountChannel.objects.all()
     serializer_class = AmountChannelListSerializer
     authentication_classes = (TokenAuthentication,)
@@ -167,15 +167,6 @@ class IPDeleteView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 
-class IPListView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = IP.objects.all()
-    lookup_field = 'pk'
-    serializer_class = IPSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('point_id', 'object_id', 'tpo_id')
-
 
 """ Линии передачи """
 
@@ -228,6 +219,13 @@ class ObjectAllView(viewsets.ModelViewSet):
     queryset = Object.objects.all()
     lookup_field = 'pk'
     serializer_class = AllObjectSerializer
+
+class PGObjectView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Object.objects.filter(type_of_trakt__name='ПГ')
+    lookup_field = 'pk'
+    serializer_class = ObjectListSerializer
 
 
 class ObjectListView(APIView, ListWithPKMixin):
@@ -566,6 +564,7 @@ class DeleteTrassaView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+#Выходят и points, ips по запросу ИП
 class FilterObjectList(ListAPIView):
     """Фильтрация объектов"""
     serializer_class = ObjectFilterSerializer
@@ -582,7 +581,9 @@ class FilterObjectList(ListAPIView):
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
         if point is not None and point != '':
-            queryset = queryset.filter(Q(point1__point=point) | Q(point2__point=point))
+            queryset1 = queryset.filter(Q(point1=point) | Q(point2=point))
+            queryset2 = Object.objects.filter(ip_object__point_id=point)
+            queryset = queryset1.union(queryset2)
         if outfit is not None and outfit != '':
             queryset = queryset.filter(id_outfit__outfit=outfit)
 
@@ -734,3 +735,4 @@ class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model = Object
     model_for_delete = OrderObjectPhoto
+
