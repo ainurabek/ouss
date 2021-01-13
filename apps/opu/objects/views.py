@@ -66,6 +66,13 @@ class TPOListView(viewsets.ModelViewSet):
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
 
+class TypeTraktListView(viewsets.ModelViewSet):
+    queryset = TypeOfTrakt.objects.all()
+    serializer_class = TypeOfTraktSerializer
+    lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+
 
 class TPOCreateView(generics.CreateAPIView):
     queryset = TPO.objects.all()
