@@ -576,6 +576,7 @@ class FilterObjectList(ListAPIView):
         tpo = self.request.query_params.get('tpo', None)
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
+        consumer = self.request.query_params.get('consumer', None)
 
 
         if tpo is not None and tpo != '':
@@ -586,6 +587,8 @@ class FilterObjectList(ListAPIView):
             queryset = queryset1.union(queryset2)
         if outfit is not None and outfit != '':
             queryset = queryset.filter(id_outfit__outfit=outfit)
+        if consumer is not None and consumer != '':
+            queryset = queryset.filter(consumer=consumer)
 
         return queryset
 
