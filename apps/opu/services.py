@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from django.db.models.fields.files import FileField
@@ -44,13 +45,14 @@ class ListWithPKMixin:
     field_for_filter = None
 
     def get(self, request, pk):
+
         kwargs = {self.field_for_filter: pk}
         object = self.model.objects.filter(**kwargs).order_by('-id')
+        search = request.GET.get('search')
 
-
+        if search is not None and search != '':
+            object = object.filter(name__icontains=search)
         serializer = self.serializer(object, many=True)
-
-
         return Response(serializer.data)
 
 

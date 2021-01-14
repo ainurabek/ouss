@@ -184,6 +184,10 @@ class LPListView(viewsets.ModelViewSet):
     queryset = Object.objects.filter(id_parent=None)
     lookup_field = 'pk'
     serializer_class = LPSerializer
+    filter_backends = (SearchFilter, )
+    search_fields = ('name', 'point1__point', 'point2__point')
+
+
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -238,12 +242,11 @@ class PGObjectView(ListAPIView):
 class ObjectListView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding')
-    filterset_fields = ('point', 'name', 'tpo', 'id_outfit')
     model = Object
     serializer = TraktListSerializer
     field_for_filter = "id_parent"
+
+
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
