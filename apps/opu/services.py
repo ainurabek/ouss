@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from django.db.models.fields.files import FileField
@@ -36,22 +37,23 @@ def create_photo(model, model_photo, obj, field_name, request):
         model_photo.objects.create(**kwargs)
 
 
-
-
-class ListWithPKMixin:
+class ListWithPKMixin(SearchFilter):
     model = None
     serializer = None
     field_for_filter = None
+    order_by = '-id'
+    search_fields = None
 
     def get(self, request, pk):
         kwargs = {self.field_for_filter: pk}
-        object = self.model.objects.filter(**kwargs).order_by('-id')
-
-
-        serializer = self.serializer(object, many=True)
-
-
+        queryset = self.filter_queryset(
+            request,
+            self.get_queryset().filter(**kwargs).order_by(self.order_by), self)
+        serializer = self.serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def get_queryset(self):
+        return self.model.objects.all()
 
 
 class PhotoCreateMixin:
