@@ -21,11 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/circuits/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/circuits/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/services.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +61,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
@@ -237,7 +234,11 @@
       <workItem from="1609411221920" duration="18000" />
       <workItem from="1609742297223" duration="13000" />
       <workItem from="1609744361039" duration="14000" />
-      <workItem from="1609839632584" duration="402000" />
+      <workItem from="1609839632584" duration="1276000" />
+      <workItem from="1609911236946" duration="1982000" />
+      <workItem from="1609916652598" duration="801000" />
+      <workItem from="1609950592102" duration="31000" />
+      <workItem from="1610599624246" duration="6114000" />
     </task>
     <servers />
   </component>

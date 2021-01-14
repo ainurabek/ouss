@@ -50,14 +50,14 @@ from apps.opu.objects.services import create_form51
 
 
 class AmountChannelListAPIView(viewsets.ModelViewSet):
-    queryset = AmountChannel.objects.all()
+    queryset = AmountChannel.objects.all().order_by('value')
     serializer_class = AmountChannelListSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
 
 class TPOListView(viewsets.ModelViewSet):
-    queryset = TPO.objects.all()
+    queryset = TPO.objects.all().order_by('name')
     serializer_class = TPOSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
@@ -66,8 +66,9 @@ class TPOListView(viewsets.ModelViewSet):
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
 
+
 class TypeTraktListView(viewsets.ModelViewSet):
-    queryset = TypeOfTrakt.objects.all()
+    queryset = TypeOfTrakt.objects.all().order_by('-id')
     serializer_class = TypeOfTraktSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
@@ -84,7 +85,6 @@ class TPOCreateView(generics.CreateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-
 class TPOEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = TPO.objects.all()
@@ -98,7 +98,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
 class OutfitsListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Outfit.objects.all()
+    queryset = Outfit.objects.all().order_by('outfit')
     lookup_field = 'pk'
     serializer_class = OutfitListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -131,7 +131,7 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
 class PointListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all()
+    queryset = Point.objects.all().order_by('point')
     lookup_field = 'pk'
     serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -181,7 +181,7 @@ class IPDeleteView(generics.DestroyAPIView):
 class LPListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.filter(id_parent=None)
+    queryset = Object.objects.filter(id_parent=None).order_by('name')
     lookup_field = 'pk'
     serializer_class = LPSerializer
     filter_backends = (SearchFilter, )
@@ -223,18 +223,18 @@ class LPEditView(generics.RetrieveUpdateAPIView):
         instance.save()
 
 
-
 class ObjectAllView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.all()
+    queryset = Object.objects.all().order_by('name')
     lookup_field = 'pk'
     serializer_class = AllObjectSerializer
+
 
 class PGObjectView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.filter(type_of_trakt__name='ПГ')
+    queryset = Object.objects.filter(type_of_trakt__name='ПГ').order_by('name')
     lookup_field = 'pk'
     serializer_class = ObjectListSerializer
 
@@ -242,9 +242,11 @@ class PGObjectView(ListAPIView):
 class ObjectListView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
+    search_fields = ('name',)
     model = Object
     serializer = TraktListSerializer
     field_for_filter = "id_parent"
+    order_by = 'name'
 
 
 
@@ -388,7 +390,6 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
-
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -600,15 +601,7 @@ class FilterObjectList(ListAPIView):
         if consumer is not None and consumer != '':
             queryset = queryset.filter(consumer=consumer)
 
-        return queryset
-
-
-class TypeOfTraktAPIView(ModelViewSet):
-    serializer_class = TypeOfTraktSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    lookup_field = "pk"
-    queryset = TypeOfTrakt.objects.all()
+        return queryset.order_by('name')
 
 
 class InOutAPIVIew(ModelViewSet):
@@ -624,7 +617,7 @@ class TypeOfLocationAPIVIew(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    queryset = TypeOfLocation.objects.all()
+    queryset = TypeOfLocation.objects.all().order_by('name')
 
 
 class LineTypeAPIVIew(ModelViewSet):
@@ -632,7 +625,7 @@ class LineTypeAPIVIew(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    queryset = LineType.objects.all()
+    queryset = LineType.objects.all().order_by('name')
 
 
 class CategoryAPIVIew(ModelViewSet):
@@ -640,7 +633,7 @@ class CategoryAPIVIew(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('index')
 
 
 class ConsumerModelViewSet(ModelViewSet):
@@ -648,7 +641,7 @@ class ConsumerModelViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    queryset = Consumer.objects.all()
+    queryset = Consumer.objects.all().order_by('name')
 
 
 class ObjectHistory(APIView):

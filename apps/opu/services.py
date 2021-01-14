@@ -37,23 +37,23 @@ def create_photo(model, model_photo, obj, field_name, request):
         model_photo.objects.create(**kwargs)
 
 
-
-
-class ListWithPKMixin:
+class ListWithPKMixin(SearchFilter):
     model = None
     serializer = None
     field_for_filter = None
+    order_by = '-id'
+    search_fields = None
 
     def get(self, request, pk):
-
         kwargs = {self.field_for_filter: pk}
-        object = self.model.objects.filter(**kwargs).order_by('-id')
-        search = request.GET.get('search')
-
-        if search is not None and search != '':
-            object = object.filter(name__icontains=search)
-        serializer = self.serializer(object, many=True)
+        queryset = self.filter_queryset(
+            request,
+            self.get_queryset().filter(**kwargs).order_by(self.order_by), self)
+        serializer = self.serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def get_queryset(self):
+        return self.model.objects.all()
 
 
 class PhotoCreateMixin:
