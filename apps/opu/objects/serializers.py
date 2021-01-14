@@ -197,6 +197,7 @@ class LPSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True)
     point1 = PointList()
     point2 = PointList()
+
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2')
@@ -222,7 +223,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
                   'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
-                  'customer', 'ip_object', 'our', 'total_amount_channels', 'order_object_photo')
+                  'customer', 'ip_object', 'our', 'total_amount_channels', 'order_object_photo',)
 
         depth = 1
 
