@@ -59,8 +59,6 @@ class Circuit(models.Model):
 	type_using = models.CharField(max_length=100, blank=True, null=True)
 	category = models.ForeignKey(Category, related_name='circ_cat', on_delete=models.SET_NULL, blank=True, null=True) ###
 	num_order = models.CharField(max_length=100, blank=True, null=True)
-	num_arenda = models.CharField(max_length=100, blank=True, null=True)
-
 	speed = models.CharField(max_length=100, blank=True, null=True)
 	measure = models.ForeignKey(Measure, related_name='circ_measure', on_delete=models.SET_NULL, blank=True, null=True)
 	comments = models.CharField(max_length=100, blank=True, null=True)

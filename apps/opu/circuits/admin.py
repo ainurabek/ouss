@@ -8,9 +8,7 @@ from .models import Measure, Speed, Mode, TypeCom, Circuit
 class CircuitAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'first')
     search_fields = ('name',)
+
 admin.site.register(Measure)
-
 admin.site.register(TypeCom)
-# admin.site.register(Circuit)
-
 admin.site.register(Mode)
