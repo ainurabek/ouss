@@ -100,8 +100,7 @@ class CircuitEdit(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('type_using', 'category', 'num_order',
-                  'date_order', 'speed', 'measure', 'comments', 'first', 'point1', 'point2',
+        fields = ('type_using', 'category', 'num_order', 'speed', 'measure', 'comments', 'first', 'point1', 'point2',
                   'customer', 'mode', 'type_com')
 
     def update(self, instance, validated_data):
@@ -110,7 +109,6 @@ class CircuitEdit(serializers.ModelSerializer):
         """
         instance.type_using = validated_data.get('type_using', instance.type_using)
         instance.num_order = validated_data.get('num_order', instance.num_order)
-        instance.date_order = validated_data.get('date_order', instance.date_order)
         instance.speed = validated_data.get('speed', instance.speed)
         instance.measure = validated_data.get('measure', instance.measure)
         instance.comments = validated_data.get('comments', instance.comments)
