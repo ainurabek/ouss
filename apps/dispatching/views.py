@@ -459,7 +459,7 @@ def get_report_object(request):
     return JsonResponse(data, safe=False)
 
 
-# чтобы передавать фронту нужно
+# сотрудники других предприятий
 class OutfitWorkerGet(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)

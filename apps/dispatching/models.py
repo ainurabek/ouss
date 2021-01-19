@@ -31,6 +31,7 @@ class TypeOfJournal(models.Model):
 
 class Reason(models.Model):
     name = models.CharField(max_length=150)
+    is_read_only = models.BooleanField(default=False)  # if True - то название нельзя редактировать
 
 
     def __str__(self):
@@ -55,6 +56,7 @@ class Index(models.Model):
     '''Тип заявки (Например Квартирная заявка)'''
     index = models.CharField('Индекс', max_length=255)
     name = models.CharField('Название индекса', max_length=255)
+    is_read_only = models.BooleanField(default=False)  # if True - то название нельзя редактировать
 
     class Meta:
         verbose_name = 'Индекс события'

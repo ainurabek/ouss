@@ -110,7 +110,7 @@ class Schema53PhotoCreateView(APIView):
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        create_photo_for_form53(model=Form53, model_photo=Schema53Photo,
+        create_photo(model=Form53, model_photo=Schema53Photo,
                                 obj=form53, field_name="schema", request=request)
         response = {"data": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)

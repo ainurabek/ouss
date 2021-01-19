@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
@@ -13,18 +13,24 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
 
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
-    CircuitListSerializer
+    CircuitListSerializer, SignalizationSerializer
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
-
+from apps.opu.form_customer.models import Signalization
 #API
 #######################################################################################################################
 
 
+
+class SignalizationView(viewsets.ModelViewSet):
+    queryset = Signalization.objects.all().order_by('name')
+    serializer_class = SignalizationSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 class CustomerFormListView(ListAPIView):
     """Список арендаторов"""

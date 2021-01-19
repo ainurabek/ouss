@@ -3,8 +3,8 @@
 from django.http import HttpResponse
 from rest_framework.viewsets import ModelViewSet
 
-from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
-from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
+from apps.opu.circuits.serializers import CategorySerializer
+from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
     Category, AmountChannel, Consumer
 
 from rest_framework.views import APIView
@@ -202,13 +202,22 @@ class LPCreateView(generics.CreateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-    def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user.profile)
-        # instance.total_amount_channels = instance.amount_channels.value
-        instance.save()
-        create_form51(obj = instance)
-        # create_circuit(instance, self.request)
-        adding_an_object_to_trassa(obj=instance)
+    def post(self, request, *args, **kwargs):
+        if Object.objects.filter(name=request.data['name'], point1=request.data['point1'],
+                                 point2=request.data['point2']).exists():
+            content = {'Такой обьект уже создан'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+        serializer = LPCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            instance = serializer.save(created_by=self.request.user.profile)
+            # instance.total_amount_channels = instance.amount_channels.value
+            instance.save()
+            create_form51(obj=instance)
+            # create_circuit(instance, self.request)
+            adding_an_object_to_trassa(obj=instance)
+            response = {"data": "ЛП создана успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -248,9 +257,6 @@ class ObjectListView(APIView, ListWithPKMixin):
     field_for_filter = "id_parent"
     order_by = 'name'
 
-
-
-
 class ObjectDetailView(RetrieveDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -275,6 +281,11 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = get_object_or_404(Object, pk=pk)
+
+        if Object.objects.filter(name=parent.name+'-'+request.data["name"], point1=request.data["point1"], point2=request.data["point2"]).exists():
+            content = {'Такой обьект уже создан'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+
         serializer = ObjectCreateSerializer(data=request.data)
 
         if check_parent_type_of_trakt(parent):
@@ -603,13 +614,6 @@ class FilterObjectList(ListAPIView):
 
         return queryset.order_by('name')
 
-
-class InOutAPIVIew(ModelViewSet):
-    serializer_class = InOutSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    lookup_field = "pk"
-    queryset = InOut.objects.all()
 
 
 class TypeOfLocationAPIVIew(ModelViewSet):

@@ -429,7 +429,7 @@ class ReportOaAndOdApiView(APIView):
             rep["od"]["sum"] += outfit_data["od"]["sum"]
             rep["otv"]["sum"] += outfit_data["otv"]["sum"]
             rep['total_sum']['sum'] = round(rep['total_sum']['sum'] + outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]+outfit_data["otv"]["sum"], 2)
-            rep['total_sum']['count'] +=outfit_data["oa"]["count"]+outfit_data["od"]["count"]+outfit_data["otv"]["count"]
+            rep['total_sum']['count'] += outfit_data["oa"]["count"]+outfit_data["od"]["count"]+outfit_data["otv"]["count"]
             winners_oa = set_response_for_winners(winners_oa, "oa", data)
             winners_od = set_response_for_winners(winners_od, "od", data)
             winners_otv = set_response_for_winners(winners_otv, "otv", data)
@@ -460,7 +460,6 @@ class WinnerReportAPIView(APIView):
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         winners = {i.index: [{"name": None, "sum": 0, "count": 0} for _ in range(3)] for i in list_index}
-        print(winners)
         data = []
 
         for out in outfits:

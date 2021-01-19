@@ -30,7 +30,7 @@ class CircuitListViewSet(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order', 'date_order',
+    search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order',
                      'num_arenda', 'speed', 'measure', 'point1', 'point2', 'customer', 'id_object', 'mode', 'type_com')
     filterset_fields = ('point1', 'point2', 'customer', 'id_object', 'category', )
     model = Circuit
