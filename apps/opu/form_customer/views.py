@@ -81,7 +81,7 @@ class FormCustomerCircCreateAPIView(APIView):
             data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
             create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="src", request=request)
             response = {"data": "Форма арендатора успешно создана"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -101,7 +101,7 @@ class FormCustomerObjCreateAPIView(APIView):
             data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
             create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
             response = {"data": "Форма арендатора успешно создана"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
