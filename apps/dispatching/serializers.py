@@ -38,12 +38,12 @@ class TypeJournalSerializer(serializers.ModelSerializer):
 class ReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reason
-        fields = ('id', "name")
+        fields = ('id', "name", 'is_read_only')
 
 class IndexSerializer(serializers.ModelSerializer):
     class Meta:
         model = Index
-        fields = ('id', 'index', "name")
+        fields = ('id', 'index', "name", 'is_read_only')
 
 #event obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
