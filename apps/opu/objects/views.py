@@ -376,14 +376,15 @@ class CreateLeftTrassaView(APIView):
             main_obj.transit.add(obj)
             Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
-            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else \
-                obj.circ_obj.count()
+            num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() \
+                                                                    <= obj.circuit_object_parent.count() else \
+                obj.circuit_object_parent.count()
             if num_circuit != 0:
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     if int(cir.num_circuit) > num_circuit:
                         break
-                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                     cir.transit.add(circuit)
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
@@ -403,15 +404,16 @@ class CreateRightTrassaView(APIView):
             main_obj.transit2.add(obj)
             Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
-            num_circuit = main_obj.circ_obj.count() if main_obj.circ_obj.count() <= obj.circ_obj.count() else\
-                obj.circ_obj.count()
+            num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() <=\
+                                                                    obj.circuit_object_parent.count() else\
+                obj.circuit_object_parent.count()
 
             if num_circuit != 0:
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     if int(cir.num_circuit) > num_circuit:
                         break
-                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                     cir.transit2.add(circuit)
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
@@ -433,23 +435,23 @@ class SaveTrassaView(APIView):
             i.transit.add(*main_obj.transit.all())
 
 
-        for cir in main_obj.circ_obj.all():
+        for cir in main_obj.circuit_object_parent.all():
             for obj in main_obj.transit.all():
-                if obj.circ_obj.count() == 0:
+                if obj.circuit_object_parent.count() == 0:
                     continue
                 try:
-                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                 except IndexError:
                     break
                 circuit.transit.add(*cir.transit.all())
                 circuit.transit2.add(*cir.transit2.all())
 
-        for cir in main_obj.circ_obj.all():
+        for cir in main_obj.circuit_object_parent.all():
             for obj in main_obj.transit2.all():
-                if obj.circ_obj.count() == 0:
+                if obj.circuit_object_parent.count() == 0:
                     continue
                 try:
-                    circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                 except IndexError:
                     break
                 circuit.transit2.add(*cir.transit2.all())
@@ -482,25 +484,25 @@ class DeleteTrassaView(APIView):
             if main_obj.transit.filter(pk=pk).exists():
                 main_obj.transit.remove(main_obj)
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     cir.transit.remove(cir)
 
             if main_obj.transit2.filter(pk=pk).exists():
                 main_obj.transit2.remove(main_obj)
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     cir.transit2.remove(cir)
 
-            all_cir = main_obj.circ_obj.count()
+            all_cir = main_obj.circuit_object_parent.count()
 
             for t_obj in main_obj.transit.all():
                 if t_obj.transit.filter(pk=pk).exists():
                     t_obj.transit.remove(main_obj)
 
-                    for circ in t_obj.circ_obj.all():
+                    for circ in t_obj.circuit_object_parent.all():
                         if all_cir < int(circ.num_circuit):
                             break
-                        circuit = main_obj.circ_obj.all()[int(circ.num_circuit)-1]
+                        circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
                         if circ.transit.filter(pk=circuit.pk).exists():
                             circ.transit.remove(circuit)
 
@@ -508,10 +510,10 @@ class DeleteTrassaView(APIView):
                 if t_obj.transit2.filter(pk=pk).exists():
                     t_obj.transit2.remove(main_obj)
 
-                    for circ in t_obj.circ_obj.all():
+                    for circ in t_obj.circuit_object_parent.all():
                         if all_cir < int(circ.num_circuit):
                             break
-                        circuit = main_obj.circ_obj.all()[int(circ.num_circuit)-1]
+                        circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
                         if circ.transit2.filter(pk=circuit.pk).exists():
                             circ.transit2.remove(circuit)
 
@@ -524,16 +526,16 @@ class DeleteTrassaView(APIView):
             obj.transit2.clear()
             obj.transit.clear()
 
-            for cir in obj.circ_obj.all():
+            for cir in obj.circuit_object_parent.all():
                 cir.transit.clear()
                 cir.transit2.clear()
 
             if main_obj.transit.filter(pk=pk).exists():
                 main_obj.transit.remove(obj)
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     try:
-                        circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                        circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                         cir.transit.remove(circuit)
                     except IndexError:
                         pass
@@ -541,9 +543,9 @@ class DeleteTrassaView(APIView):
             if main_obj.transit2.filter(pk=pk).exists():
                 main_obj.transit2.remove(obj)
 
-                for cir in main_obj.circ_obj.all():
+                for cir in main_obj.circuit_object_parent.all():
                     try:
-                        circuit = obj.circ_obj.all()[int(cir.num_circuit)-1]
+                        circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
                         cir.transit2.remove(circuit)
                     except IndexError:
                         pass
@@ -552,9 +554,9 @@ class DeleteTrassaView(APIView):
                 if t_obj.transit.filter(pk=pk).exists():
                     t_obj.transit.remove(obj)
 
-                    for circ in t_obj.circ_obj.all():
+                    for circ in t_obj.circuit_object_parent.all():
                         try:
-                            circuit = obj.circ_obj.all()[int(circ.num_circuit)-1]
+                            circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
                             if circ.transit.filter(pk=circuit.pk).exists():
                                 circ.transit.remove(circuit)
                         except IndexError:
@@ -564,9 +566,9 @@ class DeleteTrassaView(APIView):
                 if t_obj.transit2.filter(pk=pk).exists():
                     t_obj.transit2.remove(obj)
 
-                    for circ in t_obj.circ_obj.all():
+                    for circ in t_obj.circuit_object_parent.all():
                         try:
-                            circuit = obj.circ_obj.all()[int(circ.num_circuit)-1]
+                            circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
                             if circ.transit2.filter(pk=circuit.pk).exists():
                                 circ.transit2.remove(circuit)
                         except IndexError:
