@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django import template
 
 from apps.opu.objects.models import TPO, Outfit,Point, Category, LineType, TypeOfTrakt, Object, \
-    TypeOfLocation, InOut
+    TypeOfLocation
 
 from apps.opu.customer.models import Customer
 
@@ -31,10 +31,7 @@ def get_circuit_diff(history):
                 old = Measure.objects.get(pk=change.old)
                 new = Measure.objects.get(pk=change.new)
                 message += "{}:{} ->-> {}".format(change.field, old, new)
-            elif "in_out" == change.field:
-                old = InOut.objects.get(pk=change.old)
-                new = InOut.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+
             elif "point1" == change.field:
                 old = Point.objects.get(pk=change.old)
                 new = Point.objects.get(pk=change.new)

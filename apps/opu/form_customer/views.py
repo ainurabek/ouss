@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
@@ -13,18 +13,24 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
 
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
-    CircuitListSerializer
+    CircuitListSerializer, SignalizationSerializer
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
-
+from apps.opu.form_customer.models import Signalization
 #API
 #######################################################################################################################
 
 
+
+class SignalizationView(viewsets.ModelViewSet):
+    queryset = Signalization.objects.all().order_by('name')
+    serializer_class = SignalizationSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 class CustomerFormListView(ListAPIView):
     """Список арендаторов"""
@@ -73,9 +79,8 @@ class FormCustomerCircCreateAPIView(APIView):
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
-            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="src", request=request)
             response = {"data": "Форма арендатора успешно создана"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,14 +93,13 @@ class FormCustomerObjCreateAPIView(APIView):
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
         if Form_Customer.objects.filter(object=object).exists():
-            content = {'По такому обьекту уже форма арендаторов создана'}
+            content = {'message': 'По такому обьекту уже форма арендаторов создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
-            create_photo(model=Form_Customer, model_photo=OrderCusPhoto, obj=data, field_name="order", request=request)
             response = {"data": "Форма арендатора успешно создана"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

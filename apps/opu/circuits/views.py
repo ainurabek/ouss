@@ -2,40 +2,25 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
 from apps.opu.circuits.serializers import CircuitList, CircuitEdit, MeasureCircSerializer, SpeedSerializer, \
     TypeComSerializer, ModeCircSerializer
 from rest_framework import generics, status
 from apps.opu.circuits.models import Circuit, Measure, Speed, TypeCom, Mode
 from rest_framework.views import APIView
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
-from django.http import JsonResponse
-
-# from apps.opu.objects.services import get_active_channels, get_total_amount_active_channels
-
-from apps.opu.objects.models import Object
-
 from apps.opu.circuits.service import get_circuit_diff
-
-# from apps.opu.objects.services import update_circuit_fisrt
-from apps.opu.circuits.service import create_circuit
-
 from apps.opu.circuits.service import update_circuit_active
 
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    search_fields = ('num_circuit', 'name', 'type_using', 'category', 'num_order', 'date_order',
-                     'num_arenda', 'speed', 'measure', 'point1', 'point2', 'customer', 'id_object', 'mode', 'type_com')
-    filterset_fields = ('point1', 'point2', 'customer', 'id_object', 'category', )
+
     model = Circuit
     serializer = CircuitList
     field_for_filter = "id_object"
+    order_by = 'id'
 
 class CircuitEditView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
@@ -54,7 +39,7 @@ class MeasureAPIView(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     serializer_class = MeasureCircSerializer
     lookup_field = 'pk'
-    queryset = Measure.objects.all()
+    queryset = Measure.objects.all().order_by('name')
 
 
 class SpeedAPIView(ModelViewSet):
@@ -62,7 +47,7 @@ class SpeedAPIView(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     serializer_class = SpeedSerializer
     lookup_field = 'pk'
-    queryset = Speed.objects.all()
+    queryset = Speed.objects.all().order_by('name')
 
 
 class TypeComAPIView(ModelViewSet):
@@ -70,7 +55,7 @@ class TypeComAPIView(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     serializer_class = TypeComSerializer
     lookup_field = 'pk'
-    queryset = TypeCom.objects.all()
+    queryset = TypeCom.objects.all().order_by('name')
 
 
 class ModeAPIView(ModelViewSet):
@@ -78,7 +63,7 @@ class ModeAPIView(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     serializer_class = ModeCircSerializer
     lookup_field = 'pk'
-    queryset = Mode.objects.all()
+    queryset = Mode.objects.all().order_by('name')
 
 
 class CircuitHistory(APIView):

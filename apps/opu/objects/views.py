@@ -3,8 +3,8 @@
 from django.http import HttpResponse
 from rest_framework.viewsets import ModelViewSet
 
-from apps.opu.circuits.serializers import InOutSerializer, CategorySerializer
-from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, InOut, TypeOfLocation, LineType, \
+from apps.opu.circuits.serializers import CategorySerializer
+from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
     Category, AmountChannel, Consumer
 
 from rest_framework.views import APIView
@@ -23,29 +23,18 @@ from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from apps.opu.form51.models import Form51
 from apps.opu.form_customer.models import Form_Customer
 from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
-from apps.opu.objects.serializers import IPSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, save_old_object, \
     update_circuit, update_total_amount_channels
-
 from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.objects.services import adding_an_object_to_trassa
-
 from apps.opu.circuits.service import create_circuit
-
 from apps.opu.objects.serializers import ObjectEditSerializer
-
 from apps.opu.objects.models import OrderObjectPhoto
-
-from apps.opu.services import create_photo
-
-from apps.opu.objects.serializers import OrderObjectPhotoSerializer
-
 from apps.opu.objects.services import create_form51
 
 
@@ -184,6 +173,10 @@ class LPListView(viewsets.ModelViewSet):
     queryset = Object.objects.filter(id_parent=None).order_by('name')
     lookup_field = 'pk'
     serializer_class = LPSerializer
+    filter_backends = (SearchFilter, )
+    search_fields = ('name', 'point1__point', 'point2__point')
+
+
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -198,13 +191,22 @@ class LPCreateView(generics.CreateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
-    def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user.profile)
-        # instance.total_amount_channels = instance.amount_channels.value
-        instance.save()
-        create_form51(obj = instance)
-        # create_circuit(instance, self.request)
-        adding_an_object_to_trassa(obj=instance)
+    def post(self, request, *args, **kwargs):
+        if Object.objects.filter(name=request.data['name'], point1=request.data['point1'],
+                                 point2=request.data['point2']).exists():
+            content = {"message": "Такой обьект уже создан"}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+        serializer = LPCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            instance = serializer.save(created_by=self.request.user.profile)
+            # instance.total_amount_channels = instance.amount_channels.value
+            instance.save()
+            create_form51(obj=instance)
+            # create_circuit(instance, self.request)
+            adding_an_object_to_trassa(obj=instance)
+            response = {"data": "ЛП создана успешно"}
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LPEditView(generics.RetrieveUpdateAPIView):
@@ -238,13 +240,11 @@ class PGObjectView(ListAPIView):
 class ObjectListView(APIView, ListWithPKMixin):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    filter_backends = (SearchFilter,)
     search_fields = ('name',)
     model = Object
     serializer = TraktListSerializer
     field_for_filter = "id_parent"
     order_by = 'name'
-
 
 class ObjectDetailView(RetrieveDestroyAPIView):
     permission_classes = (IsAuthenticated,)
@@ -256,7 +256,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
         update_total_amount_channels(instance=instance)
-        response = {"data": "Объект успешно удален"}
+        response = {"message": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -270,6 +270,11 @@ class ObjectCreateView(APIView):
 
     def post(self, request, pk):
         parent = get_object_or_404(Object, pk=pk)
+
+        if Object.objects.filter(name=parent.name+'-'+request.data["name"], point1=request.data["point1"], point2=request.data["point2"]).exists():
+            content = {"message": "Такой обьект уже создан"}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+
         serializer = ObjectCreateSerializer(data=request.data)
 
         if check_parent_type_of_trakt(parent):
@@ -295,7 +300,7 @@ class ObjectCreateView(APIView):
             adding_an_object_to_trassa(obj=instance)
             update_total_amount_channels(instance=instance)
             create_circuit(instance, self.request)
-            response = {"data": "Объект успешно создан"}
+            response = {"message": "Объект успешно создан"}
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -312,7 +317,7 @@ class ObjectEditView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             update_circuit(old_obj=old_obj, obj=instance)
-            response = {"data": "Объект успешно отредактирован"}
+            response = {"message": "Объект успешно отредактирован"}
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -451,7 +456,7 @@ class SaveTrassaView(APIView):
                     break
                 circuit.transit2.add(*cir.transit2.all())
                 circuit.transit.add(*cir.transit.all())
-        response = {"data": "Трасса успешно сахранен"}
+        response = {"message": "Трасса успешно сахранен"}
         return Response(status=status.HTTP_201_CREATED)
 
     def post(self, request, pk):
@@ -600,13 +605,6 @@ class FilterObjectList(ListAPIView):
 
         return queryset.order_by('name')
 
-
-class InOutAPIVIew(ModelViewSet):
-    serializer_class = InOutSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    lookup_field = "pk"
-    queryset = InOut.objects.all()
 
 
 class TypeOfLocationAPIVIew(ModelViewSet):

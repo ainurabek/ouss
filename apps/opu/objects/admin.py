@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Object, IP, Point, Outfit, InOut, LineType, TPO, TypeOfLocation, \
+from .models import Object, IP, Point, Outfit, LineType, TPO, TypeOfLocation, \
     TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel
 
 
@@ -53,7 +53,6 @@ class AmountChannelAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-admin.site.register(InOut)
 admin.site.register(TypeOfTrakt)
 admin.site.register(TypeOfLocation)
 admin.site.register(LineType)

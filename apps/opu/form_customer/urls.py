@@ -7,6 +7,7 @@ from apps.opu.form_customer import views
 app_name = 'form_customer'
 
 router = routers.DefaultRouter()
+router.register('signalization', views.SignalizationView, basename='signalization_list')
 
 urlpatterns = [
 

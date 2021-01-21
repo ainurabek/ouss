@@ -9,13 +9,6 @@ from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
 
 
-class InOut(models.Model):
-	name = models.CharField('Название', max_length=100)
-
-	def __str__(self):
-		return self.name
-
-
 class TPO(models.Model):
 	name = models.CharField('Название', max_length=100, error_messages={"invalid": "Это поле обязательно."}) #название ТПО
 	index = models.CharField('Индекс', max_length=100) #номер ТПО
@@ -31,8 +24,8 @@ class TPO(models.Model):
 class TypeOfTrakt(models.Model):
 	name = models.CharField('Название', max_length=100)
 
-
 	class Meta:
+
 		verbose_name = 'ПГ/ВГ/ТГ/ЧГ/РГ'
 		verbose_name_plural = 'ПГ/ВГ/ТГ/ЧГ/РГ'
 
@@ -65,8 +58,7 @@ class MainLineType(models.Model):
 
 class LineType(models.Model):
 	name = models.CharField('Название', max_length=100)
-	main_line_type = models.ForeignKey(MainLineType, related_name="main_line_type",
-									   on_delete=models.CASCADE,blank=True, null=True)
+	main_line_type = models.ForeignKey(MainLineType, related_name="main_line_type", on_delete=models.CASCADE, blank=True, null=True)
 
 	class Meta:
 		verbose_name = 'Тип линии'
@@ -159,9 +151,8 @@ class Consumer(models.Model):
 
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
-	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE,related_name='parents', blank=True, null=True)
+	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, related_name='parents', blank=True, null=True)
 	name = models.CharField('Название', max_length=100)
-	inter_code = models.CharField('Международное обозначение', max_length=100, blank=True, null=True)
 	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.SET_NULL, blank=True, null=True)
 	tpo1 = models.ForeignKey(TPO, related_name='obj_tpo', on_delete=models.SET_NULL, blank=True, null=True)
 	point1 = models.ForeignKey(Point, related_name='obj_point', verbose_name='ИП приема', on_delete=models.SET_NULL, blank=True, null=True)
@@ -174,19 +165,16 @@ class Object(models.Model):
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
 	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',
 										blank=True, null=True, on_delete=models.SET_NULL)
-	save_in = models.BooleanField('Сохранить', blank=True, null=True)
 	type_line = models.ForeignKey(LineType, related_name='obj_type_line', on_delete=models.SET_NULL, blank=True, null=True)
 	type_of_trakt = models.ForeignKey(TypeOfTrakt, related_name='obj_trakt_type', on_delete=models.SET_NULL, blank=True, null=True)
 	customer = models.ForeignKey(Customer, related_name='obj_cust', on_delete=models.CASCADE, blank=True, null=True)
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-	add_time = models.DateTimeField(blank=True, null=True)
 	total_amount_channels = models.IntegerField('Задействованные каналы', default=0, blank=True, null=True)
 	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
 	src = models.ImageField('Скан распоряжения', upload_to='files/', blank=True)
 	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_object_log')
-
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
