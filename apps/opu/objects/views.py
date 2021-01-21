@@ -526,7 +526,7 @@ class DeleteTrassaView(APIView):
             obj.transit2.clear()
             obj.transit.clear()
 
-            for cir in obj.circ_obj.all():
+            for cir in obj.circuit_object_parent.all():
                 cir.transit.clear()
                 cir.transit2.clear()
 
