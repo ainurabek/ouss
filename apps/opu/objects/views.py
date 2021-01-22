@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
-    Category, AmountChannel, Consumer
+    Category, AmountChannel, Consumer, Bug
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
@@ -17,7 +17,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer
+    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer
 
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
@@ -37,6 +37,16 @@ from apps.opu.objects.serializers import ObjectEditSerializer
 from apps.opu.objects.models import OrderObjectPhoto
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
+
+
+class BugModelViewSet(viewsets.ModelViewSet):
+    queryset = Bug.objects.all().order_by('-id')
+    serializer_class = BugSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
 
 
 class AmountChannelListAPIView(viewsets.ModelViewSet):

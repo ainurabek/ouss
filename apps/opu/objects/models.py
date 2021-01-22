@@ -9,6 +9,16 @@ from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
 
 
+class Bug(models.Model):
+	text = models.TextField()
+	created_at = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
+
+	class Meta:
+		verbose_name = 'Ошибка'
+		verbose_name_plural = 'Ошибки'
+
+
 class TPO(models.Model):
 	name = models.CharField('Название', max_length=100, error_messages={"invalid": "Это поле обязательно."}) #название ТПО
 	index = models.CharField('Индекс', max_length=100) #номер ТПО
