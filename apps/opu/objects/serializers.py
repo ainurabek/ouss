@@ -3,13 +3,20 @@ from django.contrib.auth import get_user_model
 
 
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel, OrderObjectPhoto, Consumer
+    AmountChannel, OrderObjectPhoto, Consumer, Bug
 
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
 
 User = get_user_model()
+
+
+class BugSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Bug
+        fields = ('id', 'text',)
 
 
 class PointList(serializers.ModelSerializer):
