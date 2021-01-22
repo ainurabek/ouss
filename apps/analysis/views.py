@@ -66,6 +66,7 @@ def get_report(request):
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
+
                 type_line = get_type_line(call)
                 amount_of_channels = get_amount_of_channels(call)
                 period_reason = {"name1": None, "name2": None, "name3": None, "name4": None,
@@ -109,26 +110,30 @@ def get_report(request):
                     "period_of_time": period_reason, "amount_of_channels": amount_of_channels
                 })
 
+            total_period_of_time = {k: round(v, 2) for k,v in total_period_of_time.items()}
+
             total = dict(total_period_of_time)
+
             for i in total:
                 total[i] = total[i] * int(get_amount_of_channels(event))
                 total_outfit[i] += total[i]
+
             data.append({
                 "name": "всего", "date_from": "час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": round(total_period_of_time, 2),  "color":'2'
+                "period_of_time": total_period_of_time,   "color":'2'
             })
 
             data.append({
                 "name": "всего", "date_from": "кнл/час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": round(total, 2),  "color":'3'
+                "period_of_time": total,   "color":'3'
             })
 
         data.append({
             "name": "Общий итог", "date_from": None, "comments": None,
             "reason": None, "type_line": None,
-            "period_of_time": round(total_outfit, 2), "color":'4'
+            "period_of_time": total_outfit,  "color":'4'
         })
 
     return JsonResponse(data, safe=False)
