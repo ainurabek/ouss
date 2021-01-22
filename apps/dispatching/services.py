@@ -35,6 +35,7 @@ def get_minus_date(days: int):
 
 def get_event_name(event_object) -> str:
     event_name = None
+
     if event_object.object is not None:
         event_name = event_object.object.name
     elif event_object.ips is not None:

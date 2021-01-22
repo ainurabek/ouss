@@ -152,8 +152,11 @@ class ProfileListAPIView(viewsets.ModelViewSet):
             pass
         return queryset
 
-
-
+class AllProfileAPIView(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    queryset = Profile.objects.all().order_by('last_name')
+    serializer_class = ProfileListSerializer
 
 
 '''
@@ -202,7 +205,7 @@ class LogListAPIView(ListAPIView):
     filterset_fields = ('user',)
 
     def get_queryset(self):
-        subdep = SubdepartmentKT.objects.get(id=2)
+        subdep = SubdepartmentKT.objects.get(id=3)
         queryset = Log.objects.filter(user__user__subdepartment=subdep)
         start_at = self.request.query_params.get('start_at', None)
         end_time = self.request.query_params.get('end_time', None)

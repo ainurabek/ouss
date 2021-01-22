@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.viewsets import ModelViewSet
 
 from apps.opu.circuits.serializers import CategorySerializer
@@ -36,6 +36,7 @@ from apps.opu.circuits.service import create_circuit
 from apps.opu.objects.serializers import ObjectEditSerializer
 from apps.opu.objects.models import OrderObjectPhoto
 from apps.opu.objects.services import create_form51
+from apps.opu.customer.models import Customer
 
 
 class BugModelViewSet(viewsets.ModelViewSet):
@@ -65,6 +66,22 @@ class TPOListView(viewsets.ModelViewSet):
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
 
+# for dashboard
+def get_points_amount(request):
+    points_amount = Point.objects.all().count()
+    return JsonResponse(points_amount, safe=False)
+
+def get_tpo_amount(request):
+    tpo_amount = TPO.objects.all().count()
+    return JsonResponse(tpo_amount, safe=False)
+
+def get_outfits_amount(request):
+    outfits_amount = Outfit.objects.all().count()
+    return JsonResponse(outfits_amount, safe=False)
+
+def get_customers_amount(request):
+    customers_amount = Customer.objects.all().count()
+    return JsonResponse(customers_amount, safe=False)
 
 class TypeTraktListView(viewsets.ModelViewSet):
     queryset = TypeOfTrakt.objects.all().order_by('-id')
