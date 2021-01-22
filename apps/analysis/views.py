@@ -110,12 +110,12 @@ def get_report(request):
                     "period_of_time": period_reason, "amount_of_channels": amount_of_channels
                 })
 
-            total_period_of_time = {k: round(v, 2) for k,v in total_period_of_time.items()}
 
             total = dict(total_period_of_time)
 
             for i in total:
-                total[i] = total[i] * int(get_amount_of_channels(event))
+                total[i] = round(total[i] * int(get_amount_of_channels(event)), 2)
+
                 total_outfit[i] += total[i]
 
             data.append({
