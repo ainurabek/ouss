@@ -116,19 +116,19 @@ def get_report(request):
             data.append({
                 "name": "всего", "date_from": "час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": total_period_of_time, "color":'2'
+                "period_of_time": round(total_period_of_time, 2),  "color":'2'
             })
 
             data.append({
                 "name": "всего", "date_from": "кнл/час", "comments": None,
                 "reason": None, "type_line": get_type_line(event),
-                "period_of_time": total, "color":'3'
+                "period_of_time": round(total, 2),  "color":'3'
             })
 
         data.append({
             "name": "Общий итог", "date_from": None, "comments": None,
             "reason": None, "type_line": None,
-            "period_of_time": total_outfit, "color":'4'
+            "period_of_time": round(total_outfit, 2), "color":'4'
         })
 
     return JsonResponse(data, safe=False)
@@ -157,6 +157,7 @@ def get_report_analysis(request):
 
     for out in outfits:
         data.append({"outfit": out.responsible_outfit.outfit,
+                     'id':None,
                  "name": None,
                 "reason": None,
                  "date_from": None,
@@ -166,6 +167,7 @@ def get_report_analysis(request):
                  "comments1": None})
         for event in all_event.filter(responsible_outfit=out.responsible_outfit):
             data.append({"outfit": None,
+                         'id': event.id,
                          "name": get_event_name(event),
                          "reason": None,
                          "date_from": None,
@@ -176,6 +178,7 @@ def get_report_analysis(request):
             calls_count = 0
             for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
                 data.append({"outfit": None,
+                             'id': call.id,
                              "name": get_event_name(call),
                              "reason": call.reason.name,
                              "date_from": call.date_from,
@@ -255,7 +258,9 @@ class FormAnalysisCreateAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, pk):
-        if FormAnalysis.objects.filter(id_parent_id=pk, outfit_id=request.data["outfit"]).exists():
+        outfit = request.data['outfit']
+
+        if FormAnalysis.objects.filter(id_parent__id=pk, outfit__id=outfit).exclude(id=pk).exists():
             content = {'По такому предприятию уже существует Средний Коэффициент'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         else:

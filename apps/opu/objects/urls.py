@@ -73,6 +73,12 @@ urlpatterns = [
 
     path("pg/list/", views.PGObjectView.as_view(), name='pg_object_list'),
 
+    #statistics
+    path("tpo_amount/", views.get_tpo_amount, name='tpo_amount'),
+    path("points_amount/", views.get_points_amount, name='points_amount'),
+    path("outfits_amount/", views.get_outfits_amount, name='outfits_amount'),
+    path("customers_amount/", views.get_customers_amount, name='customers_amount'),
+
     path('', include(router.urls))
 
 ]

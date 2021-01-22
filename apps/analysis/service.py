@@ -26,12 +26,12 @@ def get_period(obj, date_to):
             date_to = datetime.fromisoformat(date_to + "T23:59:59")
             date = date_to - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-            return period_of_time
+            return round(period_of_time, 2)
         date = datetime.now()
         newdate = date.replace(hour=23, minute=59, second=59)
         date = newdate - obj.date_from
         period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-        return period_of_time
+        return round(period_of_time, 2)
 
 
 def get_coefficient_kls(downtime):
@@ -128,10 +128,10 @@ def get_period_date_to(call, date_to):
 
 def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, outfit) -> Event:
 
-    if not isinstance(outfit, list):
+    if not isinstance(outfit, list) and outfit is not None and outfit != '':
         outfit = [outfit]
 
-    if outfit != [""] and outfit != []:
+    if outfit is not None and outfit != '' and outfit != []:
         event = event.filter(responsible_outfit__in=outfit)
     if date_from is not None and date_to is None:
         event = event.filter(created_at=date_from)

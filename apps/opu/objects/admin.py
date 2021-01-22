@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Object, IP, Point, Outfit, LineType, TPO, TypeOfLocation, \
-    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel
-
+    TypeOfTrakt, Category, OutfitWorker, MainLineType, AmountChannel, OrderObjectPhoto
 
 
 class IpInline(admin.StackedInline):
@@ -60,5 +59,7 @@ admin.site.register(Category)
 admin.site.register(IP)
 
 admin.site.register(OutfitWorker)
+
+admin.site.register(OrderObjectPhoto)
 
 

@@ -5,12 +5,13 @@ from knox import views as knox_views
 from . import views
 
 from .views import LoginAPI, UserViewSet, Register, LogoutView, ProfileListAPIView, CreateProfileAPIView,\
-    DepartmentKTAPIView, SubdepartmentKTAPIView
+    DepartmentKTAPIView, SubdepartmentKTAPIView, AllProfileAPIView
 app_name = 'accounts'
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet, basename='users')
 router.register('profile_list', ProfileListAPIView)
+router.register('profiles', AllProfileAPIView)
 router.register('departments', DepartmentKTAPIView)
 router.register('subdepartments', SubdepartmentKTAPIView)
 
