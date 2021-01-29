@@ -397,10 +397,18 @@ class CreateLeftTrassaView(APIView):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
 
-        if main_obj.transit.filter(pk=pk).exists():
-            pass
-        else:
-            main_obj.transit.add(obj)
+        if not main_obj.transit.filter(pk=pk).exists():
+            main_obj.transit.add(*[*obj.transit2.all(), *obj.transit.all()])
+            print(obj.transit2.all())
+            print(obj.transit.all())
+
+            for tr in obj.transit.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+            for tr in obj.transit2.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+
             Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
             num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() \
@@ -412,7 +420,14 @@ class CreateLeftTrassaView(APIView):
                     if int(cir.num_circuit) > num_circuit:
                         break
                     circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit.add(circuit)
+                    cir.transit.add(*[*circuit.transit.all(), *circuit.transit2.all()])
+                    for tr in circuit.transit.all():
+                        tr.transit2.clear()
+                        tr.transit.clear()
+                    for tr in circuit.transit2.all():
+                        tr.transit2.clear()
+                        tr.transit.clear()
+
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -425,10 +440,14 @@ class CreateRightTrassaView(APIView):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
 
-        if main_obj.transit2.filter(pk=pk).exists():
-            pass
-        else:
-            main_obj.transit2.add(obj)
+        if not main_obj.transit2.filter(pk=pk).exists():
+            main_obj.transit2.add(*[*obj.transit.all().reverse(), *obj.transit2.all()])
+            for tr in obj.transit.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+            for tr in obj.transit2.all():
+                tr.transit2.clear()
+                tr.transit.clear()
             Object.objects.filter(pk=pk).update(created_by=request.user.profile)
 
             num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() <=\
@@ -441,7 +460,13 @@ class CreateRightTrassaView(APIView):
                     if int(cir.num_circuit) > num_circuit:
                         break
                     circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit2.add(circuit)
+                    cir.transit2.add(*[*circuit.transit.all(), *circuit.transit2.all()])
+                    for tr in circuit.transit.all():
+                        tr.transit2.clear()
+                        tr.transit.clear()
+                    for tr in circuit.transit2.all():
+                        tr.transit2.clear()
+                        tr.transit.clear()
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -494,8 +519,7 @@ class SaveTrassaView(APIView):
                 return HttpResponse("В форме арендаторов уже есть такая трасса")
             else:
                 Form_Customer.objects.create(object=main_obj, customer=main_obj.customer)
-        elif data['customer'] == False:
-            pass
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -506,45 +530,47 @@ class DeleteTrassaView(APIView):
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
-            main_obj = Object.objects.get(pk=main_pk)
-
-            if main_obj.transit.filter(pk=pk).exists():
-                main_obj.transit.remove(main_obj)
-
-                for cir in main_obj.circuit_object_parent.all():
-                    cir.transit.remove(cir)
-
-            if main_obj.transit2.filter(pk=pk).exists():
-                main_obj.transit2.remove(main_obj)
-
-                for cir in main_obj.circuit_object_parent.all():
-                    cir.transit2.remove(cir)
-
-            all_cir = main_obj.circuit_object_parent.count()
-
-            for t_obj in main_obj.transit.all():
-                if t_obj.transit.filter(pk=pk).exists():
-                    t_obj.transit.remove(main_obj)
-
-                    for circ in t_obj.circuit_object_parent.all():
-                        if all_cir < int(circ.num_circuit):
-                            break
-                        circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                        if circ.transit.filter(pk=circuit.pk).exists():
-                            circ.transit.remove(circuit)
-
-            for t_obj in main_obj.transit2.all():
-                if t_obj.transit2.filter(pk=pk).exists():
-                    t_obj.transit2.remove(main_obj)
-
-                    for circ in t_obj.circuit_object_parent.all():
-                        if all_cir < int(circ.num_circuit):
-                            break
-                        circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                        if circ.transit2.filter(pk=circuit.pk).exists():
-                            circ.transit2.remove(circuit)
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            message = {"message": "Невозможно удалять выбранный обьект"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
+            # main_obj = Object.objects.get(pk=main_pk)
+            #
+            # if main_obj.transit.filter(pk=pk).exists():
+            #     main_obj.transit.remove(main_obj)
+            #
+            #     for cir in main_obj.circuit_object_parent.all():
+            #         cir.transit.remove(cir)
+            #
+            # if main_obj.transit2.filter(pk=pk).exists():
+            #     main_obj.transit2.remove(main_obj)
+            #
+            #     for cir in main_obj.circuit_object_parent.all():
+            #         cir.transit2.remove(cir)
+            #
+            # all_cir = main_obj.circuit_object_parent.count()
+            #
+            # for t_obj in main_obj.transit.all():
+            #     if t_obj.transit.filter(pk=pk).exists():
+            #         t_obj.transit.remove(main_obj)
+            #
+            #         for circ in t_obj.circuit_object_parent.all():
+            #             if all_cir < int(circ.num_circuit):
+            #                 break
+            #             circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
+            #             if circ.transit.filter(pk=circuit.pk).exists():
+            #                 circ.transit.remove(circuit)
+            #
+            # for t_obj in main_obj.transit2.all():
+            #     if t_obj.transit2.filter(pk=pk).exists():
+            #         t_obj.transit2.remove(main_obj)
+            #
+            #         for circ in t_obj.circuit_object_parent.all():
+            #             if all_cir < int(circ.num_circuit):
+            #                 break
+            #             circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
+            #             if circ.transit2.filter(pk=circuit.pk).exists():
+            #                 circ.transit2.remove(circuit)
+            #
+            # return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
             main_obj = Object.objects.get(pk=main_pk)
@@ -552,9 +578,11 @@ class DeleteTrassaView(APIView):
 
             obj.transit2.clear()
             obj.transit.clear()
+            obj.transit.add(obj)
 
             for cir in obj.circuit_object_parent.all():
                 cir.transit.clear()
+                cir.transit.add(cir)
                 cir.transit2.clear()
 
             if main_obj.transit.filter(pk=pk).exists():

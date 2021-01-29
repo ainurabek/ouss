@@ -144,10 +144,11 @@ def get_report_analysis(request):
     date_to = request.GET.get("date_to")
     index = request.GET.get("index")
     responsible_outfit = request.GET.getlist('responsible_outfit')
+
+
     all_event_completed = Event.objects.filter(callsorevent=True, index1__index='4')
 
     all_event_completed = event_filter_date_from_date_to_and_outfit(all_event_completed, date_from, date_to, responsible_outfit)
-
 
     all_event_uncompleted = Event.objects.filter(callsorevent=True).exclude(index1__index='4')
     all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, responsible_outfit)
@@ -161,7 +162,6 @@ def get_report_analysis(request):
 
     data = []
 
-    count = 0
     for out in outfits:
         data.append({"outfit": out.responsible_outfit.outfit,
                      'id':None,
@@ -184,7 +184,6 @@ def get_report_analysis(request):
                          "comments1": None})
             calls_count = 0
             for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
-                count += 1
                 data.append({"outfit": None,
                              'id': call.id,
                              "name": get_event_name(call),
@@ -194,12 +193,10 @@ def get_report_analysis(request):
                              'region': call.point1.point + " - " + call.point2.point,
                              "index1": call.index1.index,
                              "comments1": call.comments1})
-
                 calls_count += 1
             if calls_count == 0:
                 data.pop()
-        if count == 0:
-            data.pop()
+
     return JsonResponse(data, safe=False)
 
 class DispEventHistory(APIView):
