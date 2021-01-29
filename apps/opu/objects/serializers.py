@@ -409,8 +409,8 @@ class ObjectListSerializer(serializers.ModelSerializer):
 
 
 class TraktListSerializer(serializers.ModelSerializer):
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointList()
+    point2 = PointList()
     type_of_trakt = TypeOfTraktSerializer()
     transit = TransitSerializer(many=True, read_only=True)
     transit2 = TransitSerializer(many=True, read_only=True)

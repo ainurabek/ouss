@@ -364,7 +364,7 @@ class PointListTrassa(ListAPIView):
     """Список ИП для создания трассы"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all()
+    queryset = Point.objects.all().order_by('point')
     serializer_class = PointList
 
 
@@ -398,9 +398,7 @@ class CreateLeftTrassaView(APIView):
         obj = Object.objects.get(pk=pk)
 
         if not main_obj.transit.filter(pk=pk).exists():
-            main_obj.transit.add(*[*obj.transit2.all(), *obj.transit.all()])
-            print(obj.transit2.all())
-            print(obj.transit.all())
+            main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
 
             for tr in obj.transit.all():
                 tr.transit2.clear()
@@ -420,7 +418,7 @@ class CreateLeftTrassaView(APIView):
                     if int(cir.num_circuit) > num_circuit:
                         break
                     circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit.add(*[*circuit.transit.all(), *circuit.transit2.all()])
+                    cir.transit.add(*circuit.transit.all(), *circuit.transit2.all())
                     for tr in circuit.transit.all():
                         tr.transit2.clear()
                         tr.transit.clear()
@@ -441,7 +439,7 @@ class CreateRightTrassaView(APIView):
         obj = Object.objects.get(pk=pk)
 
         if not main_obj.transit2.filter(pk=pk).exists():
-            main_obj.transit2.add(*[*obj.transit.all().reverse(), *obj.transit2.all()])
+            main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
             for tr in obj.transit.all():
                 tr.transit2.clear()
                 tr.transit.clear()
@@ -455,12 +453,11 @@ class CreateRightTrassaView(APIView):
                 obj.circuit_object_parent.count()
 
             if num_circuit != 0:
-
                 for cir in main_obj.circuit_object_parent.all():
                     if int(cir.num_circuit) > num_circuit:
                         break
                     circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit2.add(*[*circuit.transit.all(), *circuit.transit2.all()])
+                    cir.transit2.add(*circuit.transit.all(), *circuit.transit2.all())
                     for tr in circuit.transit.all():
                         tr.transit2.clear()
                         tr.transit.clear()
