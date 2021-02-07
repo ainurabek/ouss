@@ -220,7 +220,6 @@ class LPDetailSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True, read_only=True)
     id_outfit = ObjectOutfitSerializer()
     ip_object = IPSerializer(many=True)
-    category = CategorySerializer()
     our = TypeOfLocationSerializer()
     customer = CustomerSerializer()
     order_object_photo = OrderObjectPhotoSerializer(many=True)
@@ -229,15 +228,14 @@ class LPDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
-                  'transit2', 'tpo1', 'category', 'tpo2', 'id_outfit', 'comments',
+                  'transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments',
                   'customer', 'ip_object', 'our', 'total_amount_channels', 'order_object_photo',)
 
         depth = 1
 
 
 class LPCreateSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Category.objects.all())
+
     tpo1 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=TPO.objects.all())
     tpo2 = serializers.PrimaryKeyRelatedField(
@@ -258,7 +256,7 @@ class LPCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
+        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
                   'comments',  'customer')
 
 
@@ -277,8 +275,6 @@ class LPEditSerializer(serializers.ModelSerializer):
         read_only=False, queryset=LineType.objects.all())
     our = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeOfLocation.objects.all())
-    category = serializers.PrimaryKeyRelatedField(
-        read_only=False, allow_null=True, queryset=Category.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
 
@@ -286,7 +282,7 @@ class LPEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
+        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
         'comments', 'customer')
         depth = 1
 
