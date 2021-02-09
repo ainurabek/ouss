@@ -86,10 +86,10 @@ class EventListAPIView(viewsets.ModelViewSet):
 class IPEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = IP.objects.all()
-    serializer_class = IPListSerializer
+    queryset = Point.objects.all()
+    serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('point_id',)
+    filterset_fields = ('name',)
 
 
 class EventIPCreateViewAPI(APIView):
@@ -98,10 +98,10 @@ class EventIPCreateViewAPI(APIView):
     """Создания Event"""
     def post(self, request, pk):
 
-        ip = IP.objects.get(pk=pk)
+        point = Point.objects.get(pk=pk)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save(ips=ip, created_by=self.request.user.profile)
+            event = serializer.save(ips=point, created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
