@@ -231,7 +231,7 @@ class EventUpdateAPIView(UpdateAPIView):
             serializer.save()
 
 
-#удаление события - Ainur
+#удаление события  по звонкам
 class EventDeleteAPIView(DestroyAPIView):
     """Удаления event"""
     authentication_classes = (TokenAuthentication,)
@@ -240,6 +240,10 @@ class EventDeleteAPIView(DestroyAPIView):
     lookup_field = 'pk'
 
     def perform_destroy(self, instance):
+        if instance.id_parent is None:
+            instance.delete()
+            return
+
         main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
         if instance.previous is not None:
             previous_event = get_object_or_404(Event, pk=instance.previous.pk)
@@ -252,10 +256,6 @@ class EventDeleteAPIView(DestroyAPIView):
 
         if main_event.event_id_parent.count() == 0:
             main_event.delete()
-
-
-
-
 
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class UnknownEventListAPIView(ListAPIView):
