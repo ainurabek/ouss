@@ -129,7 +129,7 @@ class IPDetailObjectSerializer(serializers.ModelSerializer):
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
-    ips = IPListSerializer()
+    ips = PointListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
 
@@ -192,7 +192,7 @@ class CallsCreateSerializer(serializers.ModelSerializer):
     object = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Object.objects.all(), allow_null=True)
     ips = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=IP.objects.all(), allow_null=True)
+        read_only=False, queryset=Point.objects.all(), allow_null=True)
     circuit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Circuit.objects.all(), allow_null=True)
 
@@ -213,7 +213,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
 
     responsible_outfit = OutfitListSerializer()
     send_from = OutfitListSerializer()
-    ips = IPListSerializer()
+    ips = PointListSerializer()
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
     customer = CustomerSerializer()
