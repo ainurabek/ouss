@@ -11,12 +11,30 @@ services:
       - POSTGRES_PASSWORD=ainura123
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "python manage.py migrate --no-input && python manage.py collectstatic --no-input && gunicorn project.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/code
+      - static_volume:/code/static
+      - media_volume:/code/media
     ports:
       - 8000:8000
     depends_on:
       - db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/code/static
+      - media_volume:/code/media
+    ports:
+      - 8888:80
+    depends_on:
+      - web
+  front:
+    image: abilst/docker_nginx
+    ports:
+    - 8080:80
+    depends_on:
+      - web
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:

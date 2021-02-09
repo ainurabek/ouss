@@ -124,6 +124,7 @@ class CircuitEventListAPIView(ListAPIView):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('object', 'customer', 'name', 'type_using',)
 
+
 #cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -146,6 +147,7 @@ class EventCircuitCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 #obj - Ainur
 class ObjectEventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -154,6 +156,7 @@ class ObjectEventListAPIView(ListAPIView):
     serializer_class = ObjectEventSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer',)
+
 
 #obj create - Ainur
 class EventObjectCreateViewAPI(APIView):

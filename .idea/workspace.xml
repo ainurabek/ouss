@@ -22,11 +22,11 @@
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/dispatching/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/dispatching/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/opu/circuits/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/circuits/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -247,7 +247,26 @@
       <workItem from="1611030979965" duration="4503000" />
       <workItem from="1611203979015" duration="1818000" />
       <workItem from="1611219571721" duration="3394000" />
-      <workItem from="1611302555526" duration="1567000" />
+      <workItem from="1611302555526" duration="1742000" />
+      <workItem from="1611809847086" duration="9893000" />
+      <workItem from="1611897305413" duration="3438000" />
+      <workItem from="1611910717220" duration="58000" />
+      <workItem from="1611913916266" duration="1383000" />
+      <workItem from="1611992291429" duration="23000" />
+      <workItem from="1612171400386" duration="8052000" />
+      <workItem from="1612194931278" duration="5990000" />
+      <workItem from="1612241076715" duration="11285000" />
+      <workItem from="1612258390649" duration="1306000" />
+      <workItem from="1612329996332" duration="20271000" />
+      <workItem from="1612356787448" duration="246000" />
+      <workItem from="1612361943299" duration="1838000" />
+      <workItem from="1612363813420" duration="1795000" />
+      <workItem from="1612365854850" duration="1265000" />
+      <workItem from="1612367798795" duration="891000" />
+      <workItem from="1612501390291" duration="339000" />
+      <workItem from="1612501863013" duration="13000" />
+      <workItem from="1612598521041" duration="21000" />
+      <workItem from="1612858395497" duration="10017000" />
     </task>
     <servers />
   </component>
