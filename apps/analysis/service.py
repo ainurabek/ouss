@@ -8,6 +8,8 @@ from django import template
 from apps.dispatching.models import Reason, Index
 from django.db.models import Q
 
+from KT.apps.opu.objects.models import Point
+
 register = template.Library()
 
 
@@ -536,7 +538,7 @@ def filter_event(events: Event, instance, index, outfit):
     if isinstance(instance, Object):
         return events.filter(object=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
-    elif isinstance(instance, IP):
+    elif isinstance(instance, Point):
 
         return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
                              date_to__isnull=False)
