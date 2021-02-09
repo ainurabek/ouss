@@ -93,39 +93,40 @@ def get_object_diff(history):
             if "tpo1"  == change.field:
                 old_tpo = TPO.objects.get(pk=change.old)
                 new_tpo = TPO.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_tpo, new_tpo)
+                message += "{}:{} ->-> {}".format(change.field, old_tpo.name, new_tpo.name)
             elif "tpo2" == change.field:
                 old_tpo = TPO.objects.get(pk=change.old)
                 new_tpo = TPO.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_tpo, new_tpo)
+                message += "{}:{} ->-> {}".format(change.field, old_tpo.name, new_tpo.name)
             elif "id_outfit" == change.field:
                 old = Outfit.objects.get(pk=change.old)
                 new = Outfit.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.outfit, new.outfit)
             elif "point1" == change.field:
                 old = Point.objects.get(pk=change.old)
                 new = Point.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.point, new.point)
             elif "point2" == change.field:
                 old = Point.objects.get(pk=change.old)
                 new = Point.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.point, new.point)
             elif "category" == change.field:
                 old = Category.objects.get(pk=change.old)
                 new = Category.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.index, new.index)
             elif "type_line" == change.field:
                 old_type = LineType.objects.get(pk=change.old)
                 new_type = LineType.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_type, new_type)
+                message += "{}:{} ->-> {}".format(change.field, old_type.name, new_type.name)
             elif "type_of_trakt" == change.field:
                 old = TypeOfTrakt.objects.get(pk=change.old)
                 new = TypeOfTrakt.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.name, new.name)
             elif "customer" == change.field:
                 old = Customer.objects.get(pk=change.old)
                 new = Customer.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.customer, new.customer)
+
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
@@ -140,15 +141,15 @@ def get_ip_diff(history):
             if "object_id"  == change.field:
                 old = Object.objects.get(pk=change.old)
                 new = Object.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.name, new.name)
             elif "point_id" == change.field:
                 old_tpo = Point.objects.get(pk=change.old)
                 new_tpo = Point.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_tpo, new_tpo)
+                message += "{}:{} ->-> {}".format(change.field, old_tpo.point, new_tpo.point)
             elif "tpo_id" == change.field:
                 old = TPO.objects.get(pk=change.old)
                 new = TPO.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.index, new.index)
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
@@ -163,11 +164,11 @@ def get_point_diff(history):
             if "id_outfit"  == change.field:
                 old = Outfit.objects.get(pk=change.old)
                 new = Outfit.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.outfit, new.outfit)
             elif "tpo" == change.field:
                 old = TPO.objects.get(pk=change.old)
                 new = TPO.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.index, new.index)
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
@@ -182,11 +183,11 @@ def get_outfit_diff(history):
             if "type_outfit"  == change.field:
                 old = TypeOfLocation.objects.get(pk=change.old)
                 new = TypeOfLocation.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.name, new.name)
             elif "tpo" == change.field:
                 old = TPO.objects.get(pk=change.old)
                 new = TPO.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+                message += "{}:{} ->-> {}".format(change.field, old.index, new.index)
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)

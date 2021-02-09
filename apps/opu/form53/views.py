@@ -28,7 +28,7 @@ class Form53CreateViewAPI(APIView):
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
         if Form53.objects.filter(circuit=circuit).exists():
-            content = {'По такому каналу уже форма5.3 создана'}
+            content = {'detail':'По такому каналу уже форма5.3 создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():

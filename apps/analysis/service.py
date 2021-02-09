@@ -521,11 +521,11 @@ def get_diff(history):
             if "reason" == change.field:
                 old_reason = Reason.objects.get(pk=change.old)
                 new_reason = Reason.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_reason, new_reason)
+                message += "{}:{} ->-> {}".format(change.field, old_reason.name, new_reason.name)
             elif "index1" == change.field:
                 old_index = Index.objects.get(pk=change.old)
                 new_index = Index.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old_index, new_index)
+                message += "{}:{} ->-> {}".format(change.field, old_index.index, new_index.index)
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)

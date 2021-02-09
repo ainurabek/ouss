@@ -74,7 +74,7 @@ class FormCustomerCircCreateAPIView(APIView):
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
         if Form_Customer.objects.filter(circuit=circuit).exists():
-            content = {'По такому каналу уже форма арендаторов создана'}
+            content = {'detail':'По такому каналу уже форма арендаторов создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():

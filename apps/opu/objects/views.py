@@ -221,7 +221,7 @@ class LPCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         if Object.objects.filter(name=request.data['name'], point1=request.data['point1'],
                                  point2=request.data['point2']).exists():
-            content = {"message": "Такой обьект уже создан"}
+            content = {"detail": "Такой обьект уже создан"}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = LPCreateSerializer(data=request.data)
         if serializer.is_valid():
@@ -299,7 +299,7 @@ class ObjectCreateView(APIView):
         parent = get_object_or_404(Object, pk=pk)
 
         if Object.objects.filter(name=parent.name+'-'+request.data["name"], point1=request.data["point1"], point2=request.data["point2"]).exists():
-            content = {"message": "Такой обьект уже создан"}
+            content = {"detail": "Такой обьект уже создан"}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
 
         serializer = ObjectCreateSerializer(data=request.data)
@@ -527,7 +527,7 @@ class DeleteTrassaView(APIView):
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
-            message = {"message": "Невозможно удалять выбранный обьект"}
+            message = {"detail": "Невозможно удалять выбранный обьект"}
             return Response(message, status=status.HTTP_403_FORBIDDEN)
             # main_obj = Object.objects.get(pk=main_pk)
             #
