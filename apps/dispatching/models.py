@@ -73,7 +73,7 @@ class Event(models.Model):
     type_journal = models.ForeignKey(TypeOfJournal, verbose_name='Вид журнала', on_delete=models.CASCADE)
     date_from = models.DateTimeField(blank=True, null=True, verbose_name='От')
     date_to = models.DateTimeField(blank=True, null=True, verbose_name='До')
-    date_calls = models.DateTimeField(blank=True, null=True, verbose_name='Время звонка')
+    time_created_at = models.TimeField(blank=True, null=True, verbose_name='Время сообщения')
     created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.SET_NULL, null=True, blank=True)
     contact_name = models.ForeignKey(OutfitWorker, verbose_name='Передал (ФИО)', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateField('Дата создания', blank=True, null=True)

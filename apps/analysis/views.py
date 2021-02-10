@@ -190,7 +190,7 @@ def get_report_analysis(request):
                              "reason": call.reason.name,
                              "date_from": call.date_from,
                              "date_to": call.date_to,
-                             'region': call.point1.point + " - " + call.point2.point,
+                             'region': call.point1.point + " - " + call.point2.point if call.point1 is not None else "",
                              "index1": call.index1.index,
                              "comments1": call.comments1})
                 calls_count += 1

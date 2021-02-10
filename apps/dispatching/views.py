@@ -103,11 +103,13 @@ class EventIPCreateViewAPI(APIView):
         if serializer.is_valid():
             event = serializer.save(ips=point, created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
                                  reason=event.reason, comments1=event.comments1, ips=event.ips,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
-                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 customer=event.customer, created_by=event.created_by,
+                                  contact_name=event.contact_name,
                                  )
 
             # update_period_of_time(instance=obj)
@@ -122,7 +124,7 @@ class CircuitEventListAPIView(ListAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEventList
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'customer', 'name', 'type_using',)
+    filterset_fields = ('object', 'customer', 'name')
 
 
 #cirxuit create - Ainur
@@ -137,6 +139,7 @@ class EventCircuitCreateViewAPI(APIView):
         if serializer.is_valid():
             event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
                                  reason=event.reason, comments1=event.comments1, circuit=event.circuit,
@@ -171,6 +174,7 @@ class EventObjectCreateViewAPI(APIView):
             event = serializer.save(object=object, created_by=self.request.user.profile)
 
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
                                  reason=event.reason, comments1=event.comments1, object=event.object,
@@ -280,6 +284,7 @@ class EventUnknownCreateViewAPI(APIView):
         if serializer.is_valid():
             event = serializer.save(created_by=self.request.user.profile)
             Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
                                  date_from=event.date_from, index1=event.index1,
                                  type_journal=event.type_journal, point1=event.point1, point2=event.point2,
                                  reason=event.reason, comments1=event.comments1, name=event.name,
@@ -452,7 +457,7 @@ def get_report_object(request):
                                  "type_journal": None,
                                  "date_from": call.date_from,
                                  "date_to": call.date_to,
-                                 "region": call.point1.point + " - " + call.point2.point,
+                                 "region": call.point1.point + " - " + call.point2.point if call.point1 is not None else "",
                                  "index1": call.index1.index,
                                  "comments1": call.comments1})
                     calls_count += 1

@@ -129,6 +129,8 @@ class Point(models.Model):
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
 	region = models.CharField('Район', max_length=150, blank=True, null=True)
 	type_equipment = models.CharField('Тип оборудования', max_length=150, blank=True, null=True)
+	total_point_channels_KLS = models.IntegerField("Значение_КЛС", default=0)
+	total_point_channels_RRL = models.IntegerField("Значение_ЦРРЛ", default=0)
 	history = HistoricalRecords(related_name='history_point_log')
 
 	def __str__(self):

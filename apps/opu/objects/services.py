@@ -80,6 +80,22 @@ def update_total_amount_channels(instance: Object):
         id_parent_instance.save()
         id_parent_instance = id_parent_instance.id_parent
 
+def update_total_point_channels(instance: Object):
+    if instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'КЛС':
+        instance.point1.total_point_channels_KLS += instance.total_amount_channels
+        instance.point2.total_point_channels_KLS += instance.total_amount_channels
+        instance.point1.save()
+        instance.point2.save()
+    elif instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'ЦРРЛ':
+        instance.point1.total_point_channels_RRL += instance.total_amount_channels
+        instance.point2.total_point_channels_RRL += instance.total_amount_channels
+        instance.point1.save()
+        instance.point2.save
+
+
+
+
+
 
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)

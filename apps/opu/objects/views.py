@@ -38,6 +38,8 @@ from apps.opu.objects.models import OrderObjectPhoto
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 
+from apps.opu.objects.services import update_total_point_channels
+
 
 class BugModelViewSet(viewsets.ModelViewSet):
     queryset = Bug.objects.all().order_by('-id')
@@ -374,6 +376,7 @@ class ObjectCreateView(APIView):
                 created_by=request.user.profile,
                 name=parent.name+'-'+request.data["name"],
             )
+
             # if instance.type_of_trakt.name == 'ПГ':
             instance.total_amount_channels = instance.amount_channels.value
             instance.save()
@@ -382,7 +385,7 @@ class ObjectCreateView(APIView):
             adding_an_object_to_trassa(obj=instance)
             update_total_amount_channels(instance=instance)
             create_circuit(instance, self.request)
-            response = {"message": "Объект успешно создан"}
+            update_total_point_channels(instance=instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
