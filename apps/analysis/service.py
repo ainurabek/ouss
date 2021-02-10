@@ -8,7 +8,7 @@ from django import template
 from apps.dispatching.models import Reason, Index
 from django.db.models import Q
 
-from KT.apps.opu.objects.models import Point
+from apps.opu.objects.models import Point
 
 register = template.Library()
 
