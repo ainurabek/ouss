@@ -9,8 +9,6 @@ class Customer(models.Model):
 	address = models.CharField('Адрес', max_length=250, blank=True, null=True)
 	email = models.CharField('Email и телефон', max_length=1250, blank=True, null=True)
 	diapozon = models.CharField('Диапозон нумераций', max_length=1250, blank=True, null=True)
-	contact_name = models.CharField('Ответственное лицо', max_length=200, blank=True, null=True)
-	reuisits = models.CharField('Реквизиты', max_length=200, blank=True, null=True)
 	created_at = models.DateField('Дата', auto_now_add=True)
 	adding = models.CharField("Примечание", max_length=250, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_customer_log')

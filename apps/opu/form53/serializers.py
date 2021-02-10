@@ -29,6 +29,6 @@ class Form53Serializer(serializers.ModelSerializer):
     circuit = CircuitList()
     class Meta:
         model = Form53
-        fields = ("id", "circuit",  "order53_photo", "schema53_photo", "comments", 'created_at')
+        fields = ("id", "circuit",  "order53_photo", "schema53_photo", "comments")
         depth=1
 

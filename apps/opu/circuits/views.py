@@ -2,10 +2,9 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from apps.opu.circuits.serializers import CircuitList, CircuitEdit, MeasureCircSerializer, SpeedSerializer, \
-    TypeComSerializer, ModeCircSerializer
+from apps.opu.circuits.serializers import CircuitList, CircuitEdit
 from rest_framework import generics, status
-from apps.opu.circuits.models import Circuit, Measure, Speed, TypeCom, Mode
+from apps.opu.circuits.models import Circuit
 from rest_framework.views import APIView
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
@@ -33,65 +32,6 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
         instance = serializer.save(created_by=self.request.user.profile)
         update_circuit_active(object=instance.object)
 
-
-class MeasureAPIView(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = MeasureCircSerializer
-    lookup_field = 'pk'
-    queryset = Measure.objects.all().order_by('name')
-
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
-
-
-class SpeedAPIView(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = SpeedSerializer
-    lookup_field = 'pk'
-    queryset = Speed.objects.all().order_by('name')
-
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
-
-
-class TypeComAPIView(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = TypeComSerializer
-    lookup_field = 'pk'
-    queryset = TypeCom.objects.all().order_by('name')
-
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
-
-
-class ModeAPIView(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = ModeCircSerializer
-    lookup_field = 'pk'
-    queryset = Mode.objects.all().order_by('name')
-
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
 
 
 class CircuitHistory(APIView):

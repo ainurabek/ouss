@@ -7,8 +7,6 @@ from apps.opu.objects.models import TPO, Outfit,Point, Category, LineType, TypeO
 
 from apps.opu.customer.models import Customer
 
-from apps.opu.circuits.models import Measure, Mode, TypeCom
-
 from apps.opu.circuits.models import Circuit
 
 from apps.opu.objects.services import update_total_amount_channels
@@ -27,10 +25,6 @@ def get_circuit_diff(history):
                 old = Category.objects.get(pk=change.old)
                 new = Category.objects.get(pk=change.new)
                 message += "{}:{} ->-> {}".format(change.field, old, new)
-            elif "measure" == change.field:
-                old = Measure.objects.get(pk=change.old)
-                new = Measure.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
 
             elif "point1" == change.field:
                 old = Point.objects.get(pk=change.old)
@@ -48,14 +42,7 @@ def get_circuit_diff(history):
                 old = Object.objects.get(pk=change.old)
                 new = Object.objects.get(pk=change.new)
                 message += "{}:{} ->-> {}".format(change.field, old, new)
-            elif "mode"  == change.field:
-                old = Mode.objects.get(pk=change.old)
-                new = Mode.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
-            elif "type_com"  == change.field:
-                old = TypeCom.objects.get(pk=change.old)
-                new = TypeCom.objects.get(pk=change.new)
-                message += "{}:{} ->-> {}".format(change.field, old, new)
+
             else:
                 message += "{}:{} ->-> {}".format(change.field, change.old, change.new)
         return mark_safe(message)
