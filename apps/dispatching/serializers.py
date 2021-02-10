@@ -79,8 +79,7 @@ class CircuitEventList(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'object', 'num_circuit', 'type_using',
-                  'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
+        fields = ('id', 'name', 'object', 'num_circuit', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
 
 class CircuitDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
