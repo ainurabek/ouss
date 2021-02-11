@@ -37,8 +37,12 @@ from apps.opu.objects.serializers import ObjectEditSerializer
 from apps.opu.objects.models import OrderObjectPhoto
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
+from apps.opu.circuits.models import Circuit
+from apps.opu.circuits.serializers import CircuitList
 
 from apps.opu.objects.services import update_total_point_channels
+
+from apps.opu.circuits.serializers import CircuitTrassaList
 
 
 class BugModelViewSet(viewsets.ModelViewSet):
@@ -495,6 +499,9 @@ class CreateRightTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
+        # if main_pk.is_transit is True or obj.is_transit is True:
+        #     message = {"detail": "Создание трассы может привести к перезаписи трассы транзитных каналов"}
+        #     return Response(message, status=status.HTTP_403_FORBIDDEN)
         if not main_obj.transit2.filter(pk=pk).exists():
             main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
             for tr in obj.transit.all():
@@ -585,45 +592,6 @@ class DeleteTrassaView(APIView):
         if main_pk == pk:
             message = {"detail": "Невозможно удалять выбранный обьект"}
             return Response(message, status=status.HTTP_403_FORBIDDEN)
-            # main_obj = Object.objects.get(pk=main_pk)
-            #
-            # if main_obj.transit.filter(pk=pk).exists():
-            #     main_obj.transit.remove(main_obj)
-            #
-            #     for cir in main_obj.circuit_object_parent.all():
-            #         cir.transit.remove(cir)
-            #
-            # if main_obj.transit2.filter(pk=pk).exists():
-            #     main_obj.transit2.remove(main_obj)
-            #
-            #     for cir in main_obj.circuit_object_parent.all():
-            #         cir.transit2.remove(cir)
-            #
-            # all_cir = main_obj.circuit_object_parent.count()
-            #
-            # for t_obj in main_obj.transit.all():
-            #     if t_obj.transit.filter(pk=pk).exists():
-            #         t_obj.transit.remove(main_obj)
-            #
-            #         for circ in t_obj.circuit_object_parent.all():
-            #             if all_cir < int(circ.num_circuit):
-            #                 break
-            #             circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-            #             if circ.transit.filter(pk=circuit.pk).exists():
-            #                 circ.transit.remove(circuit)
-            #
-            # for t_obj in main_obj.transit2.all():
-            #     if t_obj.transit2.filter(pk=pk).exists():
-            #         t_obj.transit2.remove(main_obj)
-            #
-            #         for circ in t_obj.circuit_object_parent.all():
-            #             if all_cir < int(circ.num_circuit):
-            #                 break
-            #             circuit = main_obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-            #             if circ.transit2.filter(pk=circuit.pk).exists():
-            #                 circ.transit2.remove(circuit)
-            #
-            # return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
             main_obj = Object.objects.get(pk=main_pk)
@@ -638,50 +606,143 @@ class DeleteTrassaView(APIView):
                 cir.transit.add(cir)
                 cir.transit2.clear()
 
-            if main_obj.transit.filter(pk=pk).exists():
-                main_obj.transit.remove(obj)
+            main_obj.transit.remove(obj)
 
-                for cir in main_obj.circuit_object_parent.all():
-                    try:
-                        circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                        cir.transit.remove(circuit)
-                    except IndexError:
-                        pass
+            for cir in main_obj.circuit_object_parent.all():
+                try:
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
+                    cir.transit.remove(circuit)
+                except IndexError:
+                    pass
 
-            if main_obj.transit2.filter(pk=pk).exists():
-                main_obj.transit2.remove(obj)
+            main_obj.transit2.remove(obj)
 
-                for cir in main_obj.circuit_object_parent.all():
-                    try:
-                        circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                        cir.transit2.remove(circuit)
-                    except IndexError:
-                        pass
+            for cir in main_obj.circuit_object_parent.all():
+                try:
+                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
+                    cir.transit2.remove(circuit)
+                except IndexError:
+                    pass
 
             for t_obj in main_obj.transit.all():
-                if t_obj.transit.filter(pk=pk).exists():
-                    t_obj.transit.remove(obj)
+                t_obj.transit.remove(obj)
+                t_obj.transit2.remove(obj)
 
-                    for circ in t_obj.circuit_object_parent.all():
-                        try:
-                            circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                            if circ.transit.filter(pk=circuit.pk).exists():
-                                circ.transit.remove(circuit)
-                        except IndexError:
-                            pass
+                for circ in t_obj.circuit_object_parent.all():
+                    try:
+                        circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
+                        circ.transit.remove(circuit)
+                        circ.transit2.remove(circuit)
+                    except IndexError:
+                        pass
 
             for t_obj in main_obj.transit2.all():
-                if t_obj.transit2.filter(pk=pk).exists():
-                    t_obj.transit2.remove(obj)
+                t_obj.transit2.remove(obj)
+                t_obj.transit.remove(obj)
 
-                    for circ in t_obj.circuit_object_parent.all():
-                        try:
-                            circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                            if circ.transit2.filter(pk=circuit.pk).exists():
-                                circ.transit2.remove(circuit)
-                        except IndexError:
-                            pass
+                for circ in t_obj.circuit_object_parent.all():
+                    try:
+                        circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
+                        circ.transit2.remove(circuit)
+                        circ.transit.remove(circuit)
+                    except IndexError:
+                        pass
 
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CircuitListTrassa(ListAPIView):
+    """Список circuits для создания трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Circuit.objects.all().order_by('num_circuit')
+    serializer_class = CircuitList
+
+class SelectCircuitView(APIView):
+    """Выбор каналы для фильтрацы каналов"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        obj = Object.objects.get(pk=pk)
+        circuits = Circuit.objects.filter(object=obj)
+        serializer = CircuitTrassaList(circuits, many=True).data
+        return Response(serializer)
+
+#создание трассы для каналов
+class CreateLeftCircuitTrassaView(APIView):
+    permission_classes = (IsAuthenticated, IsOpuOnly)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, main_pk, pk):
+        main_obj = Circuit.objects.get(pk=main_pk)
+        obj = Circuit.objects.get(pk=pk)
+
+        if not main_obj.transit.filter(pk=pk).exists():
+            main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
+            for tr in obj.transit.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+            for tr in obj.transit2.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+        response = {"data": "Объект успешно добавлен в трассу"}
+        return Response(response, status=status.HTTP_201_CREATED)
+
+class CreateRightCircuitTrassaView(APIView):
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, main_pk, pk):
+        main_obj = Circuit.objects.get(pk=main_pk)
+        obj = Circuit.objects.get(pk=pk)
+        if not main_obj.transit2.filter(pk=pk).exists():
+            main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
+            for tr in obj.transit.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+            for tr in obj.transit2.all():
+                tr.transit2.clear()
+                tr.transit.clear()
+        response = {"data": "Канал успешно добавлен в трассу"}
+        return Response(response, status=status.HTTP_201_CREATED)
+
+
+class SaveCircuitTrassaView(APIView):
+    """Сохранение трассы for circuits"""
+    authentication_classes = (TokenAuthentication, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, pk):
+        main_obj = get_object_or_404(Circuit, pk=pk)
+        for i in main_obj.transit.all():
+            i.transit.add(*main_obj.transit.all())
+            i.transit2.add(*main_obj.transit2.all())
+        for i in main_obj.transit2.all():
+            i.transit2.add(*main_obj.transit2.all())
+            i.transit.add(*main_obj.transit.all())
+        return Response(status=status.HTTP_201_CREATED)
+
+class DeleteCircuitTrassaView(APIView):
+    """Удаления трассы для канала"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def delete(self, request, main_pk, pk):
+        if main_pk == pk:
+            message = {"detail": "Невозможно удалять выбранный канал"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
+        else:
+            main_obj = Circuit.objects.get(pk=main_pk)
+            obj = Circuit.objects.get(pk=pk)
+            obj.transit2.clear()
+            obj.transit.clear()
+            obj.transit.add(obj)
+            for t_obj in main_obj.transit.all():
+                t_obj.transit.remove(obj)
+                t_obj.transit2.remove(obj)
+            for t_obj in main_obj.transit2.all():
+                t_obj.transit2.remove(obj)
+                t_obj.transit.remove(obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -698,7 +759,6 @@ class FilterObjectList(ListAPIView):
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
         consumer = self.request.query_params.get('consumer', None)
-
 
         if tpo is not None and tpo != '':
             queryset = queryset.filter(Q(tpo1__index=tpo) | Q(tpo2__index=tpo))
