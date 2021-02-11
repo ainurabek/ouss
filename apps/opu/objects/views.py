@@ -679,6 +679,10 @@ class CreateLeftCircuitTrassaView(APIView):
 
         if not main_obj.transit.filter(pk=pk).exists():
             main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
+            main_obj.object.is_transit = True
+            main_obj.object.save()
+            obj.object.is_transit = True
+            obj.object.save()
             for tr in obj.transit.all():
                 tr.transit2.clear()
                 tr.transit.clear()
@@ -697,6 +701,10 @@ class CreateRightCircuitTrassaView(APIView):
         obj = Circuit.objects.get(pk=pk)
         if not main_obj.transit2.filter(pk=pk).exists():
             main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
+            main_obj.object.is_transit = True
+            main_obj.object.save()
+            obj.object.is_transit = True
+            obj.object.save()
             for tr in obj.transit.all():
                 tr.transit2.clear()
                 tr.transit.clear()
@@ -737,12 +745,28 @@ class DeleteCircuitTrassaView(APIView):
             obj.transit2.clear()
             obj.transit.clear()
             obj.transit.add(obj)
+            main_trassa = [*main_obj.object.transit.all(), main_obj.object.transit2.all()]
+            circ_trassa = [*[cir.object for cir in main_obj.transit.all()], *[cir.object for cir in main_obj.transit2.all()]]
+
+            is_transit = True
+            if main_trassa != circ_trassa:
+                main_obj.object.is_transit = False
+
+
+            main_obj.object.is_transit = is_transit
+            main_obj.object.save()
+            obj.object.is_transit = is_transit
+            obj.object.save()
             for t_obj in main_obj.transit.all():
                 t_obj.transit.remove(obj)
                 t_obj.transit2.remove(obj)
+                t_obj.object.is_transit = is_transit
+                t_obj.object.save()
             for t_obj in main_obj.transit2.all():
                 t_obj.transit2.remove(obj)
                 t_obj.transit.remove(obj)
+                t_obj.object.is_transit = is_transit
+                t_obj.object.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
