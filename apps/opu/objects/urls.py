@@ -5,10 +5,12 @@ from django.urls import path, include
 from rest_framework import routers
 from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
-    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView,\
+    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, \
     ObjectCreateView, ObjectEditView, ObjectListView, \
     SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
-    CreateRightTrassaView, SelectPointView, ObjectDetailView
+    CreateRightTrassaView, SelectPointView, ObjectDetailView, CircuitListTrassa, SelectCircuitView, \
+    CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, DeleteCircuitTrassaView, \
+    PGCircuitListView
 
 app_name = 'objects'
 
@@ -79,6 +81,15 @@ urlpatterns = [
     path("points_amount/", views.get_points_amount, name='points_amount'),
     path("outfits_amount/", views.get_outfits_amount, name='outfits_amount'),
     path("customers_amount/", views.get_customers_amount, name='customers_amount'),
+
+    #trassa for circuits
+    path('cir_trassa/pg_list/<int:pk>/', PGCircuitListView.as_view(), name='cir_pg_list'),
+    path('cir_trassa/select-circuit/<int:pk>/', SelectCircuitView.as_view(), name='select_circuit'),
+    path('cir_trassa/circuit_list/', CircuitListTrassa.as_view(), name='circuit_list'),
+    path('cir_trassa/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftCircuitTrassaView.as_view(), name='left_trassa_circuit'),
+    path('cir_trassa/right-trassa/<int:main_pk>/<int:pk>/', CreateRightCircuitTrassaView.as_view(), name='right_trassa_circuit'),
+    path('cir_trassa/save-trassa/<int:pk>/', SaveCircuitTrassaView.as_view(), name='save_trassa_circ'),
+    path('cir_trassa/delete-trass/<int:main_pk>/<int:pk>/', DeleteCircuitTrassaView.as_view(), name='delete_trassa_circ'),
 
     path('', include(router.urls))
 

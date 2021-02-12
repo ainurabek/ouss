@@ -186,6 +186,7 @@ class Object(models.Model):
 	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
 	src = models.ImageField('Скан распоряжения', upload_to='files/', blank=True)
 	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
+	is_transit = models.BooleanField(default=False)  # if True - то его компоненты участвуют в транзите, при измнении, эти компоненты перезапишутся
 	history = HistoricalRecords(related_name='history_object_log')
 
 	class Meta:

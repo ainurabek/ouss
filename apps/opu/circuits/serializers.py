@@ -55,6 +55,10 @@ class CircuitList(serializers.ModelSerializer):
                    'comments', 'transit', 'transit2', 'first', 'point1', 'point2',
                   'customer')
 
+class CircuitTrassaList(serializers.ModelSerializer):
+    class Meta:
+        model = Circuit
+        fields = ('id', 'num_circuit')
 
 class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(

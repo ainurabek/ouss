@@ -90,11 +90,14 @@ def get_coefficient_rrl(downtime):
                             return 0
 
 
+
 def get_type_line(obj) -> str:
+
     if obj.object is not None:
         return obj.object.type_line.main_line_type.name
     elif obj.circuit is not None:
         return obj.circuit.id_object.type_line.main_line_type.name
+
 
 
 def get_calls_list(all_event, obj):
