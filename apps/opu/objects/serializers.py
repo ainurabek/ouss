@@ -426,5 +426,14 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
         model = Object
         fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer', 'ip_object')
 
+class PGListSerializer(serializers.ModelSerializer):
+    # point1 = PointList()
+    # point2 = PointList()
+    # type_of_trakt = TypeOfTraktSerializer()
+    # transit = TransitSerializer(many=True, read_only=True)
+    # transit2 = TransitSerializer(many=True, read_only=True)
 
+    class Meta:
+        model = Object
+        fields = ('id', 'name')
 

@@ -9,7 +9,8 @@ from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     ObjectCreateView, ObjectEditView, ObjectListView, \
     SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
     CreateRightTrassaView, SelectPointView, ObjectDetailView, CircuitListTrassa, SelectCircuitView, \
-    CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, DeleteCircuitTrassaView
+    CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, DeleteCircuitTrassaView, \
+    PGCircuitListView
 
 app_name = 'objects'
 
@@ -82,8 +83,9 @@ urlpatterns = [
     path("customers_amount/", views.get_customers_amount, name='customers_amount'),
 
     #trassa for circuits
-    path('cir_trassa/circuit_list/', CircuitListTrassa.as_view(), name='circuit_list'),
+    path('cir_trassa/pg_list/<int:pk>/', PGCircuitListView.as_view(), name='cir_pg_list'),
     path('cir_trassa/select-circuit/<int:pk>/', SelectCircuitView.as_view(), name='select_circuit'),
+    path('cir_trassa/circuit_list/', CircuitListTrassa.as_view(), name='circuit_list'),
     path('cir_trassa/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftCircuitTrassaView.as_view(), name='left_trassa_circuit'),
     path('cir_trassa/right-trassa/<int:main_pk>/<int:pk>/', CreateRightCircuitTrassaView.as_view(), name='right_trassa_circuit'),
     path('cir_trassa/save-trassa/<int:pk>/', SaveCircuitTrassaView.as_view(), name='save_trassa_circ'),

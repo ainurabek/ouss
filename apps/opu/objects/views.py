@@ -44,6 +44,8 @@ from apps.opu.objects.services import update_total_point_channels
 
 from apps.opu.circuits.serializers import CircuitTrassaList
 
+from apps.opu.objects.serializers import PGListSerializer
+
 
 class BugModelViewSet(viewsets.ModelViewSet):
     queryset = Bug.objects.all().order_by('-id')
@@ -650,12 +652,16 @@ class DeleteTrassaView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-class CircuitListTrassa(ListAPIView):
-    """Список circuits для создания трассы"""
-    permission_classes = (IsAuthenticated,)
+
+class PGCircuitListView(APIView):
+    """Выбор PG для создания трассы circuits"""
     authentication_classes = (TokenAuthentication,)
-    queryset = Circuit.objects.all().order_by('num_circuit')
-    serializer_class = CircuitList
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def get(self, request, pk):
+        obj = Object.objects.filter(id_parent__pk=pk, type_of_trakt__name='ПГ')
+        serializer = PGListSerializer(obj, many=True).data
+        return Response(serializer)
 
 class SelectCircuitView(APIView):
     """Выбор каналы для фильтрацы каналов"""
@@ -667,6 +673,15 @@ class SelectCircuitView(APIView):
         circuits = Circuit.objects.filter(object=obj)
         serializer = CircuitTrassaList(circuits, many=True).data
         return Response(serializer)
+
+class CircuitListTrassa(ListAPIView):
+    """Список circuits для создания трассы"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = Circuit.objects.all().order_by('num_circuit')
+    serializer_class = CircuitList
+
+
 
 #создание трассы для каналов
 class CreateLeftCircuitTrassaView(APIView):
