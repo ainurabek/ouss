@@ -90,14 +90,11 @@ def get_coefficient_rrl(downtime):
                             return 0
 
 
-def get_type_line(obj) -> int:
+def get_type_line(obj) -> str:
     if obj.object is not None:
         return obj.object.type_line.main_line_type.name
     elif obj.circuit is not None:
         return obj.circuit.id_object.type_line.main_line_type.name
-    elif obj.ips is not None:
-
-        return obj.ips.object_id.type_line.main_line_type.name
 
 
 def get_calls_list(all_event, obj):
@@ -112,8 +109,6 @@ def get_calls_list(all_event, obj):
 def get_amount_of_channels(obj):
     if obj.object is not None:
         return obj.object.total_amount_channels
-    elif obj.ips is not None:
-        return obj.ips.total_point_channels
     elif obj.circuit is not None:
         return obj.circuit.id_object.total_amount_channels
 
