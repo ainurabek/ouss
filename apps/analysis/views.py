@@ -1,3 +1,6 @@
+import copy
+from pprint import pprint
+
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from knox.auth import TokenAuthentication
@@ -142,9 +145,10 @@ def get_report(request):
     """Отчет по 1"""
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
-    responsible_outfit = request.GET.getlist("responsible_outfit")
+    responsible_outfit = request.GET.getlist("responsible_outfit[]")
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False)
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратура',
+                                                                                              'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии'])
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
     outfits = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
@@ -162,31 +166,37 @@ def get_report(request):
     }
 
     for outfit in outfits:
-        total_outfit = example.copy()
+        total_outfit = copy.deepcopy(example)
         total_outfit['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
-        out_data = example.copy()['name'] = outfit.responsible_outfit
+        out_data = copy.deepcopy(example)
+        out_data['name'] = outfit.responsible_outfit.outfit
         out_data['color'] = "1"
         data.append(out_data)
 
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
-            event_data = example.copy()['name'] = get_event_name(event)
+            event_data = copy.deepcopy(example)
+            event_data['name'] = get_event_name(event)
             data.append(event_data)
             example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
-            total_period_of_time = example.copy()
+            total_period_of_time = copy.deepcopy(example)
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
+
                 if call.ips is None:
                     type_line = get_type_line(call)
                     amount_of_channels = get_amount_of_channels(call)
-                    call_data = example.copy()
+
+                    call_data = copy.deepcopy(example)
                     call_data['period_of_time'][call.reason.name+type_line] = period
+
                     call_data['amount_of_channels'][type_line] = amount_of_channels
 
                     total_period_of_time['period_of_time'][call.reason.name+type_line] += period
+
                     data.append(call_data)
                 else:
-                    call_data = example.copy()
+                    call_data = copy.deepcopy(example)
                     kls = call.ips.total_point_channels_KLS
                     rrl = call.ips.total_point_channels_RRL
 
@@ -227,6 +237,7 @@ def get_report(request):
         total_outfit['name'] = 'Общий итог'
         total_outfit['color'] = '4'
         data.append(total_outfit)
+
 
     return JsonResponse(data, safe=False)
 

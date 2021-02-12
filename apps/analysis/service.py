@@ -92,7 +92,6 @@ def get_coefficient_rrl(downtime):
 
 
 def get_type_line(obj) -> str:
-
     if obj.object is not None:
         return obj.object.type_line.main_line_type.name
     elif obj.circuit is not None:
@@ -160,7 +159,7 @@ def event_distinct(events: Event, *args):
 
 
 def get_type_line_vls_and_kls():
-    return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ВЛС")
+    return MainLineType.objects.get(name__iexact="КЛС"), MainLineType.objects.get(name__iexact="ЦРРЛ")
 
 
 def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK, parent_obj: FormAnalysis, user):
@@ -169,23 +168,37 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     outfits = event_distinct(all_event, "responsible_outfit")
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
-    kls, vls = get_type_line_vls_and_kls()
+    kls, rrl = get_type_line_vls_and_kls()
 
     total_rep_kls = 0
     total_rep_rrl = 0
     for out in outfits:
-        reason_1 = 0
-        reason_2 = 0
-        amount_of_channels = 0
-        for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
-            amount_of_channels += int(get_amount_of_channels(event))
-            if get_type_line(event) == kls.name:
-                reason_1 += get_period_date_to(event, date_to)
-            elif get_type_line(event) == vls.name:
-                reason_2 += get_period_date_to(event, date_to)
+        total_outfit_kls = 0
+        total_outfit_rrl = 0
 
-        total_out_kls = reason_1 * amount_of_channels
-        total_out_rrl = reason_2 * amount_of_channels
+        amount_of_channels_kls = 0
+        amount_of_channels_rrl = 0
+        for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
+            if event.ips is None:
+
+                if get_type_line(event) == kls.name:
+                    amount_of_channels_kls += int(get_amount_of_channels(event))
+                    total_outfit_kls += get_period_date_to(event, date_to)
+
+                elif get_type_line(event) == rrl.name:
+                    amount_of_channels_rrl += int(get_amount_of_channels(event))
+                    total_outfit_rrl += get_period_date_to(event, date_to)
+            else:
+                if event.ips.total_point_channels_KLS != 0:
+                    amount_of_channels_kls += event.ips.total_point_channels_KLS
+                    total_outfit_kls += get_period_date_to(event, date_to)
+                if event.ips.total_point_channels_RRL != 0:
+                    amount_of_channels_rrl += event.ips.total_point_channels_RRL
+                    total_outfit_rrl += get_period_date_to(event, date_to)
+
+        total_out_kls = total_outfit_kls * amount_of_channels_kls
+        total_out_rrl = total_outfit_rrl * amount_of_channels_rrl
+
         total_rep_kls += total_out_kls
         total_rep_rrl += total_out_rrl
         #####################################################################################################
