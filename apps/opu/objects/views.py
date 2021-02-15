@@ -149,7 +149,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
 class OutfitsListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication, IsOpuOnly,)
-    queryset = Outfit.objects.all().order_by('outfit')
+    queryset = Outfit.objects.all().order_by('id')
     lookup_field = 'pk'
     serializer_class = OutfitListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)

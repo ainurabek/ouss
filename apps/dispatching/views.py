@@ -203,6 +203,7 @@ class EventCallsCreateViewAPI(APIView):
             response = {"data": "Звонок создано успешно"}
             event.date_to = instance.date_from
             event.index1 = instance.index1
+            event.created_at = instance.created_at
             event.save()
             previous_event.date_to = instance.date_from
             previous_event.save()
@@ -431,6 +432,7 @@ def get_report_object(request):
                      "date_to": None,
                      "region": None,
                      "index1": None,
+                     "reason": None,
                      "comments1": None})
         for out in outfits.filter(type_journal=type.type_journal):
             data.append({"outfit": out.responsible_outfit.outfit,
@@ -440,6 +442,7 @@ def get_report_object(request):
                      "date_to": None,
                      "region": None,
                      "index1": None,
+                     "reason": None,
                      "comments1": None})
             for event in all_event.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal):
                 data.append({"outfit": None,
@@ -449,6 +452,7 @@ def get_report_object(request):
                              "date_to": None,
                              "region": None,
                              "index1": None,
+                             "reason": None,
                              "comments1": None})
                 calls_count = 0
                 for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
@@ -457,8 +461,9 @@ def get_report_object(request):
                                  "type_journal": None,
                                  "date_from": call.date_from,
                                  "date_to": call.date_to,
-                                 "region": call.point1.point + " - " + call.point2.point if call.point1 is not None else "",
+                                 "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
                                  "index1": call.index1.index,
+                                 "reason": call.reason.name,
                                  "comments1": call.comments1})
                     calls_count += 1
                 if calls_count == 0:
