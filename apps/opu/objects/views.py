@@ -46,6 +46,7 @@ from apps.opu.circuits.serializers import CircuitTrassaList
 
 from apps.opu.objects.serializers import PGListSerializer
 
+from apps.opu.objects.serializers import LineTypeCreateSerializer
 
 
 class BugModelViewSet(viewsets.ModelViewSet):
@@ -840,6 +841,13 @@ class LineTypeAPIVIew(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
     queryset = LineType.objects.all().order_by('name')
+
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LineTypeSerializer
+        else:
+            return LineTypeCreateSerializer
 
     def get_permissions(self):
         if self.action == 'list':

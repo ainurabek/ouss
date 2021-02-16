@@ -37,7 +37,7 @@ class MainLineTypeListSerializer(serializers.ModelSerializer):
         model = MainLineType
         fields = ("id", "name")
 
-class LineTypeSerializer(serializers.ModelSerializer):
+class LineTypeCreateSerializer(serializers.ModelSerializer):
     main_line_type = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=MainLineType.objects.all())
 
@@ -45,6 +45,12 @@ class LineTypeSerializer(serializers.ModelSerializer):
         model = LineType
         fields = ('id', 'name', 'main_line_type')
 
+class LineTypeSerializer(serializers.ModelSerializer):
+    main_line_type = MainLineTypeListSerializer()
+
+    class Meta:
+        model = LineType
+        fields = ('id', 'name', 'main_line_type')
 
 class ObjectOutfitSerializer(serializers.ModelSerializer):
 
