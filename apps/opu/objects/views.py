@@ -654,15 +654,24 @@ class DeleteTrassaView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+from itertools import takewhile
 class PGCircuitListView(APIView):
     """Выбор PG для создания трассы circuits"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
     def get(self, request, pk):
-        obj = Object.objects.filter(id_parent__pk=pk, type_of_trakt__name='ПГ')
-        serializer = PGListSerializer(obj, many=True).data
+        obj = Object.objects.get(pk=pk)
+        childs = obj.parents.all()
+        pg = []
+        while childs:
+            newchilds = []
+            for c in childs:
+                if c.type_of_trakt.name == 'ПГ':
+                    pg.append(c)
+                newchilds += c.parents.all()
+            childs = newchilds
+        serializer = PGListSerializer(pg, many=True).data
         return Response(serializer)
 
 class SelectCircuitView(APIView):

@@ -90,7 +90,7 @@ def update_total_point_channels(instance: Object):
         instance.point1.total_point_channels_RRL += instance.total_amount_channels
         instance.point2.total_point_channels_RRL += instance.total_amount_channels
         instance.point1.save()
-        instance.point2.save
+        instance.point2.save()
 
 
 
