@@ -91,3 +91,12 @@ class CircuitEdit(serializers.ModelSerializer):
         instance.first = validated_data.get('first', instance.first)
         instance.save()
         return instance
+
+
+class CircuitDetail(serializers.ModelSerializer):
+    transit = TransitCircSerializer(many=True)
+    transit2 = TransitCircSerializer(many=True)
+
+    class Meta:
+        model = Circuit
+        fields = ('id', 'name', 'transit', 'transit2')

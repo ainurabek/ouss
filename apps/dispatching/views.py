@@ -78,7 +78,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         return queryset
 
     def retrieve(self, request, pk=None):
-        calls = Event.objects.filter(id_parent_id=pk).order_by("-id")
+        calls = Event.objects.filter(id_parent_id=pk).order_by("-date_from")
         serializer = self.get_serializer(calls, many=True)
         return Response(serializer.data)
 
@@ -199,14 +199,35 @@ class EventCallsCreateViewAPI(APIView):
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
-                                       callsorevent=False, previous=previous_event)
-            response = {"data": "Звонок создано успешно"}
-            event.date_to = instance.date_from
-            event.index1 = instance.index1
-            event.created_at = instance.created_at
-            event.save()
-            previous_event.date_to = instance.date_from
-            previous_event.save()
+                                       callsorevent=False)
+
+            all_calls = event.event_id_parent.all().order_by('-date_from')
+            prev = all_calls.filter(date_from__lt = instance.date_from)[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
+            next = all_calls.filter(date_from__gt=instance.date_from)[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
+
+            if prev is not None and next is not None:
+                prev.date_to = instance.date_from
+                instance.date_to = next.date_from
+                instance.previous = prev
+                next.previous = instance
+                prev.save()
+                instance.save()
+                next.save()
+            elif prev is None and next is not None:
+                instance.date_to = next.date_from
+                next.previous = instance
+                instance.save()
+                next.save()
+            elif prev is not None and next is None:
+                event.date_to = instance.date_from
+                event.index1 = instance.index1
+                instance.previous = prev
+                prev.date_to = instance.date_from
+                event.save()
+                instance.save()
+                prev.save()
+
+            response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -221,21 +242,25 @@ class EventUpdateAPIView(UpdateAPIView):
 
     def perform_update(self, serializer):
         #это меняет дату конца предыдущего события
-        date_to = str(self.get_object().date_from)
-        index1 = str(self.get_object().index1)
+        date_from = str(self.get_object().date_from)
         instance = serializer.save()
-        if instance.id_parent is not None:
-            latest_event = instance.id_parent.event_id_parent.all().latest()
-            if latest_event.pk == instance.pk and str(instance.date_from) != date_to:
 
-                instance.id_parent.date_to =instance.date_from
-                instance.id_parent.save()
-            if latest_event.pk ==instance.pk and str(instance.index1) != index1:
-                instance.id_parent.index1=instance.index1
-                instance.id_parent.save()
-            if instance.previous is not None:
+
+        if instance.id_parent is not None:
+            all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
+            next = all_calls.filter(date_from__gt=instance.date_from)
+
+            if date_from != instance.date_from and instance.previous is not None:
                 instance.previous.date_to = instance.date_from
                 instance.previous.save()
+
+
+            if next.count() == 0:
+                instance.id_parent.date_to = instance.date_from
+                instance.id_parent.index1 = instance.index1
+                instance.id_parent.save()
+
+
             serializer.save()
 
 
@@ -253,14 +278,36 @@ class EventDeleteAPIView(DestroyAPIView):
             return
 
         main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
-        if instance.previous is not None:
-            previous_event = get_object_or_404(Event, pk=instance.previous.pk)
+
+        previous_event = instance.previous
+        if Event.objects.filter(previous=instance).exists():
+            next_event = instance.event_previous
+        else:
+            next_event = None
+
+
+        if previous_event is not None and next_event is not None:
+            instance.delete()
+            previous_event.date_to = next_event.date_from
+            next_event.previous = previous_event
+            next_event.save()
+            previous_event.save()
+
+        elif next_event is None:
+            instance.delete()
             main_event.date_to = previous_event.date_from
             main_event.index1 = previous_event.index1
             main_event.save()
             previous_event.date_to = None
             previous_event.save()
-        instance.delete()
+
+            ##else doesnt work
+        else:
+            main_event.date_from = next_event.date_from
+            main_event.index1 = next_event.index1
+            main_event.save()
+
+            instance.delete()
 
         if main_event.event_id_parent.count() == 0:
             main_event.delete()

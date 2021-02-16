@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from apps.opu.circuits.serializers import CircuitList, CircuitEdit
+from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetail
 from rest_framework import generics, status
 from apps.opu.circuits.models import Circuit
 from rest_framework.views import APIView
@@ -10,6 +10,7 @@ from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import ListWithPKMixin
 from apps.opu.circuits.service import get_circuit_diff
 from apps.opu.circuits.service import update_circuit_active
+
 
 
 class CircuitListViewSet(APIView, ListWithPKMixin):
@@ -21,7 +22,7 @@ class CircuitListViewSet(APIView, ListWithPKMixin):
     order_by = 'id'
 
 
-class CircuitEditView(generics.RetrieveUpdateAPIView):
+class CircuitEditView(generics.UpdateAPIView):
     lookup_field = 'pk'
     queryset = Circuit.objects.all()
     serializer_class = CircuitEdit
@@ -32,7 +33,12 @@ class CircuitEditView(generics.RetrieveUpdateAPIView):
         instance = serializer.save(created_by=self.request.user.profile)
         update_circuit_active(object=instance.object)
 
-
+class CircuitDetailView(generics.RetrieveAPIView):
+    lookup_field = 'pk'
+    queryset = Circuit.objects.all()
+    serializer_class = CircuitDetail
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 class CircuitHistory(APIView):
     authentication_classes = (TokenAuthentication,)
