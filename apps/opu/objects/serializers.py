@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 
 
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel, OrderObjectPhoto, Consumer, Bug
+    AmountChannel, OrderObjectPhoto, Consumer, Bug, MainLineType
 
 from ..circuits.serializers import CategorySerializer
 from ..customer.models import Customer
@@ -32,12 +32,17 @@ class AmountChannelListSerializer(serializers.ModelSerializer):
         model = AmountChannel
         fields = ("id", "name", 'value', 'is_read_only')
 
+class MainLineTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MainLineType
+        fields = ("id", "name")
 
 class LineTypeSerializer(serializers.ModelSerializer):
+    main_line_type = MainLineTypeListSerializer()
 
     class Meta:
         model = LineType
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'main_line_type')
 
 
 class ObjectOutfitSerializer(serializers.ModelSerializer):

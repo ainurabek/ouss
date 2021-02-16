@@ -33,8 +33,8 @@ from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixi
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.objects.services import adding_an_object_to_trassa
 from apps.opu.circuits.service import create_circuit
-from apps.opu.objects.serializers import ObjectEditSerializer
-from apps.opu.objects.models import OrderObjectPhoto
+from apps.opu.objects.serializers import ObjectEditSerializer, MainLineTypeListSerializer
+from apps.opu.objects.models import OrderObjectPhoto, MainLineType
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 from apps.opu.circuits.models import Circuit
@@ -45,6 +45,7 @@ from apps.opu.objects.services import update_total_point_channels
 from apps.opu.circuits.serializers import CircuitTrassaList
 
 from apps.opu.objects.serializers import PGListSerializer
+
 
 
 class BugModelViewSet(viewsets.ModelViewSet):
@@ -827,6 +828,12 @@ class TypeOfLocationAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+class MainLineTypeList(ListAPIView):
+    """Список главных типов линии"""
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    queryset = MainLineType.objects.all().order_by('name')
+    serializer_class = MainLineTypeListSerializer
 
 class LineTypeAPIVIew(ModelViewSet):
     serializer_class = LineTypeSerializer

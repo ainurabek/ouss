@@ -10,7 +10,7 @@ from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
     CreateRightTrassaView, SelectPointView, ObjectDetailView, CircuitListTrassa, SelectCircuitView, \
     CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, DeleteCircuitTrassaView, \
-    PGCircuitListView
+    PGCircuitListView, MainLineTypeList
 
 app_name = 'objects'
 
@@ -21,6 +21,7 @@ router.register('point', views.PointListView, basename='point_list')
 router.register('lp', views.LPListView, basename='lp_list')
 router.register('objects', views.ObjectAllView, basename='all_objects')
 router.register('line-type', views.LineTypeAPIVIew, basename='line_type')
+
 router.register('category', views.CategoryAPIVIew, basename='category')
 router.register('type_trakt', views.TypeTraktListView, basename='type_of_trakt')
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
@@ -90,6 +91,8 @@ urlpatterns = [
     path('cir_trassa/right-trassa/<int:main_pk>/<int:pk>/', CreateRightCircuitTrassaView.as_view(), name='right_trassa_circuit'),
     path('cir_trassa/save-trassa/<int:pk>/', SaveCircuitTrassaView.as_view(), name='save_trassa_circ'),
     path('cir_trassa/delete-trass/<int:main_pk>/<int:pk>/', DeleteCircuitTrassaView.as_view(), name='delete_trassa_circ'),
+    path('main-line-type/list/', MainLineTypeList.as_view(), name='line_type'),
+
 
     path('', include(router.urls))
 

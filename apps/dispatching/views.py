@@ -201,24 +201,32 @@ class EventCallsCreateViewAPI(APIView):
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False)
 
-            all_calls = event.event_id_parent.all().order_by('-date_from')
-            prev = all_calls.filter(date_from__lt = instance.date_from)[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
-            next = all_calls.filter(date_from__gt=instance.date_from)[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
-
+            all_calls = event.event_id_parent.all()
+            prev = all_calls.filter(date_from__lt = instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
+            print('prev', prev)
+            next = all_calls.filter(date_from__gt=instance.date_from).order_by('date_from')[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
+            print('next', next)
             if prev is not None and next is not None:
+                print('next and prev are not None', next)
                 prev.date_to = instance.date_from
+                prev.save()
+                next.previous = None
+                next.save()
                 instance.date_to = next.date_from
                 instance.previous = prev
-                next.previous = instance
-                prev.save()
                 instance.save()
+                next.previous = instance
                 next.save()
             elif prev is None and next is not None:
+                print('prev is None, next is not None', next)
                 instance.date_to = next.date_from
-                next.previous = instance
                 instance.save()
+                next.previous = instance
                 next.save()
+                event.date_from = instance.date_from
+                event.save()
             elif prev is not None and next is None:
+                print('prev is not None', prev)
                 event.date_to = instance.date_from
                 event.index1 = instance.index1
                 instance.previous = prev
@@ -563,7 +571,7 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = OutfitWorker.objects.all()
+    queryset = OutfitWorker.objects.all().order_by('id')
     lookup_field = 'pk'
 
 
@@ -571,7 +579,7 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
 class CommentModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Comments.objects.all()
+    queryset = Comments.objects.all().order_by('id')
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
 
@@ -580,7 +588,7 @@ class CommentModelViewSet(viewsets.ModelViewSet):
 class TypeJournalModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = TypeOfJournal.objects.all()
+    queryset = TypeOfJournal.objects.all().order_by('id')
     serializer_class = TypeJournalSerializer
     lookup_field = 'pk'
 
@@ -589,7 +597,7 @@ class TypeJournalModelViewSet(viewsets.ModelViewSet):
 class ReasonModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Reason.objects.all()
+    queryset = Reason.objects.all().order_by('id')
     serializer_class = ReasonSerializer
     lookup_field = 'pk'
 
@@ -598,7 +606,7 @@ class ReasonModelViewSet(viewsets.ModelViewSet):
 class IndexModelViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Index.objects.all()
+    queryset = Index.objects.all().order_by('id')
     serializer_class = IndexSerializer
     lookup_field = 'pk'
 

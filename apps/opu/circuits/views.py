@@ -11,15 +11,17 @@ from apps.opu.services import ListWithPKMixin
 from apps.opu.circuits.service import get_circuit_diff
 from apps.opu.circuits.service import update_circuit_active
 
+from apps.opu.objects.models import Object
 
 
-class CircuitListViewSet(APIView, ListWithPKMixin):
+class CircuitListViewSet(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    model = Circuit
-    serializer = CircuitList
-    field_for_filter = "id_object"
-    order_by = 'id'
+
+    def get(self, request, pk):
+        circuits = Object.objects.get(pk=pk).circuit_object_parent.all()
+        serializer = CircuitList(circuits, many=True)
+        return Response(serializer.data)
 
 
 class CircuitEditView(generics.UpdateAPIView):
