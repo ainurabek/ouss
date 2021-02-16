@@ -91,8 +91,8 @@ urlpatterns = [
     path('cir_trassa/right-trassa/<int:main_pk>/<int:pk>/', CreateRightCircuitTrassaView.as_view(), name='right_trassa_circuit'),
     path('cir_trassa/save-trassa/<int:pk>/', SaveCircuitTrassaView.as_view(), name='save_trassa_circ'),
     path('cir_trassa/delete-trass/<int:main_pk>/<int:pk>/', DeleteCircuitTrassaView.as_view(), name='delete_trassa_circ'),
-    path('main-line-type/list/', MainLineTypeList.as_view(), name='line_type'),
 
+    path('main-line-type/list/', MainLineTypeList.as_view(), name='line_type'),
 
     path('', include(router.urls))
 
