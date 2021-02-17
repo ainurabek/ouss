@@ -230,7 +230,7 @@ class AllObjectSerializer(serializers.ModelSerializer):
 class LPSerializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True)
     transit2 = TransitSerializer(many=True)
-    reserve_transit =ReserveTransitSerializer(many=True)
+    reserve_transit = ReserveTransitSerializer(many=True)
     reserve_transit2 = ReserveTransitSerializer(many=True)
     point1 = PointList()
     point2 = PointList()

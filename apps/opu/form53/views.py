@@ -16,11 +16,6 @@ from apps.opu.form53.services import get_form53_diff
 from apps.opu.services import create_photo
 
 
-# API
-#############################################################################################
-
-
-
 class Form53CreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
@@ -46,7 +41,6 @@ class Form53CreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class Form53ListAPIView(ListAPIView):
     """Список Формы 5.3"""
     authentication_classes = (TokenAuthentication,)
@@ -54,7 +48,7 @@ class Form53ListAPIView(ListAPIView):
     serializer_class = Form53Serializer
 
     def get_queryset(self):
-        queryset = Form53.objects.all()
+        queryset = Form53.objects.all().prefetch_related('order53_photo', 'schema53_photo', 'circuit')
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
         pg_object = self.request.query_params.get('pg_object', None)
@@ -63,13 +57,13 @@ class Form53ListAPIView(ListAPIView):
             queryset = queryset.filter(circuit__object__id_outfit=outfit)
         if customer is not None:
             queryset = queryset.filter(circuit__customer=customer)
+
         #добавили в фильтр поиск по ПГ, у которых есть каналы
+
         if pg_object is not None:
             queryset = queryset.filter(circuit__object=pg_object)
 
-
         return queryset
-
 
 
 class Form53UpdateAPIView(UpdateAPIView):
@@ -85,6 +79,7 @@ class Form53DeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     queryset = Form53
+
 
 class Order53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)

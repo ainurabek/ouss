@@ -1,11 +1,11 @@
 # coding: utf-8
 from rest_framework.views import APIView
 from django.http import HttpResponse
-from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
+from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
-from rest_framework import viewsets, status, generics
+from rest_framework import status
 from django.db.models import Q
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.circuits.serializers import CircuitTrassaList
@@ -15,7 +15,6 @@ from apps.opu.circuits.models import Circuit
 from apps.opu.circuits.serializers import CircuitList
 from apps.opu.objects.models import Object, Point
 from apps.opu.objects.serializers import SelectObjectSerializer, PointList, ObjectListSerializer
-
 
 
 class SelectObjectView(APIView):
@@ -33,7 +32,7 @@ class PointListTrassa(ListAPIView):
     """Список ИП для создания трассы"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all().order_by('point')
+    queryset = Point.objects.all().order_by('point').values('id', 'point')
     serializer_class = PointList
 
 
@@ -349,6 +348,7 @@ class DeleteReserveTrassaView(APIView):
                 t_obj.reserve_transit.remove(obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 '''Создание трассы для каналов'''
 class PGCircuitListView(APIView):
     """Выбор PG для создания трассы circuits"""
@@ -369,6 +369,7 @@ class PGCircuitListView(APIView):
         serializer = PGListSerializer(pg, many=True).data
         return Response(serializer)
 
+
 class SelectCircuitView(APIView):
     """Выбор каналы для фильтрацы каналов"""
     permission_classes = (IsAuthenticated,)
@@ -379,6 +380,7 @@ class SelectCircuitView(APIView):
         circuits = Circuit.objects.filter(object=obj)
         serializer = CircuitTrassaList(circuits, many=True).data
         return Response(serializer)
+
 
 class CircuitListTrassa(ListAPIView):
     """Список circuits для создания трассы"""
@@ -412,6 +414,7 @@ class CreateLeftCircuitTrassaView(APIView):
                 tr.transit.clear()
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
+
 
 class CreateRightCircuitTrassaView(APIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
@@ -450,6 +453,7 @@ class SaveCircuitTrassaView(APIView):
             i.transit2.add(*main_obj.transit2.all())
             i.transit.add(*main_obj.transit.all())
         return Response(status=status.HTTP_201_CREATED)
+
 
 class DeleteCircuitTrassaView(APIView):
     """Удаления трассы для канала"""

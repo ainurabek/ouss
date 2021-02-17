@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -9,16 +9,10 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from apps.opu.form51.models import Form51
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, Form51ReserveSerializer
 from apps.opu.objects.models import Object
-# Templates
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form51.service import get_form51_diff
-
-
-
-# API
-#############################################################################################
 
 
 class FormListAPIView(ListAPIView):
@@ -28,7 +22,7 @@ class FormListAPIView(ListAPIView):
     serializer_class = Form51Serializer
 
     def get_queryset(self):
-        queryset = Form51.objects.all()
+        queryset = Form51.objects.all().prefetch_related('object', 'customer', 'order_photo', 'schema_photo')
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
 

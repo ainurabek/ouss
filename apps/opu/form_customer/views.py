@@ -1,5 +1,4 @@
-from django.shortcuts import redirect, render, get_object_or_404
-
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
@@ -11,7 +10,6 @@ from apps.opu.customer.models import Customer
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
-
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
     CircuitListSerializer, SignalizationSerializer
 from apps.opu.form_customer.serializers import CustomerFormSerializer
@@ -21,9 +19,6 @@ from apps.accounts.permissions import IsOpuOnly
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
-#API
-#######################################################################################################################
-
 
 
 class SignalizationView(viewsets.ModelViewSet):
@@ -31,6 +26,7 @@ class SignalizationView(viewsets.ModelViewSet):
     serializer_class = SignalizationSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
 
 class CustomerFormListView(ListAPIView):
     """Список арендаторов"""
@@ -78,8 +74,7 @@ class FormCustomerCircCreateAPIView(APIView):
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            data = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
-            response = {"data": "Форма арендатора успешно создана"}
+            serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -95,10 +90,10 @@ class FormCustomerObjCreateAPIView(APIView):
         if Form_Customer.objects.filter(object=object).exists():
             content = {'message': 'По такому обьекту уже форма арендаторов создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
+
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            data = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
-            response = {"data": "Форма арендатора успешно создана"}
+            serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -137,6 +132,7 @@ class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
     model_for_delete = OrderCusPhoto
+
 
 class FormCustomerHistory(APIView):
     authentication_classes = (TokenAuthentication,)

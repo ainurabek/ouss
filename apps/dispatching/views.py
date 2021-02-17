@@ -1,6 +1,4 @@
 import datetime
-from datetime import date
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -13,10 +11,7 @@ from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
 
-from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer, PointListSerializer, \
-    IPListSerializer
-
-now = date.today()
+from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
@@ -27,12 +22,11 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
 
-########API
-#listevent
 class EventListAPIView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.filter(callsorevent=True)
+    queryset = Event.objects.filter(callsorevent=True).prefetch_related('object', 'circuit', 'ips', 'index1',
+                                                                        'responsible_outfit')
     lookup_field = 'pk'
     serializer_class = EventListSerializer
 
@@ -75,7 +69,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         return queryset
 
     def retrieve(self, request, pk=None):
-        calls = Event.objects.filter(id_parent_id=pk).order_by("-date_from")
+        calls = Event.objects.get(pk=pk).event_id_parent.all().order_by("-date_from")
         serializer = self.get_serializer(calls, many=True)
         return Response(serializer.data)
 
@@ -100,13 +94,11 @@ class EventIPCreateViewAPI(APIView):
                                   contact_name=event.contact_name,
                                  )
 
-            # update_period_of_time(instance=obj)
             response = {"data": "Событие создано успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -125,12 +117,10 @@ class EventCircuitCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
-            # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#obj create - Ainur
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -164,7 +154,6 @@ class EventCallsCreateViewAPI(APIView):
 
     def post(self, request, pk, id):
         event = get_object_or_404(Event, pk=pk)
-        previous_event = get_object_or_404(Event, pk=id)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
@@ -209,7 +198,6 @@ class EventCallsCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# event update - Ainur
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
@@ -231,19 +219,16 @@ class EventUpdateAPIView(UpdateAPIView):
                 instance.previous.date_to = instance.date_from
                 instance.previous.save()
 
-
             if next.count() == 0:
                 instance.id_parent.date_to = instance.date_from
                 instance.id_parent.index1 = instance.index1
                 instance.id_parent.save()
 
-
             serializer.save()
 
 
-#удаление события  по звонкам
 class EventDeleteAPIView(DestroyAPIView):
-    """Удаления event"""
+    """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Event.objects.all()
@@ -262,7 +247,6 @@ class EventDeleteAPIView(DestroyAPIView):
         else:
             next_event = None
 
-
         if previous_event is not None and next_event is not None:
             instance.delete()
             previous_event.date_to = next_event.date_from
@@ -278,7 +262,6 @@ class EventDeleteAPIView(DestroyAPIView):
             previous_event.date_to = None
             previous_event.save()
 
-            ##else doesnt work
         else:
             main_event.date_from = next_event.date_from
             main_event.index1 = next_event.index1
@@ -290,8 +273,8 @@ class EventDeleteAPIView(DestroyAPIView):
             main_event.delete()
 
 
-#статистика событий за неделю
 def get_dates_and_counts_week(request):
+    """статистика событий за неделю"""
     data = {}
     dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).\
         exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
@@ -304,8 +287,9 @@ def get_dates_and_counts_week(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-#статистика событий за месяц
+
 def get_dates_and_counts_month(request):
+    """статистика событий за месяц"""
     data = {}
     dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).\
         exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
@@ -317,8 +301,9 @@ def get_dates_and_counts_month(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-#статистика событий за сегодня
+
 def get_dates_and_counts_today(request):
+    """статистика событий за сегодня"""
     data = {}
     time = datetime.date.today()
 
@@ -332,16 +317,14 @@ def get_dates_and_counts_today(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-#статистика событий по предприятиям за месяц
+
 def get_outfit_statistics_for_a_month(request):
+    """статистика событий по предприятиям за месяц"""
     month = get_minus_date(days=30)
     dates = Event.objects.filter(created_at__gte=month).\
         exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
-    all_data = Event.objects.filter(created_at__gte=month).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
-         "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
-                     exclude(previous__isnull=True, callsorevent=False).count()/all_data)*100,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
              exclude(previous__isnull=True, callsorevent=False).count()}
         for date in dates
@@ -350,15 +333,12 @@ def get_outfit_statistics_for_a_month(request):
     return JsonResponse(teams_data, safe=False)
 
 
-#статистика событий по предприятиям за неделю
 def get_outfit_statistics_for_a_week(request):
+    """статистика событий по предприятиям за неделю"""
     week = get_minus_date(days=7)
     dates = Event.objects.filter(created_at__gte=week).exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
-    all = Event.objects.filter(created_at__gte=week).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
-        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit,
-                                                                                    created_at__gte=week).
-                                                               exclude(previous__isnull=True, callsorevent=False).count()/all)*100,
+        {"outfit": date.responsible_outfit.outfit,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).
              exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
@@ -367,16 +347,13 @@ def get_outfit_statistics_for_a_week(request):
     return JsonResponse(teams_data, safe=False)
 
 
-#статистика событий по предприятиям за сегодня
 def get_outfit_statistics_for_a_day(request):
+    """статистика событий по предприятиям за сегодня"""
     day = datetime.date.today()
     dates = Event.objects.filter(created_at__gte=day).\
         exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
-    all = Event.objects.filter(created_at__gte=day).exclude(previous__isnull=True, callsorevent=False).count()
     teams_data = [
-        {"outfit": date.responsible_outfit.outfit, "percent": (Event.objects.filter(responsible_outfit=date.responsible_outfit,
-                                                                                    created_at__gte=day).
-                                                               exclude(previous__isnull=True, callsorevent=False).count()/all)*100,
+        {"outfit": date.responsible_outfit.outfit,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).
              exclude(previous__isnull=True, callsorevent=False).count() }
         for date in dates
@@ -384,8 +361,9 @@ def get_outfit_statistics_for_a_day(request):
 
     return JsonResponse(teams_data, safe=False)
 
-#список завершенных событий
+
 class CompletedEvents(ListFilterAPIView):
+    """статистика событий по предприятиям за сегодня"""
     permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
@@ -398,6 +376,7 @@ class UncompletedEventList(ListFilterAPIView):
     serializer_class = EventListSerializer
     queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True,
                                                           callsorevent=False).exclude(index1__index='4')
+
 
 def get_report_object(request):
     date = request.GET.get("date")
@@ -463,8 +442,8 @@ def get_report_object(request):
     return JsonResponse(data, safe=False)
 
 
-# сотрудники других предприятий
 class OutfitWorkerGet(APIView):
+    """статистика событий по предприятиям за сегодня"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -475,8 +454,8 @@ class OutfitWorkerGet(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# возможность создавать сотрудников предприятий диспетчерам
 class OutfitWorkerAPIView(ListAPIView):
+    """возможность создавать сотрудников предприятий диспетчерам"""
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerListSerializer
     authentication_classes = (TokenAuthentication,)
@@ -485,16 +464,16 @@ class OutfitWorkerAPIView(ListAPIView):
     filterset_fields = ('outfit', 'name')
 
 
-# создание сотрудника - Ainur
 class OutfitWorkerCreateView(generics.CreateAPIView):
+    """создание сотрудника - Ainur"""
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
 
-# редактирование сотрудника - Ainur
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
+    """редактирование сотрудника - Ainur"""
     lookup_field = 'pk'
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
@@ -502,7 +481,6 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
 
-# сотрудника удаление - Ainur
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
@@ -511,8 +489,8 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
     lookup_field = 'pk'
 
 
-# Создание, удаление и список комментариеиив
 class CommentModelViewSet(viewsets.ModelViewSet):
+    """Создание, удаление и список комментариеиив"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Comments.objects.all().order_by('id')
@@ -520,8 +498,8 @@ class CommentModelViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
 
-# Создание, удаление и список видо журналов
 class TypeJournalModelViewSet(viewsets.ModelViewSet):
+    """Создание, удаление и список видо журналов"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = TypeOfJournal.objects.all().order_by('id')
@@ -529,8 +507,8 @@ class TypeJournalModelViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
 
-# Создание, удаление и список Reason
 class ReasonModelViewSet(viewsets.ModelViewSet):
+    """Создание, удаление и список Reason"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Reason.objects.all().order_by('id')
@@ -538,8 +516,8 @@ class ReasonModelViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
 
-# Создание, удаление и список Reason
 class IndexModelViewSet(viewsets.ModelViewSet):
+    """Создание, удаление и список Reason"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Index.objects.all().order_by('id')
