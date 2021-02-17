@@ -99,6 +99,7 @@ def update_total_point_channels(instance: Object):
 
 def adding_an_object_to_trassa(obj: Object):
     obj.transit.add(obj)
+    obj.reserve_transit.add(obj)
 
 
 def create_form51(obj:Object):

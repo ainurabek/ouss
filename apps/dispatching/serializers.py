@@ -56,11 +56,6 @@ class EventObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', "name", 'id_outfit', 'point1', 'point2', 'type_line', 'amount_channels')
 
-class EventUnknownSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = ('id', "name", 'responsible_outfit', 'send_from', 'point1', 'point2', 'customer', 'index1',
-                  'comments1')
 
 class EventDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,18 +63,6 @@ class EventDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_obj', ]
         depth=2
 
-class CircuitEventList(serializers.ModelSerializer):
-    transit = TransitCircSerializer(many=True, read_only=True)
-    transit2 = TransitCircSerializer(many=True, read_only=True)
-    point1 = PointCircSerializer()
-    point2 = PointCircSerializer()
-    customer = CustomerSerializer()
-    category = CategorySerializer()
-    object = ObjectSerializer()
-
-    class Meta:
-        model = Circuit
-        fields = ('id', 'name', 'object', 'num_circuit', 'category', 'point1', 'point2', 'customer', 'transit', 'transit2')
 
 class CircuitDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -88,34 +71,14 @@ class CircuitDetailObjectSerializer(serializers.ModelSerializer):
         depth=1
 
 #obj event - Ainur
-class ObjectEventSerializer(serializers.ModelSerializer):
-    tpo1 = TPOSerializer()
-    tpo2 = TPOSerializer()
-    point1 = PointList()
-    point2 = PointList()
-    transit = TransitSerializer(many=True, read_only=True)
-    transit2 = TransitSerializer(many=True, read_only=True)
-    id_outfit = OutfitListSerializer()
-    category = CategorySerializer()
-    customer = CustomerSerializer()
 
-
-    class Meta:
-        model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',
-                   'transit', 'transit2', 'tpo1', 'tpo2', 'customer')
-        depth=1
 
 class EventCircuitSerializer(serializers.ModelSerializer):
     point1=serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-
-
     class Meta:
         model = Circuit
         fields = ('id', "name", 'point1', 'point2')
-
-
 
 
 class IPDetailObjectSerializer(serializers.ModelSerializer):

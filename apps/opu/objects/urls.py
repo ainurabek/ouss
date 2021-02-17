@@ -7,10 +7,11 @@ from . import views
 from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
     TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, \
     ObjectCreateView, ObjectEditView, ObjectListView, \
-    SelectObjectView, SaveTrassaView, DeleteTrassaView, PointListTrassa, ObjectList, CreateLeftTrassaView, \
-    CreateRightTrassaView, SelectPointView, ObjectDetailView, CircuitListTrassa, SelectCircuitView, \
-    CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, DeleteCircuitTrassaView, \
-    PGCircuitListView, MainLineTypeList
+          ObjectDetailView,  MainLineTypeList
+from .trassa import SelectObjectView, SaveTrassaView, DeleteTrassaView, CreateLeftTrassaView, CreateRightTrassaView,\
+    SelectCircuitView, CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, \
+    DeleteCircuitTrassaView, PointListTrassa, ObjectList, SelectPointView, CircuitListTrassa,  \
+    PGCircuitListView, CreateLeftReserveTrassaView, CreateRightReserveTrassaView, SaveReserveTrassaView, DeleteReserveTrassaView
 
 app_name = 'objects'
 
@@ -56,15 +57,22 @@ urlpatterns = [
     path('trakt/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),
     path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
     path('trakt/object-detail/<int:pk>/', ObjectDetailView.as_view(), name='object_delete'),
-
+#ds,jh
     path('trakt/select-lp/<int:pk>/', SelectObjectView.as_view(), name='select_lp'),
     path('trakt/point-list/', PointListTrassa.as_view(), name='point_list'),
     path('trakt/select-point/<int:pk>/', SelectPointView.as_view(), name='select_point'),
     path('trakt/select-object/<int:pk>/', ObjectList.as_view(), name='select_obj'),
+    #основная трасса
     path('trakt/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftTrassaView.as_view(), name='left_trassa'),
     path('trakt/right-trassa/<int:main_pk>/<int:pk>/', CreateRightTrassaView.as_view(), name='right_trassa'),
     path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
     path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
+    #резервная трасса
+    path('reserve/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftReserveTrassaView.as_view(), name='reserve_left_trassa'),
+    path('reserve/right-trassa/<int:main_pk>/<int:pk>/', CreateRightReserveTrassaView.as_view(), name='reserve_right_trassa'),
+    path('reserve/save-trassa/<int:pk>/', SaveReserveTrassaView.as_view(), name='save_reserve_trassa'),
+    path('reserve/delete-trass/<int:main_pk>/<int:pk>/', DeleteReserveTrassaView.as_view(), name='delete_reserve_trassa'),
+
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
 
     path("history/obj/<int:pk>/", views.ObjectHistory.as_view(), name='object_history'),

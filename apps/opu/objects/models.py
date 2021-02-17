@@ -173,6 +173,8 @@ class Object(models.Model):
 	category = models.ForeignKey('Category', related_name='obj_category', on_delete=models.SET_NULL, blank=True, null=True)
 	transit = SortedManyToManyField('Object', related_name='transit_obj1', blank=True)
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
+	reserve_transit = SortedManyToManyField('Object', related_name='reserve_transit_obj1', blank=True)
+	reserve_transit2 = SortedManyToManyField('Object', related_name='reserve_transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
 	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',

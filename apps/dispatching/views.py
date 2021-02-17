@@ -5,12 +5,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from django.http import JsonResponse
-from .serializers import EventListSerializer, CircuitEventList, ObjectEventSerializer, \
-     CommentsSerializer, EventUnknownSerializer, TypeJournalSerializer,\
+from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer,\
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name
-
-
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -83,15 +80,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class IPEventListAPIView(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all()
-    serializer_class = PointListSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name',)
-
-
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -118,15 +106,6 @@ class EventIPCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CircuitEventListAPIView(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Circuit.objects.all()
-    serializer_class = CircuitEventList
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'customer', 'name')
-
-
 #cirxuit create - Ainur
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -149,16 +128,6 @@ class EventCircuitCreateViewAPI(APIView):
             # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-#obj - Ainur
-class ObjectEventListAPIView(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.all()
-    serializer_class = ObjectEventSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name', 'point1', 'point2', 'id_outfit', 'customer',)
 
 
 #obj create - Ainur
@@ -203,11 +172,11 @@ class EventCallsCreateViewAPI(APIView):
 
             all_calls = event.event_id_parent.all()
             prev = all_calls.filter(date_from__lt = instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
-            print('prev', prev)
+
             next = all_calls.filter(date_from__gt=instance.date_from).order_by('date_from')[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
-            print('next', next)
+
             if prev is not None and next is not None:
-                print('next and prev are not None', next)
+
                 prev.date_to = instance.date_from
                 prev.save()
                 next.previous = None
@@ -218,7 +187,7 @@ class EventCallsCreateViewAPI(APIView):
                 next.previous = instance
                 next.save()
             elif prev is None and next is not None:
-                print('prev is None, next is not None', next)
+
                 instance.date_to = next.date_from
                 instance.save()
                 next.previous = instance
@@ -226,7 +195,7 @@ class EventCallsCreateViewAPI(APIView):
                 event.date_from = instance.date_from
                 event.save()
             elif prev is not None and next is None:
-                print('prev is not None', prev)
+
                 event.date_to = instance.date_from
                 event.index1 = instance.index1
                 instance.previous = prev
@@ -319,39 +288,6 @@ class EventDeleteAPIView(DestroyAPIView):
 
         if main_event.event_id_parent.count() == 0:
             main_event.delete()
-
-#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
-class UnknownEventListAPIView(ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Event.objects.exclude(name__isnull=True)
-    serializer_class = EventUnknownSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name',)
-
-
-class EventUnknownCreateViewAPI(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    """Создания Unknown Event"""
-
-    def post(self, request):
-        serializer = EventCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            event = serializer.save(created_by=self.request.user.profile)
-            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
-                                 time_created_at=event.time_created_at,
-                                 date_from=event.date_from, index1=event.index1,
-                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
-                                 reason=event.reason, comments1=event.comments1, name=event.name,
-                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
-                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
-                                 )
-            response = {"data": "Событие создано успешно"}
-            # update_period_of_time(instance=obj)
-            return Response(response, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 #статистика событий за неделю

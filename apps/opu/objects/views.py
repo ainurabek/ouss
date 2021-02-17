@@ -23,7 +23,7 @@ from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from apps.opu.form_customer.models import Form_Customer
+
 from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
 from apps.accounts.permissions import IsOpuOnly
@@ -37,41 +37,9 @@ from apps.opu.objects.serializers import ObjectEditSerializer, MainLineTypeListS
 from apps.opu.objects.models import OrderObjectPhoto, MainLineType
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
-from apps.opu.circuits.models import Circuit
-from apps.opu.circuits.serializers import CircuitList
-
 from apps.opu.objects.services import update_total_point_channels
-
-from apps.opu.circuits.serializers import CircuitTrassaList
-
-from apps.opu.objects.serializers import PGListSerializer
-
 from apps.opu.objects.serializers import LineTypeCreateSerializer
 
-
-class BugModelViewSet(viewsets.ModelViewSet):
-    queryset = Bug.objects.all().order_by('-id')
-    serializer_class = BugSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
-
-
-class AmountChannelListAPIView(viewsets.ModelViewSet):
-    queryset = AmountChannel.objects.all().order_by('value')
-    serializer_class = AmountChannelListSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def get_permissions(self):
-        if self.action == 'list':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -82,42 +50,6 @@ class TPOListView(viewsets.ModelViewSet):
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'index')
     filterset_fields = ('name', 'index')
-
-    def get_permissions(self):
-        if self.action == 'list':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsOpuOnly]
-
-        return [permission() for permission in permission_classes]
-
-
-# for dashboard
-def get_points_amount(request):
-    points_amount = Point.objects.all().count()
-    return JsonResponse(points_amount, safe=False)
-
-
-def get_tpo_amount(request):
-    tpo_amount = TPO.objects.all().count()
-    return JsonResponse(tpo_amount, safe=False)
-
-
-def get_outfits_amount(request):
-    outfits_amount = Outfit.objects.all().count()
-    return JsonResponse(outfits_amount, safe=False)
-
-
-def get_customers_amount(request):
-    customers_amount = Customer.objects.all().count()
-    return JsonResponse(customers_amount, safe=False)
-
-
-class TypeTraktListView(viewsets.ModelViewSet):
-    queryset = TypeOfTrakt.objects.all().order_by('-id')
-    serializer_class = TypeOfTraktSerializer
-    lookup_field = 'pk'
-    authentication_classes = (TokenAuthentication,)
 
     def get_permissions(self):
         if self.action == 'list':
@@ -145,9 +77,37 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
+class AmountChannelListAPIView(viewsets.ModelViewSet):
+    queryset = AmountChannel.objects.all().order_by('value')
+    serializer_class = AmountChannelListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsOpuOnly]
+
+        return [permission() for permission in permission_classes]
+
+
+class TypeTraktListView(viewsets.ModelViewSet):
+    queryset = TypeOfTrakt.objects.all().order_by('-id')
+    serializer_class = TypeOfTraktSerializer
+    lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsOpuOnly]
+
+        return [permission() for permission in permission_classes]
+
 
 # Предприятия
-
 class OutfitsListView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication, IsOpuOnly,)
@@ -243,8 +203,6 @@ class IPDeleteView(generics.DestroyAPIView):
 
 
 """ Линии передачи """
-
-
 class LPListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.filter(id_parent=None).order_by('name')
@@ -318,7 +276,7 @@ class ObjectAllView(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-
+#we use this view in form 5.3
 class PGObjectView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -327,14 +285,17 @@ class PGObjectView(ListAPIView):
     serializer_class = ObjectListSerializer
 
 
-class ObjectListView(APIView, ListWithPKMixin):
-    permission_classes = (IsAuthenticated, )
+class ObjectListView(APIView):
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     search_fields = ('name',)
-    model = Object
     serializer = TraktListSerializer
-    field_for_filter = "id_parent"
-    order_by = 'name'
+
+    def get(self, request, pk):
+        obj = Object.objects.get(pk=pk)
+        childs = obj.parents.all()
+        serializer = TraktListSerializer(childs, many=True).data
+        return Response(serializer)
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
@@ -353,8 +314,6 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
 
 # ПГ ВГ ТГ ЧГ РГ
-
-
 class ObjectCreateView(APIView):
     """"""
     authentication_classes = (TokenAuthentication,)
@@ -414,386 +373,6 @@ class ObjectEditView(APIView):
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class SelectObjectView(APIView):
-    """Выбор ЛП для создания трассы"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def get(self, request, pk):
-        obj = Object.objects.get(pk=pk)
-        serializer = SelectObjectSerializer(obj).data
-        return Response(serializer)
-
-
-class PointListTrassa(ListAPIView):
-    """Список ИП для создания трассы"""
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all().order_by('point')
-    serializer_class = PointList
-
-
-class SelectPointView(APIView):
-    """Выбор ИП для фильтрацы ЛП"""
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, pk):
-        point = Point.objects.get(pk=pk)
-        lps = Object.objects.filter(Q(point1=point) | Q(point2=point), id_parent=None)
-        serializer = ObjectListSerializer(lps, many=True).data
-        return Response(serializer)
-
-
-class ObjectList(APIView, ListWithPKMixin):
-    """Список ПГ, ВГ итд"""
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    model = Object
-    serializer = ObjectListSerializer
-    field_for_filter = "id_parent"
-
-
-class CreateLeftTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, main_pk, pk):
-        main_obj = Object.objects.get(pk=main_pk)
-        obj = Object.objects.get(pk=pk)
-
-        if not main_obj.transit.filter(pk=pk).exists():
-            main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
-
-            for tr in obj.transit.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-            for tr in obj.transit2.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-
-            Object.objects.filter(pk=pk).update(created_by=request.user.profile)
-
-            num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() \
-                                                                    <= obj.circuit_object_parent.count() else \
-                obj.circuit_object_parent.count()
-            if num_circuit != 0:
-
-                for cir in main_obj.circuit_object_parent.all():
-                    if int(cir.num_circuit) > num_circuit:
-                        break
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit.add(*circuit.transit.all(), *circuit.transit2.all())
-                    for tr in circuit.transit.all():
-                        tr.transit2.clear()
-                        tr.transit.clear()
-                    for tr in circuit.transit2.all():
-                        tr.transit2.clear()
-                        tr.transit.clear()
-
-        response = {"data": "Объект успешно добавлен в трассу"}
-        return Response(response, status=status.HTTP_201_CREATED)
-
-
-class CreateRightTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, main_pk, pk):
-        main_obj = Object.objects.get(pk=main_pk)
-        obj = Object.objects.get(pk=pk)
-        # if main_pk.is_transit is True or obj.is_transit is True:
-        #     message = {"detail": "Создание трассы может привести к перезаписи трассы транзитных каналов"}
-        #     return Response(message, status=status.HTTP_403_FORBIDDEN)
-        if not main_obj.transit2.filter(pk=pk).exists():
-            main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
-            for tr in obj.transit.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-            for tr in obj.transit2.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-            Object.objects.filter(pk=pk).update(created_by=request.user.profile)
-
-            num_circuit = main_obj.circuit_object_parent.count() if main_obj.circuit_object_parent.count() <=\
-                                                                    obj.circuit_object_parent.count() else\
-                obj.circuit_object_parent.count()
-
-            if num_circuit != 0:
-                for cir in main_obj.circuit_object_parent.all():
-                    if int(cir.num_circuit) > num_circuit:
-                        break
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit2.add(*circuit.transit.all(), *circuit.transit2.all())
-                    for tr in circuit.transit.all():
-                        tr.transit2.clear()
-                        tr.transit.clear()
-                    for tr in circuit.transit2.all():
-                        tr.transit2.clear()
-                        tr.transit.clear()
-        response = {"data": "Объект успешно добавлен в трассу"}
-        return Response(response, status=status.HTTP_201_CREATED)
-
-
-class SaveTrassaView(APIView):
-    """Сохранение трассы"""
-    authentication_classes = (TokenAuthentication, IsOpuOnly,)
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request, pk):
-        main_obj = get_object_or_404(Object, pk=pk)
-        for i in main_obj.transit.all():
-            i.transit.add(*main_obj.transit.all())
-            i.transit2.add(*main_obj.transit2.all())
-
-        for i in main_obj.transit2.all():
-            i.transit2.add(*main_obj.transit2.all())
-            i.transit.add(*main_obj.transit.all())
-
-        for cir in main_obj.circuit_object_parent.all():
-            for obj in main_obj.transit.all():
-                if obj.circuit_object_parent.count() == 0:
-                    continue
-                try:
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                except IndexError:
-                    break
-                circuit.transit.add(*cir.transit.all())
-                circuit.transit2.add(*cir.transit2.all())
-
-        for cir in main_obj.circuit_object_parent.all():
-            for obj in main_obj.transit2.all():
-                if obj.circuit_object_parent.count() == 0:
-                    continue
-                try:
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                except IndexError:
-                    break
-                circuit.transit2.add(*cir.transit2.all())
-                circuit.transit.add(*cir.transit.all())
-        response = {"message": "Трасса успешно сахранен"}
-        return Response(status=status.HTTP_201_CREATED)
-
-    def post(self, request, pk):
-        main_obj = Object.objects.get(pk=pk)
-        data = request.data
-        if data['customer'] == True:
-            if Form_Customer.objects.filter(object=main_obj).exists():
-                return HttpResponse("В форме арендаторов уже есть такая трасса")
-            else:
-                Form_Customer.objects.create(object=main_obj, customer=main_obj.customer)
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class DeleteTrassaView(APIView):
-    """Удаления трассы"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def delete(self, request, main_pk, pk):
-        if main_pk == pk:
-            message = {"detail": "Невозможно удалять выбранный обьект"}
-            return Response(message, status=status.HTTP_403_FORBIDDEN)
-
-        else:
-            main_obj = Object.objects.get(pk=main_pk)
-            obj = Object.objects.get(pk=pk)
-
-            obj.transit2.clear()
-            obj.transit.clear()
-            obj.transit.add(obj)
-
-            for cir in obj.circuit_object_parent.all():
-                cir.transit.clear()
-                cir.transit.add(cir)
-                cir.transit2.clear()
-
-            main_obj.transit.remove(obj)
-
-            for cir in main_obj.circuit_object_parent.all():
-                try:
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit.remove(circuit)
-                except IndexError:
-                    pass
-
-            main_obj.transit2.remove(obj)
-
-            for cir in main_obj.circuit_object_parent.all():
-                try:
-                    circuit = obj.circuit_object_parent.all()[int(cir.num_circuit)-1]
-                    cir.transit2.remove(circuit)
-                except IndexError:
-                    pass
-
-            for t_obj in main_obj.transit.all():
-                t_obj.transit.remove(obj)
-                t_obj.transit2.remove(obj)
-
-                for circ in t_obj.circuit_object_parent.all():
-                    try:
-                        circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                        circ.transit.remove(circuit)
-                        circ.transit2.remove(circuit)
-                    except IndexError:
-                        pass
-
-            for t_obj in main_obj.transit2.all():
-                t_obj.transit2.remove(obj)
-                t_obj.transit.remove(obj)
-
-                for circ in t_obj.circuit_object_parent.all():
-                    try:
-                        circuit = obj.circuit_object_parent.all()[int(circ.num_circuit)-1]
-                        circ.transit2.remove(circuit)
-                        circ.transit.remove(circuit)
-                    except IndexError:
-                        pass
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-from itertools import takewhile
-class PGCircuitListView(APIView):
-    """Выбор PG для создания трассы circuits"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def get(self, request, pk):
-        obj = Object.objects.get(pk=pk)
-        childs = obj.parents.all()
-        pg = []
-        while childs:
-            newchilds = []
-            for c in childs:
-                if c.type_of_trakt.name == 'ПГ':
-                    pg.append(c)
-                newchilds += c.parents.all()
-            childs = newchilds
-        serializer = PGListSerializer(pg, many=True).data
-        return Response(serializer)
-
-class SelectCircuitView(APIView):
-    """Выбор каналы для фильтрацы каналов"""
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, pk):
-        obj = Object.objects.get(pk=pk)
-        circuits = Circuit.objects.filter(object=obj)
-        serializer = CircuitTrassaList(circuits, many=True).data
-        return Response(serializer)
-
-class CircuitListTrassa(ListAPIView):
-    """Список circuits для создания трассы"""
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Circuit.objects.all().order_by('num_circuit')
-    serializer_class = CircuitList
-
-
-
-#создание трассы для каналов
-class CreateLeftCircuitTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, main_pk, pk):
-        main_obj = Circuit.objects.get(pk=main_pk)
-        obj = Circuit.objects.get(pk=pk)
-
-        if not main_obj.transit.filter(pk=pk).exists():
-            main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
-            main_obj.object.is_transit = True
-            main_obj.object.save()
-            obj.object.is_transit = True
-            obj.object.save()
-            for tr in obj.transit.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-            for tr in obj.transit2.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-        response = {"data": "Объект успешно добавлен в трассу"}
-        return Response(response, status=status.HTTP_201_CREATED)
-
-class CreateRightCircuitTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-    authentication_classes = (TokenAuthentication,)
-
-    def get(self, request, main_pk, pk):
-        main_obj = Circuit.objects.get(pk=main_pk)
-        obj = Circuit.objects.get(pk=pk)
-        if not main_obj.transit2.filter(pk=pk).exists():
-            main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
-            main_obj.object.is_transit = True
-            main_obj.object.save()
-            obj.object.is_transit = True
-            obj.object.save()
-            for tr in obj.transit.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-            for tr in obj.transit2.all():
-                tr.transit2.clear()
-                tr.transit.clear()
-        response = {"data": "Канал успешно добавлен в трассу"}
-        return Response(response, status=status.HTTP_201_CREATED)
-
-
-class SaveCircuitTrassaView(APIView):
-    """Сохранение трассы for circuits"""
-    authentication_classes = (TokenAuthentication, IsOpuOnly,)
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request, pk):
-        main_obj = get_object_or_404(Circuit, pk=pk)
-        for i in main_obj.transit.all():
-            i.transit.add(*main_obj.transit.all())
-            i.transit2.add(*main_obj.transit2.all())
-        for i in main_obj.transit2.all():
-            i.transit2.add(*main_obj.transit2.all())
-            i.transit.add(*main_obj.transit.all())
-        return Response(status=status.HTTP_201_CREATED)
-
-class DeleteCircuitTrassaView(APIView):
-    """Удаления трассы для канала"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
-
-    def delete(self, request, main_pk, pk):
-        if main_pk == pk:
-            message = {"detail": "Невозможно удалять выбранный канал"}
-            return Response(message, status=status.HTTP_403_FORBIDDEN)
-        else:
-            main_obj = Circuit.objects.get(pk=main_pk)
-            obj = Circuit.objects.get(pk=pk)
-            obj.transit2.clear()
-            obj.transit.clear()
-            obj.transit.add(obj)
-            main_trassa = [*main_obj.object.transit.all(), main_obj.object.transit2.all()]
-            circ_trassa = [*[cir.object for cir in main_obj.transit.all()], *[cir.object for cir in main_obj.transit2.all()]]
-
-            is_transit = True
-            if main_trassa != circ_trassa:
-                main_obj.object.is_transit = False
-
-
-            main_obj.object.is_transit = is_transit
-            main_obj.object.save()
-            obj.object.is_transit = is_transit
-            obj.object.save()
-            for t_obj in main_obj.transit.all():
-                t_obj.transit.remove(obj)
-                t_obj.transit2.remove(obj)
-                t_obj.object.is_transit = is_transit
-                t_obj.object.save()
-            for t_obj in main_obj.transit2.all():
-                t_obj.transit2.remove(obj)
-                t_obj.transit.remove(obj)
-                t_obj.object.is_transit = is_transit
-                t_obj.object.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 #Выходят и points, ips по запросу ИП
@@ -995,3 +574,32 @@ class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):
     model = Object
     model_for_delete = OrderObjectPhoto
 
+# for dashboard
+def get_points_amount(request):
+    points_amount = Point.objects.all().count()
+    return JsonResponse(points_amount, safe=False)
+
+
+def get_tpo_amount(request):
+    tpo_amount = TPO.objects.all().count()
+    return JsonResponse(tpo_amount, safe=False)
+
+
+def get_outfits_amount(request):
+    outfits_amount = Outfit.objects.all().count()
+    return JsonResponse(outfits_amount, safe=False)
+
+
+def get_customers_amount(request):
+    customers_amount = Customer.objects.all().count()
+    return JsonResponse(customers_amount, safe=False)
+
+
+class BugModelViewSet(viewsets.ModelViewSet):
+    queryset = Bug.objects.all().order_by('-id')
+    serializer_class = BugSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOpuOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)

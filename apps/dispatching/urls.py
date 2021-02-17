@@ -25,15 +25,13 @@ urlpatterns = [
     path("api/event/delete/<int:pk>/", views.EventDeleteAPIView.as_view()),
 
     #if IPS
-    path("api/event/ips/", views.IPEventListAPIView.as_view()),
     path("api/event/ips/create/<int:pk>/", views.EventIPCreateViewAPI.as_view()),
 
     #if circuits
-    path("api/event/circuits/", views.CircuitEventListAPIView.as_view()),
     path("api/event/circuits/create/<int:pk>/", views.EventCircuitCreateViewAPI.as_view()),
 
     #if objects
-    path("api/event/objects/", views.ObjectEventListAPIView.as_view()),
+
     path("api/event/objects/create/<int:pk>/", views.EventObjectCreateViewAPI.as_view()),
 
     #outfit_worker
@@ -45,9 +43,6 @@ urlpatterns = [
     #передавать сотрудникв предприятий - Айнур
     path("api/outfit_worker/<int:pk>/", views.OutfitWorkerGet.as_view()),
 
-    #unknown events
-    path("api/event/unknown/", views.UnknownEventListAPIView.as_view()),
-    path("api/event/unknown/create/", views.EventUnknownCreateViewAPI.as_view()),
 
     #статистика за месяц-неделю-сегодня
     path("api/event/week/", views.get_dates_and_counts_week),
