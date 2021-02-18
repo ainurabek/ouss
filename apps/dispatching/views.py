@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer,\
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name
+from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -20,15 +21,18 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
+from rest_framework.decorators import permission_classes
 
 
 class EventListAPIView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
     queryset = Event.objects.filter(callsorevent=True).prefetch_related('object', 'circuit', 'ips', 'index1',
                                                                         'responsible_outfit')
+
     lookup_field = 'pk'
     serializer_class = EventListSerializer
+
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -76,7 +80,7 @@ class EventListAPIView(viewsets.ModelViewSet):
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     """Создания Event"""
     def post(self, request, pk):
 
@@ -101,7 +105,7 @@ class EventIPCreateViewAPI(APIView):
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -123,7 +127,7 @@ class EventCircuitCreateViewAPI(APIView):
 
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -149,7 +153,7 @@ class EventObjectCreateViewAPI(APIView):
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     """Создания Event"""
 
     def post(self, request, pk, id):
@@ -201,7 +205,7 @@ class EventCallsCreateViewAPI(APIView):
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser)
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
@@ -230,7 +234,7 @@ class EventUpdateAPIView(UpdateAPIView):
 class EventDeleteAPIView(DestroyAPIView):
     """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     queryset = Event.objects.all()
     lookup_field = 'pk'
 
@@ -272,7 +276,7 @@ class EventDeleteAPIView(DestroyAPIView):
         if main_event.event_id_parent.count() == 0:
             main_event.delete()
 
-
+@permission_classes([IsAuthenticated,])
 def get_dates_and_counts_week(request):
     """статистика событий за неделю"""
     data = {}
@@ -287,7 +291,7 @@ def get_dates_and_counts_week(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+@permission_classes([IsAuthenticated,])
 def get_dates_and_counts_month(request):
     """статистика событий за месяц"""
     data = {}
@@ -301,7 +305,7 @@ def get_dates_and_counts_month(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+@permission_classes([IsAuthenticated,])
 def get_dates_and_counts_today(request):
     """статистика событий за сегодня"""
     data = {}
@@ -317,7 +321,7 @@ def get_dates_and_counts_today(request):
     data["dates"] = teams_data
     return JsonResponse(data, safe=False)
 
-
+@permission_classes([IsAuthenticated, ])
 def get_outfit_statistics_for_a_month(request):
     """статистика событий по предприятиям за месяц"""
     month = get_minus_date(days=30)
@@ -332,7 +336,7 @@ def get_outfit_statistics_for_a_month(request):
 
     return JsonResponse(teams_data, safe=False)
 
-
+@permission_classes([IsAuthenticated,])
 def get_outfit_statistics_for_a_week(request):
     """статистика событий по предприятиям за неделю"""
     week = get_minus_date(days=7)
@@ -346,7 +350,7 @@ def get_outfit_statistics_for_a_week(request):
 
     return JsonResponse(teams_data, safe=False)
 
-
+@permission_classes([IsAuthenticated,])
 def get_outfit_statistics_for_a_day(request):
     """статистика событий по предприятиям за сегодня"""
     day = datetime.date.today()
@@ -364,20 +368,20 @@ def get_outfit_statistics_for_a_day(request):
 
 class CompletedEvents(ListFilterAPIView):
     """статистика событий по предприятиям за сегодня"""
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
     queryset = Event.objects.filter(index1__index='4')
 
 
 class UncompletedEventList(ListFilterAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
     queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True,
                                                           callsorevent=False).exclude(index1__index='4')
 
-
+@permission_classes([IsAuthenticated, SuperUser|IsDispOnly])
 def get_report_object(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
@@ -459,7 +463,7 @@ class OutfitWorkerAPIView(ListAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerListSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'name')
 
@@ -469,7 +473,7 @@ class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
 
 
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
@@ -478,13 +482,13 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
 
 
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     queryset = OutfitWorker.objects.all().order_by('id')
     lookup_field = 'pk'
 
@@ -492,35 +496,63 @@ class OutfitWorkerDeleteAPIView(DestroyAPIView):
 class CommentModelViewSet(viewsets.ModelViewSet):
     """Создание, удаление и список комментариеиив"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Comments.objects.all().order_by('id')
     serializer_class = CommentsSerializer
     lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class TypeJournalModelViewSet(viewsets.ModelViewSet):
     """Создание, удаление и список видо журналов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = TypeOfJournal.objects.all().order_by('id')
     serializer_class = TypeJournalSerializer
     lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class ReasonModelViewSet(viewsets.ModelViewSet):
     """Создание, удаление и список Reason"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Reason.objects.all().order_by('id')
     serializer_class = ReasonSerializer
     lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class IndexModelViewSet(viewsets.ModelViewSet):
     """Создание, удаление и список Reason"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Index.objects.all().order_by('id')
     serializer_class = IndexSerializer
     lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+
+        return [permission() for permission in permission_classes]
 

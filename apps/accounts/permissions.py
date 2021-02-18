@@ -31,7 +31,7 @@ class SuperUser(BasePermission):
 
 class IngenerUser(BasePermission):
     def has_permission(self, request, view):
-        return True if request.user.role.id == 2else False
+        return True if request.user.role.id == 2 else False
 
 class IsReadOnlyUser(BasePermission):
     def has_permission(self, request, view):

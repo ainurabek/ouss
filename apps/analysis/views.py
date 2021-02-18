@@ -25,6 +25,9 @@ from rest_framework import status
 from apps.opu.services import ListWithPKMixin
 
 from apps.analysis.service import get_diff
+from rest_framework.decorators import permission_classes
+from apps.accounts.permissions import SuperUser, IsAKOnly, IngenerUser
+
 
 
 
@@ -141,8 +144,10 @@ from apps.analysis.service import get_diff
 #     return JsonResponse(data, safe=False)
 
 
+
+@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report(request):
-    """Отчет по 1"""
+    """Отчет по 1. Форма анализа"""
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.getlist("responsible_outfit[]")
@@ -237,11 +242,9 @@ def get_report(request):
         total_outfit['name'] = 'Общий итог'
         total_outfit['color'] = '4'
         data.append(total_outfit)
-
-
     return JsonResponse(data, safe=False)
 
-
+@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_analysis(request):
     """Отчет дисп.службы по разным индексам"""
     date_from = request.GET.get("date_from")
@@ -296,7 +299,7 @@ def get_report_analysis(request):
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
@@ -316,11 +319,18 @@ class DispEventHistory(APIView):
 
 
 class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
-    """Отчет по коэф, пункт 5, пункт 7"""
+    """Отчет по коэф, пункт 5, пункт 7 - Отчет АК"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = FormAnalysis.objects.filter(main=True).order_by('-id')
     lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly, IngenerUser]
+
+        return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -349,7 +359,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
     lookup_field = "pk"
     queryset = FormAnalysis.objects.all()
     serializer_class = FormAnalysisUpdateSerializer
@@ -358,7 +368,7 @@ class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
 class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
 
     def post(self, request, pk):
         outfit = request.data['outfit']
@@ -383,7 +393,7 @@ class FormAnalysisCreateAPIView(APIView):
 class Punkt5ListAPIView(APIView, ListWithPKMixin):
     """Список п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
     model = Punkt5
     serializer = Punkt5ListSerializer
     field_for_filter = "form_analysis__id_parent"
@@ -392,7 +402,7 @@ class Punkt5ListAPIView(APIView, ListWithPKMixin):
 class Punkt7ListAPIView(APIView, ListWithPKMixin):
     """Список п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
     model = Punkt7
     serializer = Punkt7ListSerializer
     field_for_filter = "form_analysis__id_parent"
@@ -401,7 +411,7 @@ class Punkt7ListAPIView(APIView, ListWithPKMixin):
 class Punkt5UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
     lookup_field = "pk"
     queryset = Punkt5.objects.all()
     serializer_class = Punkt5UpdateSerializer
@@ -413,7 +423,7 @@ class Punkt5UpdateAPIView(generics.UpdateAPIView):
 
 class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
     queryset = Punkt5.objects.all()
     lookup_field = "pk"
 
@@ -424,7 +434,7 @@ class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
 class Punkt7UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.7"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
     lookup_field = "pk"
     queryset = Punkt7.objects.all()
     serializer_class = Punkt7UpdateSerializer
@@ -436,7 +446,7 @@ class Punkt7UpdateAPIView(generics.UpdateAPIView):
 
 class Punkt7DeleteAPIView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
     queryset = Punkt7.objects.all()
     lookup_field = "pk"
 
@@ -447,7 +457,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа, Отв"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
     def get(self, request):
         date_from = request.GET.get("date_from")
@@ -551,7 +561,7 @@ class ReportOaAndOdApiView(APIView):
 
 class WinnerReportAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
     def get(self, request):
         date_from = request.GET.get("date_from")
