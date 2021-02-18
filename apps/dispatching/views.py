@@ -99,7 +99,7 @@ class EventIPCreateViewAPI(APIView):
                                  )
 
             response = {"data": "Событие создано успешно"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -147,7 +147,7 @@ class EventObjectCreateViewAPI(APIView):
 
             response = {"data": "Событие создано успешно"}
 
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -198,7 +198,7 @@ class EventCallsCreateViewAPI(APIView):
                 prev.save()
 
             response = {"data": "Событие создано успешно"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

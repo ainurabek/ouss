@@ -45,7 +45,7 @@ class TPOListView(viewsets.ModelViewSet):
     filterset_fields = ('name', 'index')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -59,7 +59,7 @@ class AmountChannelListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -74,7 +74,7 @@ class TypeTraktListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -93,13 +93,13 @@ class OutfitsListView(viewsets.ModelViewSet):
     filterset_fields = ('outfit', 'adding', 'tpo', 'num_outfit', 'type_outfit')
 
     def get_serializer_class(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             return OutfitListSerializer
         else:
             return OutfitCreateSerializer
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -120,7 +120,7 @@ class PointListView(viewsets.ModelViewSet):
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit', 'region', 'type_equipment')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -128,7 +128,7 @@ class PointListView(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             return PointListSerializer
         else:
             return PointCreateSerializer
@@ -166,7 +166,7 @@ class LPListView(viewsets.ModelViewSet):
     search_fields = ('name', 'point1__point', 'point2__point')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -354,7 +354,7 @@ class TypeOfLocationAPIVIew(ModelViewSet):
     queryset = TypeOfLocation.objects.all().order_by('name')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -383,7 +383,7 @@ class LineTypeAPIVIew(ModelViewSet):
             return LineTypeCreateSerializer
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -398,7 +398,7 @@ class CategoryAPIVIew(ModelViewSet):
     queryset = Category.objects.all().order_by('index')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
@@ -413,7 +413,7 @@ class ConsumerModelViewSet(ModelViewSet):
     queryset = Consumer.objects.all().order_by('name')
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
