@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import Circuit
 from ..customer.models import Customer
 from ..objects.models import Category, Object, Point
+from ..objects.serializers import ObjectSerializer
 
 User = get_user_model()
 
