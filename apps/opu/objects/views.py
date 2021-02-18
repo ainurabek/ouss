@@ -20,7 +20,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
-from apps.accounts.permissions import IsPervichkaOnly
+from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, save_old_object, \
     update_circuit, update_total_amount_channels
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
@@ -45,43 +45,24 @@ class TPOListView(viewsets.ModelViewSet):
     filterset_fields = ('name', 'index')
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
-
-
-class TPOCreateView(generics.CreateAPIView):
-    queryset = TPO.objects.all()
-    serializer_class = TPOSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
-
-    def perform_update(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
-
-
-class TPOEditView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'pk'
-    queryset = TPO.objects.all()
-    serializer_class = TPOSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
 
 class AmountChannelListAPIView(viewsets.ModelViewSet):
     queryset = AmountChannel.objects.all().order_by('value')
     serializer_class = AmountChannelListSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -93,10 +74,10 @@ class TypeTraktListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -107,37 +88,25 @@ class OutfitsListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication, IsPervichkaOnly,)
     queryset = Outfit.objects.all().order_by('id').prefetch_related('tpo', 'type_outfit')
     lookup_field = 'pk'
-    serializer_class = OutfitListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('outfit', 'adding', 'tpo__index', 'tpo__name', 'num_outfit', 'type_outfit__name')
     filterset_fields = ('outfit', 'adding', 'tpo', 'num_outfit', 'type_outfit')
 
+    def get_serializer_class(self):
+        if self.action == 'list' or 'retrieve':
+            return OutfitListSerializer
+        else:
+            return OutfitCreateSerializer
+
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
+
         return [permission() for permission in permission_classes]
 
-
-class OutfitCreateView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
-    authentication_classes = (TokenAuthentication,)
-    queryset = Outfit.objects.all()
-    serializer_class = OutfitCreateSerializer
-
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
-
-
-class OutfitEditView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'pk'
-    queryset = Outfit.objects.all()
-    serializer_class = OutfitCreateSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
-
-    def perform_update(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
 
@@ -145,39 +114,29 @@ class PointListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     queryset = Point.objects.all().order_by('point').prefetch_related('tpo', 'id_outfit')
     lookup_field = 'pk'
-    serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding',
                      'region', 'type_equipment')
     filterset_fields = ('point', 'name', 'tpo', 'id_outfit', 'region', 'type_equipment')
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
-
-class PointCreateView(generics.CreateAPIView):
-    queryset = Point.objects.all()
-    serializer_class = PointCreateSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
-
-
-class PointEditView(generics.RetrieveUpdateAPIView):
-    lookup_field = 'pk'
-    queryset = Point.objects.all()
-    serializer_class = PointCreateSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    def get_serializer_class(self):
+        if self.action == 'list' or 'retrieve':
+            return PointListSerializer
+        else:
+            return PointCreateSerializer
 
 
 class IPCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         request.data["object_id"] = pk
@@ -191,7 +150,7 @@ class IPCreateView(APIView):
 class IPDeleteView(generics.DestroyAPIView):
     queryset = IP.objects.all()
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
 
 class LPListView(viewsets.ModelViewSet):
@@ -207,10 +166,10 @@ class LPListView(viewsets.ModelViewSet):
     search_fields = ('name', 'point1__point', 'point2__point')
 
     def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -225,7 +184,7 @@ class LPCreateView(generics.CreateAPIView):
     queryset = Object.objects.all()
     serializer_class = LPCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, *args, **kwargs):
         if Object.objects.filter(name=request.data['name'], point1=request.data['point1'],
@@ -250,33 +209,23 @@ class LPEditView(generics.RetrieveUpdateAPIView):
     queryset = Object.objects.all()
     serializer_class = LPEditSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def perform_update(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
         instance.save()
 
 
-class ObjectAllView(viewsets.ModelViewSet):
+class ObjectAllView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.all().order_by('name').prefetch_related('tpo1', 'tpo2',
                                                                       'point1', 'point2', 'transit', 'transit2',
                                                                       'id_outfit', 'category', 'customer')
-    lookup_field = 'pk'
     serializer_class = AllObjectSerializer
-
-    def get_permissions(self):
-        if self.action == 'list':
-            permission_classes = [IsAuthenticated, ]
-        else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
-
-        return [permission() for permission in permission_classes]
 
 
 #we use this view in form 5.3
 class PGObjectView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.filter(type_of_trakt__name='ПГ').order_by('name').prefetch_related('point1', 'point2',
                                                                                                  'type_of_trakt')
@@ -285,7 +234,6 @@ class PGObjectView(ListAPIView):
 
 
 class ObjectListView(APIView):
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     search_fields = ('name',)
     serializer = TraktListSerializer
@@ -298,13 +246,12 @@ class ObjectListView(APIView):
 
 
 class ObjectDetailView(RetrieveDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
 
     def destroy(self, request, *args, **kwargs):
-        self.permission_classes = (IsPervichkaOnly, )
+        self.permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
         instance = self.get_object()
         self.perform_destroy(instance)
         update_total_amount_channels(instance=instance)
@@ -316,7 +263,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 class ObjectCreateView(APIView):
     """"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         parent = get_object_or_404(Object, pk=pk)
@@ -358,7 +305,7 @@ class ObjectCreateView(APIView):
 
 class ObjectEditView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def put(self, request, pk):
         obj = get_object_or_404(Object, pk=pk)
@@ -407,10 +354,10 @@ class TypeOfLocationAPIVIew(ModelViewSet):
     queryset = TypeOfLocation.objects.all().order_by('name')
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -436,10 +383,10 @@ class LineTypeAPIVIew(ModelViewSet):
             return LineTypeCreateSerializer
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -451,10 +398,10 @@ class CategoryAPIVIew(ModelViewSet):
     queryset = Category.objects.all().order_by('index')
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -466,10 +413,10 @@ class ConsumerModelViewSet(ModelViewSet):
     queryset = Consumer.objects.all().order_by('name')
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsPervichkaOnly]
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -560,7 +507,7 @@ class OutfitHistory(APIView):
 
 class OrderFileUploader(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     search_field_for_img = "object_order"
     model = Object
     model_photo = OrderObjectPhoto
@@ -568,7 +515,7 @@ class OrderFileUploader(APIView, PhotoCreateMixin):
 
 class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model = Object
     model_for_delete = OrderObjectPhoto
 

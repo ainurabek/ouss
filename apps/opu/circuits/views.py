@@ -5,7 +5,7 @@ from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetai
 from rest_framework import generics, status
 from apps.opu.circuits.models import Circuit
 from rest_framework.views import APIView
-from apps.accounts.permissions import IsPervichkaOnly
+from apps.accounts.permissions import IsPervichkaOnly, IngenerUser, SuperUser
 from apps.opu.circuits.service import get_circuit_diff
 from apps.opu.circuits.service import update_circuit_active
 from apps.opu.objects.models import Object
@@ -16,7 +16,7 @@ class CircuitListViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
-        circuits = Circuit.objects.filter(id_object=pk).prefetch_related('point1', 'point2', 'object', 'transit',
+        circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'transit',
                                                                          'transit2', 'id_object', 'customer',
                                                                          'category')
         serializer = CircuitList(circuits, many=True)
@@ -28,7 +28,7 @@ class CircuitEditView(generics.UpdateAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEdit
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def perform_update(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
@@ -40,12 +40,12 @@ class CircuitDetailView(generics.RetrieveAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitDetail
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated,)
 
 
 class CircuitHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def get(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)

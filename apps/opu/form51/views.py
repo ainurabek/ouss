@@ -10,7 +10,7 @@ from apps.opu.form51.models import Form51
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, Form51ReserveSerializer
 from apps.opu.objects.models import Object
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
-from apps.accounts.permissions import IsPervichkaOnly
+from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form51.service import get_form51_diff
 
@@ -37,7 +37,7 @@ class FormListAPIView(ListAPIView):
 class Form51UpdateAPIView(UpdateAPIView):
     """Редактирования Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form51.objects.all()
     serializer_class = Form51CreateSerializer
 
@@ -45,7 +45,7 @@ class Form51UpdateAPIView(UpdateAPIView):
 class Form51DeleteAPIView(DestroyAPIView):
     """Удаления Формы 5.1"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form51.objects.all()
 
 
@@ -60,7 +60,7 @@ class ReserveDetailAPIView(APIView, ListWithPKMixin):
 
 class ReserveDelete(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def delete(self, request, form_pk, reserve_pk):
         form51 = get_object_or_404(Form51, pk=form_pk)
@@ -74,7 +74,7 @@ class ReserveDelete(APIView):
 
 class OrderPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model = Form51
     model_photo = OrderPhoto
     search_field_for_img = "order"
@@ -82,14 +82,14 @@ class OrderPhotoCreateView(APIView, PhotoCreateMixin):
 
 class OrderPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model = Form51
     model_for_delete = OrderPhoto
 
 
 class SchemaPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model = Form51
     model_photo = SchemaPhoto
     search_field_for_img = "schema"
@@ -97,14 +97,14 @@ class SchemaPhotoCreateView(APIView, PhotoCreateMixin):
 
 class SchemaPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model = Form51
     model_for_delete = SchemaPhoto
 
 
 class Form51History(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly, )
 
     def get(self, request, pk):
         form51 = Form51.objects.get(pk=pk)
