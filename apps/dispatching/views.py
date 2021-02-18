@@ -156,7 +156,7 @@ class EventCallsCreateViewAPI(APIView):
     permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
     """Создания Event"""
 
-    def post(self, request, pk, id):
+    def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
@@ -188,7 +188,6 @@ class EventCallsCreateViewAPI(APIView):
                 event.date_from = instance.date_from
                 event.save()
             elif prev is not None and next is None:
-
                 event.date_to = instance.date_from
                 event.index1 = instance.index1
                 instance.previous = prev
@@ -196,8 +195,6 @@ class EventCallsCreateViewAPI(APIView):
                 event.save()
                 instance.save()
                 prev.save()
-
-            response = {"data": "Событие создано успешно"}
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
