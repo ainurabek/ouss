@@ -13,10 +13,12 @@ class CustomerFormSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ('id', 'abr', 'customer')
 
+
 class OrderCusPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderCusPhoto
         fields = ("id", "src")
+
 
 class PointSerializer(serializers.ModelSerializer):
 
@@ -65,7 +67,7 @@ class ObjectFormCustomer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ( 'id', "name", "transit", "transit2", "point1", "point2")
+        fields = ('id', "name", "transit", "transit2", "point1", "point2")
 
 
 class SignalizationSerializer(serializers.ModelSerializer):

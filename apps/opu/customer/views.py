@@ -35,6 +35,7 @@ class CustomerEditView(generics.RetrieveUpdateAPIView):
 	def perform_update(self, serializer):
 		serializer.save(created_by=self.request.user.profile)
 
+
 @api_view(['DELETE', ])
 @permission_classes((IsAuthenticated, IsOpuOnly,))
 def customer_delete_view(request, pk):
@@ -50,6 +51,7 @@ def customer_delete_view(request, pk):
 		else:
 			data["failure"] = "Арендатор успешно удален"
 		return Response(data=data)
+
 
 class CustomerHistory(APIView):
 	authentication_classes = (TokenAuthentication,)
@@ -70,4 +72,3 @@ class CustomerHistory(APIView):
 				continue
 			data.append(a)
 		return Response(data, status=status.HTTP_200_OK)
-

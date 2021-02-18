@@ -1,12 +1,8 @@
-# coding: utf-8
-
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from rest_framework.viewsets import ModelViewSet
-
 from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
     Category, AmountChannel, Consumer, Bug
-
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -15,21 +11,19 @@ from knox.auth import TokenAuthentication
 from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     OutfitListSerializer, OutfitCreateSerializer, PointListSerializer, PointCreateSerializer, \
     ObjectSerializer, LPCreateSerializer, \
-    ObjectCreateSerializer, IPCreateSerializer, SelectObjectSerializer, PointList, ObjectListSerializer, \
+    ObjectCreateSerializer, IPCreateSerializer, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
     LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer
-
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-
 from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
 from apps.accounts.permissions import IsOpuOnly
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, save_old_object, \
     update_circuit, update_total_amount_channels
-from apps.opu.services import ListWithPKMixin, PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
+from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.objects.services import adding_an_object_to_trassa
 from apps.opu.circuits.service import create_circuit
@@ -39,7 +33,6 @@ from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 from apps.opu.objects.services import update_total_point_channels
 from apps.opu.objects.serializers import LineTypeCreateSerializer
-
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -77,6 +70,7 @@ class TPOEditView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
+
 class AmountChannelListAPIView(viewsets.ModelViewSet):
     queryset = AmountChannel.objects.all().order_by('value')
     serializer_class = AmountChannelListSerializer
@@ -107,11 +101,11 @@ class TypeTraktListView(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-# Предприятия
 class OutfitsListView(viewsets.ModelViewSet):
+    """Предприятия"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication, IsOpuOnly,)
-    queryset = Outfit.objects.all().order_by('id')
+    queryset = Outfit.objects.all().order_by('id').prefetch_related('tpo', 'type_outfit')
     lookup_field = 'pk'
     serializer_class = OutfitListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -147,10 +141,9 @@ class OutfitEditView(generics.RetrieveUpdateAPIView):
         serializer.save(created_by=self.request.user.profile)
 
 
-# ИПы
 class PointListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all().order_by('point')
+    queryset = Point.objects.all().order_by('point').prefetch_related('tpo', 'id_outfit')
     lookup_field = 'pk'
     serializer_class = PointListSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend)
@@ -201,11 +194,13 @@ class IPDeleteView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOpuOnly,)
 
 
-
-""" Линии передачи """
 class LPListView(viewsets.ModelViewSet):
+    """ Линии передачи """
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.filter(id_parent=None).order_by('name')
+    queryset = Object.objects.filter(id_parent=None).order_by('name').prefetch_related('transit',
+                                                                                       'transit2', 'reserve_transit',
+                                                                                       'reserve_transit2', 'point1',
+                                                                                       'point2')
     lookup_field = 'pk'
     serializer_class = LPSerializer
     filter_backends = (SearchFilter, )
@@ -264,7 +259,9 @@ class LPEditView(generics.RetrieveUpdateAPIView):
 
 class ObjectAllView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.all().order_by('name')
+    queryset = Object.objects.all().order_by('name').prefetch_related('tpo1', 'tpo2',
+                                                                      'point1', 'point2', 'transit', 'transit2',
+                                                                      'id_outfit', 'category', 'customer')
     lookup_field = 'pk'
     serializer_class = AllObjectSerializer
 
@@ -276,11 +273,13 @@ class ObjectAllView(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+
 #we use this view in form 5.3
 class PGObjectView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.filter(type_of_trakt__name='ПГ').order_by('name')
+    queryset = Object.objects.filter(type_of_trakt__name='ПГ').order_by('name').prefetch_related('point1', 'point2',
+                                                                                                 'type_of_trakt')
     lookup_field = 'pk'
     serializer_class = ObjectListSerializer
 
@@ -374,16 +373,14 @@ class ObjectEditView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-#Выходят и points, ips по запросу ИП
 class FilterObjectList(ListAPIView):
-    """Фильтрация объектов"""
+    """Фильтрация объектов. Выходят и points, ips по запросу ИП"""
     serializer_class = ObjectFilterSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
-        queryset = Object.objects.all()
+        queryset = Object.objects.all().prefetch_related('point1', 'point2', 'id_outfit', 'ip_object', 'consumer')
         tpo = self.request.query_params.get('tpo', None)
         point = self.request.query_params.get('point', None)
         outfit = self.request.query_params.get('outfit', None)
@@ -417,6 +414,7 @@ class TypeOfLocationAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+
 class MainLineTypeList(ListAPIView):
     """Список главных типов линии"""
     permission_classes = (IsAuthenticated,)
@@ -424,12 +422,12 @@ class MainLineTypeList(ListAPIView):
     queryset = MainLineType.objects.all().order_by('name')
     serializer_class = MainLineTypeListSerializer
 
+
 class LineTypeAPIVIew(ModelViewSet):
     serializer_class = LineTypeSerializer
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
     queryset = LineType.objects.all().order_by('name')
-
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -574,24 +572,25 @@ class OrderObjectFileDeleteView(APIView, PhotoDeleteMixin):
     model = Object
     model_for_delete = OrderObjectPhoto
 
+
 # for dashboard
 def get_points_amount(request):
-    points_amount = Point.objects.all().count()
+    points_amount = Point.objects.count()
     return JsonResponse(points_amount, safe=False)
 
 
 def get_tpo_amount(request):
-    tpo_amount = TPO.objects.all().count()
+    tpo_amount = TPO.objects.count()
     return JsonResponse(tpo_amount, safe=False)
 
 
 def get_outfits_amount(request):
-    outfits_amount = Outfit.objects.all().count()
+    outfits_amount = Outfit.objects.count()
     return JsonResponse(outfits_amount, safe=False)
 
 
 def get_customers_amount(request):
-    customers_amount = Customer.objects.all().count()
+    customers_amount = Customer.objects.count()
     return JsonResponse(customers_amount, safe=False)
 
 
