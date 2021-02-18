@@ -48,12 +48,13 @@ class CircuitList(serializers.ModelSerializer):
     transit2 = TransitCircSerializer(many=True)
     customer = CustomerSerializer()
     category = CategorySerializer()
+    object =  ObjectSerializer()
 
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'id_object', 'num_circuit', 'category', 'num_order',
                    'comments', 'transit', 'transit2', 'first', 'point1', 'point2',
-                  'customer')
+                  'customer', 'object')
 
 class CircuitTrassaList(serializers.ModelSerializer):
     class Meta:
