@@ -15,7 +15,7 @@ from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, For
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 from apps.opu.form_customer.serializers import ObjectFormCustomer
 from apps.opu.objects.models import Object
-from apps.accounts.permissions import IsPervichkaOnly
+from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
@@ -25,7 +25,13 @@ class SignalizationView(viewsets.ModelViewSet):
     queryset = Signalization.objects.all().order_by('name')
     serializer_class = SignalizationSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        if self.action == 'list' or 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]
+        return [permission() for permission in permission_classes]
 
 
 class CustomerFormListView(ListAPIView):
@@ -65,7 +71,7 @@ class ObjectListAPIView(APIView, ListWithPKMixin):
 class FormCustomerCircCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
@@ -83,7 +89,7 @@ class FormCustomerCircCreateAPIView(APIView):
 class FormCustomerObjCreateAPIView(APIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
@@ -101,20 +107,20 @@ class FormCustomerObjCreateAPIView(APIView):
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form_Customer.objects.all()
     serializer_class = FormCustomerCreateSerializer
 
 
 class FormCustomerDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form_Customer.objects.all()
 
 
 class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     model = Form_Customer
     model_photo = OrderCusPhoto
@@ -130,13 +136,13 @@ class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
 
 class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     model_for_delete = OrderCusPhoto
 
 
 class FormCustomerHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def get(self, request, pk):
         form_customer = Form_Customer.objects.get(pk=pk)

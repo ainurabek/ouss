@@ -3,12 +3,11 @@ from rest_framework.filters import SearchFilter
 from knox.auth import TokenAuthentication
 from apps.opu.customer.models import Customer
 from apps.opu.customer.serializers import CustomerSerializer
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from apps.accounts.permissions import IsPervichkaOnly
+from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from rest_framework.views import APIView
 
 from apps.opu.customer.service import get_customer_diff
@@ -19,43 +18,21 @@ class CustomerViewSet(viewsets.ModelViewSet):
 	serializer_class = CustomerSerializer
 	lookup_field = 'pk'
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticated,)
 	filter_backends = (SearchFilter, DjangoFilterBackend)
 	search_fields = ('customer', 'abr', 'adding', 'diapozon')
 	filterset_fields =  ('customer', 'abr', 'adding', 'diapozon')
 
-
-class CustomerEditView(generics.RetrieveUpdateAPIView):
-	lookup_field = 'pk'
-	queryset = Customer.objects.all()
-	serializer_class = CustomerSerializer
-	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticated, IsPervichkaOnly,)
-
-	def perform_update(self, serializer):
-		serializer.save(created_by=self.request.user.profile)
-
-
-@api_view(['DELETE', ])
-@permission_classes((IsAuthenticated, IsPervichkaOnly,))
-def customer_delete_view(request, pk):
-	try:
-		customer = Customer.objects.get(id=pk)
-	except customer.DoesNotExist:
-		return Response(status=status.HTTP_404_NOT_FOUND)
-	if request.method == "DELETE":
-		operation = customer.delete()
-		data = {}
-		if operation:
-			data["success"] = "Арендатор успешно удален"
+	def get_permissions(self):
+		if self.action == 'list' or 'retrieve':
+			permission_classes = [IsAuthenticated, ]
 		else:
-			data["failure"] = "Арендатор успешно удален"
-		return Response(data=data)
+			permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]
+		return [permission() for permission in permission_classes]
 
 
 class CustomerHistory(APIView):
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticated,)
+	permission_classes = (IsAuthenticated, IsPervichkaOnly, )
 
 	def get(self, request, pk):
 		customer = Customer.objects.get(pk=pk)

@@ -4,9 +4,7 @@ from django.conf.urls import url
 from django.urls import path, include
 from rest_framework import routers
 from . import views
-from .views import LPListView, LPCreateView, LPEditView, TPOCreateView, \
-    TPOEditView, OutfitCreateView, OutfitEditView, PointCreateView, PointEditView, IPCreateView, \
-    ObjectCreateView, ObjectEditView, ObjectListView, \
+from .views import LPCreateView, LPEditView, IPCreateView, ObjectCreateView, ObjectEditView, ObjectListView, \
           ObjectDetailView,  MainLineTypeList
 from .trassa import SelectObjectView, SaveTrassaView, DeleteTrassaView, CreateLeftTrassaView, CreateRightTrassaView,\
     SelectCircuitView, CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, \
@@ -20,9 +18,7 @@ router.register('tpo', views.TPOListView, basename='tpo_list')
 router.register('outfit', views.OutfitsListView, basename='outfit_list')
 router.register('point', views.PointListView, basename='point_list')
 router.register('lp', views.LPListView, basename='lp_list')
-router.register('objects', views.ObjectAllView, basename='all_objects')
 router.register('line-type', views.LineTypeAPIVIew, basename='line_type')
-
 router.register('category', views.CategoryAPIVIew, basename='category')
 router.register('type_trakt', views.TypeTraktListView, basename='type_of_trakt')
 router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_of_location')
@@ -32,20 +28,7 @@ router.register('bug', views.BugModelViewSet, basename='bug')
 
 
 urlpatterns = [
-
-    path('tpo/create/', TPOCreateView.as_view(), name='tpo_create'),
-    url(r'^tpo/edit/(?P<pk>\S+)/$', TPOEditView.as_view()),
-    # url(r'^tpo/delete/(?P<tpo_id>\S+)/$', views.TPODeleteView.as_view(), name='tpo_delete'),
-
-    path('outfit/create/', OutfitCreateView.as_view(), name='outfit_create'),
-    url(r'^outfit/edit/(?P<pk>\S+)/$', OutfitEditView.as_view()),
-    # url(r'^outfit/delete/(?P<outfit_id>\S+)/$', views.OutfitDeleteView.as_view(), name='outfit_delete'),
-
-    path('point/create/', PointCreateView.as_view(), name='point_create'),
-    url(r'^point/edit/(?P<pk>\S+)/$', PointEditView.as_view()),
-    # url(r'^point/delete/(?P<pk>\S+)/$', views.PointDeleteView.as_view(), name='point_delete'),
-
-
+    path('objects/', ObjectListView.as_view(), name='object_list'),
     url(r'^ip/create/(?P<pk>\S+)/$', IPCreateView.as_view()),
     url(r'^ip/delete/(?P<pk>\S+)/$', views.IPDeleteView().as_view(), name='ip_delete'),
 
