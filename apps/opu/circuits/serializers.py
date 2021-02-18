@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import Circuit
 from ..customer.models import Customer
 from ..objects.models import Category, Object, Point
-from ..objects.serializers import ObjectSerializer
+from ..objects.serializers import ObjectSerializer, CategorySerializer
 
 User = get_user_model()
 
@@ -20,10 +20,7 @@ class PointCircSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'point')
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ('id', 'index', 'name')
+
 
 
 class CustomerSerializer(serializers.ModelSerializer):
