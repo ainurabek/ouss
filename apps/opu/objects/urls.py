@@ -28,7 +28,7 @@ router.register('bug', views.BugModelViewSet, basename='bug')
 
 
 urlpatterns = [
-    path('objects/', ObjectListView.as_view(), name='object_list'),
+    path('objects/', views.ObjectAllView.as_view(), name='object_list'),
     url(r'^ip/create/(?P<pk>\S+)/$', IPCreateView.as_view()),
     url(r'^ip/delete/(?P<pk>\S+)/$', views.IPDeleteView().as_view(), name='ip_delete'),
 
