@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from apps.accounts.permissions import IsOpuOnly
+from apps.accounts.permissions import IsPervichkaOnly
 from rest_framework.views import APIView
 
 from apps.opu.customer.service import get_customer_diff
@@ -30,14 +30,14 @@ class CustomerEditView(generics.RetrieveUpdateAPIView):
 	queryset = Customer.objects.all()
 	serializer_class = CustomerSerializer
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticated, IsOpuOnly,)
+	permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
 	def perform_update(self, serializer):
 		serializer.save(created_by=self.request.user.profile)
 
 
 @api_view(['DELETE', ])
-@permission_classes((IsAuthenticated, IsOpuOnly,))
+@permission_classes((IsAuthenticated, IsPervichkaOnly,))
 def customer_delete_view(request, pk):
 	try:
 		customer = Customer.objects.get(id=pk)

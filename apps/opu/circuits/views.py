@@ -5,7 +5,7 @@ from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetai
 from rest_framework import generics, status
 from apps.opu.circuits.models import Circuit
 from rest_framework.views import APIView
-from apps.accounts.permissions import IsOpuOnly
+from apps.accounts.permissions import IsPervichkaOnly
 from apps.opu.circuits.service import get_circuit_diff
 from apps.opu.circuits.service import update_circuit_active
 from apps.opu.objects.models import Object
@@ -28,7 +28,7 @@ class CircuitEditView(generics.UpdateAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitEdit
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def perform_update(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
@@ -40,7 +40,7 @@ class CircuitDetailView(generics.RetrieveAPIView):
     queryset = Circuit.objects.all()
     serializer_class = CircuitDetail
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
 
 class CircuitHistory(APIView):

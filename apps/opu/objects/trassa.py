@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework import status
 from django.db.models import Q
-from apps.accounts.permissions import IsOpuOnly
+from apps.accounts.permissions import IsPervichkaOnly
 from apps.opu.circuits.serializers import CircuitTrassaList
 from apps.opu.form_customer.models import Form_Customer
 from apps.opu.objects.serializers import PGListSerializer
@@ -20,7 +20,7 @@ from apps.opu.objects.serializers import SelectObjectSerializer, PointList, Obje
 class SelectObjectView(APIView):
     """Выбор ЛП для создания трассы"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
@@ -61,7 +61,7 @@ class ObjectList(APIView):
 
 
 class CreateLeftTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -102,7 +102,7 @@ class CreateLeftTrassaView(APIView):
 
 
 class CreateRightTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -143,7 +143,7 @@ class CreateRightTrassaView(APIView):
 
 class SaveTrassaView(APIView):
     """Сохранение трассы"""
-    authentication_classes = (TokenAuthentication, IsOpuOnly,)
+    authentication_classes = (TokenAuthentication, IsPervichkaOnly,)
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
@@ -195,7 +195,7 @@ class SaveTrassaView(APIView):
 class DeleteTrassaView(APIView):
     """Удаления трассы"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
@@ -261,7 +261,7 @@ class DeleteTrassaView(APIView):
 
 '''Создание резервной трассы'''
 class CreateLeftReserveTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -283,7 +283,7 @@ class CreateLeftReserveTrassaView(APIView):
 
 
 class CreateRightReserveTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -304,7 +304,7 @@ class CreateRightReserveTrassaView(APIView):
 
 class SaveReserveTrassaView(APIView):
     """Сохранение reserve трассы"""
-    authentication_classes = (TokenAuthentication, IsOpuOnly,)
+    authentication_classes = (TokenAuthentication, IsPervichkaOnly,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
@@ -322,7 +322,7 @@ class SaveReserveTrassaView(APIView):
 class DeleteReserveTrassaView(APIView):
     """Удаления reserve трассы"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:
@@ -353,7 +353,7 @@ class DeleteReserveTrassaView(APIView):
 class PGCircuitListView(APIView):
     """Выбор PG для создания трассы circuits"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
@@ -393,7 +393,7 @@ class CircuitListTrassa(ListAPIView):
 
 #создание трассы для каналов
 class CreateLeftCircuitTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -417,7 +417,7 @@ class CreateLeftCircuitTrassaView(APIView):
 
 
 class CreateRightCircuitTrassaView(APIView):
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, main_pk, pk):
@@ -441,7 +441,7 @@ class CreateRightCircuitTrassaView(APIView):
 
 class SaveCircuitTrassaView(APIView):
     """Сохранение трассы for circuits"""
-    authentication_classes = (TokenAuthentication, IsOpuOnly,)
+    authentication_classes = (TokenAuthentication, IsPervichkaOnly,)
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
@@ -458,7 +458,7 @@ class SaveCircuitTrassaView(APIView):
 class DeleteCircuitTrassaView(APIView):
     """Удаления трассы для канала"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def delete(self, request, main_pk, pk):
         if main_pk == pk:

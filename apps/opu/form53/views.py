@@ -9,7 +9,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
-from apps.accounts.permissions import IsOpuOnly
+from apps.accounts.permissions import IsPervichkaOnly
 
 from apps.opu.services import PhotoDeleteMixin
 from apps.opu.form53.services import get_form53_diff
@@ -18,7 +18,7 @@ from apps.opu.services import create_photo
 
 class Form53CreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     """Создания Формы 5.3"""
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
@@ -69,7 +69,7 @@ class Form53ListAPIView(ListAPIView):
 class Form53UpdateAPIView(UpdateAPIView):
     """Редактирования Формы 5.3"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     queryset = Form53.objects.all()
     serializer_class = Form53CreateSerializer
 
@@ -77,13 +77,13 @@ class Form53UpdateAPIView(UpdateAPIView):
 class Form53DeleteAPIView(DestroyAPIView):
     """Удаления Формы 5.3"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     queryset = Form53
 
 
 class Order53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
@@ -95,13 +95,13 @@ class Order53PhotoCreateView(APIView):
 
 class Order53PhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     model_for_delete = Order53Photo
 
 
 class Schema53PhotoCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
@@ -113,7 +113,7 @@ class Schema53PhotoCreateView(APIView):
 
 class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsOpuOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
     model_for_delete = Schema53Photo
 
 

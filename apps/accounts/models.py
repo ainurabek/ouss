@@ -20,6 +20,7 @@ class Role(models.Model):
 class DepartmentKT(models.Model):
     name = models.CharField('Отдел', max_length=30)
 
+
     class Meta:
         verbose_name = 'Отдел'
         verbose_name_plural = 'Отделы'
