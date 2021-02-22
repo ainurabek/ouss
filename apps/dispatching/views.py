@@ -256,6 +256,10 @@ class EventDeleteAPIView(DestroyAPIView):
             next_event.save()
             previous_event.save()
 
+        elif previous_event is None and next_event is None:
+            instance.delete()
+            main_event.delete()
+
         elif next_event is None:
             instance.delete()
             main_event.date_to = previous_event.date_from
@@ -263,9 +267,7 @@ class EventDeleteAPIView(DestroyAPIView):
             main_event.save()
             previous_event.date_to = None
             previous_event.save()
-        elif previous_event is None and next_event is None:
-            instance.delete()
-            main_event.delete()
+
         else:
             main_event.date_from = next_event.date_from
             main_event.index1 = next_event.index1
