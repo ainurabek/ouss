@@ -241,12 +241,13 @@ class EventDeleteAPIView(DestroyAPIView):
             return
 
         main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
-
         previous_event = instance.previous
+
         if Event.objects.filter(previous=instance).exists():
             next_event = instance.event_previous
         else:
             next_event = None
+
 
         if previous_event is not None and next_event is not None:
             instance.delete()
@@ -262,16 +263,16 @@ class EventDeleteAPIView(DestroyAPIView):
             main_event.save()
             previous_event.date_to = None
             previous_event.save()
-
+        elif previous_event is None and next_event is None:
+            instance.delete()
+            main_event.delete()
         else:
             main_event.date_from = next_event.date_from
             main_event.index1 = next_event.index1
             main_event.save()
-
             instance.delete()
 
-        if main_event.event_id_parent.count() == 0:
-            main_event.delete()
+
 
 @permission_classes([IsAuthenticated,])
 def get_dates_and_counts_week(request):
