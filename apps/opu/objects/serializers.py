@@ -464,7 +464,7 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer', 'ip_object')
+        fields = ( 'id', 'name', 'point1', 'point2', 'id_outfit', 'customer', 'ip_object', 'type_of_trakt')
 
 class PGListSerializer(serializers.ModelSerializer):
     class Meta:
