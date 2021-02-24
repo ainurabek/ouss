@@ -273,15 +273,18 @@ def get_report_analysis(request):
                "index1": None, "comments1": None}
 
     for out in outfits:
-        out_data = example.copy()['outfit'] = out.responsible_outfit.outfit
+        out_data = example.copy()
+        out_data['outfit'] = out.responsible_outfit.outfit
         data.append(out_data)
         for event in all_event.filter(responsible_outfit=out.responsible_outfit):
-            event_data = example.copy()['id'] = event.id
+            event_data = example.copy()
+            event_data['id'] = event.id
             event_data['name'] = get_event_name(event)
             data.append(event_data)
             calls_count = 0
             for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
-                call_data = example.copy()['id'] = call.id
+                call_data = example.copy()
+                call_data['id'] = call.id
                 call_data['name'] = get_event_name(call)
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from

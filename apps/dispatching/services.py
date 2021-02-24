@@ -34,6 +34,7 @@ def get_minus_date(days: int):
 
 
 def get_event_name(event_object) -> str:
+
     event_name = None
 
     if event_object.object is not None:
@@ -42,8 +43,7 @@ def get_event_name(event_object) -> str:
         event_name = event_object.ips.name
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
-    elif event_object.name is not None:
-        event_name = event_object.name
+
     return event_name
 
 

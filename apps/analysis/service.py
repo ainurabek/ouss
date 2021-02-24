@@ -103,7 +103,7 @@ def get_calls_list(all_event, obj):
     if obj.object is not None:
         return all_event.filter(object=obj.object)
     elif obj.ips is not None:
-        return all_event.filter(ips=obj.point)
+        return all_event.filter(ips=obj.ips)
     elif obj.circuit is not None:
         return all_event.filter(circuit=obj.circuit)
 
