@@ -82,13 +82,30 @@ def update_total_amount_channels(instance: Object):
 
 def update_total_point_channels(instance: Object):
     if instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'КЛС':
-        instance.point1.total_point_channels_KLS += instance.total_amount_channels
-        instance.point2.total_point_channels_KLS += instance.total_amount_channels
+        objs = instance.point1.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="КЛС")
+        count_1 = 0
+        for obj in objs:
+            count_1 += obj.total_amount_channels
+        instance.point1.total_point_channels_KLS = count_1
+        objs = instance.point2.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="КЛС")
+        count_2 = 0
+        for obj in objs:
+            count_2 += obj.total_amount_channels
+        instance.point2.total_point_channels_KLS = count_2
         instance.point1.save()
         instance.point2.save()
+
     elif instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'ЦРРЛ':
-        instance.point1.total_point_channels_RRL += instance.total_amount_channels
-        instance.point2.total_point_channels_RRL += instance.total_amount_channels
+        objs = instance.point1.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="ЦРРЛ")
+        count_1 = 0
+        for obj in objs:
+            count_1 += obj.total_amount_channels
+        instance.point1.total_point_channels_RRL = count_1
+        objs = instance.point2.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="ЦРРЛ")
+        count_2 = 0
+        for obj in objs:
+            count_2 += obj.total_amount_channels
+        instance.point2.total_point_channels_RRL = count_2
         instance.point1.save()
         instance.point2.save()
 

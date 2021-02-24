@@ -11,6 +11,8 @@ from apps.opu.circuits.models import Circuit
 
 from apps.opu.objects.services import update_total_amount_channels
 
+from apps.opu.objects.services import update_total_point_channels
+
 register = template.Library()
 from django.db.models import Q
 
@@ -73,4 +75,6 @@ def update_circuit_active(object: Object):
     object.total_amount_channels = object.circuit_object_parent.filter(first=True).count()
     object.save()
     update_total_amount_channels(object)
+
+    update_total_point_channels(object)
 
