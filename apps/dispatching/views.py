@@ -43,11 +43,11 @@ class EventListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
     #фильтр по хвостам + за сегодня
-
         today = datetime.date.today()
-        queryset1 = self.queryset.exclude(index1__index='4')
+        queryset1 = self.queryset.exclude(index1__index='4') #хваосты
         queryset2 = self.queryset.filter(created_at=today)
         queryset = queryset1.union(queryset2)
+
     # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         created_at = self.request.query_params.get('created_at', None)
@@ -59,16 +59,16 @@ class EventListAPIView(viewsets.ModelViewSet):
         if created_at is not None and created_at != '':
             q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1__index='4')
             q2 = self.queryset.filter(created_at=created_at)
-            queryset = q1.union(q2)
+            queryset = q1|q2
 
         if type_journal is not None and type_journal != '':
-            queryset = self.queryset.filter(type_journal=type_journal)
+            queryset = queryset.filter(type_journal=type_journal)
         if responsible_outfit is not None and responsible_outfit != '':
-            queryset = self.queryset.filter(responsible_outfit=responsible_outfit)
+            queryset = queryset.filter(responsible_outfit=responsible_outfit)
         if index1 is not None and index1 != '':
-            queryset = self.queryset.filter(index1=index1)
+            queryset = queryset.filter(index1=index1)
         if name is not None and name != '':
-            queryset = self.queryset.filter(name=name)
+            queryset = queryset.filter(name=name)
 
         return queryset.order_by('-date_from')
 
@@ -98,7 +98,6 @@ class EventIPCreateViewAPI(APIView):
                                   contact_name=event.contact_name,
                                  )
 
-            response = {"data": "Событие создано успешно"}
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

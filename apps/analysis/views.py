@@ -479,11 +479,11 @@ class ReportOaAndOdApiView(APIView):
         if index is None or index == '':
             all_event = Event.objects.filter(index1__in=[od, oa, otv])
         elif od.id == index or oa.id == index or otv.id == index:
-            all_event = Event.objects.filter(index1__in=[index],
+            all_event = Event.objects.filter(index1=index,
                                          callsorevent=False)
         else:
-            message = {'message': "Можно фильтровать только по индекса Од, Оа, Отв"}
-            return Response(message, status.HTTP_403_FORBIDDEN)
+            data = {'detail': "Можно фильтровать только по индекса Од, Оа, Отв"}
+            return Response(data, status.HTTP_403_FORBIDDEN)
 
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
