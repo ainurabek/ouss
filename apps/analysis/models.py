@@ -9,7 +9,7 @@ class FormAnalysis(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     average_coefficient = models.FloatField("Средний коэффициент качества", default=0, blank=True, null=True)
     coefficient = models.FloatField("Коэффициент качества", default=0, blank=True, null=True)
-    tv_coefficient = models.FloatField("Коэффициент качества ТВ", default=0, blank=True, null=True)
+
 
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

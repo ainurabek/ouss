@@ -166,7 +166,7 @@ def get_report(request):
         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
         }
 
-    example = {"name": None, "date_from": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
+    example = {"name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
     }
 
@@ -193,17 +193,22 @@ def get_report(request):
                     amount_of_channels = get_amount_of_channels(call)
 
                     call_data = copy.deepcopy(example)
+                    call_data['date_from'] = call.date_from
+                    call_data['date_to'] = call.date_to
                     call_data['period_of_time'][call.reason.name+type_line] = period
 
                     call_data['amount_of_channels'][type_line] = amount_of_channels
+                    call_data['comments'] = call.comments1
 
                     total_period_of_time['period_of_time'][call.reason.name+type_line] += period
 
                     data.append(call_data)
                 else:
                     call_data = copy.deepcopy(example)
+                    call_data['date_from'] = call.date_from
+                    call_data['date_to'] = call.date_to
+                    call_data['comments'] = call.comments1
                     kls = call.ips.total_point_channels_KLS
-
                     rrl = call.ips.total_point_channels_RRL
 
                     if kls != 0:
@@ -252,6 +257,8 @@ def get_report(request):
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_analysis(request):
     """Отчет дисп.службы по разным индексам"""
+
+    today = datetime.date.today()
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     index = request.GET.get("index")
@@ -264,7 +271,7 @@ def get_report_analysis(request):
     all_event_uncompleted = Event.objects.filter(callsorevent=True).exclude(index1__index='4')
     all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, responsible_outfit)
     all_event = all_event_completed | all_event_uncompleted
-    all_calls = Event.objects.filter(callsorevent=False)
+    all_calls = Event.objects.filter(callsorevent=False, created_at = today)
     if index is not None:
         all_calls = all_calls.filter(index1_id=index)
 
@@ -472,17 +479,19 @@ class ReportOaAndOdApiView(APIView):
         date_to = request.GET.get("date_to")
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
+
+
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         otv = Index.objects.get(index="0тв")
 
         if index is None or index == '':
             all_event = Event.objects.filter(index1__in=[od, oa, otv])
-        elif od.id == index or oa.id == index or otv.id == index:
+        elif index in [str(od.id), str(oa.id), str(otv.id)]:
             all_event = Event.objects.filter(index1=index,
                                          callsorevent=False)
         else:
-            data = {'detail': "Можно фильтровать только по индекса Од, Оа, Отв"}
+            data = {'detail': "Можно фильтровать только по индексу Од, Оа, Отв"}
             return Response(data, status.HTTP_403_FORBIDDEN)
 
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)

@@ -76,14 +76,14 @@ class FormAnalysisDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FormAnalysis
-        fields = ("id", "outfit", "average_coefficient", "tv_coefficient", "coefficient", "punkt5", "punkt7")
+        fields = ("id", "outfit", "average_coefficient", "coefficient", "punkt5", "punkt7")
 
 
 class FormAnalysisUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FormAnalysis
-        fields = ("id", "name", "average_coefficient", "tv_coefficient")
+        fields = ("id", "name", "average_coefficient")
 
 
 class Punkt5UpdateSerializer(serializers.ModelSerializer):

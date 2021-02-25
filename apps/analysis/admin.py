@@ -4,8 +4,7 @@ from apps.analysis.models import *
 
 @admin.register(FormAnalysis)
 class FormAnalysisAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_parent', 'name', "date_from", "date_to", 'outfit', 'average_coefficient', "coefficient",
-                    "tv_coefficient")
+    list_display = ('id', 'id_parent', 'name', "date_from", "date_to", 'outfit', 'average_coefficient', "coefficient")
 
 
 @admin.register(Punkt5)
