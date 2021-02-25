@@ -2,7 +2,7 @@ from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
 from apps.opu.circuits.models import Circuit
-from apps.opu.objects.models import MainLineType, Object, IP
+from apps.opu.objects.models import MainLineType, Object, IP, Outfit
 from django.utils.safestring import mark_safe
 from django import template
 from apps.dispatching.models import Reason, Index
@@ -164,7 +164,10 @@ def get_type_line_vls_and_kls():
 def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK, parent_obj: FormAnalysis, user):
     """Создание п.5"""
     all_event = calls_filter_for_punkt5(date_from, date_to, outfit)
-    outfits = event_distinct(all_event, "responsible_outfit")
+    if outfit:
+        outfits = [Outfit.objects.get(pk=outfit), ]
+    else:
+        outfits = Outfit.objects.filter(outfit__in=['ЧОФ', 'НОФ', 'ТОФ', 'ИОФ', 'ЖОФ', 'ООФ', 'БОФ', 'БГТС', 'ЦСП'])
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
     kls, rrl = get_type_line_vls_and_kls()
@@ -174,10 +177,9 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     for out in outfits:
         total_outfit_kls = 0
         total_outfit_rrl = 0
-
         amount_of_channels_kls = 0
         amount_of_channels_rrl = 0
-        for event in all_event_name.filter(responsible_outfit=out.responsible_outfit):
+        for event in all_event_name.filter(responsible_outfit=out):
             if event.ips is None:
 
                 if get_type_line(event) == kls.name:
@@ -201,19 +203,19 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         total_rep_kls += total_out_kls
         total_rep_rrl += total_out_rrl
         #####################################################################################################
-        analysis_form = FormAnalysis.objects.create(outfit=out.responsible_outfit, date_from=date_from,
+        analysis_form = FormAnalysis.objects.create(outfit=out, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
 
         if punkt7_AK:
             try:
-                form = FormAnalysis.objects.get(outfit=out.responsible_outfit, id_parent=punkt7_AK)
+                form = FormAnalysis.objects.get(outfit=out, id_parent=punkt7_AK)
             except FormAnalysis.DoesNotExist:
-                punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
+                punkt7 = Punkt7.objects.create(outfit=out, date_to=date_to, date_from=date_from,
                                                user=user, form_analysis=analysis_form)
                 TotalData.objects.create(punkt7=punkt7)
             else:
                 fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
-                                                   outfit=out.responsible_outfit,
+                                                   outfit=out,
                                                    total_number_kls=form.punkt7.total_number_kls,
                                                    corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
                                                    percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
@@ -234,12 +236,12 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
                                          total_coefficient=total_data7.total_coefficient, kls=total_data7.kls,
                                          vls=total_data7.vls, rrl=total_data7.rrl)
         else:
-            punkt7 = Punkt7.objects.create(outfit=out.responsible_outfit, date_to=date_to, date_from=date_from,
+            punkt7 = Punkt7.objects.create(outfit=out, date_to=date_to, date_from=date_from,
                                            user=user, form_analysis=analysis_form)
             TotalData.objects.create(punkt7=punkt7)
 
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
-                                       outfit_period_of_time_rrl=total_out_rrl, outfit=out.responsible_outfit,
+                                       outfit_period_of_time_rrl=total_out_rrl, outfit=out,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
 
         TotalData.objects.create(punkt5=punkt5)

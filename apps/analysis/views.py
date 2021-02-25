@@ -366,7 +366,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         """ Список ср.КФТ отчет """
-        form_list = FormAnalysis.objects.filter(id_parent=self.get_object().pk).order_by('-id')
+        form_list = FormAnalysis.objects.filter(id_parent=self.get_object().pk).order_by('outfit')
         serializer = self.get_serializer(form_list, many=True)
         return Response(serializer.data)
 
@@ -412,6 +412,7 @@ class Punkt5ListAPIView(APIView, ListWithPKMixin):
     model = Punkt5
     serializer = Punkt5ListSerializer
     field_for_filter = "form_analysis__id_parent"
+    order_by = 'outfit'
 
 
 class Punkt7ListAPIView(APIView, ListWithPKMixin):
@@ -421,6 +422,7 @@ class Punkt7ListAPIView(APIView, ListWithPKMixin):
     model = Punkt7
     serializer = Punkt7ListSerializer
     field_for_filter = "form_analysis__id_parent"
+    order_by = 'outfit'
 
 
 class Punkt5UpdateAPIView(generics.UpdateAPIView):

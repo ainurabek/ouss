@@ -20,17 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/KT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/KT.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/accounts/permissions.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/accounts/permissions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/circuits/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/circuits/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/customer/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/customer/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/customer/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/customer/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/customer/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/customer/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/form51/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/form51/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/form53/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/form53/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/form_customer/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/form_customer/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/objects/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/objects/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/analysis/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/analysis/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -280,7 +273,13 @@
       <workItem from="1613461009705" duration="8303000" />
       <workItem from="1613473691255" duration="2160000" />
       <workItem from="1613537657839" duration="17968000" />
-      <workItem from="1613624216878" duration="11579000" />
+      <workItem from="1613624216878" duration="11884000" />
+      <workItem from="1613637362175" duration="1298000" />
+      <workItem from="1613642077074" duration="5816000" />
+      <workItem from="1613990263357" duration="1763000" />
+      <workItem from="1614141042446" duration="5904000" />
+      <workItem from="1614233654824" duration="325000" />
+      <workItem from="1614244787925" duration="3505000" />
     </task>
     <servers />
   </component>
