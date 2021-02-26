@@ -12,7 +12,7 @@ from apps.opu.form51.models import OrderPhoto, SchemaPhoto
 
 from apps.opu.objects.serializers import ConsumerSerializer
 
-from KT.apps.opu.objects.serializers import ReserveTransitSerializer
+from apps.opu.objects.serializers import ReserveTransitSerializer
 
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
