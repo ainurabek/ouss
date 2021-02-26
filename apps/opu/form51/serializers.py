@@ -12,6 +12,8 @@ from apps.opu.form51.models import OrderPhoto, SchemaPhoto
 
 from apps.opu.objects.serializers import ConsumerSerializer
 
+from KT.apps.opu.objects.serializers import ReserveTransitSerializer
+
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
 
@@ -53,6 +55,8 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 class ObjectForm51Serializer(serializers.ModelSerializer):
     transit = TransitSerializer(many=True)
     transit2 = TransitSerializer(many=True)
+    reserve_transit = ReserveTransitSerializer(many=True)
+    reserve_transit2 = ReserveTransitSerializer(many=True)
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
     category = CategorySerializer()
@@ -60,7 +64,7 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ("name", "transit", "transit2", "category", "point1", "point2", 'consumer')
+        fields = ("name", "transit", "transit2", "reserve_transit", "reserve_transit2", "category", "point1", "point2", 'consumer')
         depth = 1
 
 
@@ -80,8 +84,8 @@ class Form51Serializer(serializers.ModelSerializer):
 
 
 class ObjectReserveSerializer(serializers.ModelSerializer):
-    transit = TransitSerializer(many=True)
-    transit2 = TransitSerializer(many=True)
+    reserve_transit = ReserveTransitSerializer(many=True)
+    reserve_transit2 = ReserveTransitSerializer(many=True)
     category = CategorySerializer()
     class Meta:
         model = Object
