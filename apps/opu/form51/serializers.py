@@ -45,7 +45,7 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form51
-        fields = ("id", "customer", "num_order", "reserve", "comments", "reserve_object")
+        fields = ("id", "customer", "num_order", "reserve", "comments")
 
 
 
@@ -73,7 +73,7 @@ class Form51Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form51
-        fields = ("id", "object", "customer", "num_order", "order_photo", "schema_photo", "reserve", "reserve_object", 'comments')
+        fields = ("id", "object", "customer", "num_order", "order_photo", "schema_photo", "reserve", 'comments')
         depth=1
 
 
