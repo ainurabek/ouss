@@ -10,7 +10,6 @@ class FormAnalysis(models.Model):
     average_coefficient = models.FloatField("Средний коэффициент качества", default=0, blank=True, null=True)
     coefficient = models.FloatField("Коэффициент качества", default=0, blank=True, null=True)
 
-
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     date_from = models.DateField("Начало", blank=True, null=True)

@@ -148,7 +148,7 @@ def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
     all_event = Event.objects.filter(index1__index='1', callsorevent=False,
-                                     reason__name__in=['ПВ аппаратура', 'Линейные ПВ', 'Хищения на ЛС'])
+                                     reason__name__in=['ПВ аппаратура', 'Линейные ПВ', 'Хищения на ЛС']).exclude(name__isnull=False)
     return event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
 
 

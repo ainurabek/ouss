@@ -198,3 +198,8 @@ class ReportSerializer(serializers.ModelSerializer):
         fields = ('id', 'date_from', 'date_to', 'index1', 'created_at',  'object', 'circuit', 'ips', 'name')
 
 
+class EventUnknownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ('id', "name", 'responsible_outfit', 'send_from', 'point1', 'point2', 'customer', 'index1',
+                  'comments1')

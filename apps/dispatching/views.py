@@ -3,8 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from django.http import JsonResponse
-from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer,\
-    ReasonSerializer, IndexSerializer, CallsCreateSerializer, ReportSerializer
+from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
+    ReasonSerializer, IndexSerializer, CallsCreateSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser
 from ..opu.circuits.models import Circuit
@@ -555,3 +555,24 @@ class IndexModelViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+#Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
+class EventUnknownCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    """Создания Unknown Event"""
+
+    def post(self, request):
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            event = serializer.save( created_by=self.request.user.profile)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1, name=event.name,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 )
+            response = {"data": "Событие создано успешно"}
+            # update_period_of_time(instance=obj)
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

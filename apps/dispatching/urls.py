@@ -63,6 +63,8 @@ urlpatterns = [
     #второй звонок
     path("api/event/calls/create/<int:pk>/", views.EventCallsCreateViewAPI.as_view()),
 
+    path("api/unknown/event/create/", views.EventUnknownCreateViewAPI.as_view()),
+
 
     path('', include(router.urls)),
 
