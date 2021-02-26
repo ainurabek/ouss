@@ -43,6 +43,8 @@ def get_event_name(event_object) -> str:
         event_name = event_object.ips.name
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
+    else:
+        event_name = event_object.name
 
     return event_name
 
