@@ -94,7 +94,7 @@ class ObjectReserveSerializer(serializers.ModelSerializer):
 
 class Form51ReserveSerializer(serializers.ModelSerializer):
     """ Резерв """
-    object = ObjectReserveSerializer(many=True)
+    object = ObjectReserveSerializer()
 
     class Meta:
         model = Form51
