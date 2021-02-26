@@ -85,14 +85,14 @@ class ObjectReserveSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     class Meta:
         model = Object
-        fields = ('id', "name", "transit", "transit2", "category")
+        fields = ('id', "name", "reserve_transit", "reserve_transit2", "category")
 
 
 class Form51ReserveSerializer(serializers.ModelSerializer):
     """ Резерв """
-    reserve_object = ObjectReserveSerializer(many=True)
+    object = ObjectReserveSerializer(many=True)
 
     class Meta:
         model = Form51
-        fields = ("id", "reserve_object")
+        fields = ("id", "object")
         depth = 1

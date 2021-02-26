@@ -269,14 +269,8 @@ class CreateLeftReserveTrassaView(APIView):
         obj = Object.objects.get(pk=pk)
 
         if not main_obj.reserve_transit.filter(pk=pk).exists():
-            main_obj.reserve_transit.add(*obj.reserve_transit2.all().reverse(), *obj.reserve_transit.all())
+            main_obj.reserve_transit.add(obj)
 
-            for tr in obj.reserve_transit.all():
-                tr.reserve_transit2.clear()
-                tr.reserve_transit.clear()
-            for tr in obj.reserve_transit2.all():
-                tr.reserve_transit2.clear()
-                tr.reserve_transit.clear()
 
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
@@ -291,13 +285,8 @@ class CreateRightReserveTrassaView(APIView):
         obj = Object.objects.get(pk=pk)
 
         if not main_obj.reserve_transit2.filter(pk=pk).exists():
-            main_obj.reserve_transit2.add(*obj.reserve_transit.all().reverse(), *obj.reserve_transit2.all())
-            for tr in obj.reserve_transit.all():
-                tr.reserve_transit2.clear()
-                tr.reserve_transit.clear()
-            for tr in obj.reserve_transit2.all():
-                tr.reserve_transit2.clear()
-                tr.reserve_transit.clear()
+            main_obj.reserve_transit2.add(obj)
+
         response = {"data": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -335,7 +324,7 @@ class DeleteReserveTrassaView(APIView):
 
             obj.reserve_transit2.clear()
             obj.reserve_transit.clear()
-            obj.reserve_transit.add(obj)
+
 
             main_obj.reserve_transit.remove(obj)
             main_obj.reserve_transit2.remove(obj)

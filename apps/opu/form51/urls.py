@@ -12,10 +12,10 @@ urlpatterns = [
 
     path("list/", views.FormListAPIView.as_view()),
     path("api/update/<int:pk>/", views.Form51UpdateAPIView.as_view()),
-    path("api/delete/<int:pk>/", views.Form51DeleteAPIView.as_view()),
-    path("api/reserve/<int:pk>/", views.ReserveDetailAPIView.as_view()),
+    path("api/detail/<int:pk>/", views.Form51DetailAPIView.as_view()),
+    # path("api/reserve/<int:pk>/", views.ReserveDetailAPIView.as_view()),
 
-    path("api/reserve/delete/<int:form_pk>/<int:reserve_pk>/", views.ReserveDelete.as_view()),
+    # path("api/reserve/delete/<int:form_pk>/<int:reserve_pk>/", views.ReserveDelete.as_view()),
 #orderphoto
     path("api/orderphoto/create/<int:pk>/", views.OrderPhotoCreateView.as_view()),
     path("api/orderphoto/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderPhotoDeleteView.as_view()),

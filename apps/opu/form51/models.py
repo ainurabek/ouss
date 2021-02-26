@@ -12,7 +12,7 @@ class Form51(models.Model):
     object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
     num_order = models.CharField("Номер распоряжения", max_length=250, blank=True, null=True)
     reserve = models.CharField('Наличие резерва', max_length=15, blank=True, null=True)
-    reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)
+    # reserve_object = models.ManyToManyField(Object, verbose_name="Трасса резерва потока", related_name="reserve_objects", blank=True)
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     comments = models.CharField('Примечание', max_length=400, blank=True, null=True)
     history = HistoricalRecords(related_name='history_form51_log')
