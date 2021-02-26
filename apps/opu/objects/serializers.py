@@ -450,10 +450,11 @@ class TraktListSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True, read_only=True)
     reserve_transit = ReserveTransitSerializer(many=True, read_only=True)
     reserve_transit2 = ReserveTransitSerializer(many=True, read_only=True)
+    id_parent = serializers.SlugRelatedField(slug_field='id', read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2", 'reserve_transit', 'reserve_transit2')
+        fields = ('id', 'id_parent', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2", 'reserve_transit', 'reserve_transit2')
 
 
 class ObjectFilterSerializer(serializers.ModelSerializer):

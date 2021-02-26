@@ -501,11 +501,6 @@ class ReportOaAndOdApiView(APIView):
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
 
-        winners_otv = {
-            "first": {"value": 0, "index": None},
-            "second": {"value": 0, "index": None},
-            "third": {"value": 0, "index": None}
-        }
 
         winners_oa = {
             "first": {"value": 0, "index": None},

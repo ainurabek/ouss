@@ -239,7 +239,7 @@ class ObjectListView(APIView):
     serializer = TraktListSerializer
 
     def get(self, request, pk):
-        obj = Object.objects.get(pk=pk)
+        obj = get_object_or_404(Object, pk=pk)
         childs = obj.parents.all()
         serializer = TraktListSerializer(childs, many=True).data
         return Response(serializer)
@@ -253,6 +253,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         self.permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
         instance = self.get_object()
+
         self.perform_destroy(instance)
         update_total_amount_channels(instance=instance)
         response = {"message": "Объект успешно удален"}
