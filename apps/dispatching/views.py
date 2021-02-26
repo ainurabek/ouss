@@ -572,7 +572,7 @@ class EventUnknownCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
-            response = {"data": "Событие создано успешно"}
+
             # update_period_of_time(instance=obj)
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
