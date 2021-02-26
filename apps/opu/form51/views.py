@@ -50,7 +50,7 @@ class Form51DetailAPIView(RetrieveDestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form51.objects.all()
-    serializer = Form51ReserveSerializer
+    serializer_class = Form51ReserveSerializer
 
 
 #
