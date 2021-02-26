@@ -271,7 +271,7 @@ def get_report_analysis(request):
     all_event_uncompleted = Event.objects.filter(callsorevent=True).exclude(index1__index='4')
     all_event_uncompleted = event_filter_date_from_date_to_and_outfit(all_event_uncompleted, date_from, date_to, responsible_outfit)
     all_event = all_event_completed | all_event_uncompleted
-    all_calls = Event.objects.filter(callsorevent=False, created_at = today)
+    all_calls = Event.objects.filter(callsorevent=False)
     if index is not None:
         all_calls = all_calls.filter(index1_id=index)
 
