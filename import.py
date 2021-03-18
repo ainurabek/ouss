@@ -1,6 +1,6 @@
 import csv, sys, os
 
-
+from apps.dispatching.models import Event
 
 project_dir = "/home/ainura/Desktop/2020/KT/KT/project/"
 sys.path.append(project_dir)
@@ -49,8 +49,23 @@ from apps.opu.objects.models import  Object
 #     point.point2.total_point_channels_RRL = count_2
 #     point.point2.save()
 
-all_objs = Object.objects.all()
-for obj in all_objs:
-    obj.reserve_transit.clear()
-    obj.reserve_transit2.clear()
+# all_objs = Object.objects.all()
+# for obj in all_objs:
+#     obj.reserve_transit.clear()
+#     obj.reserve_transit2.clear()
 
+# main_events = Event.objects.filter(callsorevent = True)
+# for event in main_events:
+#     last = event.event_id_parent.all().order_by('-date_from')[0]
+#     event.created_at = last.created_at
+#     event.save()
+
+events = Event.objects.filter(callsorevent = True)
+for event in events:
+
+    calls  = event.event_id_parent.all()
+    for call in calls:
+        call.object = event.object
+        call.ips = event.ips
+        call.circuit = event.circuit
+        call.save()

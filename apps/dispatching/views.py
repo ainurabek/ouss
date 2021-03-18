@@ -1,4 +1,6 @@
 import datetime
+
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
@@ -23,7 +25,83 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 
-
+# def get_object(obj: Event):
+#     res = None
+#     if obj.object is not None:
+#         res = {'name': obj.object.name, 'id': obj.object.id}
+#     elif obj.ips is not None:
+#         res = {'name': obj.ips.name, 'id': obj.ips.id}
+#     elif obj.circuit is not None:
+#         res = {'name': obj.circuit.name, 'id': obj.circuit.id}
+#     elif obj.name is not None:
+#         res = {'name': obj.name}
+#
+#     return res
+#
+def get_date_to(obj: Event, created_at: str):
+    data = obj.id_parent.date_to
+    if obj.date_to is not None:
+        if str(obj.date_to.date()) != created_at:
+            data = created_at + "T24:00:00"
+        else:
+            data = obj.date_to
+    return data
+#
+# def event_list(request):
+#     created_at = request.GET.get("created_at")
+#     type_journal = request.GET.get('type_journal')
+#     responsible_outfit = request.GET.get('responsible_outfit')
+#     index1 = request.GET.get('index1')
+#     name = request.GET.get('name')
+#
+#     events = Event.objects.filter(date_from__date__lte=created_at, callsorevent=True).order_by('-date_from')#хвосты И все события,созданные в этот день
+#
+#     if type_journal is not None and type_journal != '':
+#         events = events.filter(type_journal=type_journal)
+#     if responsible_outfit is not None and responsible_outfit != '':
+#         events = events.filter(responsible_outfit=responsible_outfit)
+#     if index1 is not None and index1 != '':
+#         events = events.filter(index1=index1)
+#     if name is not None and name != '':
+#         events = events.filter(name=name)
+#
+#     data = []
+#
+#     for event in events:
+#         call = event.event_id_parent.filter(date_from__date__lte=created_at).order_by('-date_from')[0]
+#
+#         if str(call.date_from.date())== created_at:
+#             data.append({
+#                 "id": event.id,
+#                 "object": get_object(call),
+#                 "ips": get_object(call),
+#                 "circuit": get_object(call),
+#                 "index1": call.index1.index,
+#                 "date_from": event.date_from,
+#                 "date_to": get_date_to(call, created_at),
+#                 "created_at": call.created_at,
+#                 "time_created_at": call.time_created_at,
+#                 "name": call.name,
+#                 "responsible_outfit": call.responsible_outfit.outfit
+#             })
+#         elif call.index1.index != '4':
+#             data.append({
+#                 "id": event.id,
+#                 "object": get_object(call),
+#                 "ips": get_object(call),
+#                 "circuit": get_object(call),
+#                 "index1": call.index1.index,
+#                 "date_from": event.date_from,
+#                 "date_to": get_date_to(call, created_at),
+#                 "created_at": call.created_at,
+#                 "time_created_at": call.time_created_at,
+#                 "name": call.name,
+#                 "responsible_outfit": call.responsible_outfit.outfit
+#             })
+#
+#
+#     return JsonResponse(data, safe=False)
+from django.db.models import Q
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
@@ -42,24 +120,17 @@ class EventListAPIView(viewsets.ModelViewSet):
     # событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
 
     def get_queryset(self):
-    #фильтр по хвостам + за сегодня
-        today = datetime.date.today()
-        queryset1 = self.queryset.exclude(index1__index='4') #хваосты
-        queryset2 = self.queryset.filter(created_at=today)
-        queryset = queryset1.union(queryset2)
-
-    # фильтр  по дате создания, без времени + хвосты за предыдущие дни
-
         created_at = self.request.query_params.get('created_at', None)
+
         type_journal = self.request.query_params.get('type_journal', None)
         responsible_outfit = self.request.query_params.get('responsible_outfit', None)
         index1 = self.request.query_params.get('index1', None)
         name = self.request.query_params.get('name', None)
+    #фильтр по хвостам + за сегодня
 
-        if created_at is not None and created_at != '':
-            q1 = self.queryset.filter(created_at__lte=created_at).exclude(index1__index='4')
-            q2 = self.queryset.filter(created_at=created_at)
-            queryset = q1|q2
+        queryset = self.queryset.filter(date_from__date__lte=created_at).order_by('-date_from')
+
+    # фильтр  по дате создания, без времени + хвосты за предыдущие дни
 
         if type_journal is not None and type_journal != '':
             queryset = queryset.filter(type_journal=type_journal)
@@ -69,12 +140,35 @@ class EventListAPIView(viewsets.ModelViewSet):
             queryset = queryset.filter(index1=index1)
         if name is not None and name != '':
             queryset = queryset.filter(name=name)
+        data = set()
 
-        return queryset.order_by('-date_from')
+
+        for event in queryset.filter(Q(date_to__date = created_at) | Q(date_to__date=None)):
+            data.add(event)
+
+        for event in queryset.filter(date_from__date__lt=created_at).exclude(index1__index='4'):
+            data.add(event)
+
+
+        return data
 
     def retrieve(self, request, pk=None):
         calls = Event.objects.get(pk=pk).event_id_parent.all().order_by("-date_from")
         serializer = self.get_serializer(calls, many=True)
+        return Response(serializer.data)
+
+
+class EventDetailAPIView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
+
+
+    def get(self, request, pk=None):
+        created_at = request.GET.get("created_at")
+
+        calls = Event.objects.get(pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
+
+        serializer = EventDetailSerializer(calls, many=True)
         return Response(serializer.data)
 
 
@@ -126,7 +220,7 @@ class EventCircuitCreateViewAPI(APIView):
 
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -162,6 +256,8 @@ class EventCallsCreateViewAPI(APIView):
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False)
 
+
+
             all_calls = event.event_id_parent.all()
             prev = all_calls.filter(date_from__lt = instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
 
@@ -191,6 +287,7 @@ class EventCallsCreateViewAPI(APIView):
                 event.index1 = instance.index1
                 instance.previous = prev
                 prev.date_to = instance.date_from
+                event.created_at = instance.created_at
                 event.save()
                 instance.save()
                 prev.save()
@@ -210,6 +307,8 @@ class EventUpdateAPIView(UpdateAPIView):
         date_from = str(self.get_object().date_from)
         instance = serializer.save()
 
+        instance.id_parent.save()
+
 
         if instance.id_parent is not None:
             all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
@@ -222,7 +321,10 @@ class EventUpdateAPIView(UpdateAPIView):
             if next.count() == 0:
                 instance.id_parent.date_to = instance.date_from
                 instance.id_parent.index1 = instance.index1
+                instance.id_parent.created_at = instance.created_at
                 instance.id_parent.save()
+            instance.id_parent.responsible_outfit = instance.responsible_outfit
+            instance.id_parent.save()
 
             serializer.save()
 
@@ -263,6 +365,7 @@ class EventDeleteAPIView(DestroyAPIView):
             instance.delete()
             main_event.date_to = previous_event.date_from
             main_event.index1 = previous_event.index1
+            main_event.created_at = previous_event.created_at
             main_event.save()
             previous_event.date_to = None
             previous_event.save()
@@ -270,6 +373,7 @@ class EventDeleteAPIView(DestroyAPIView):
         else:
             main_event.date_from = next_event.date_from
             main_event.index1 = next_event.index1
+            main_event.created_at = next_event.created_at
             main_event.save()
             instance.delete()
 
@@ -380,21 +484,92 @@ class UncompletedEventList(ListFilterAPIView):
     queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True,
                                                           callsorevent=False).exclude(index1__index='4')
 
+# @permission_classes([IsAuthenticated, SuperUser|IsDispOnly])
+# def get_report_object(request):
+#     date = request.GET.get("date")
+#     index = request.GET.get("index")
+#     if date is None or date == "":
+#         date = datetime.date.today()
+#
+#     all_calls = Event.objects.filter(Q(date_from__date__lte=date) |Q(date_to__date=date), callsorevent=False).exclude(index1__index='4').order_by('-date_from')#хвосты И все события,созданные в этот день
+#     all_event_names = all_calls.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
+#
+#     if index is not None and index != "":
+#         all_calls = all_calls.filter(index1_id=index)
+#     type_journal = all_calls.order_by("type_journal").distinct("type_journal")
+#     outfits = all_calls.order_by("responsible_outfit").distinct("responsible_outfit")
+#     data = []
+#
+#     for type in type_journal:
+#         data.append({"type_journal": type.type_journal.name,
+#                      "outfit": None,
+#                      "name": None,
+#                      "date_from": None,
+#                      "date_to": None,
+#                      "region": None,
+#                      "index1": None,
+#                      "reason": None,
+#                      "comments1": None})
+#         for out in outfits.filter(type_journal=type.type_journal):
+#             data.append({"outfit": out.responsible_outfit.outfit,
+#                      "name": None,
+#                      "type_journal": None,
+#                      "date_from": None,
+#                      "date_to": None,
+#                      "region": None,
+#                      "index1": None,
+#                      "reason": None,
+#                      "comments1": None})
+#             for event in all_event_names.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal):
+#
+#                 data.append({"outfit": None,
+#                              "name": get_event_name(event),
+#                              "type_journal": None,
+#                              "date_from": None,
+#                              "date_to": None,
+#                              "region": None,
+#                              "index1": None,
+#                              "reason": None,
+#                              "comments1": None})
+#                 calls_count = 0
+#                 for call in all_calls.filter(object=event.object, ips=event.ips, circuit=event.circuit, name= event.name):
+#                     data.append({"outfit": None,
+#                                  "name": get_event_name(call),
+#                                  "type_journal": None,
+#                                  "date_from": call.date_from,
+#                                  "date_to": get_date_to(call, date),
+#                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
+#                                  "index1": call.index1.index,
+#                                  "reason": call.reason.name,
+#                                  "comments1": call.comments1})
+#                 #     calls_count += 1
+#                 # if calls_count == 0:
+#                 #     data.pop()
+#
+#     return JsonResponse(data, safe=False)
+
+
 @permission_classes([IsAuthenticated, SuperUser|IsDispOnly])
 def get_report_object(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
-    if date is None or date == "":
-        date = datetime.date.today()
+    # if date is None or date == "":
+    #     date = datetime.date.today()
 
-    all_event_completed = Event.objects.filter(callsorevent=True, created_at=date, index1__index='4')
-    all_event_uncompleted = Event.objects.filter(created_at__lte=date, callsorevent=True).exclude(index1__index='4')
-    all_event = all_event_completed | all_event_uncompleted
-    all_calls = Event.objects.filter(callsorevent=False)
+    all_uncompleted_events = Event.objects.filter(date_from__date__lt=date, callsorevent=True).order_by('-date_from').exclude(index1__index='4')
+    all_current_calls = Event.objects.filter(date_to__date=date, callsorevent=True)
+    all_events = all_uncompleted_events|all_current_calls
+
+    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
+    print(all_event_names)
+
+
     if index is not None and index != "":
-        all_calls = all_calls.filter(index1_id=index)
-    type_journal = (all_event_completed | all_event_uncompleted).order_by("type_journal").distinct("type_journal")
-    outfits = (all_event_completed | all_event_uncompleted).order_by("responsible_outfit").distinct("responsible_outfit")
+        all_calls = Event.objects.filter(index1_id=index, callsorevent=False)
+    else:
+        all_calls = Event.objects.filter(callsorevent=False)
+    type_journal = all_events.order_by("type_journal").distinct("type_journal")
+    outfits = all_events.order_by("responsible_outfit").distinct("responsible_outfit")
     data = []
 
     for type in type_journal:
@@ -417,7 +592,8 @@ def get_report_object(request):
                      "index1": None,
                      "reason": None,
                      "comments1": None})
-            for event in all_event.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal):
+            for event in all_event_names.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal):
+
                 data.append({"outfit": None,
                              "name": get_event_name(event),
                              "type_journal": None,
@@ -428,19 +604,19 @@ def get_report_object(request):
                              "reason": None,
                              "comments1": None})
                 calls_count = 0
-                for call in all_calls.filter(id_parent=event).exclude(index1__index='4'):
+                for call in all_calls.filter(date_to__date__lte=date, object=event.object, ips=event.ips, circuit=event.circuit, name= event.name):
                     data.append({"outfit": None,
-                                 "name": get_event_name(call),
-                                 "type_journal": None,
+                                         "name": get_event_name(event),
+                                         "type_journal": None,
                                  "date_from": call.date_from,
-                                 "date_to": call.date_to,
+                                 "date_to": get_date_to(call, date),
                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,
                                  "comments1": call.comments1})
-                    calls_count += 1
-                if calls_count == 0:
-                    data.pop()
+                #     calls_count += 1
+                # if calls_count == 0:
+                #     data.pop()
 
     return JsonResponse(data, safe=False)
 

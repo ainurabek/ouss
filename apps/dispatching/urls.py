@@ -21,6 +21,8 @@ urlpatterns = [
     #api
     path('api/list/', views.EventListAPIView.as_view({'get': 'list'}), name="api_list_event"),
     path('api/detail/<int:pk>/', views.EventListAPIView.as_view({'get': 'retrieve'}), name="api_detail_event"),
+    # path('api/list/', views.event_list, name="api_list_event"),
+    path('api/detail/<int:pk>/', views.EventDetailAPIView.as_view(), name="api_detail_event"),
     path("api/event/edit/<int:pk>/", views.EventUpdateAPIView.as_view()),
     path("api/event/delete/<int:pk>/", views.EventDeleteAPIView.as_view()),
 
