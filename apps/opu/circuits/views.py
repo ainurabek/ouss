@@ -31,7 +31,32 @@ class CircuitEditView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def perform_update(self, serializer):
+        circuit = self.get_object()
+        flag = bool(circuit.first)
+        if flag:
+            if circuit.object.type_line.main_line_type.name == 'КЛС':
+                circuit.point1.total_point_channels_KLS -= 1
+                circuit.point1.save()
+                circuit.point2.total_point_channels_KLS -= 1
+                circuit.point2.save()
+            elif circuit.object.type_line.main_line_type.name == 'ЦРРЛ':
+                circuit.point1.total_point_channels_RRL -= 1
+                circuit.point1.save()
+                circuit.point2.total_point_channels_RRL -= 1
+                circuit.point2.save()
         instance = serializer.save(created_by=self.request.user.profile)
+        if instance.first:
+            if circuit.object.type_line.main_line_type.name == 'КЛС':
+                circuit.point1.total_point_channels_KLS += 1
+                circuit.point1.save()
+                circuit.point2.total_point_channels_KLS += 1
+                circuit.point2.save()
+
+            elif circuit.object.type_line.main_line_type.name == 'ЦРРЛ':
+                circuit.point1.total_point_channels_RRL += 1
+                circuit.point1.save()
+                circuit.point2.total_point_channels_RRL += 1
+                circuit.point2.save()
         update_circuit_active(object=instance.object)
 
 

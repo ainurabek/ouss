@@ -42,6 +42,8 @@ class Circuit(models.Model):
 		verbose_name_plural = 'Каналы для Формы 5.3'
 		ordering = ('id',)
 
+
+
 	def __str__(self):
 		return self.name
 

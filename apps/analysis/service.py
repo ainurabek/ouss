@@ -21,19 +21,19 @@ def division(a: float, b: float) -> float:
 
 def get_period(obj, date_to):
     if obj.date_to is not None and obj.date_from is not None:
-        return obj.period_of_time
+        if obj.date_to.date() <= datetime.strptime(date_to, '%Y-%m-%d').date():
+            return obj.period_of_time
 
-    if obj.date_to is None:
-        if date_to is not None:
-            date_to = datetime.fromisoformat(date_to + "T23:59:59")
-            date = date_to - obj.date_from
-            period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-            return round(period_of_time, 2)
-        date = datetime.now()
-        newdate = date.replace(hour=23, minute=59, second=59)
-        date = newdate - obj.date_from
+    if date_to is not None:
+        date_to = datetime.fromisoformat(date_to + "T23:59:59")
+        date = date_to - obj.date_from
         period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
         return round(period_of_time, 2)
+    date = datetime.now()
+    newdate = date.replace(hour=23, minute=59, second=59)
+    date = newdate - obj.date_from
+    period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+    return round(period_of_time, 2)
 
 
 def get_coefficient_kls(downtime):
@@ -133,11 +133,17 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
     if outfit is not None and outfit != '' and outfit != []:
         event = event.filter(responsible_outfit__in=outfit)
     if date_from is not None and date_to is None:
-        event = event.filter(created_at=date_from)
+        event = event.filter(Q(date_to__date__gte=date_from) |Q(date_to__date = None))
+        event= event.filter(date_from__date__lte=date_from)
     elif date_from is None and date_to is not None:
-        event = event.filter(created_at=date_to)
+        event = event.filter(Q(date_to__date__gte=date_to) | Q(date_to__date=None))
+        event = event.filter(date_from__date__lte=date_to)
     elif date_from is not None and date_to is not None:
-        event = event.filter(created_at__gte=date_from, created_at__lte=date_to)
+        event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
+        # event1 = event1.filter(date_from__date__lte=date_from)
+        # event2 = event.filter(Q(date_to__date__gte=date_to) | Q(date_to__date=None))
+        # event2 = event2.filter(date_from__date__lte=date_to)
+        event = event
 
     return event
 

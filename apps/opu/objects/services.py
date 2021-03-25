@@ -41,20 +41,50 @@ def update_circuit(old_obj, obj: Object):
     obj_name, obj_point1, obj_point2 = old_obj
     if obj_name != obj.name:
         circuits = Circuit.objects.filter(id_object=obj)
-        all = Circuit.objects.filter(id_object=obj).count() + 1
+        all =  obj.circuit_object_parent.all() + 1
         cir = 1
         for circuit in circuits:
             if cir <= all:
                 circuit.name = Circuit.objects.filter(pk=circuit.id).update(name=obj.name + "/" + str(cir))
                 cir += 1
 
-    if obj_point1 != obj.point1 or obj_point2 != obj.point2:
-        circuits = Circuit.objects.filter(id_object=obj.id)
+    if obj_point1 != obj.point1.point or obj_point2 != obj.point2.point:
 
-        for circuit in circuits:
-            circuit.name = Circuit.objects.filter(pk=circuit.id).update(
-                point1=obj.point1.id,
-                point2=obj.point2.id)
+        if obj.type_line.main_line_type.name == 'КЛС':
+            for circuit in obj.circuit_object_parent.all():
+                if circuit.first:
+                    circuit.point1.total_point_channels_KLS -= 1
+                    circuit.point1.save()
+                    circuit.point2.total_point_channels_KLS -= 1
+                    circuit.point2.save()
+                    circuit.point1 = obj.point1
+                    circuit.point2 = obj.point2
+                    circuit.save()
+                    circuit.point1.total_point_channels_KLS += 1
+                    circuit.point1.save()
+                    circuit.point2.total_point_channels_KLS += 1
+                    circuit.point2.save()
+        elif obj.type_line.main_line_type.name == 'ЦРРЛ':
+            for circuit in obj.circuit_object_parent.all():
+
+                if circuit.first:
+                    circuit.point1.total_point_channels_RRL -= 1
+                    circuit.point1.save()
+                    circuit.point2.total_point_channels_RRL -= 1
+                    circuit.point2.save()
+                    circuit.point1 = obj.point1
+                    circuit.point2 = obj.point2
+                    circuit.save()
+                    circuit.point1.total_point_channels_RRL += 1
+                    circuit.point1.save()
+                    circuit.point2.total_point_channels_RRL += 1
+                    circuit.point2.save()
+        else:
+            for circuit in obj.circuit_object_parent.all():
+                circuit.point1 = obj.point1
+                circuit.point2 = obj.point2
+                circuit.save()
+
 
 
 def get_count_active_channels(instance: Object):
@@ -79,35 +109,6 @@ def update_total_amount_channels(instance: Object):
         id_parent_instance.total_amount_channels = get_count_active_channels(id_parent_instance)
         id_parent_instance.save()
         id_parent_instance = id_parent_instance.id_parent
-
-def update_total_point_channels(instance: Object):
-    if instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'КЛС':
-        objs = instance.point1.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="КЛС")
-        count_1 = 0
-        for obj in objs:
-            count_1 += obj.total_amount_channels
-        instance.point1.total_point_channels_KLS = count_1
-        objs = instance.point2.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="КЛС")
-        count_2 = 0
-        for obj in objs:
-            count_2 += obj.total_amount_channels
-        instance.point2.total_point_channels_KLS = count_2
-        instance.point1.save()
-        instance.point2.save()
-
-    elif instance.type_of_trakt.name == 'ПГ' and instance.type_line.main_line_type.name == 'ЦРРЛ':
-        objs = instance.point1.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="ЦРРЛ")
-        count_1 = 0
-        for obj in objs:
-            count_1 += obj.total_amount_channels
-        instance.point1.total_point_channels_RRL = count_1
-        objs = instance.point2.obj_point.filter(type_of_trakt__name="ПГ").filter(type_line__main_line_type__name="ЦРРЛ")
-        count_2 = 0
-        for obj in objs:
-            count_2 += obj.total_amount_channels
-        instance.point2.total_point_channels_RRL = count_2
-        instance.point1.save()
-        instance.point2.save()
 
 
 

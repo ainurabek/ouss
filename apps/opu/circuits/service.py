@@ -11,7 +11,6 @@ from apps.opu.circuits.models import Circuit
 
 from apps.opu.objects.services import update_total_amount_channels
 
-from apps.opu.objects.services import update_total_point_channels
 
 register = template.Library()
 from django.db.models import Q
@@ -56,8 +55,21 @@ def create_circuit(obj: Object, request):
             c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
                                  category=obj.category, point1=obj.point1, point2=obj.point2,
                                  created_by=request.user.profile, first=active, object=obj)
+
             c.id_object.add(obj)
             c.transit.add(c)
+        if  active == 1:
+            if obj.type_line.main_line_type.name == 'КЛС':
+                obj.point1.total_point_channels_KLS += obj.amount_channels.value
+                obj.point1.save()
+                obj.point2.total_point_channels_KLS += obj.amount_channels.value
+                obj.point2.save()
+            elif obj.type_line.main_line_type.name == 'ЦРРЛ':
+                obj.point1.total_point_channels_RRL += obj.amount_channels.value
+                obj.point1.save()
+                obj.point2.total_point_channels_RRL += obj.amount_channels.value
+                obj.point2.save()
+
         #чтобы добавлять каналы в список всех каналов id_parent
         id_parent = obj.id_parent
         while True:
@@ -76,5 +88,4 @@ def update_circuit_active(object: Object):
     object.save()
     update_total_amount_channels(object)
 
-    update_total_point_channels(object)
 

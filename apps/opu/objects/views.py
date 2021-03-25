@@ -31,7 +31,6 @@ from apps.opu.objects.serializers import ObjectEditSerializer, MainLineTypeListS
 from apps.opu.objects.models import OrderObjectPhoto, MainLineType
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
-from apps.opu.objects.services import update_total_point_channels
 from apps.opu.objects.serializers import LineTypeCreateSerializer
 
 
@@ -199,8 +198,7 @@ class LPCreateView(generics.CreateAPIView):
             create_form51(obj=instance)
             # create_circuit(instance, self.request)
             adding_an_object_to_trassa(obj=instance)
-            response = {"data": "ЛП создана успешно"}
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -253,6 +251,17 @@ class ObjectDetailView(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         self.permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
         instance = self.get_object()
+        for cir in instance.circuit_object_parent.filter(first=True):
+            if instance.type_line.main_line_type.name == 'КЛС':
+                cir.point1.total_point_channels_KLS -=1
+                cir.point1.save()
+                cir.point2.total_point_channels_KLS -= 1
+                cir.point2.save()
+            elif instance.type_line.main_line_type.name == 'ЦРРЛ':
+                cir.point1.total_point_channels_RRL -=1
+                cir.point1.save()
+                cir.point2.total_point_channels_RRL -= 1
+                cir.point2.save()
 
         self.perform_destroy(instance)
         update_total_amount_channels(instance=instance)
@@ -297,9 +306,8 @@ class ObjectCreateView(APIView):
             create_form51(obj = instance)
             # create_circuit(obj=instance, request=request)
             adding_an_object_to_trassa(obj=instance)
-            update_total_amount_channels(instance=instance)
             create_circuit(instance, self.request)
-            update_total_point_channels(instance=instance)
+            update_total_amount_channels(instance=instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -316,6 +324,7 @@ class ObjectEditView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             update_circuit(old_obj=old_obj, obj=instance)
+            # update_total_point_channels(instance=instance)
             response = {"message": "Объект успешно отредактирован"}
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
