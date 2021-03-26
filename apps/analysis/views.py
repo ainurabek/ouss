@@ -1,9 +1,7 @@
 import copy
 from rest_framework import viewsets, generics
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
-import datetime
-
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
 from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
@@ -14,20 +12,17 @@ from apps.analysis.service import get_period, get_type_line, get_calls_list, get
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
     set_response_for_winners, get_winners
-
 from apps.dispatching.models import Event, HistoricalEvent, Index
 from apps.dispatching.services import get_event_name, get_event
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from apps.opu.services import ListWithPKMixin
-
 from apps.analysis.service import get_diff
 from rest_framework.decorators import permission_classes
 from apps.accounts.permissions import SuperUser, IsAKOnly, IngenerUser
-from apps.dispatching.views import get_date_to
-
-
+from apps.analysis.service import get_date_to_ak
+from apps.dispatching.services import get_date_to
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
@@ -37,7 +32,7 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.getlist("responsible_outfit")
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратура',
+    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
                                                                                               'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
 
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
@@ -48,8 +43,8 @@ def get_report(request):
     data = []
 
     list_reason_typ_line = {
-        "Откл. ЭЭКЛС": None, "Откл. ЭЭЦРРЛ": None, "ПВ аппаратураКЛС": None,
-        "ПВ аппаратураЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
+        "Откл. ЭЭКЛС": None, "Откл. ЭЭЦРРЛ": None, "ПВ аппаратурыКЛС": None,
+        "ПВ аппаратурыЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
         }
 
@@ -96,9 +91,7 @@ def get_report(request):
                     call_data['date_to'] = call.date_to
                     call_data['comments'] = call.comments1
                     kls = call.ips.total_point_channels_KLS
-
                     rrl = call.ips.total_point_channels_RRL
-
 
                     if kls != 0:
                         call_data['amount_of_channels']["КЛС"] = kls
@@ -143,20 +136,12 @@ def get_report(request):
         data.append(total_outfit)
     return JsonResponse(data, safe=False)
 
-def get_date_to_ak(obj: Event, created_at: str):
-    data = obj.date_to
-    if obj.date_to is None:
-        data = created_at + "T24:00:00"
-    elif obj.date_to.date() > datetime.datetime.strptime(created_at, '%Y-%m-%d').date():
-        data = created_at + "T24:00:00"
-    return data
+
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_analysis(request):
     """Отчет дисп.службы по разным индексам"""
-
-
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     index = request.GET.get("index")
@@ -164,16 +149,13 @@ def get_report_analysis(request):
 
     all_events = Event.objects.filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4')
 
-    all_events= event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
+    if index is not None and index != "":
+        all_events = all_events.filter(index1__id=index)
 
+    all_events= event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
 
     all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id').distinct('ips_id', 'object_id',
                                                                                                 'circuit_id')
-
-    if index is not None and index != "":
-        all_events = all_events.filter(index1_id=index)
-
-
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = []
@@ -194,7 +176,7 @@ def get_report_analysis(request):
 
             for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from'):
                 call_data = example.copy()
-                call_data['id'] = call.id
+                call_data['id'] = None
                 call_data['name'] = '-'
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from
@@ -203,7 +185,6 @@ def get_report_analysis(request):
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
                 data.append(call_data)
-
 
     return JsonResponse(data, safe=False)
 
@@ -378,13 +359,11 @@ class ReportOaAndOdApiView(APIView):
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
 
-
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
 
-
         if index is None or index == '':
-            all_event = Event.objects.filter(index1__in=[od, oa]).exclude(name__isnull=False)
+            all_event = Event.objects.filter(index1__in=[od, oa],  callsorevent=False).exclude(name__isnull=False)
         elif index in [str(od.id), str(oa.id)]:
             all_event = Event.objects.filter(index1=index,
                                          callsorevent=False).exclude(name__isnull=False)
@@ -396,7 +375,6 @@ class ReportOaAndOdApiView(APIView):
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
-
 
         winners_oa = {
             "first": {"value": 0, "index": None},
@@ -423,11 +401,11 @@ class ReportOaAndOdApiView(APIView):
             data.append({"outfit": outfit.outfit, "name": None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
             outfit_data = {"outfit": outfit.outfit, "name": None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}}
             for event in all_event_name.filter(responsible_outfit=outfit):
-                count_od = get_count_event(all_event, get_event(event), od, outfit)
-                count_oa = get_count_event(all_event, get_event(event), oa, outfit)
+                count_od = get_count_event(all_event, event, od, outfit)
+                count_oa = get_count_event(all_event, event, oa, outfit)
 
-                sum_oa = get_sum_period_of_time_event(all_event, get_event(event), oa, outfit)
-                sum_od = get_sum_period_of_time_event(all_event, get_event(event), od, outfit)
+                sum_oa = get_sum_period_of_time_event(all_event, event, oa, outfit, date_to)
+                sum_od = get_sum_period_of_time_event(all_event, event, od, outfit, date_to)
 
                 winner_index = len(data)
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
@@ -492,8 +470,8 @@ class WinnerReportAPIView(APIView):
             outfit = out.responsible_outfit
             for index in list_index:
                 for event in all_event_name.filter(responsible_outfit=outfit, index1=index):
-                    sum = get_sum_period_of_time_event(all_event, get_event(event), index, outfit)
-                    count = get_count_event(all_event, get_event(event), index, outfit)
+                    sum = get_sum_period_of_time_event(all_event, event, index, outfit, date_to)
+                    count = get_count_event(all_event, event, index, outfit)
                     event_name = get_event_name(event)
                     get_winners(winners[index.index], event_name, sum, count)
 

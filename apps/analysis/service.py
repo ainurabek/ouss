@@ -1,14 +1,11 @@
 from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
-from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import MainLineType, Object, IP, Outfit
 from django.utils.safestring import mark_safe
 from django import template
 from apps.dispatching.models import Reason, Index
 from django.db.models import Q
-
-from apps.opu.objects.models import Point
 
 register = template.Library()
 
@@ -20,8 +17,9 @@ def division(a: float, b: float) -> float:
 
 
 def get_period(obj, date_to):
-    if obj.date_to is not None and obj.date_from is not None:
+    if obj.date_to is not None and obj.date_from is not None and date_to is not None:
         if obj.date_to.date() <= datetime.strptime(date_to, '%Y-%m-%d').date():
+
             return obj.period_of_time
 
     if date_to is not None:
@@ -29,10 +27,15 @@ def get_period(obj, date_to):
         date = date_to - obj.date_from
         period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
         return round(period_of_time, 2)
+
     date = datetime.now()
+
     newdate = date.replace(hour=23, minute=59, second=59)
+
     date = newdate - obj.date_from
+
     period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+
     return round(period_of_time, 2)
 
 
@@ -92,8 +95,11 @@ def get_coefficient_rrl(downtime):
 
 
 def get_type_line(obj) -> str:
+
     if obj.object is not None:
+
         return obj.object.type_line.main_line_type.name
+
     elif obj.circuit is not None:
         return obj.circuit.id_object.type_line.main_line_type.name
 
@@ -113,7 +119,6 @@ def get_amount_of_channels(obj):
         return obj.object.total_amount_channels
     elif obj.circuit is not None:
         return obj.circuit.id_object.total_amount_channels
-
 
 def get_period_date_to(call, date_to):
     if call.date_to is None:
@@ -140,21 +145,16 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
         event = event.filter(date_from__date__lte=date_to)
     elif date_from is not None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
-        # event1 = event1.filter(date_from__date__lte=date_from)
-        # event2 = event.filter(Q(date_to__date__gte=date_to) | Q(date_to__date=None))
-        # event2 = event2.filter(date_from__date__lte=date_to)
-        event = event
 
     return event
-
-
 
 
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
     all_event = Event.objects.filter(index1__index='1', callsorevent=False,
-                                     reason__name__in=['ПВ аппаратура', 'Линейные ПВ', 'Хищения на ЛС']).exclude(name__isnull=False)
+                                     reason__name__in=['ПВ аппаратуры', 'Линейные ПВ', 'Хищения на ЛС']).exclude(name__isnull=False)
+
     return event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
 
 
@@ -176,6 +176,7 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         outfits = Outfit.objects.filter(outfit__in=['ЧОФ', 'НОФ', 'ТОФ', 'ИОФ', 'ЖОФ', 'ООФ', 'БОФ', 'БГТС', 'ЦСП'])
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
+
     kls, rrl = get_type_line_vls_and_kls()
 
     total_rep_kls = 0
@@ -183,31 +184,40 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     for out in outfits:
         total_outfit_kls = 0
         total_outfit_rrl = 0
-        amount_of_channels_kls = 0
-        amount_of_channels_rrl = 0
+
         for event in all_event_name.filter(responsible_outfit=out):
+            total_event_kls = 0
+            total_event_rrl = 0
+
+            type_line = get_type_line(event)
+            for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit):
+                period = get_period(call, date_to)
+                if call.ips is None:
+                    if type_line == kls.name:
+                        total_event_kls += period
+                    elif type_line == rrl.name:
+                        total_event_rrl += period
+                else:
+                    if call.ips.total_point_channels_KLS != 0:
+                        total_event_kls += period
+                    if call.ips.total_point_channels_RRL != 0:
+                        total_event_rrl += period
+
             if event.ips is None:
-
-                if get_type_line(event) == kls.name:
-                    amount_of_channels_kls += int(get_amount_of_channels(event))
-                    total_outfit_kls += get_period_date_to(event, date_to)
-
-                elif get_type_line(event) == rrl.name:
-                    amount_of_channels_rrl += int(get_amount_of_channels(event))
-                    total_outfit_rrl += get_period_date_to(event, date_to)
+                amount_of_channels = int(get_amount_of_channels(event))
+                if type_line == kls.name:
+                    total_outfit_kls += amount_of_channels*total_event_kls
+                elif type_line == rrl.name:
+                    total_outfit_rrl += amount_of_channels*total_event_rrl
             else:
                 if event.ips.total_point_channels_KLS != 0:
-                    amount_of_channels_kls += event.ips.total_point_channels_KLS
-                    total_outfit_kls += get_period_date_to(event, date_to)
+                    total_outfit_kls += event.ips.total_point_channels_KLS*total_event_kls
                 if event.ips.total_point_channels_RRL != 0:
-                    amount_of_channels_rrl += event.ips.total_point_channels_RRL
-                    total_outfit_rrl += get_period_date_to(event, date_to)
+                    total_outfit_rrl += event.ips.total_point_channels_RRL*total_event_rrl
 
-        total_out_kls = total_outfit_kls * amount_of_channels_kls
-        total_out_rrl = total_outfit_rrl * amount_of_channels_rrl
 
-        total_rep_kls += total_out_kls
-        total_rep_rrl += total_out_rrl
+        total_rep_kls += total_outfit_kls
+        total_rep_rrl += total_outfit_rrl
         #####################################################################################################
         analysis_form = FormAnalysis.objects.create(outfit=out, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
@@ -246,8 +256,8 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
                                            user=user, form_analysis=analysis_form)
             TotalData.objects.create(punkt7=punkt7)
 
-        punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=total_out_kls,
-                                       outfit_period_of_time_rrl=total_out_rrl, outfit=out,
+        punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=round(total_outfit_kls, 2),
+                                       outfit_period_of_time_rrl=round(total_outfit_rrl, 2), outfit=out,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
 
         TotalData.objects.create(punkt5=punkt5)
@@ -554,29 +564,18 @@ def get_diff(history):
 
 def filter_event(events: Event, instance, index, outfit):
 
-    if isinstance(instance, Object):
-        return events.filter(object=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
-                             date_to__isnull=False)
-    elif isinstance(instance, Point):
-
-        return events.filter(ips=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
-                             date_to__isnull=False)
-    elif isinstance(instance, Circuit):
-        return events.filter(circuit=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
-                             date_to__isnull=False)
-    else:
-        return events.filter(name=instance, index1=index, responsible_outfit=outfit, date_from__isnull=False,
-                             date_to__isnull=False)
+    return events.filter(object=instance.object, ips=instance.ips, circuit=instance.circuit, index1=index, responsible_outfit=outfit)
 
 
-def get_count_event(events: Event, obj, index, outfit) -> int:
-    return filter_event(events, obj, index, outfit).count()
+def get_count_event(events: Event, event, index, outfit) -> int:
+    return filter_event(events, event, index, outfit).count()
 
 
-def get_sum_period_of_time_event(events: Event, instance, index, outfit):
+def get_sum_period_of_time_event(events: Event, instance, index, outfit, date_to):
     a = 0
     for event in filter_event(events, instance, index, outfit):
-        a += event.period_of_time
+
+        a += get_period(event, date_to)
 
     return a
 
@@ -662,3 +661,12 @@ def get_winners(winners: list, name, sum_p, count):
         third = swap_winners_first_stage(third, name, sum_p, count)
 
     return winners
+
+
+def get_date_to_ak(obj: Event, created_at: str):
+    data = obj.date_to
+    if obj.date_to is None:
+        data = created_at + "T24:00:00"
+    elif obj.date_to.date() > datetime.strptime(created_at, '%Y-%m-%d').date():
+        data = created_at + "T24:00:00"
+    return data

@@ -1,8 +1,6 @@
 import datetime
 from datetime import timedelta
-
 from rest_framework.generics import ListAPIView
-
 from apps.dispatching.models import Event
 
 
@@ -61,13 +59,18 @@ def get_event(event_object) -> Event:
         event = event_object
     return event
 
-# def update_period_of_time(instance):
-#     if instance.date_from is not None and instance.date_to is not None:
-#         date = instance.date_to - instance.date_from
-#         period_time=(((date.total_seconds()/60)*100)/60)/100
-#         print(period_time)
-#         instance.period_of_time = period_time
-#         print(instance.period_of_time)
-#         instance.save()
-#         print(instance.period_of_time)
+def get_date_to(obj: Event, created_at: str):
+    data = None
+    if obj.id_parent is not None:
+        data = obj.id_parent.date_to
+    if obj.date_to is not None:
+
+        if str(obj.date_to.date()) != created_at:
+            data = created_at + "T24:00:00"
+        else:
+            data = obj.date_to
+
+    else:
+        data = created_at + "T24:00:00"
+    return data
 

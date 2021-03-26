@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer
-from .services import get_minus_date, ListFilterAPIView, get_event_name
+from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
@@ -26,89 +26,8 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 
-# def get_object(obj: Event):
-#     res = None
-#     if obj.object is not None:
-#         res = {'name': obj.object.name, 'id': obj.object.id}
-#     elif obj.ips is not None:
-#         res = {'name': obj.ips.name, 'id': obj.ips.id}
-#     elif obj.circuit is not None:
-#         res = {'name': obj.circuit.name, 'id': obj.circuit.id}
-#     elif obj.name is not None:
-#         res = {'name': obj.name}
-#
-#     return res
-#
-def get_date_to(obj: Event, created_at: str):
-    data = None
-    if obj.id_parent is not None:
-        data = obj.id_parent.date_to
-    if obj.date_to is not None:
 
-        if str(obj.date_to.date()) != created_at:
-            data = created_at + "T24:00:00"
-        else:
-            data = obj.date_to
 
-    else:
-        data = created_at + "T24:00:00"
-    return data
-#
-# def event_list(request):
-#     created_at = request.GET.get("created_at")
-#     type_journal = request.GET.get('type_journal')
-#     responsible_outfit = request.GET.get('responsible_outfit')
-#     index1 = request.GET.get('index1')
-#     name = request.GET.get('name')
-#
-#     events = Event.objects.filter(date_from__date__lte=created_at, callsorevent=True).order_by('-date_from')#хвосты И все события,созданные в этот день
-#
-#     if type_journal is not None and type_journal != '':
-#         events = events.filter(type_journal=type_journal)
-#     if responsible_outfit is not None and responsible_outfit != '':
-#         events = events.filter(responsible_outfit=responsible_outfit)
-#     if index1 is not None and index1 != '':
-#         events = events.filter(index1=index1)
-#     if name is not None and name != '':
-#         events = events.filter(name=name)
-#
-#     data = []
-#
-#     for event in events:
-#         call = event.event_id_parent.filter(date_from__date__lte=created_at).order_by('-date_from')[0]
-#
-#         if str(call.date_from.date())== created_at:
-#             data.append({
-#                 "id": event.id,
-#                 "object": get_object(call),
-#                 "ips": get_object(call),
-#                 "circuit": get_object(call),
-#                 "index1": call.index1.index,
-#                 "date_from": event.date_from,
-#                 "date_to": get_date_to(call, created_at),
-#                 "created_at": call.created_at,
-#                 "time_created_at": call.time_created_at,
-#                 "name": call.name,
-#                 "responsible_outfit": call.responsible_outfit.outfit
-#             })
-#         elif call.index1.index != '4':
-#             data.append({
-#                 "id": event.id,
-#                 "object": get_object(call),
-#                 "ips": get_object(call),
-#                 "circuit": get_object(call),
-#                 "index1": call.index1.index,
-#                 "date_from": event.date_from,
-#                 "date_to": get_date_to(call, created_at),
-#                 "created_at": call.created_at,
-#                 "time_created_at": call.time_created_at,
-#                 "name": call.name,
-#                 "responsible_outfit": call.responsible_outfit.outfit
-#             })
-#
-#
-#     return JsonResponse(data, safe=False)
-from django.db.models import Q
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
@@ -495,7 +414,7 @@ def get_report_object(request):
     all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
 
     if index is not None and index != "":
-        all_calls = all_events.filter(index1_id=index)
+        all_events = all_events.filter(index1_id=index)
 
 
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
