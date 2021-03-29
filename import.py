@@ -8,7 +8,7 @@ import django
 django.setup()
 
 from apps.opu.objects.models import  Object, Point
-from KT.apps.analysis.models import AmountChannelsKLSRRL
+from apps.analysis.models import AmountChannelsKLSRRL
 from apps.dispatching.models import Event
 
 
