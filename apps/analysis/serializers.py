@@ -6,6 +6,8 @@ from apps.dispatching.models import Event, HistoricalEvent
 from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSerializer
 from apps.opu.objects.serializers import IPListSerializer
 
+from apps.analysis.models import AmountChannelsKLSRRL
+
 
 class DispEvent1ListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
@@ -118,3 +120,10 @@ class FormAnalysisCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormAnalysis
         fields = ("id", "date_from", "date_to")
+
+
+class AmountChannelsKLSRRLSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AmountChannelsKLSRRL
+        fields = ("id", "amount_channelsKLS", "amount_channelsRRL")

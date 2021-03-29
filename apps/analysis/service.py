@@ -670,3 +670,13 @@ def get_date_to_ak(obj: Event, created_at: str):
     elif obj.date_to.date() > datetime.strptime(created_at, '%Y-%m-%d').date():
         data = created_at + "T24:00:00"
     return data
+
+def get_amount(obj:Event):
+    if obj.object is not None:
+        return obj.object.object_channelKLSRRL.id, obj.object.object_channelKLSRRL.amount_channelsKLS, \
+               obj.object.object_channelKLSRRL.amount_channelsRRL
+    if obj.ips is not None:
+        return  obj.ips.point_channelKLSRRL.id, obj.ips.point_channelKLSRRL.amount_channelsKLS, \
+                obj.ips.point_channelKLSRRL.amount_channelsRRL
+    if obj.circuit is not None:
+        return  None, 1, 1

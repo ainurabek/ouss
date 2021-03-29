@@ -1,7 +1,5 @@
 import csv, sys, os
 
-from apps.dispatching.models import Event
-
 project_dir = "/home/ainura/Desktop/2020/KT/KT/project/"
 sys.path.append(project_dir)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
@@ -9,7 +7,9 @@ import django
 
 django.setup()
 
-from apps.opu.objects.models import  Object
+from apps.opu.objects.models import  Object, Point
+from KT.apps.analysis.models import AmountChannelsKLSRRL
+from apps.dispatching.models import Event
 
 
 #добавить все задействованные каналы к ипам обьектов
@@ -60,12 +60,19 @@ from apps.opu.objects.models import  Object
 #     event.created_at = last.created_at
 #     event.save()
 
-events = Event.objects.filter(callsorevent = True)
-for event in events:
+# events = Event.objects.filter(callsorevent = True)
+# for event in events:
+#
+#     calls  = event.event_id_parent.all()
+#     for call in calls:
+#         call.object = event.object
+#         call.ips = event.ips
+#         call.circuit = event.circuit
+#         call.save()
 
-    calls  = event.event_id_parent.all()
-    for call in calls:
-        call.object = event.object
-        call.ips = event.ips
-        call.circuit = event.circuit
-        call.save()
+objects = Object.objects.all()
+for obj in objects:
+    AmountChannelsKLSRRL.objects.create(object = obj)
+points = Point.objects.all()
+for point in points:
+    AmountChannelsKLSRRL.objects.create(ips=point)

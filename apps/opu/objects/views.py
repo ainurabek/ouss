@@ -33,6 +33,8 @@ from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 from apps.opu.objects.serializers import LineTypeCreateSerializer
 
+from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, create_point_KLSS_RRL_amount_channels
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all().order_by('name')
@@ -131,6 +133,9 @@ class PointListView(viewsets.ModelViewSet):
             return PointListSerializer
         else:
             return PointCreateSerializer
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        create_point_KLSS_RRL_amount_channels(ips=instance)
 
 
 class IPCreateView(APIView):
@@ -303,6 +308,7 @@ class ObjectCreateView(APIView):
             # if instance.type_of_trakt.name == 'ПГ':
             instance.total_amount_channels = instance.amount_channels.value
             instance.save()
+            create_object_KLSS_RRL_amount_channels(obj = instance)
             create_form51(obj = instance)
             # create_circuit(obj=instance, request=request)
             adding_an_object_to_trassa(obj=instance)

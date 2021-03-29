@@ -1,7 +1,9 @@
 from apps.opu.circuits.models import Circuit
-from apps.opu.objects.models import TypeOfTrakt, Object
+from apps.opu.objects.models import TypeOfTrakt, Object, Point
 
 from apps.opu.form51.models import Form51
+
+from apps.analysis.models import AmountChannelsKLSRRL
 
 
 def check_parent_type_of_trakt(parent: Object):
@@ -124,3 +126,9 @@ def create_form51(obj:Object):
     Form51.objects.create(object = obj, customer = obj.customer)
 
 
+def create_object_KLSS_RRL_amount_channels(obj:Object):
+    AmountChannelsKLSRRL.objects.create(object=obj)
+
+
+def create_point_KLSS_RRL_amount_channels(ips:Point):
+    AmountChannelsKLSRRL.objects.create(ips=ips)

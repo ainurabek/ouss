@@ -2,6 +2,8 @@ from django.db import models
 from apps.accounts.models import Profile
 from apps.opu.objects.models import Outfit, MainLineType
 
+from apps.opu.objects.models import Object, Point
+
 
 class FormAnalysis(models.Model):
     id_parent = models.ForeignKey("FormAnalysis", on_delete=models.CASCADE, blank=True, null=True)
@@ -22,6 +24,19 @@ class FormAnalysis(models.Model):
     class Meta:
         verbose_name = "Средний Кеффициент"
         verbose_name_plural = "Средний Кеффициент"
+
+class AmountChannelsKLSRRL(models.Model):
+    object = models.OneToOneField(Object, related_name = 'object_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
+    ips = models.OneToOneField(Point, related_name = 'point_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
+    amount_channelsKLS = models.IntegerField("КЛС каналы", default=0, blank=True, null=True)
+    amount_channelsRRL = models.IntegerField("ЦРРЛ каналы", default=0,  blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.id}"
+
+    class Meta:
+        verbose_name = "Количество каналов (КЛС и ЦЦРЛ)"
+        verbose_name_plural = "Количество каналов (КЛС и ЦЦРЛ)"
 
 
 class Punkt5(models.Model):

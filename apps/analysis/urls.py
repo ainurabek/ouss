@@ -25,6 +25,7 @@ urlpatterns = [
     path("winners/report/", views.WinnerReportAPIView.as_view()),
 
     path("disp/report/", views.get_report_analysis),
+    path("update/amount_channels/<int:pk>/", views.AmountChannelsObjectKLSRRLAPIView.as_view()),
     path('', include(router.urls)),
 
 ]

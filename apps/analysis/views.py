@@ -1,5 +1,6 @@
 import copy
 from rest_framework import viewsets, generics
+from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
@@ -23,6 +24,131 @@ from rest_framework.decorators import permission_classes
 from apps.accounts.permissions import SuperUser, IsAKOnly, IngenerUser
 from apps.analysis.service import get_date_to_ak
 from apps.dispatching.services import get_date_to
+from apps.analysis.models import AmountChannelsKLSRRL
+from apps.analysis.serializers import AmountChannelsKLSRRLSerializer
+from apps.analysis.service import get_amount
+
+
+# @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+# def get_report(request):
+#     """ Форма анализа"""
+#     date_from = request.GET.get("date_from")
+#     date_to = request.GET.get("date_to")
+#     responsible_outfit = request.GET.getlist("responsible_outfit")
+#
+#     all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
+#                                                                                               'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
+#
+#     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
+#
+#     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+#     outfits = event_distinct(all_event, "responsible_outfit")
+#
+#     data = []
+#
+#     list_reason_typ_line = {
+#         "Откл. ЭЭКЛС": None, "Откл. ЭЭЦРРЛ": None, "ПВ аппаратурыКЛС": None,
+#         "ПВ аппаратурыЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
+#         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
+#         }
+#
+#     example = {"name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
+#                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
+#     }
+#
+#     for outfit in outfits:
+#         total_outfit = copy.deepcopy(example)
+#         total_outfit['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
+#         out_data = copy.deepcopy(example)
+#         out_data['name'] = outfit.responsible_outfit.outfit
+#         out_data['color'] = "1"
+#         data.append(out_data)
+#
+#         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+#             event_data = copy.deepcopy(example)
+#             event_data['name'] = get_event_name(event)
+#             data.append(event_data)
+#             example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
+#             total_period_of_time = copy.deepcopy(example)
+#
+#             for call in get_calls_list(all_event, event):
+#                 period = get_period(call, date_to)
+#
+#                 if call.ips is None:
+#                     type_line = get_type_line(call)
+#                     amount_of_channels = get_amount_of_channels(call)
+#
+#                     call_data = copy.deepcopy(example)
+#                     call_data['date_from'] = call.date_from
+#                     call_data['date_to'] = call.date_to
+#                     call_data['period_of_time'][call.reason.name+type_line] = period
+#
+#                     call_data['amount_of_channels'][type_line] = amount_of_channels
+#                     call_data['comments'] = call.comments1
+#
+#                     total_period_of_time['period_of_time'][call.reason.name+type_line] += period
+#
+#                     data.append(call_data)
+#                 else:
+#                     call_data = copy.deepcopy(example)
+#                     call_data['date_from'] = call.date_from
+#                     call_data['date_to'] = call.date_to
+#                     call_data['comments'] = call.comments1
+#                     kls = call.ips.total_point_channels_KLS
+#                     rrl = call.ips.total_point_channels_RRL
+#
+#                     if kls != 0:
+#                         call_data['amount_of_channels']["КЛС"] = kls
+#                         call_data['period_of_time'][call.reason.name + 'КЛС'] = period
+#                         total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
+#
+#                     if rrl != 0:
+#                         call_data['amount_of_channels']["ЦРРЛ"] = rrl
+#                         call_data['period_of_time'][call.reason.name + 'ЦРРЛ'] = period
+#                         total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
+#                     data.append(call_data)
+#
+#
+#             total = dict(total_period_of_time)
+#             if event.ips is None:
+#                 for i in total['period_of_time']:
+#                     total['period_of_time'][i] = round(total['period_of_time'][i] * int(get_amount_of_channels(event)), 2)
+#                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
+#             else:
+#                 k = event.ips.total_point_channels_KLS
+#                 r = event.ips.total_point_channels_RRL
+#
+#                 for i in total['period_of_time']:
+#                     if k != 0:
+#                         total['period_of_time'][i] = round(total['period_of_time'][i] * k, 2)
+#                         total_outfit['period_of_time'][i] += total['period_of_time'][i]
+#                     if r != 0:
+#                         total['period_of_time'][i] = round(total['period_of_time'][i] * r, 2)
+#                         total_outfit['period_of_time'][i] += total['period_of_time'][i]
+#
+#             total_period_of_time['name'] = 'всего'
+#             total_period_of_time['date_from'] = 'час'
+#             total_period_of_time['color'] = '2'
+#             data.append(total_period_of_time)
+#             total['name'] = 'всего'
+#             total['date_from'] = 'кнл/час'
+#             total['color'] = '3'
+#             data.append(total)
+#
+#         total_outfit['name'] = 'Общий итог'
+#         total_outfit['color'] = '4'
+#         data.append(total_outfit)
+#     return JsonResponse(data, safe=False)
+
+
+
+class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
+    '''сохранение количества каналов для Обьекта'''
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = AmountChannelsKLSRRL.objects.all()
+    serializer_class = AmountChannelsKLSRRLSerializer
+
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
@@ -31,6 +157,7 @@ def get_report(request):
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.getlist("responsible_outfit")
+
 
     all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
                                                                                               'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
@@ -48,7 +175,7 @@ def get_report(request):
         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
         }
 
-    example = {"name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
+    example = {'id': None, "name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
     }
 
@@ -61,66 +188,42 @@ def get_report(request):
         data.append(out_data)
 
         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+            amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(event)
             event_data = copy.deepcopy(example)
             event_data['name'] = get_event_name(event)
+            event_data['id'] = amount_channels_id
             data.append(event_data)
             example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
             total_period_of_time = copy.deepcopy(example)
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
+                amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(call)
+                call_data = copy.deepcopy(example)
+                call_data['date_from'] = call.date_from
+                call_data['date_to'] = call.date_to
+                if amount_channels_KLS != 0:
+                    call_data['period_of_time'][call.reason.name+'КЛС'] = period
+                    total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
+                if amount_channels_RRL != 0:
+                    call_data['period_of_time'][call.reason.name+'ЦРРЛ'] = period
+                    total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
 
-                if call.ips is None:
-                    type_line = get_type_line(call)
-                    amount_of_channels = get_amount_of_channels(call)
-
-                    call_data = copy.deepcopy(example)
-                    call_data['date_from'] = call.date_from
-                    call_data['date_to'] = call.date_to
-                    call_data['period_of_time'][call.reason.name+type_line] = period
-
-                    call_data['amount_of_channels'][type_line] = amount_of_channels
-                    call_data['comments'] = call.comments1
-
-                    total_period_of_time['period_of_time'][call.reason.name+type_line] += period
-
-                    data.append(call_data)
-                else:
-                    call_data = copy.deepcopy(example)
-                    call_data['date_from'] = call.date_from
-                    call_data['date_to'] = call.date_to
-                    call_data['comments'] = call.comments1
-                    kls = call.ips.total_point_channels_KLS
-                    rrl = call.ips.total_point_channels_RRL
-
-                    if kls != 0:
-                        call_data['amount_of_channels']["КЛС"] = kls
-                        call_data['period_of_time'][call.reason.name + 'КЛС'] = period
-                        total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
-
-                    if rrl != 0:
-                        call_data['amount_of_channels']["ЦРРЛ"] = rrl
-                        call_data['period_of_time'][call.reason.name + 'ЦРРЛ'] = period
-                        total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
-                    data.append(call_data)
+                call_data['amount_of_channels']['КЛС']= amount_channels_KLS
+                call_data['amount_of_channels']['ЦРРЛ'] = amount_channels_RRL
+                call_data['comments'] = call.comments1
+                data.append(call_data)
 
 
             total = dict(total_period_of_time)
-            if event.ips is None:
-                for i in total['period_of_time']:
-                    total['period_of_time'][i] = round(total['period_of_time'][i] * int(get_amount_of_channels(event)), 2)
-                    total_outfit['period_of_time'][i] += total['period_of_time'][i]
-            else:
-                k = event.ips.total_point_channels_KLS
-                r = event.ips.total_point_channels_RRL
 
-                for i in total['period_of_time']:
-                    if k != 0:
-                        total['period_of_time'][i] = round(total['period_of_time'][i] * k, 2)
-                        total_outfit['period_of_time'][i] += total['period_of_time'][i]
-                    if r != 0:
-                        total['period_of_time'][i] = round(total['period_of_time'][i] * r, 2)
-                        total_outfit['period_of_time'][i] += total['period_of_time'][i]
+            for i in total['period_of_time']:
+                if amount_channels_KLS != 0:
+                    total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_KLS, 2)
+                    total_outfit['period_of_time'][i] += total['period_of_time'][i]
+                if amount_channels_RRL != 0:
+                    total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_RRL, 2)
+                    total_outfit['period_of_time'][i] += total['period_of_time'][i]
 
             total_period_of_time['name'] = 'всего'
             total_period_of_time['date_from'] = 'час'
@@ -135,8 +238,6 @@ def get_report(request):
         total_outfit['color'] = '4'
         data.append(total_outfit)
     return JsonResponse(data, safe=False)
-
-
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
