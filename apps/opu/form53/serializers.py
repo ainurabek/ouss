@@ -28,6 +28,7 @@ class Form53CreateSerializer(serializers.ModelSerializer):
         model = Form53
         fields = ("id",  "comments")
 
+
 class TransitForm53Serializer(serializers.ModelSerializer):
     point1 = PointCircSerializer()
     point2 = PointCircSerializer()
@@ -36,6 +37,7 @@ class TransitForm53Serializer(serializers.ModelSerializer):
         model = Circuit
         fields = ('id', 'point1', 'name', 'point2')
 
+
 class CircuitForm53(serializers.ModelSerializer):
 
     transit = TransitForm53Serializer(many=True)
@@ -43,20 +45,20 @@ class CircuitForm53(serializers.ModelSerializer):
 
     category = CategorySerializer()
 
-
     class Meta:
         model = Circuit
         fields = ('id', 'name',  'num_circuit', 'category', 'num_order',
                    'comments', 'transit', 'transit2')
 
+
 class Form53Serializer(serializers.ModelSerializer):
     """Список Формы 5.3"""
     order53_photo = Order53PhotoSerializer(many=True)
-    schema53_photo=Schema53PhotoSerializer(many=True)
+    schema53_photo = Schema53PhotoSerializer(many=True)
     circuit = CircuitForm53()
 
     class Meta:
         model = Form53
         fields = ("id", "circuit",  "order53_photo", "schema53_photo", "comments")
-        depth=1
+        depth = 1
 
