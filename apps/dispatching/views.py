@@ -171,6 +171,7 @@ class EventCallsCreateViewAPI(APIView):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
+
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False)
 
@@ -181,6 +182,10 @@ class EventCallsCreateViewAPI(APIView):
 
             next = all_calls.filter(date_from__gt=instance.date_from).order_by('date_from')[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
 
+            if prev is None and instance.index1.index =='4':
+                instance.delete()
+                message = {"detail": "Нельзя самым первым создавать событие с индексом 4"}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
             if prev is not None and next is not None:
                 prev.date_to = instance.date_from
                 prev.save()
@@ -192,7 +197,6 @@ class EventCallsCreateViewAPI(APIView):
                 next.previous = instance
                 next.save()
             elif prev is None and next is not None:
-
                 instance.date_to = next.date_from
                 instance.save()
                 next.previous = instance
@@ -223,22 +227,42 @@ class EventUpdateAPIView(UpdateAPIView):
     def perform_update(self, serializer):
         #это меняет дату конца предыдущего события
         date_from = str(self.get_object().date_from)
+
         instance = serializer.save()
+
 
         instance.id_parent.save()
         if instance.id_parent is not None:
             all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
-            next = all_calls.filter(date_from__gt=instance.date_from)
 
-            if date_from != instance.date_from and instance.previous is not None:
+            next = all_calls.filter(date_from__gt=instance.date_from)
+            prev = all_calls.filter(date_from__lt=instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
+            print('next')
+            print(next)
+            print('date_from')
+            print(date_from)
+            print('instance.date_from')
+            print(instance.date_from)
+            print('instance.previous')
+            print(instance.previous)
+            print('prev')
+            print(prev)
+            if date_from != instance.date_from and prev is not None:
                 instance.previous.date_to = instance.date_from
                 instance.previous.save()
-
             if next.count() == 0:
                 instance.id_parent.date_to = instance.date_from
                 instance.id_parent.index1 = instance.index1
                 instance.id_parent.created_at = instance.created_at
                 instance.id_parent.save()
+            if prev is None and next is not None:
+                instance.id_parent.date_from = instance.date_from
+                instance.id_parent.save()
+                instance.date_to = instance.previous.date_from
+                instance.save()
+                instance.previous.date_to = None
+                instance.previous.save()
+
             instance.id_parent.responsible_outfit = instance.responsible_outfit
             instance.id_parent.save()
 
@@ -285,7 +309,6 @@ class EventDeleteAPIView(DestroyAPIView):
             main_event.save()
             previous_event.date_to = None
             previous_event.save()
-
         else:
             main_event.date_from = next_event.date_from
             main_event.date_to = None

@@ -32,7 +32,7 @@ class PointListTrassa(ListAPIView):
     """Список ИП для создания трассы"""
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all().order_by('point').values('id', 'point')
+    queryset = Point.objects.all().order_by('point').values('id', 'point', 'name')
     serializer_class = PointList
 
 

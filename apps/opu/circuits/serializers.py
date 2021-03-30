@@ -30,8 +30,8 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class TransitCircSerializer(serializers.ModelSerializer):
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointCircSerializer()
+    point2 = PointCircSerializer()
 
     class Meta:
         model = Circuit
