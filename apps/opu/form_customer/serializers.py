@@ -24,12 +24,12 @@ class PointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Point
-        fields = ("point", "name")
+        fields = ('id', "point", "name")
 
 
 class CircuitTransitSerializer(serializers.ModelSerializer):
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointSerializer()
+    point2 = PointSerializer()
 
     class Meta:
         model = Circuit

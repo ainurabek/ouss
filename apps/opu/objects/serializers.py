@@ -27,7 +27,7 @@ class PointList(serializers.ModelSerializer):
 
     class Meta:
         model = Point
-        fields = ('id', 'point')
+        fields = ('id', 'point', 'name')
 
 
 class AmountChannelListSerializer(serializers.ModelSerializer):
@@ -183,8 +183,8 @@ class ParentSerializer(serializers.ModelSerializer):
 
 
 class TransitSerializer(serializers.ModelSerializer):
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointList()
+    point2 = PointList()
 
     class Meta:
         model = Object
