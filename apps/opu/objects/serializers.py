@@ -191,8 +191,8 @@ class TransitSerializer(serializers.ModelSerializer):
         fields = ('id', 'point1', 'name', 'point2')
 
 class ReserveTransitSerializer(serializers.ModelSerializer):
-    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = PointList()
+    point2 = PointList()
 
     class Meta:
         model = Object
