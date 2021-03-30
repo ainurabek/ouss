@@ -411,12 +411,14 @@ class ObjectEditSerializer(serializers.ModelSerializer):
 
     id_outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Outfit.objects.all())
+    type_line = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=LineType.objects.all())
 
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
                   'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
-                  'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'category', 'comments', 'customer', 'consumer')
+                  'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'category', 'comments', 'customer', 'consumer', 'type_line')
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):

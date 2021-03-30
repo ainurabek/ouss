@@ -176,9 +176,6 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         outfits = Outfit.objects.filter(outfit__in=['ЧОФ', 'НОФ', 'ТОФ', 'ИОФ', 'ЖОФ', 'ООФ', 'БОФ', 'БГТС', 'ЦСП'])
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
 
-
-    kls, rrl = get_type_line_vls_and_kls()
-
     total_rep_kls = 0
     total_rep_rrl = 0
     for out in outfits:
@@ -186,35 +183,19 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         total_outfit_rrl = 0
 
         for event in all_event_name.filter(responsible_outfit=out):
+            amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(event)
+
             total_event_kls = 0
             total_event_rrl = 0
-
-            type_line = get_type_line(event)
             for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit):
                 period = get_period(call, date_to)
-                if call.ips is None:
-                    if type_line == kls.name:
-                        total_event_kls += period
-                    elif type_line == rrl.name:
-                        total_event_rrl += period
-                else:
-                    if call.ips.total_point_channels_KLS != 0:
-                        total_event_kls += period
-                    if call.ips.total_point_channels_RRL != 0:
-                        total_event_rrl += period
+                if amount_channels_KLS != 0:
+                    total_event_kls += period
+                if amount_channels_RRL != 0:
+                    total_event_rrl += period
 
-            if event.ips is None:
-                amount_of_channels = int(get_amount_of_channels(event))
-                if type_line == kls.name:
-                    total_outfit_kls += amount_of_channels*total_event_kls
-                elif type_line == rrl.name:
-                    total_outfit_rrl += amount_of_channels*total_event_rrl
-            else:
-                if event.ips.total_point_channels_KLS != 0:
-                    total_outfit_kls += event.ips.total_point_channels_KLS*total_event_kls
-                if event.ips.total_point_channels_RRL != 0:
-                    total_outfit_rrl += event.ips.total_point_channels_RRL*total_event_rrl
-
+            total_outfit_kls += amount_channels_KLS*total_event_kls
+            total_outfit_rrl += amount_channels_RRL*total_event_rrl
 
         total_rep_kls += total_outfit_kls
         total_rep_rrl += total_outfit_rrl

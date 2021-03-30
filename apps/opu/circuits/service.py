@@ -53,8 +53,8 @@ def create_circuit(obj: Object, request):
     if int(request.data['create_circuit']):
         for num_cir in range(1, obj.amount_channels.value+1):
             c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
-                                 category=obj.category, point1=obj.point1, point2=obj.point2,
-                                 created_by=request.user.profile, first=active, object=obj)
+                                 category=Category.objects.get(index='6'), point1=obj.point1, point2=obj.point2,
+                                 created_by=request.user.profile, first=active, object=obj, )
 
             c.id_object.add(obj)
             c.transit.add(c)

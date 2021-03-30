@@ -67,6 +67,9 @@ class CreateLeftTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
 
         if not main_obj.transit.filter(pk=pk).exists():
             main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
@@ -111,6 +114,9 @@ class CreateRightTrassaView(APIView):
         # if main_pk.is_transit is True or obj.is_transit is True:
         #     message = {"detail": "Создание трассы может привести к перезаписи трассы транзитных каналов"}
         #     return Response(message, status=status.HTTP_403_FORBIDDEN)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
         if not main_obj.transit2.filter(pk=pk).exists():
             main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
             for tr in obj.transit.all():
@@ -267,6 +273,10 @@ class CreateLeftReserveTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
+
 
         if not main_obj.reserve_transit.filter(pk=pk).exists():
             main_obj.reserve_transit.add(obj)
@@ -283,6 +293,9 @@ class CreateRightReserveTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Object.objects.get(pk=main_pk)
         obj = Object.objects.get(pk=pk)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
 
         if not main_obj.reserve_transit2.filter(pk=pk).exists():
             main_obj.reserve_transit2.add(obj)
@@ -388,6 +401,9 @@ class CreateLeftCircuitTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Circuit.objects.get(pk=main_pk)
         obj = Circuit.objects.get(pk=pk)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
 
         if not main_obj.transit.filter(pk=pk).exists():
             main_obj.transit.add(*obj.transit2.all().reverse(), *obj.transit.all())
@@ -412,6 +428,10 @@ class CreateRightCircuitTrassaView(APIView):
     def get(self, request, main_pk, pk):
         main_obj = Circuit.objects.get(pk=main_pk)
         obj = Circuit.objects.get(pk=pk)
+        if main_obj == obj:
+            message = {"detail": "Невозможно добавлять обьект к самому себе"}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
+
         if not main_obj.transit2.filter(pk=pk).exists():
             main_obj.transit2.add(*obj.transit.all().reverse(), *obj.transit2.all())
             main_obj.object.is_transit = True
@@ -456,9 +476,7 @@ class DeleteCircuitTrassaView(APIView):
         else:
             main_obj = Circuit.objects.get(pk=main_pk)
             obj = Circuit.objects.get(pk=pk)
-            obj.transit2.clear()
-            obj.transit.clear()
-            obj.transit.add(obj)
+
             main_trassa = [*main_obj.object.transit.all(), main_obj.object.transit2.all()]
             circ_trassa = [*[cir.object for cir in main_obj.transit.all()], *[cir.object for cir in main_obj.transit2.all()]]
 
@@ -469,6 +487,7 @@ class DeleteCircuitTrassaView(APIView):
             main_obj.object.save()
             obj.object.is_transit = is_transit
             obj.object.save()
+
             for t_obj in main_obj.transit.all():
                 t_obj.transit.remove(obj)
                 t_obj.transit2.remove(obj)
@@ -479,5 +498,8 @@ class DeleteCircuitTrassaView(APIView):
                 t_obj.transit.remove(obj)
                 t_obj.object.is_transit = is_transit
                 t_obj.object.save()
+            obj.transit2.clear()
+            obj.transit.clear()
+            obj.transit.add(obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
 

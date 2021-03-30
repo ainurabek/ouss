@@ -198,7 +198,6 @@ def get_report(request):
 
             for call in get_calls_list(all_event, event):
                 period = get_period(call, date_to)
-                amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(call)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = call.date_to
@@ -213,7 +212,6 @@ def get_report(request):
                 call_data['amount_of_channels']['ЦРРЛ'] = amount_channels_RRL
                 call_data['comments'] = call.comments1
                 data.append(call_data)
-
 
             total = dict(total_period_of_time)
 
