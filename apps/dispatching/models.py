@@ -94,7 +94,6 @@ class Event(models.Model):
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)
     name = models.CharField('Название', max_length=500, null=True, blank=True)
     callsorevent = models.BooleanField(default=True)
-    previous = models.OneToOneField("Event", related_name="event_previous", on_delete=models.SET_NULL, blank=True, null=True)
     history = HistoricalRecords(related_name='history_log')
     period_of_time = models.FloatField(default=0, blank=True, null=True)
 

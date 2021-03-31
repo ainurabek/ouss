@@ -67,12 +67,12 @@ class EventListAPIView(viewsets.ModelViewSet):
         if name is not None and name != '':
             queryset = queryset.filter(name=name)
         queryset = queryset.filter(Q(date_to__date=created_at) | Q(date_to__date=None)|Q(date_from__date=created_at)) | (queryset.exclude(index1__index='4', date_to__date__lt=created_at).filter(date_from__date__lt=created_at))
-        pprint(queryset)
+
         return queryset
 
     def retrieve(self, request, pk=None):
         calls = Event.objects.get(pk=pk).event_id_parent.all().order_by("-date_from")
-        pprint(calls)
+
         serializer = self.get_serializer(calls, many=True)
 
         return Response(serializer.data)
@@ -171,47 +171,24 @@ class EventCallsCreateViewAPI(APIView):
         event = get_object_or_404(Event, pk=pk)
         serializer = CallsCreateSerializer(data=request.data)
         if serializer.is_valid():
-
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False)
-
-
-
-            all_calls = event.event_id_parent.all()
-            prev = all_calls.filter(date_from__lt = instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
-
-            next = all_calls.filter(date_from__gt=instance.date_from).order_by('date_from')[0] if all_calls.filter(date_from__gt=instance.date_from).count() != 0 else None
-
-            if prev is None and instance.index1.index =='4':
-                instance.delete()
-                message = {"detail": "Нельзя самым первым создавать событие с индексом 4"}
-                return Response(message, status=status.HTTP_403_FORBIDDEN)
-            if prev is not None and next is not None:
-                prev.date_to = instance.date_from
-                prev.save()
-                next.previous = None
-                next.save()
-                instance.date_to = next.date_from
-                instance.previous = prev
-                instance.save()
-                next.previous = instance
-                next.save()
-            elif prev is None and next is not None:
-                instance.date_to = next.date_from
-                instance.save()
-                next.previous = instance
-                next.save()
-                event.date_from = instance.date_from
-                event.save()
-            elif prev is not None and next is None:
-                event.date_to = instance.date_from
-                event.index1 = instance.index1
-                instance.previous = prev
-                instance.save()
-                prev.date_to = instance.date_from
-                prev.save()
-                event.created_at = instance.created_at
-                event.save()
+            all_calls = event.event_id_parent.all().order_by('-date_from')
+            i = 0
+            while i < (len(all_calls)):
+                if all_calls[i] != all_calls.last():
+                    all_calls[i + 1].date_to = all_calls[i].date_from
+                    all_calls[i + 1].save()
+                if all_calls[i] == all_calls[0]:
+                    instance.id_parent.date_to = all_calls[i].date_from
+                    instance.id_parent.index1 = all_calls[i].index1
+                    instance.id_parent.created_at = all_calls[i].created_at
+                    instance.id_parent.responsible_outfit = all_calls[i].responsible_outfit
+                    instance.id_parent.save()
+                if all_calls[i] == all_calls.last():
+                    instance.id_parent.date_from = all_calls[i].date_from
+                    instance.id_parent.save()
+                i += 1
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -225,48 +202,25 @@ class EventUpdateAPIView(UpdateAPIView):
     serializer_class = EventCreateSerializer
 
     def perform_update(self, serializer):
-        #это меняет дату конца предыдущего события
-        date_from = str(self.get_object().date_from)
 
         instance = serializer.save()
-
-
         instance.id_parent.save()
-        if instance.id_parent is not None:
-            all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
-
-            next = all_calls.filter(date_from__gt=instance.date_from)
-            prev = all_calls.filter(date_from__lt=instance.date_from).order_by('-date_from')[0] if all_calls.filter(date_from__lt = instance.date_from).count() != 0  else None
-            print('next')
-            print(next)
-            print('date_from')
-            print(date_from)
-            print('instance.date_from')
-            print(instance.date_from)
-            print('instance.previous')
-            print(instance.previous)
-            print('prev')
-            print(prev)
-            if date_from != instance.date_from and prev is not None:
-                instance.previous.date_to = instance.date_from
-                instance.previous.save()
-            if next.count() == 0:
-                instance.id_parent.date_to = instance.date_from
-                instance.id_parent.index1 = instance.index1
-                instance.id_parent.created_at = instance.created_at
+        all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
+        i = 0
+        while i < (len(all_calls)):
+            if all_calls[i] != all_calls.last():
+                all_calls[i+1].date_to = all_calls[i].date_from
+                all_calls[i+1].save()
+            if all_calls[i] == all_calls[0]:
+                instance.id_parent.date_to = all_calls[i].date_from
+                instance.id_parent.index1 = all_calls[i].index1
+                instance.id_parent.created_at = all_calls[i].created_at
+                instance.id_parent.responsible_outfit = all_calls[i].responsible_outfit
                 instance.id_parent.save()
-            if prev is None and next is not None:
-                instance.id_parent.date_from = instance.date_from
+            if all_calls[i] == all_calls.last():
+                instance.id_parent.date_from = all_calls[i].date_from
                 instance.id_parent.save()
-                instance.date_to = instance.previous.date_from
-                instance.save()
-                instance.previous.date_to = None
-                instance.previous.save()
-
-            instance.id_parent.responsible_outfit = instance.responsible_outfit
-            instance.id_parent.save()
-
-            serializer.save()
+            i += 1
 
 
 class EventDeleteAPIView(DestroyAPIView):
@@ -280,55 +234,39 @@ class EventDeleteAPIView(DestroyAPIView):
         if instance.id_parent is None:
             instance.delete()
             return
+        all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
+        i = 0
+        while i < (len(all_calls)):
+            if all_calls[i] == instance and all_calls[i] != all_calls.last():
+                all_calls[i + 1].date_to = all_calls[i-1].date_from
+                all_calls[i + 1].save()
+                all_calls[i].delete()
 
-        main_event = get_object_or_404(Event, pk=instance.id_parent.pk)
-        previous_event = instance.previous
-
-        if Event.objects.filter(previous=instance).exists():
-            next_event = instance.event_previous
-        else:
-            next_event = None
-
-
-        if previous_event is not None and next_event is not None:
-            instance.delete()
-            previous_event.date_to = next_event.date_from
-            next_event.previous = previous_event
-            next_event.save()
-            previous_event.save()
-
-        elif previous_event is None and next_event is None:
-            instance.delete()
-            main_event.delete()
-
-        elif next_event is None:
-            instance.delete()
-            main_event.date_to = previous_event.date_from
-            main_event.index1 = previous_event.index1
-            main_event.created_at = previous_event.created_at
-            main_event.save()
-            previous_event.date_to = None
-            previous_event.save()
-        else:
-            main_event.date_from = next_event.date_from
-            main_event.date_to = None
-            main_event.index1 = next_event.index1
-            main_event.created_at = next_event.created_at
-            main_event.save()
-            instance.delete()
-
-
+            if all_calls[i] == instance and all_calls[i] == all_calls[0]:
+                all_calls[i+1].date_to = None
+                all_calls[i + 1].save()
+                instance.id_parent.date_to = all_calls[i+1].date_from
+                instance.id_parent.index1 = all_calls[i+1].index1
+                instance.id_parent.created_at = all_calls[i+1].created_at
+                instance.id_parent.responsible_outfit = all_calls[i+1].responsible_outfit
+                instance.id_parent.save()
+                all_calls[i].delete()
+            if all_calls[i] == instance and all_calls[i] == all_calls.last():
+                instance.id_parent.date_from = all_calls[i-1].date_from
+                instance.id_parent.save()
+                all_calls[i].delete()
+            i += 1
 
 @permission_classes([IsAuthenticated,])
 def get_dates_and_counts_week(request):
     """статистика событий за неделю"""
     data = {}
     dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).\
-        exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
+        exclude(callsorevent=False).order_by('created_at').distinct('created_at')
 
     teams_data = [
         {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
-            exclude(previous__isnull=True, callsorevent=False).count() }
+            exclude(callsorevent=False).count() }
         for date in dates
     ]
     data["dates"] = teams_data
@@ -339,10 +277,10 @@ def get_dates_and_counts_month(request):
     """статистика событий за месяц"""
     data = {}
     dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).\
-        exclude(previous__isnull=True, callsorevent=False).order_by('created_at').distinct('created_at')
+        exclude(callsorevent=False).order_by('created_at').distinct('created_at')
     teams_data = [
         {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
-            exclude(previous__isnull=True, callsorevent=False).count() }
+            exclude(callsorevent=False).count() }
         for date in dates
     ]
     data["dates"] = teams_data
@@ -355,10 +293,10 @@ def get_dates_and_counts_today(request):
     time = datetime.date.today()
 
     dates = Event.objects.filter(date_from__gte=time).\
-        exclude(previous__isnull=True, callsorevent=False).order_by('date_from').distinct('date_from')
+        exclude(callsorevent=False).order_by('date_from').distinct('date_from')
     teams_data = [
         {"time": date.date_from, "counts": Event.objects.filter(date_from=date.date_from).
-            exclude(previous__isnull=True, callsorevent=False).count()}
+            exclude(callsorevent=False).count()}
         for date in dates
     ]
     data["dates"] = teams_data
@@ -369,11 +307,11 @@ def get_outfit_statistics_for_a_month(request):
     """статистика событий по предприятиям за месяц"""
     month = get_minus_date(days=30)
     dates = Event.objects.filter(created_at__gte=month).\
-        exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+        exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
-             exclude(previous__isnull=True, callsorevent=False).count()}
+             exclude(callsorevent=False).count()}
         for date in dates
     ]
 
@@ -383,11 +321,11 @@ def get_outfit_statistics_for_a_month(request):
 def get_outfit_statistics_for_a_week(request):
     """статистика событий по предприятиям за неделю"""
     week = get_minus_date(days=7)
-    dates = Event.objects.filter(created_at__gte=week).exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+    dates = Event.objects.filter(created_at__gte=week).exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).
-             exclude(previous__isnull=True, callsorevent=False).count() }
+             exclude(callsorevent=False).count() }
         for date in dates
     ]
 
@@ -398,11 +336,11 @@ def get_outfit_statistics_for_a_day(request):
     """статистика событий по предприятиям за сегодня"""
     day = datetime.date.today()
     dates = Event.objects.filter(created_at__gte=day).\
-        exclude(previous__isnull=True, callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+        exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
          "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).
-             exclude(previous__isnull=True, callsorevent=False).count() }
+             exclude(callsorevent=False).count() }
         for date in dates
     ]
 
@@ -421,8 +359,7 @@ class UncompletedEventList(ListFilterAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
     serializer_class = EventListSerializer
-    queryset = Event.objects.filter(date_to=None).exclude(previous__isnull=True,
-                                                          callsorevent=False).exclude(index1__index='4')
+    queryset = Event.objects.filter(date_to=None).exclude(callsorevent=False).exclude(index1__index='4')
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsDispOnly])
