@@ -175,21 +175,18 @@ class EventCallsCreateViewAPI(APIView):
                                        callsorevent=False)
             all_calls = event.event_id_parent.all().order_by('-date_from')
             i = 0
-            while i < (len(all_calls)):
-                if all_calls[i] != all_calls.last():
-                    all_calls[i + 1].date_to = all_calls[i].date_from
-                    all_calls[i + 1].save()
-                if all_calls[i] == all_calls[0]:
-                    instance.id_parent.date_to = all_calls[i].date_from
-                    instance.id_parent.index1 = all_calls[i].index1
-                    instance.id_parent.created_at = all_calls[i].created_at
-                    instance.id_parent.responsible_outfit = all_calls[i].responsible_outfit
-                    instance.id_parent.save()
-                if all_calls[i] == all_calls.last():
-                    instance.id_parent.date_from = all_calls[i].date_from
-                    instance.id_parent.save()
+            while i < (len(all_calls) -1):
+                all_calls[i + 1].date_to = all_calls[i].date_from
+                all_calls[i + 1].save()
                 i += 1
-
+            all_calls[0].date_to = None
+            all_calls[0].save()
+            instance.id_parent.date_from = all_calls.last().date_from
+            instance.id_parent.date_to = all_calls[0].date_from
+            instance.id_parent.index1 = all_calls[0].index1
+            instance.id_parent.created_at = all_calls[0].created_at
+            instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
+            instance.id_parent.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -207,20 +204,19 @@ class EventUpdateAPIView(UpdateAPIView):
         instance.id_parent.save()
         all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
         i = 0
-        while i < (len(all_calls)):
-            if all_calls[i] != all_calls.last():
-                all_calls[i+1].date_to = all_calls[i].date_from
-                all_calls[i+1].save()
-            if all_calls[i] == all_calls[0]:
-                instance.id_parent.date_to = all_calls[i].date_from
-                instance.id_parent.index1 = all_calls[i].index1
-                instance.id_parent.created_at = all_calls[i].created_at
-                instance.id_parent.responsible_outfit = all_calls[i].responsible_outfit
-                instance.id_parent.save()
-            if all_calls[i] == all_calls.last():
-                instance.id_parent.date_from = all_calls[i].date_from
-                instance.id_parent.save()
+        while i < (len(all_calls) - 1):
+            all_calls[i + 1].date_to = all_calls[i].date_from
+            all_calls[i + 1].save()
             i += 1
+        all_calls[0].date_to = None
+        all_calls[0].save()
+        instance.id_parent.date_from = all_calls.last().date_from
+        instance.id_parent.date_to = all_calls[0].date_from
+        instance.id_parent.index1 = all_calls[0].index1
+        instance.id_parent.created_at = all_calls[0].created_at
+        instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
+        instance.id_parent.save()
+
 
 
 class EventDeleteAPIView(DestroyAPIView):
@@ -235,27 +231,22 @@ class EventDeleteAPIView(DestroyAPIView):
             instance.delete()
             return
         all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
+        instance.delete()
         i = 0
-        while i < (len(all_calls)):
-            if all_calls[i] == instance and all_calls[i] != all_calls.last():
-                all_calls[i + 1].date_to = all_calls[i-1].date_from
-                all_calls[i + 1].save()
-                all_calls[i].delete()
 
-            if all_calls[i] == instance and all_calls[i] == all_calls[0]:
-                all_calls[i+1].date_to = None
-                all_calls[i + 1].save()
-                instance.id_parent.date_to = all_calls[i+1].date_from
-                instance.id_parent.index1 = all_calls[i+1].index1
-                instance.id_parent.created_at = all_calls[i+1].created_at
-                instance.id_parent.responsible_outfit = all_calls[i+1].responsible_outfit
-                instance.id_parent.save()
-                all_calls[i].delete()
-            if all_calls[i] == instance and all_calls[i] == all_calls.last():
-                instance.id_parent.date_from = all_calls[i-1].date_from
-                instance.id_parent.save()
-                all_calls[i].delete()
+        while i < (len(all_calls) - 1):
+            all_calls[i + 1].date_to = all_calls[i].date_from
+            all_calls[i + 1].save()
             i += 1
+        all_calls[0].date_to = None
+        all_calls[0].save()
+        instance.id_parent.date_from = all_calls.last().date_from
+        instance.id_parent.date_to = all_calls[0].date_from
+        instance.id_parent.index1 = all_calls[0].index1
+        instance.id_parent.created_at = all_calls[0].created_at
+        instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
+        instance.id_parent.save()
+
 
 @permission_classes([IsAuthenticated,])
 def get_dates_and_counts_week(request):

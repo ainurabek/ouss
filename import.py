@@ -70,9 +70,27 @@ from apps.dispatching.models import Event
 #         call.circuit = event.circuit
 #         call.save()
 
-objects = Object.objects.all()
-for obj in objects:
-    AmountChannelsKLSRRL.objects.create(object = obj)
-points = Point.objects.all()
-for point in points:
-    AmountChannelsKLSRRL.objects.create(ips=point)
+# objects = Object.objects.all()
+# for obj in objects:
+#     AmountChannelsKLSRRL.objects.create(object = obj)
+# points = Point.objects.all()
+# for point in points:
+#     AmountChannelsKLSRRL.objects.create(ips=point)
+
+all_events = Event.objects.all()
+for event in all_events:
+    all_calls = event.event_id_parent.all().order_by('-date_from')
+    i = 0
+    while i < (len(all_calls)-1):
+        all_calls[i + 1].date_to = all_calls[i].date_from
+        all_calls[i + 1].save()
+        i += 1
+    all_calls[0].date_to = None
+    all_calls[0].save()
+    all_calls[i].id_parent.date_from = all_calls.last().date_from
+    all_calls[i].id_parent.date_to = all_calls[0].date_from
+    all_calls[i].id_parent.index1 = all_calls[0].index1
+    all_calls[i].id_parent.created_at = all_calls[0].created_at
+    all_calls[i].id_parent.responsible_outfit = all_calls[0].responsible_outfit
+    all_calls[i].id_parent.save()
+

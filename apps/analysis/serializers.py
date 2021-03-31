@@ -92,7 +92,7 @@ class Punkt5UpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Punkt5
-        fields = ("id", "outfit_period_of_time_vls",  "length_kls", "length_vls", "length_rrl")
+        fields = ("id", "outfit_period_of_time_kls", "outfit_period_of_time_rrl", "outfit_period_of_time_vls",  "length_kls", "length_vls", "length_rrl")
 
 
 class Punkt7UpdateSerializer(serializers.ModelSerializer):
