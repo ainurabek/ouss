@@ -92,6 +92,7 @@ class Form53ListAPIView(APIView):
             },
             'order53_photo': [], 'schema53_photo': [], 'comments': None, 'object_id': None
         }
+
         if len(queryset) != 0:
             response_data = deepcopy(example)
             form53 = queryset[0]
@@ -132,34 +133,8 @@ class Form53ListAPIView(APIView):
                 ]
                 response_data['object_id'] = form53.circuit.object.id
                 data.append(response_data)
-                response_data = deepcopy(example)
-            response_data['id'] = form53.id
-            response_data['comments'] = form53.comments
+            response_data = Form53Serializer(form53).data
             response_data['object_id'] = form53.circuit.object.id
-            response_data['order53_photo'] = [{'id': file.id, 'src': file.src} for file in form53.order53_photo.all()]
-            response_data['schema53_photo'] = [{'id': file.id, 'src': file.src} for file in form53.schema53_photo.all()]
-
-            response_data['circuit']['id'] = form53.circuit.id
-            response_data['circuit']['num_circuit'] = form53.circuit.num_circuit
-            response_data['circuit']['category'] = {
-                'id': form53.circuit.category.id, 'index': form53.circuit.category.index,
-                'name': form53.circuit.category.name
-            }
-            response_data['circuit']['num_order'] = form53.circuit.num_order
-            response_data['circuit']['transit'] = [
-                {
-                    'point1': {'id': obj.point1.id, 'point': obj.point1.point, 'name': obj.point1.name},
-                    'name': obj.name,
-                    'point2': {'id': obj.point2.id, 'point': obj.point2.point, 'name': obj.point2.name}}
-                for obj in form53.circuit.transit.all()
-            ]
-            response_data['circuit']['transit2'] = [
-                {
-                    'point1': {'id': obj.point1.id, 'point': obj.point1.point, 'name': obj.point1.name},
-                    'name': obj.name,
-                    'point2': {'id': obj.point2.id, 'point': obj.point2.point, 'name': obj.point2.name}}
-                for obj in form53.circuit.transit2.all()
-            ]
             data.append(response_data)
         return Response(data, status=status.HTTP_200_OK)
 

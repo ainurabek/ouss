@@ -577,11 +577,12 @@ class GOZListView(APIView):
 
     def get(self, request):
         outfit = self.request.query_params.get('outfit', None)
-        queryset = Object.objects.filter(type_of_trakt__name='ПГ')
-        if outfit is not None:
-            queryset = queryset.filter(id_outfit=outfit)
-        serializer = GOZListSerializer(queryset, many=True).data
-        return Response(serializer)
+        queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name')
+
+        queryset = queryset.filter(id_outfit_id=outfit)
+        serializer = GOZListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class GOZUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)

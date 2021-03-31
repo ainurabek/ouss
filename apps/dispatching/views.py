@@ -252,22 +252,23 @@ class EventDeleteAPIView(DestroyAPIView):
 def get_dates_and_counts_week(request):
     """статистика событий за неделю"""
     data = {}
-    dates = Event.objects.filter(created_at__gte=get_minus_date(days=7)).\
-        exclude(callsorevent=False).order_by('created_at').distinct('created_at')
+    dates = Event.objects.filter(date_from__date__gte=get_minus_date(days=7)).\
+        exclude(callsorevent=False).order_by('date_from').distinct('date_from')
+
 
     teams_data = [
-        {"day": date.created_at.strftime("%A"), "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
-            exclude(callsorevent=False).count() }
+        {"day": date.date_from.strftime("%A"), "date": date.date_from.strftime('%b %d'), "counts":Event.objects.filter(date_from__gte=date.date_from).exclude(callsorevent=False).count()}
         for date in dates
     ]
     data["dates"] = teams_data
+    print(data)
     return JsonResponse(data, safe=False)
 
 @permission_classes([IsAuthenticated,])
 def get_dates_and_counts_month(request):
     """статистика событий за месяц"""
     data = {}
-    dates = Event.objects.filter(created_at__gte=get_minus_date(days=30)).\
+    dates = Event.objects.filter(date_from__date__gte=get_minus_date(days=30)).\
         exclude(callsorevent=False).order_by('created_at').distinct('created_at')
     teams_data = [
         {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
@@ -297,11 +298,11 @@ def get_dates_and_counts_today(request):
 def get_outfit_statistics_for_a_month(request):
     """статистика событий по предприятиям за месяц"""
     month = get_minus_date(days=30)
-    dates = Event.objects.filter(created_at__gte=month).\
+    dates = Event.objects.filter(date_from__date__gte=month).\
         exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
-         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=month).
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, date_from__date__gte=month).
              exclude(callsorevent=False).count()}
         for date in dates
     ]
@@ -312,10 +313,10 @@ def get_outfit_statistics_for_a_month(request):
 def get_outfit_statistics_for_a_week(request):
     """статистика событий по предприятиям за неделю"""
     week = get_minus_date(days=7)
-    dates = Event.objects.filter(created_at__gte=week).exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
+    dates = Event.objects.filter(date_from__date__gte=week).exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
-         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=week).
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, date_from__date__gte=week).
              exclude(callsorevent=False).count() }
         for date in dates
     ]
@@ -326,11 +327,11 @@ def get_outfit_statistics_for_a_week(request):
 def get_outfit_statistics_for_a_day(request):
     """статистика событий по предприятиям за сегодня"""
     day = datetime.date.today()
-    dates = Event.objects.filter(created_at__gte=day).\
+    dates = Event.objects.filter(date_from__date__gte=day).\
         exclude(callsorevent=False).order_by('responsible_outfit').distinct('responsible_outfit')
     teams_data = [
         {"outfit": date.responsible_outfit.outfit,
-         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, created_at__gte=day).
+         "counts": Event.objects.filter(responsible_outfit=date.responsible_outfit, date_from__date__gte=day).
              exclude(callsorevent=False).count() }
         for date in dates
     ]
