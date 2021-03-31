@@ -4,7 +4,7 @@ from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
     Category, AmountChannel, Consumer, Bug
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404
+from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -34,6 +34,9 @@ from apps.opu.customer.models import Customer
 from apps.opu.objects.serializers import LineTypeCreateSerializer
 
 from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, create_point_KLSS_RRL_amount_channels
+
+from apps.opu.objects.serializers import GOZListSerializer
+from apps.opu.objects.serializers import GOZUpdateSerializer
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -565,3 +568,23 @@ class BugModelViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
+
+
+
+class GOZListView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+
+    def get(self, request):
+        outfit = self.request.query_params.get('outfit', None)
+        queryset = Object.objects.filter(type_of_trakt__name='ПГ')
+        if outfit is not None:
+            queryset = queryset.filter(id_outfit=outfit)
+        serializer = GOZListSerializer(queryset, many=True).data
+        return Response(serializer)
+
+class GOZUpdateAPIView(UpdateAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    queryset = Object.objects.all()
+    serializer_class = GOZUpdateSerializer

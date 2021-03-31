@@ -176,6 +176,7 @@ class Object(models.Model):
 	reserve_transit = SortedManyToManyField('Object', related_name='reserve_transit_obj1', blank=True)
 	reserve_transit2 = SortedManyToManyField('Object', related_name='reserve_transit_obj2', blank=True)
 	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
+	comments_GOZ = models.CharField('Примечание(ГОЗ)', max_length=100, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
 	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',
 										blank=True, null=True, on_delete=models.SET_NULL)

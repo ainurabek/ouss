@@ -85,6 +85,9 @@ urlpatterns = [
 
     path('main-line-type/list/', MainLineTypeList.as_view(), name='line_type'),
 
+    path('GOZ/', views.GOZListView.as_view(), name='goz_list'),
+    path("GOZ/update/<int:pk>/", views.GOZUpdateAPIView.as_view()),
+
     path('', include(router.urls))
 
 ]

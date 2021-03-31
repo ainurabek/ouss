@@ -474,3 +474,16 @@ class PGListSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name')
 
+class GOZListSerializer(serializers.ModelSerializer):
+    transit = TransitSerializer(many=True)
+    transit2 = TransitSerializer(many=True)
+    reserve_transit = ReserveTransitSerializer(many=True)
+    reserve_transit2 = ReserveTransitSerializer(many=True)
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'comments_GOZ')
+
+class GOZUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Object
+        fields = ('id', 'comments_GOZ')
