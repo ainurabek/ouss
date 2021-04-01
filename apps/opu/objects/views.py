@@ -577,7 +577,8 @@ class GOZListView(APIView):
 
     def get(self, request):
         outfit = self.request.query_params.get('outfit', None)
-        queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name').prefetch_related('type_of_trakt')
+        queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name').prefetch_related('transit', 'transit2', 'reserve_transit',
+                                                                                                     'reserve_transit2')
         if outfit is not None and outfit != "":
             queryset = queryset.filter(id_outfit_id=outfit)
         serializer = GOZListSerializer(queryset, many=True)

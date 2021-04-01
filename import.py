@@ -88,7 +88,10 @@ for event in all_events:
     all_calls[0].date_to = None
     all_calls[0].save()
     all_calls[i].id_parent.date_from = all_calls.last().date_from
-    all_calls[i].id_parent.date_to = all_calls[0].date_from
+    if len(all_calls) == 1:
+        all_calls[i].id_parent.date_to = None
+    else:
+        all_calls[i].id_parent.date_to = all_calls[0].date_from
     all_calls[i].id_parent.index1 = all_calls[0].index1
     all_calls[i].id_parent.created_at = all_calls[0].created_at
     all_calls[i].id_parent.responsible_outfit = all_calls[0].responsible_outfit
