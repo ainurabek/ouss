@@ -21,8 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="82d6e945-c958-412a-bf15-12a76641ff20" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/form53/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/form53/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/opu/form53/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/opu/form53/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -315,7 +313,24 @@
       <workItem from="1617088646591" duration="2107000" />
       <workItem from="1617090772410" duration="1805000" />
       <workItem from="1617092591331" duration="2714000" />
-      <workItem from="1617096524699" duration="1359000" />
+      <workItem from="1617096524699" duration="1798000" />
+      <workItem from="1617098339899" duration="1427000" />
+      <workItem from="1617100167955" duration="1797000" />
+      <workItem from="1617101982413" duration="1795000" />
+      <workItem from="1617104669300" duration="598000" />
+      <workItem from="1617165250633" duration="2696000" />
+      <workItem from="1617167969133" duration="2833000" />
+      <workItem from="1617170829562" duration="1668000" />
+      <workItem from="1617172871288" duration="1612000" />
+      <workItem from="1617174805290" duration="1796000" />
+      <workItem from="1617176617130" duration="1795000" />
+      <workItem from="1617178428647" duration="1685000" />
+      <workItem from="1617182926090" duration="1601000" />
+      <workItem from="1617186132904" duration="1796000" />
+      <workItem from="1617187947430" duration="1797000" />
+      <workItem from="1617189762844" duration="589000" />
+      <workItem from="1617252644371" duration="1792000" />
+      <workItem from="1617254454952" duration="1792000" />
     </task>
     <servers />
   </component>
