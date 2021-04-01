@@ -132,7 +132,7 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-media/
+mediafiles/
 # Pyre type checker
 .pyre/
 
@@ -143,9 +143,9 @@ media/
 cython_debug/
 folder
 .dockerignore
-Dockerfile
+#Dockerfile
 data.py
-docker-compose.yml
+#docker-compose.yml
 
 #**/migrations/
 #**/**/migrations
