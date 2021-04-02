@@ -24,7 +24,7 @@ class SecondaryBase(models.Model):
     year_of_launch = models.CharField('Год запуска', max_length=500, null=True, blank=True)
     installed_value = models.IntegerField('Монтированная емкость', default=0, blank=True, null=True)
     active_value = models.IntegerField('Задействованная емкость', default=0, blank=True, null=True)
-    active_numbering = models.IntegerField('Задействованная нумерация', default=0, blank=True, null=True)
+    active_numbering = models.CharField('Задействованная нумерация', max_length=500, null=True, blank=True)
     free_numbering = models.IntegerField('Свободная нумерация', default=0, blank=True, null=True)
     GAS_numbering = models.CharField('Выделенная ГАС нумерация', max_length=500, null=True, blank=True)
     GAS_return = models.CharField('Возврат в ГАС', max_length=500, null=True, blank=True)

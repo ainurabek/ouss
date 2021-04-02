@@ -10,7 +10,7 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.secondary.models import TypeStation, SecondaryBase
-from apps.secondary.serializers import TypeStationSerializer, SecondaryBaseSerializer
+from apps.secondary.serializers import TypeStationSerializer, SecondaryBaseSerializer, SecondaryBaseCreateSerializer
 from apps.accounts.permissions import IsVtorichkaOnly, SuperUser, IngenerUser
 from apps.opu.objects.models import Outfit, Point
 from apps.opu.objects.serializers import PointList
@@ -42,19 +42,22 @@ class PointsByOutfittView(APIView):
             return Response(serializer)
 
 
-class SecondaryBaseList(ListAPIView):
-    serializer_class = SecondaryBaseSerializer
-    permission_classes = (IsAuthenticated,)
+class BaseModelView(viewsets.ModelViewSet):
+    """ Линии передачи """
     authentication_classes = (TokenAuthentication,)
+    queryset = SecondaryBase.objects.all().order_by('outfit').prefetch_related('point', 'outfit', 'type_station')
+    lookup_field = 'pk'
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('outfit', 'point')
 
-    def get_queryset(self):
-        queryset = SecondaryBase.objects.all().prefetch_related('point', 'outfit', 'type_station')
-        outfit = self.request.query_params.get('outfit', None)
-        point = self.request.query_params.get('point', None)
-
-        if point is not None and point != '':
-            queryset = queryset.filter(point=point)
-        if outfit is not None and outfit != '':
-            queryset = queryset.filter(outfit__outfit=outfit)
-        return queryset.order_by('outfit')
-
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SecondaryBaseSerializer
+        else:
+            return SecondaryBaseCreateSerializer
+    def get_permissions(self):
+        if self.action == 'list' or self.action =='retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsVtorichkaOnly | SuperUser, IngenerUser | SuperUser]
+        return [permission() for permission in permission_classes]
