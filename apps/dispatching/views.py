@@ -241,7 +241,11 @@ class EventDeleteAPIView(DestroyAPIView):
         all_calls[0].date_to = None
         all_calls[0].save()
         instance.id_parent.date_from = all_calls.last().date_from
-        instance.id_parent.date_to = all_calls[0].date_from
+
+        if len(all_calls) == 1:
+            instance.id_parent.date_to = None
+        else:
+            instance.id_parent.date_to = all_calls[0].date_from
         instance.id_parent.index1 = all_calls[0].index1
         instance.id_parent.created_at = all_calls[0].created_at
         instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
@@ -257,11 +261,11 @@ def get_dates_and_counts_week(request):
 
 
     teams_data = [
-        {"day": date.date_from.strftime("%A"), "date": date.date_from.strftime('%b %d'), "counts":Event.objects.filter(date_from__gte=date.date_from).exclude(callsorevent=False).count()}
+        {"day": date.date_from.strftime("%A"), "date": date.date_from.strftime("%Y-%m-%d"), "counts":Event.objects.filter(date_from__gte=date.date_from).exclude(callsorevent=False).count()}
         for date in dates
     ]
     data["dates"] = teams_data
-    print(data)
+
     return JsonResponse(data, safe=False)
 
 @permission_classes([IsAuthenticated,])
@@ -269,13 +273,15 @@ def get_dates_and_counts_month(request):
     """статистика событий за месяц"""
     data = {}
     dates = Event.objects.filter(date_from__date__gte=get_minus_date(days=30)).\
-        exclude(callsorevent=False).order_by('created_at').distinct('created_at')
+        exclude(callsorevent=False).order_by('date_from').distinct('date_from')
+
     teams_data = [
-        {"day": date.created_at.day, "date": date.created_at, "counts": Event.objects.filter(created_at=date.created_at).
+        {"day": date.date_from.strftime("%A"), "date": date.date_from.strftime("%Y-%m-%d"), "counts": Event.objects.filter(date_from__gte=date.date_from).
             exclude(callsorevent=False).count() }
         for date in dates
     ]
     data["dates"] = teams_data
+
     return JsonResponse(data, safe=False)
 
 @permission_classes([IsAuthenticated,])
@@ -287,8 +293,7 @@ def get_dates_and_counts_today(request):
     dates = Event.objects.filter(date_from__gte=time).\
         exclude(callsorevent=False).order_by('date_from').distinct('date_from')
     teams_data = [
-        {"time": date.date_from, "counts": Event.objects.filter(date_from=date.date_from).
-            exclude(callsorevent=False).count()}
+        {"time": date.date_from, "counts": Event.objects.filter(date_from=date.date_from).exclude(callsorevent=False).count()}
         for date in dates
     ]
     data["dates"] = teams_data

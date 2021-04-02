@@ -9,15 +9,22 @@ from apps.opu.objects.serializers import CategorySerializer
 
 
 class Order53PhotoSerializer(serializers.ModelSerializer):
+    src = serializers.SerializerMethodField('get_src_url')
     class Meta:
         model = Order53Photo
         fields = ("id", "src")
+    def get_src_url(self, obj):
+        return self.context['request'].build_absolute_uri(obj.src.url)
 
 
 class Schema53PhotoSerializer(serializers.ModelSerializer):
+    src = serializers.SerializerMethodField('get_src_url')
+
     class Meta:
         model = Schema53Photo
         fields = ("id", "src")
+    def get_src_url(self, obj):
+        return self.context['request'].build_absolute_uri(obj.src.url)
 
 
 class Form53CreateSerializer(serializers.ModelSerializer):
@@ -42,7 +49,6 @@ class CircuitForm53(serializers.ModelSerializer):
 
     transit = TransitForm53Serializer(many=True)
     transit2 = TransitForm53Serializer(many=True)
-
     category = CategorySerializer()
 
     class Meta:

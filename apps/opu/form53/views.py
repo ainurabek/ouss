@@ -17,6 +17,8 @@ from apps.opu.services import PhotoDeleteMixin
 from apps.opu.form53.services import get_form53_diff
 from apps.opu.services import create_photo
 
+from apps.opu.services import PhotoCreateMixin
+
 
 class Form53CreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -133,7 +135,7 @@ class Form53ListAPIView(APIView):
                 ]
                 response_data['object_id'] = form53.circuit.object.id
                 data.append(response_data)
-            response_data = Form53Serializer(form53).data
+            response_data = Form53Serializer(form53, context={'request': request}).data
             response_data['object_id'] = form53.circuit.object.id
             data.append(response_data)
         return Response(data, status=status.HTTP_200_OK)
@@ -154,14 +156,15 @@ class Form53DeleteAPIView(DestroyAPIView):
     queryset = Form53
 
 
-class Order53PhotoCreateView(APIView):
+class Order53PhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        create_photo(model=Form53, model_photo=Order53Photo,
-                                obj=form53, field_name="order", request=request)
+        for img in request.FILES.getlist('order'):
+            Order53Photo.objects.create(src=img, form53=form53)
+
         response = {"message": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -172,14 +175,14 @@ class Order53PhotoDeleteView(APIView, PhotoDeleteMixin):
     model_for_delete = Order53Photo
 
 
-class Schema53PhotoCreateView(APIView):
+class Schema53PhotoCreateView(APIView, PhotoCreateMixin ):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
 
     def post(self, request, pk):
         form53 = get_object_or_404(Form53, pk=pk)
-        create_photo(model=Form53, model_photo=Schema53Photo,
-                                obj=form53, field_name="schema", request=request)
+        for img in request.FILES.getlist('schema'):
+            Schema53Photo.objects.create(src=img, form53=form53)
         response = {"message": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
