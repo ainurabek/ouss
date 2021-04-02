@@ -479,9 +479,10 @@ class GOZListSerializer(serializers.ModelSerializer):
     transit2 = TransitSerializer(many=True)
     reserve_transit = ReserveTransitSerializer(many=True)
     reserve_transit2 = ReserveTransitSerializer(many=True)
+    consumer = ConsumerSerializer()
     class Meta:
         model = Object
-        fields = ('id', 'name', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'comments_GOZ')
+        fields = ('id', 'name', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'comments_GOZ', 'consumer')
 
 class GOZUpdateSerializer(serializers.ModelSerializer):
     class Meta:
