@@ -9,9 +9,11 @@ from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from apps.secondary.models import TypeStation
-from apps.secondary.serializers import TypeStationSerializer
+from apps.secondary.models import TypeStation, SecondaryBase
+from apps.secondary.serializers import TypeStationSerializer, SecondaryBaseSerializer
 from apps.accounts.permissions import IsVtorichkaOnly, SuperUser, IngenerUser
+from apps.opu.objects.models import Outfit, Point
+from apps.opu.objects.serializers import PointList
 
 
 class TypeStationModelViewSet(ModelViewSet):
@@ -27,3 +29,32 @@ class TypeStationModelViewSet(ModelViewSet):
             permission_classes = [IsAuthenticated, IsVtorichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
+class PointsByOutfittView(APIView):
+        authentication_classes = (TokenAuthentication,)
+        search_fields = ('name',)
+        serializer = PointList
+
+        def get(self, request, pk):
+            outfit = get_object_or_404(Outfit, pk=pk)
+            points = Point.objects.filter(id_outfit = outfit)
+            serializer = PointList(points, many=True).data
+            return Response(serializer)
+
+
+class SecondaryBaseList(ListAPIView):
+    serializer_class = SecondaryBaseSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get_queryset(self):
+        queryset = SecondaryBase.objects.all().prefetch_related('point', 'outfit', 'type_station')
+        outfit = self.request.query_params.get('outfit', None)
+        point = self.request.query_params.get('point', None)
+
+        if point is not None and point != '':
+            queryset = queryset.filter(point=point)
+        if outfit is not None and outfit != '':
+            queryset = queryset.filter(outfit__outfit=outfit)
+        return queryset.order_by('outfit')
+
