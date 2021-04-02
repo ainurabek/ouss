@@ -411,7 +411,7 @@ class Punkt5UpdateAPIView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         punkt5 = serializer.save()
-        update_punkt5(punkt5)
+        update_punkt5(punkt5, self.request.data['total_coefficient'])
 
 
 class Punkt5DeleteAPIVIew(generics.DestroyAPIView):

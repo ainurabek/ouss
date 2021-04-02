@@ -376,11 +376,15 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
     form.punkt5.save()
 
 
-def update_punkt5(punkt5: Punkt5):
+def update_punkt5(punkt5: Punkt5, total_coefficient: int):
     update_downtime(punkt5)
     update_coefficient(punkt5)
     update_total_length(punkt5)
-    update_total_coefficient(punkt5.total_data5)
+    if punkt5.formula_activate:
+        update_total_coefficient(punkt5.total_data5)
+    else:
+        punkt5.total_data5.total_coefficient = total_coefficient
+        punkt5.total_data5.save()
 
     update_length_and_outfit_period_of_time(punkt5.form_analysis.id_parent)
     update_downtime(punkt5.form_analysis.id_parent.punkt5)
