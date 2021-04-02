@@ -20,7 +20,6 @@ class SecondaryBase(models.Model):
     '''База вторичной сети'''
     point = models.ForeignKey(Point, verbose_name="ИП", on_delete=models.SET_NULL, related_name="point_secondary", null=True, blank=True)
     outfit = models.ForeignKey(Outfit, related_name='second_out', on_delete=models.SET_NULL, blank=True, null=True)
-    administrative_name = models.CharField('Административное значение', max_length=500, null=True, blank=True)
     type_station = models.ForeignKey(TypeStation, related_name='type_station_second', on_delete=models.SET_NULL, blank=True, null=True)
     year_of_launch = models.CharField('Год запуска', max_length=500, null=True, blank=True)
     installed_value = models.IntegerField('Монтированная емкость', default=0, blank=True, null=True)
