@@ -59,6 +59,7 @@ class Punkt5(models.Model):
     downtime_rrl = models.FloatField("Простои РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
 
+    formula_activate = models.BooleanField(default=True)
     date_from = models.DateField("Начало", blank=True, null=True)
     date_to = models.DateField("Конец", blank=True, null=True)
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
