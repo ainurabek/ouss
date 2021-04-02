@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'apps.dispatching',
     'apps.opu.form_customer',
     'apps.analysis',
+    'apps.secondary',
     'knox',
     'rest_framework',
     'django_filters',
