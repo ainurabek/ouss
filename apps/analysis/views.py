@@ -204,6 +204,7 @@ def get_report(request):
                 if amount_channels_KLS != 0:
                     call_data['period_of_time'][call.reason.name+'КЛС'] = period
                     total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
+
                 if amount_channels_RRL != 0:
                     call_data['period_of_time'][call.reason.name+'ЦРРЛ'] = period
                     total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
@@ -212,9 +213,11 @@ def get_report(request):
                 call_data['amount_of_channels']['ЦРРЛ'] = amount_channels_RRL
                 call_data['comments'] = call.comments1
                 data.append(call_data)
-
-            total = dict(total_period_of_time)
-
+            total_period_of_time['name'] = 'всего'
+            total_period_of_time['date_from'] = 'час'
+            total_period_of_time['color'] = '2'
+            data.append(total_period_of_time)
+            total = copy.deepcopy(total_period_of_time)
             for i in total['period_of_time']:
                 if amount_channels_KLS != 0:
                     total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_KLS, 2)
@@ -223,15 +226,10 @@ def get_report(request):
                     total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_RRL, 2)
                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
 
-            total_period_of_time['name'] = 'всего'
-            total_period_of_time['date_from'] = 'час'
-            total_period_of_time['color'] = '2'
-            data.append(total_period_of_time)
             total['name'] = 'всего'
             total['date_from'] = 'кнл/час'
             total['color'] = '3'
             data.append(total)
-
         total_outfit['name'] = 'Общий итог'
         total_outfit['color'] = '4'
         data.append(total_outfit)
