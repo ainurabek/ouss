@@ -77,6 +77,7 @@ class Punkt5(models.Model):
             self.outfit.length_vls = self.length_vls
             self.outfit.length_rrl = self.length_rrl
             self.outfit.save()
+        super().save(*args, **kwargs)
 
 
 class Punkt7(models.Model):
@@ -118,6 +119,7 @@ class Punkt7(models.Model):
             self.outfit.total_number_rrl = self.total_number_rrl
             self.outfit.corresponding_norm_rrl = self.corresponding_norm_rrl
             self.outfit.save()
+        super().save(*args, **kwargs)
 
 
 
