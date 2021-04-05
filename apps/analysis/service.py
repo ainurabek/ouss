@@ -342,6 +342,7 @@ def update_total_length(punkt5: Punkt5):
     punkt5.total_data5.total_length = punkt5.length_vls + punkt5.length_kls + punkt5.length_rrl
     punkt5.total_data5.save()
     update_type_line_value(punkt5.total_data5)
+
 def update_length_and_outfit_period_of_time(form: FormAnalysis):
     outfit_period_of_time_kls = 0
     outfit_period_of_time_rrl = 0
@@ -364,18 +365,26 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
     form.punkt5.length_rrl = length_rrl
     form.punkt5.length_vls = length_vls
     form.punkt5.save()
-def update_punkt5(punkt5: Punkt5):
+
+def update_punkt5(punkt5: Punkt5, total_coefficient: float):
     update_downtime(punkt5)
     update_coefficient(punkt5)
     update_total_length(punkt5)
-    update_total_coefficient(punkt5.total_data5)
+    if punkt5.formula_activate:
+        update_total_coefficient(punkt5.total_data5)
+    else:
+        punkt5.total_data5.total_coefficient = float(total_coefficient)
+        punkt5.total_data5.save()
+
     update_length_and_outfit_period_of_time(punkt5.form_analysis.id_parent)
     update_downtime(punkt5.form_analysis.id_parent.punkt5)
     update_coefficient(punkt5.form_analysis.id_parent.punkt5)
     update_total_length(punkt5.form_analysis.id_parent.punkt5)
+
     update_republic_coefficient(punkt5.form_analysis.id_parent.punkt5)
     update_analysis_form_coefficient(punkt5.form_analysis)
     update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
+
 def delete_punkt5(punkt5: Punkt5):
     parent_analysis = punkt5.form_analysis.id_parent
     punkt5_rep = punkt5.form_analysis.id_parent.punkt5
