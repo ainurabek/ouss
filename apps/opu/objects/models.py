@@ -100,6 +100,10 @@ class Outfit(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	history = HistoricalRecords(related_name='history_outfit_log')
 
+	length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
+	length_vls = models.FloatField("Протяженность кан*км ВЛС", default=0, blank=True, null=True)
+	length_rrl = models.FloatField("Протяженность кан*км РРЛ", default=0, blank=True, null=True)
+
 
 	class Meta:
 		verbose_name = 'Предприятие'

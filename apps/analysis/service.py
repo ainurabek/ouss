@@ -303,9 +303,9 @@ def get_coefficient_punkt7_vls(percentage_compliance: int) -> int:
 
 
 def update_downtime(punkt5: Punkt5):
-    punkt5.downtime_kls = division(punkt5.outfit_period_of_time_kls, punkt5.length_kls)
-    punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.length_rrl)
-    punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.length_vls)
+    punkt5.downtime_kls = division(punkt5.outfit_period_of_time_kls, punkt5.outfit.length_kls)
+    punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.outfit.length_rrl)
+    punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.outfit.length_vls)
     punkt5.save()
 
 
@@ -334,14 +334,14 @@ def update_republic_coefficient(punkt5: Punkt5):
 
 
 def update_type_line_value(total_data: TotalData):
-    total_data.kls = division(total_data.punkt5.length_kls * 100, total_data.total_length)
-    total_data.vls = division(total_data.punkt5.length_vls * 100, total_data.total_length)
-    total_data.rrl = division(total_data.punkt5.length_rrl * 100, total_data.total_length)
+    total_data.kls = division(total_data.punkt5.outfit.length_kls * 100, total_data.total_length)
+    total_data.vls = division(total_data.punkt5.outfit.length_vls * 100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt5.outfit.length_rrl * 100, total_data.total_length)
     total_data.save()
 
 
 def update_total_length(punkt5: Punkt5):
-    punkt5.total_data5.total_length = punkt5.length_vls + punkt5.length_kls + punkt5.length_rrl
+    punkt5.total_data5.total_length = punkt5.outfit.length_vls + punkt5.outfit.length_kls + punkt5.outfit.length_rrl
     punkt5.total_data5.save()
     update_type_line_value(punkt5.total_data5)
 
@@ -376,14 +376,14 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
     form.punkt5.save()
 
 
-def update_punkt5(punkt5: Punkt5, total_coefficient: int):
+def update_punkt5(punkt5: Punkt5, total_coefficient: float):
     update_downtime(punkt5)
     update_coefficient(punkt5)
     update_total_length(punkt5)
     if punkt5.formula_activate:
         update_total_coefficient(punkt5.total_data5)
     else:
-        punkt5.total_data5.total_coefficient = total_coefficient
+        punkt5.total_data5.total_coefficient = float(total_coefficient)
         punkt5.total_data5.save()
 
     update_length_and_outfit_period_of_time(punkt5.form_analysis.id_parent)

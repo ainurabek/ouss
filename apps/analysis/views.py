@@ -409,7 +409,11 @@ class Punkt5UpdateAPIView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         punkt5 = serializer.save()
-        update_punkt5(punkt5, self.request.data['total_coefficient'])
+        punkt5.outfit.length_kls = float(self.request.data["length_kls"])
+        punkt5.outfit.length_vls = float(self.request.data["length_vls"])
+        punkt5.outfit.length_rrl = float(self.request.data["length_rrl"])
+        punkt5.outfit.save()
+        update_punkt5(punkt5, self.request.data["total_coefficient"])
 
 
 class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
