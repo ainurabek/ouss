@@ -56,17 +56,10 @@ class Punkt7Serializer(serializers.ModelSerializer):
         fields = ("id", "total_data7")
 
 
-class OutfitSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Outfit
-        fields = ("outfit", "length_kls", "length_vls", "length_rrl")
-
 
 class Punkt5ListSerializer(serializers.ModelSerializer):
-    outfit = OutfitSerializer()
+    outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
     total_data5 = TotalDataSerializer()
-
     class Meta:
         model = Punkt5
         exclude = ("form_analysis",)
@@ -97,28 +90,21 @@ class FormAnalysisUpdateSerializer(serializers.ModelSerializer):
 
 
 class Punkt5UpdateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Punkt5
-        fields = ("id", "outfit_period_of_time_vls", "formula_activate")
+        fields = ("id", "outfit_period_of_time_kls", "outfit_period_of_time_rrl", "outfit_period_of_time_vls",
+                  "length_kls", "length_vls", "length_rrl")
 
-class Punkt7OutfitSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Outfit
-        fields = ("outfit", "total_number_kls", "corresponding_norm_kls", "total_number_vls",
-                  'corresponding_norm_vls', 'total_number_rrl', 'corresponding_norm_rrl')
 
 class Punkt7UpdateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Punkt7
-        fields = ("id", )
-
+        fields = ("id", "total_number_kls", "corresponding_norm_kls", "total_number_vls", "corresponding_norm_vls",
+                  "total_number_rrl", "corresponding_norm_rrl", )
 
 class Punkt7ListSerializer(serializers.ModelSerializer):
-    outfit = Punkt7OutfitSerializer()
+    outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
     total_data7 = TotalDataSerializer()
-
     class Meta:
         model = Punkt7
         exclude = ("form_analysis",)

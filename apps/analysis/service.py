@@ -175,34 +175,44 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     else:
         outfits = Outfit.objects.filter(outfit__in=['ЧОФ', 'НОФ', 'ТОФ', 'ИОФ', 'ЖОФ', 'ООФ', 'БОФ', 'БГТС', 'ЦСП'])
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
-
+    kls, rrl = get_type_line_vls_and_kls()
     total_rep_kls = 0
     total_rep_rrl = 0
     for out in outfits:
         total_outfit_kls = 0
         total_outfit_rrl = 0
-
         for event in all_event_name.filter(responsible_outfit=out):
-            amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(event)
-
             total_event_kls = 0
             total_event_rrl = 0
+            type_line = get_type_line(event)
             for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit):
                 period = get_period(call, date_to)
-                if amount_channels_KLS != 0:
-                    total_event_kls += period
-                if amount_channels_RRL != 0:
-                    total_event_rrl += period
-
-            total_outfit_kls += amount_channels_KLS*total_event_kls
-            total_outfit_rrl += amount_channels_RRL*total_event_rrl
-
+                if call.ips is None:
+                    if type_line == kls.name:
+                        total_event_kls += period
+                    elif type_line == rrl.name:
+                        total_event_rrl += period
+                else:
+                    if call.ips.total_point_channels_KLS != 0:
+                        total_event_kls += period
+                    if call.ips.total_point_channels_RRL != 0:
+                        total_event_rrl += period
+            if event.ips is None:
+                amount_of_channels = int(get_amount_of_channels(event))
+                if type_line == kls.name:
+                    total_outfit_kls += amount_of_channels*total_event_kls
+                elif type_line == rrl.name:
+                    total_outfit_rrl += amount_of_channels*total_event_rrl
+            else:
+                if event.ips.total_point_channels_KLS != 0:
+                    total_outfit_kls += event.ips.total_point_channels_KLS*total_event_kls
+                if event.ips.total_point_channels_RRL != 0:
+                    total_outfit_rrl += event.ips.total_point_channels_RRL*total_event_rrl
         total_rep_kls += total_outfit_kls
         total_rep_rrl += total_outfit_rrl
         #####################################################################################################
         analysis_form = FormAnalysis.objects.create(outfit=out, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
-
         if punkt7_AK:
             try:
                 form = FormAnalysis.objects.get(outfit=out, id_parent=punkt7_AK)
@@ -213,10 +223,18 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             else:
                 fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
                                                    outfit=out,
+                                                   total_number_kls=out.total_number_kls,
+                                                   corresponding_norm_kls=out.corresponding_norm_kls,
                                                    percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
                                                    coefficient_kls=form.punkt7.coefficient_kls,
+
+                                                   total_number_vls=out.total_number_vls,
+                                                   corresponding_norm_vls=out.corresponding_norm_vls,
                                                    percentage_compliance_vls=form.punkt7.percentage_compliance_vls,
                                                    coefficient_vls=form.punkt7.coefficient_vls,
+
+                                                   total_number_rrl=out.total_number_rrl,
+                                                   corresponding_norm_rrl=out.corresponding_norm_rrl,
                                                    percentage_compliance_rrl=form.punkt7.percentage_compliance_rrl,
                                                    coefficient_rrl=form.punkt7.coefficient_rrl,
                                                    )
@@ -228,13 +246,11 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             punkt7 = Punkt7.objects.create(outfit=out, date_to=date_to, date_from=date_from,
                                            user=user, form_analysis=analysis_form)
             TotalData.objects.create(punkt7=punkt7)
-
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=round(total_outfit_kls, 2),
                                        outfit_period_of_time_rrl=round(total_outfit_rrl, 2), outfit=out,
+                                       length_kls=out.length_kls, length_vls = out.length_vls, length_rrl = out.length_rrl,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
-
         TotalData.objects.create(punkt5=punkt5)
-
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
     parent_obj.punkt5.save()
@@ -295,27 +311,21 @@ def get_coefficient_punkt7_vls(percentage_compliance: int) -> int:
 
 
 def update_downtime(punkt5: Punkt5):
-    punkt5.downtime_kls = division(punkt5.outfit_period_of_time_kls, punkt5.outfit.length_kls)
-    punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.outfit.length_rrl)
-    punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.outfit.length_vls)
+    punkt5.downtime_kls = division(punkt5.outfit_period_of_time_kls, punkt5.length_kls)
+    punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.length_rrl)
+    punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.length_vls)
     punkt5.save()
-
-
 def update_coefficient(punkt5: Punkt5):
     punkt5.coefficient_kls = get_coefficient_kls(punkt5.downtime_kls)
     punkt5.coefficient_rrl = get_coefficient_rrl(punkt5.downtime_rrl)
     punkt5.coefficient_vls = get_coefficient_vls(punkt5.downtime_vls)
     punkt5.save()
-
-
 def update_total_coefficient(total_data: TotalData):
     punkt5 = total_data.punkt5
     total_data.total_coefficient = division((
             punkt5.coefficient_kls * total_data.kls + punkt5.coefficient_vls * total_data.vls +
             punkt5.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
-
-
 def update_republic_coefficient(punkt5: Punkt5):
     coefficient = 0
     for form in punkt5.form_analysis.formanalysis_set.all():
@@ -323,71 +333,49 @@ def update_republic_coefficient(punkt5: Punkt5):
             coefficient += form.punkt5.total_data5.total_coefficient
     punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis.formanalysis_set.count() - 1)
     punkt5.total_data5.save()
-
-
 def update_type_line_value(total_data: TotalData):
-    total_data.kls = division(total_data.punkt5.outfit.length_kls * 100, total_data.total_length)
-    total_data.vls = division(total_data.punkt5.outfit.length_vls * 100, total_data.total_length)
-    total_data.rrl = division(total_data.punkt5.outfit.length_rrl * 100, total_data.total_length)
+    total_data.kls = division(total_data.punkt5.length_kls * 100, total_data.total_length)
+    total_data.vls = division(total_data.punkt5.length_vls * 100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt5.length_rrl * 100, total_data.total_length)
     total_data.save()
-
-
 def update_total_length(punkt5: Punkt5):
-    punkt5.total_data5.total_length = punkt5.outfit.length_vls + punkt5.outfit.length_kls + punkt5.outfit.length_rrl
+    punkt5.total_data5.total_length = punkt5.length_vls + punkt5.length_kls + punkt5.length_rrl
     punkt5.total_data5.save()
     update_type_line_value(punkt5.total_data5)
-
-
 def update_length_and_outfit_period_of_time(form: FormAnalysis):
     outfit_period_of_time_kls = 0
     outfit_period_of_time_rrl = 0
     outfit_period_of_time_vls = 0
-
     length_kls = 0
     length_rrl = 0
     length_vls = 0
-
     for analysis_form in form.formanalysis_set.all():
         if analysis_form != form:
             outfit_period_of_time_kls += analysis_form.punkt5.outfit_period_of_time_kls
             outfit_period_of_time_rrl += analysis_form.punkt5.outfit_period_of_time_rrl
             outfit_period_of_time_vls += analysis_form.punkt5.outfit_period_of_time_vls
-
             length_kls += analysis_form.punkt5.length_kls
             length_rrl += analysis_form.punkt5.length_rrl
             length_vls += analysis_form.punkt5.length_vls
-
     form.punkt5.outfit_period_of_time_kls = outfit_period_of_time_kls
     form.punkt5.outfit_period_of_time_rrl = outfit_period_of_time_rrl
     form.punkt5.outfit_period_of_time_vls = outfit_period_of_time_vls
-
     form.punkt5.length_kls = length_kls
     form.punkt5.length_rrl = length_rrl
     form.punkt5.length_vls = length_vls
-
     form.punkt5.save()
-
-
-def update_punkt5(punkt5: Punkt5, total_coefficient: float):
+def update_punkt5(punkt5: Punkt5):
     update_downtime(punkt5)
     update_coefficient(punkt5)
     update_total_length(punkt5)
-    if punkt5.formula_activate:
-        update_total_coefficient(punkt5.total_data5)
-    else:
-        punkt5.total_data5.total_coefficient = float(total_coefficient)
-        punkt5.total_data5.save()
-
+    update_total_coefficient(punkt5.total_data5)
     update_length_and_outfit_period_of_time(punkt5.form_analysis.id_parent)
     update_downtime(punkt5.form_analysis.id_parent.punkt5)
     update_coefficient(punkt5.form_analysis.id_parent.punkt5)
     update_total_length(punkt5.form_analysis.id_parent.punkt5)
-
     update_republic_coefficient(punkt5.form_analysis.id_parent.punkt5)
     update_analysis_form_coefficient(punkt5.form_analysis)
     update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
-
-
 def delete_punkt5(punkt5: Punkt5):
     parent_analysis = punkt5.form_analysis.id_parent
     punkt5_rep = punkt5.form_analysis.id_parent.punkt5
@@ -399,92 +387,65 @@ def delete_punkt5(punkt5: Punkt5):
     update_downtime(punkt5_rep)
     update_total_length(punkt5_rep)
     update_republic_coefficient(punkt5_rep)
-
     update_republic_total_number_and_corresponding_norm(parent_analysis)
     update_percentage_compliance_and_coefficient(parent_analysis.punkt7)
     update_total_object(parent_analysis.punkt7)
     update_total_coefficient_punkt7(parent_analysis.punkt7.total_data7)
-
     update_analysis_form_coefficient(parent_analysis)
-
-
 def update_analysis_form_coefficient(form_analysis: FormAnalysis):
     form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
                                          form_analysis.punkt7.total_data7.total_coefficient, 2)
-
     form_analysis.save()
-
-
 def update_percentage_compliance(punkt7: Punkt7):
-    punkt7.percentage_compliance_kls = division(punkt7.outfit.corresponding_norm_kls, punkt7.outfit.total_number_kls) * 100
-    punkt7.percentage_compliance_rrl = division(punkt7.outfit.corresponding_norm_rrl, punkt7.outfit.total_number_rrl) * 100
-    punkt7.percentage_compliance_vls = division(punkt7.outfit.corresponding_norm_vls, punkt7.outfit.total_number_vls) * 100
+    punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls) * 100
+    punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl) * 100
+    punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls) * 100
     punkt7.save()
-
-
 def update_coefficient_punkt7(punkt7: Punkt7):
     punkt7.coefficient_kls = get_coefficient_punkt7_kls(punkt7.percentage_compliance_kls)
     punkt7.coefficient_vls = get_coefficient_punkt7_vls(punkt7.percentage_compliance_vls)
     punkt7.coefficient_rrl = get_coefficient_punkt7_rrl(punkt7.percentage_compliance_rrl)
     punkt7.save()
-
-
 def update_percentage_compliance_and_coefficient(punkt7: Punkt7):
     update_percentage_compliance(punkt7)
     update_coefficient_punkt7(punkt7)
-
-
 def update_type_line_value_punkt7(total_data: TotalData):
-    total_data.kls = division(total_data.punkt7.outfit.total_number_kls * 100, total_data.total_length)
-    total_data.vls = division(total_data.punkt7.outfit.total_number_vls * 100, total_data.total_length)
-    total_data.rrl = division(total_data.punkt7.outfit.total_number_rrl * 100, total_data.total_length)
+    total_data.kls = division(total_data.punkt7.total_number_kls * 100, total_data.total_length)
+    total_data.vls = division(total_data.punkt7.total_number_vls * 100, total_data.total_length)
+    total_data.rrl = division(total_data.punkt7.total_number_rrl * 100, total_data.total_length)
     total_data.save()
-
-
 def update_total_object(punkt7: Punkt7):
-    punkt7.total_data7.total_length = punkt7.outfit.total_number_kls + punkt7.outfit.total_number_vls + punkt7.outfit.total_number_rrl
+    punkt7.total_data7.total_length = punkt7.total_number_kls + punkt7.total_number_vls + punkt7.total_number_rrl
     punkt7.total_data7.save()
     update_type_line_value_punkt7(punkt7.total_data7)
-
-
 def update_total_coefficient_punkt7(total_data: TotalData):
     punkt7 = total_data.punkt7
     total_data.total_coefficient = division((
             punkt7.coefficient_kls * total_data.kls + punkt7.coefficient_vls * total_data.vls +
             punkt7.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
-
-
 def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
     total_number_kls = 0
     total_number_rrl = 0
     total_number_vls = 0
-
     corresponding_norm_kls = 0
     corresponding_norm_rrl = 0
     corresponding_norm_vls = 0
-
     for analysis_form in form.formanalysis_set.all():
         if form != analysis_form:
-            total_number_kls += analysis_form.punkt7.outfit.total_number_kls
-            total_number_vls += analysis_form.punkt7.outfit.total_number_vls
-            total_number_rrl += analysis_form.punkt7.outfit.total_number_rrl
-
-            corresponding_norm_kls += analysis_form.punkt7.outfit.corresponding_norm_kls
-            corresponding_norm_rrl += analysis_form.punkt7.outfit.corresponding_norm_rrl
-            corresponding_norm_vls += analysis_form.punkt7.outfit.corresponding_norm_vls
-
-    form.punkt7.outfit.total_number_kls = total_number_kls
-    form.punkt7.outfit.total_number_rrl = total_number_rrl
-    form.punkt7.outfit.total_number_vls = total_number_vls
-
-    form.punkt7.outfit.corresponding_norm_kls = corresponding_norm_kls
-    form.punkt7.outfit.corresponding_norm_rrl = corresponding_norm_rrl
-    form.punkt7.outfit.corresponding_norm_vls = corresponding_norm_vls
-
+            total_number_kls += analysis_form.punkt7.total_number_kls
+            total_number_vls += analysis_form.punkt7.total_number_vls
+            total_number_rrl += analysis_form.punkt7.total_number_rrl
+            corresponding_norm_kls += analysis_form.punkt7.corresponding_norm_kls
+            corresponding_norm_rrl += analysis_form.punkt7.corresponding_norm_rrl
+            corresponding_norm_vls += analysis_form.punkt7.corresponding_norm_vls
+    form.punkt7.total_number_kls = total_number_kls
+    form.punkt7.total_number_rrl = total_number_rrl
+    form.punkt7.total_number_vls = total_number_vls
+    form.punkt7.corresponding_norm_kls = corresponding_norm_kls
+    form.punkt7.corresponding_norm_rrl = corresponding_norm_rrl
+    form.punkt7.corresponding_norm_vls = corresponding_norm_vls
     form.punkt7.save()
-
-
 def update_punkt7(punkt7: Punkt7):
     update_percentage_compliance_and_coefficient(punkt7)
     update_total_object(punkt7)
@@ -495,8 +456,6 @@ def update_punkt7(punkt7: Punkt7):
     update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
     update_analysis_form_coefficient(punkt7.form_analysis)
     update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
-
-
 def delete_punkt7(punkt7: Punkt7):
     rep_punkt7 = punkt7.form_analysis.id_parent.punkt7
     analysis_form = punkt7.form_analysis.id_parent
@@ -509,13 +468,12 @@ def delete_punkt7(punkt7: Punkt7):
     update_percentage_compliance_and_coefficient(rep_punkt7)
     update_total_object(rep_punkt7)
     update_total_coefficient_punkt7(analysis_form.punkt7.total_data7)
-
     update_downtime(analysis_form.punkt5)
     update_coefficient(analysis_form.punkt5)
     update_total_length(analysis_form.punkt5)
     update_republic_coefficient(analysis_form.punkt5)
-
     update_analysis_form_coefficient(analysis_form)
+
 
 
 @register.simple_tag

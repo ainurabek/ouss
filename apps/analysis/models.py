@@ -43,20 +43,18 @@ class Punkt5(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
                                          verbose_name="Форма анализа", related_name="punkt5")
-
     outfit_period_of_time_kls = models.FloatField("Продолжительность всех ПВ кан*час КЛС", blank=True, null=True, default=0)
+    length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
     downtime_kls = models.FloatField("Простои КЛС", default=0, blank=True, null=True)
     coefficient_kls = models.IntegerField("Коэффициент качества КЛС", default=0, blank=True, null=True)
-
     outfit_period_of_time_vls = models.FloatField("Продолжительность всех ПВ кан*час ВЛС", blank=True, null=True, default=0)
+    length_vls = models.FloatField("Протяженность кан*км ВЛС", default=0, blank=True, null=True)
     downtime_vls = models.FloatField("Простои ВЛС", default=0, blank=True, null=True)
     coefficient_vls = models.IntegerField("Коэффициент качества ВЛС", default=0, blank=True, null=True)
-
     outfit_period_of_time_rrl = models.FloatField("Продолжительность всех ПВ кан*час РРЛ", blank=True, null=True, default=0)
+    length_rrl = models.FloatField("Протяженность кан*км РРЛ", default=0, blank=True, null=True)
     downtime_rrl = models.FloatField("Простои РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
-
-    formula_activate = models.BooleanField(default=True)
     date_from = models.DateField("Начало", blank=True, null=True)
     date_to = models.DateField("Конец", blank=True, null=True)
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
@@ -69,24 +67,32 @@ class Punkt5(models.Model):
     def __str__(self):
         return f"{self.id}"
 
+    def save(self, *args, **kwargs):
+        if self.outfit is not None:
+            self.outfit.length_kls = self.length_kls
+            self.outfit.length_vls = self.length_vls
+            self.outfit.length_rrl = self.length_rrl
+            self.outfit.save()
+
 
 class Punkt7(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия")
     form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
                                          verbose_name="Форма анализа", related_name="punkt7")
-
-
+    total_number_kls = models.IntegerField("Общее количество линейных трактов КЛС", default=0, blank=True, null=True)
+    corresponding_norm_kls = models.IntegerField("Соответствующих норме КЛС", default=0, blank=True, null=True)
     percentage_compliance_kls = models.IntegerField("Процент соответствия КЛС", default=0, blank=True, null=True)
     coefficient_kls = models.IntegerField("Коэффициент качества КЛС", default=0, blank=True, null=True)
 
-
+    total_number_vls = models.IntegerField("Общее количество линейных трактов ВЛС", default=0, blank=True, null=True)
+    corresponding_norm_vls = models.IntegerField("Соответствующих норме ВЛС", default=0, blank=True, null=True)
     percentage_compliance_vls = models.IntegerField("Процент соответствия ВЛС", default=0, blank=True, null=True)
     coefficient_vls = models.IntegerField("Коэффициент качества", default=0, blank=True, null=True)
 
-
+    total_number_rrl = models.IntegerField("Общее количество линейных трактов РРЛ", default=0, blank=True, null=True)
+    corresponding_norm_rrl = models.IntegerField("Соответствующих норме РРЛ", default=0, blank=True, null=True)
     percentage_compliance_rrl = models.IntegerField("Процент соответствия РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
-
     date_from = models.DateField("Начало", blank=True, null=True)
     date_to = models.DateField("Конец", blank=True, null=True)
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
@@ -98,6 +104,17 @@ class Punkt7(models.Model):
 
     def __str__(self):
         return f"{self.id}"
+
+    def save(self, *args, **kwargs):
+        if self.outfit is not None:
+            self.outfit.total_number_kls = self.total_number_kls
+            self.outfit.corresponding_norm_kls = self.corresponding_norm_kls
+            self.outfit.total_number_vls = self.total_number_vls
+            self.outfit.corresponding_norm_vls = self.corresponding_norm_vls
+            self.outfit.total_number_rrl = self.total_number_rrl
+            self.outfit.corresponding_norm_rrl = self.corresponding_norm_rrl
+            self.outfit.save()
+
 
 
 class TotalData(models.Model):
