@@ -104,6 +104,13 @@ class Outfit(models.Model):
 	length_vls = models.FloatField("Протяженность кан*км ВЛС", default=0, blank=True, null=True)
 	length_rrl = models.FloatField("Протяженность кан*км РРЛ", default=0, blank=True, null=True)
 
+	total_number_kls = models.IntegerField("Общее количество линейных трактов КЛС", default=0, blank=True, null=True)
+	corresponding_norm_kls = models.IntegerField("Соответствующих норме КЛС", default=0, blank=True, null=True)
+	total_number_vls = models.IntegerField("Общее количество линейных трактов ВЛС", default=0, blank=True, null=True)
+	corresponding_norm_vls = models.IntegerField("Соответствующих норме ВЛС", default=0, blank=True, null=True)
+	total_number_rrl = models.IntegerField("Общее количество линейных трактов РРЛ", default=0, blank=True, null=True)
+	corresponding_norm_rrl = models.IntegerField("Соответствующих норме РРЛ", default=0, blank=True, null=True)
+
 
 	class Meta:
 		verbose_name = 'Предприятие'

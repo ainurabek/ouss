@@ -435,8 +435,15 @@ class Punkt7UpdateAPIView(generics.UpdateAPIView):
     serializer_class = Punkt7UpdateSerializer
 
     def perform_update(self, serializer):
-        puknkt5 = serializer.save()
-        update_punkt7(puknkt5)
+        punkt7 = serializer.save()
+        punkt7.outfit.total_number_kls = int(self.request.data["total_number_kls"])
+        punkt7.outfit.corresponding_norm_kls = int(self.request.data["corresponding_norm_kls"])
+        punkt7.outfit.total_number_vls = int(self.request.data["total_number_vls"])
+        punkt7.outfit.corresponding_norm_vls = int(self.request.data["corresponding_norm_vls"])
+        punkt7.outfit.total_number_rrl = int(self.request.data["total_number_rrl"])
+        punkt7.outfit.corresponding_norm_rrl = int(self.request.data["corresponding_norm_rrl"])
+        punkt7.outfit.save()
+        update_punkt7(punkt7)
 
 
 class Punkt7DeleteAPIView(generics.DestroyAPIView):

@@ -75,18 +75,15 @@ class Punkt7(models.Model):
     form_analysis = models.OneToOneField(FormAnalysis, on_delete=models.CASCADE, blank=True, null=True,
                                          verbose_name="Форма анализа", related_name="punkt7")
 
-    total_number_kls = models.IntegerField("Общее количество линейных трактов КЛС", default=0, blank=True, null=True)
-    corresponding_norm_kls = models.IntegerField("Соответствующих норме КЛС", default=0, blank=True, null=True)
+
     percentage_compliance_kls = models.IntegerField("Процент соответствия КЛС", default=0, blank=True, null=True)
     coefficient_kls = models.IntegerField("Коэффициент качества КЛС", default=0, blank=True, null=True)
 
-    total_number_vls = models.IntegerField("Общее количество линейных трактов ВЛС", default=0, blank=True, null=True)
-    corresponding_norm_vls = models.IntegerField("Соответствующих норме ВЛС", default=0, blank=True, null=True)
+
     percentage_compliance_vls = models.IntegerField("Процент соответствия ВЛС", default=0, blank=True, null=True)
     coefficient_vls = models.IntegerField("Коэффициент качества", default=0, blank=True, null=True)
 
-    total_number_rrl = models.IntegerField("Общее количество линейных трактов РРЛ", default=0, blank=True, null=True)
-    corresponding_norm_rrl = models.IntegerField("Соответствующих норме РРЛ", default=0, blank=True, null=True)
+
     percentage_compliance_rrl = models.IntegerField("Процент соответствия РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
 
