@@ -45,17 +45,14 @@ class Punkt5(models.Model):
                                          verbose_name="Форма анализа", related_name="punkt5")
 
     outfit_period_of_time_kls = models.FloatField("Продолжительность всех ПВ кан*час КЛС", blank=True, null=True, default=0)
-    length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
     downtime_kls = models.FloatField("Простои КЛС", default=0, blank=True, null=True)
     coefficient_kls = models.IntegerField("Коэффициент качества КЛС", default=0, blank=True, null=True)
 
     outfit_period_of_time_vls = models.FloatField("Продолжительность всех ПВ кан*час ВЛС", blank=True, null=True, default=0)
-    length_vls = models.FloatField("Протяженность кан*км ВЛС", default=0, blank=True, null=True)
     downtime_vls = models.FloatField("Простои ВЛС", default=0, blank=True, null=True)
     coefficient_vls = models.IntegerField("Коэффициент качества ВЛС", default=0, blank=True, null=True)
 
     outfit_period_of_time_rrl = models.FloatField("Продолжительность всех ПВ кан*час РРЛ", blank=True, null=True, default=0)
-    length_rrl = models.FloatField("Протяженность кан*км РРЛ", default=0, blank=True, null=True)
     downtime_rrl = models.FloatField("Простои РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
 

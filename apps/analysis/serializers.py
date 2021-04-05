@@ -4,6 +4,7 @@ from apps.analysis.models import FormAnalysis, Punkt5, TotalData, Punkt7
 from apps.dispatching.models import Event, HistoricalEvent
 
 from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSerializer
+from apps.opu.objects.models import Outfit
 from apps.opu.objects.serializers import IPListSerializer
 
 from apps.analysis.models import AmountChannelsKLSRRL
@@ -55,8 +56,15 @@ class Punkt7Serializer(serializers.ModelSerializer):
         fields = ("id", "total_data7")
 
 
+class OutfitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Outfit
+        fields = ("outfit", "length_kls", "length_vls", "length_rrl")
+
+
 class Punkt5ListSerializer(serializers.ModelSerializer):
-    outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
+    outfit = OutfitSerializer()
     total_data5 = TotalDataSerializer()
 
     class Meta:
@@ -92,7 +100,7 @@ class Punkt5UpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Punkt5
-        fields = ("id", "outfit_period_of_time_vls",  "length_kls", "length_vls", "length_rrl", 'formula_activate')
+        fields = ("id", "outfit_period_of_time_vls", "formula_activate")
 
 
 class Punkt7UpdateSerializer(serializers.ModelSerializer):
