@@ -244,16 +244,36 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
                                          vls=total_data7.vls, rrl=total_data7.rrl)
         else:
             punkt7 = Punkt7.objects.create(outfit=out, date_to=date_to, date_from=date_from,
-                                           user=user, form_analysis=analysis_form)
+                                           user=user, form_analysis=analysis_form, total_number_kls=out.total_number_kls,
+                                                   corresponding_norm_kls=out.corresponding_norm_kls, total_number_vls=out.total_number_vls,
+                                                   corresponding_norm_vls=out.corresponding_norm_vls,  total_number_rrl=out.total_number_rrl,
+                                                   corresponding_norm_rrl=out.corresponding_norm_rrl)
+
+
+
+
             TotalData.objects.create(punkt7=punkt7)
+            update_percentage_compliance_and_coefficient(punkt7)
+            update_total_object(punkt7)
+            update_total_coefficient_punkt7(punkt7.total_data7)
+            update_republic_total_number_and_corresponding_norm(punkt7.form_analysis.id_parent)
+            update_percentage_compliance_and_coefficient(punkt7.form_analysis.id_parent.punkt7)
+            update_total_object(punkt7.form_analysis.id_parent.punkt7)
+            update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
+
+
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=round(total_outfit_kls, 2),
                                        outfit_period_of_time_rrl=round(total_outfit_rrl, 2), outfit=out,
                                        length_kls=out.length_kls, length_vls = out.length_vls, length_rrl = out.length_rrl,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
         TotalData.objects.create(punkt5=punkt5)
+        update_analysis_form_coefficient(punkt7.form_analysis)
+        update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
     parent_obj.punkt5.save()
+
+
 
 
 def get_coefficient_punkt7_kls(percentage_compliance: int) -> int:
@@ -405,6 +425,7 @@ def update_analysis_form_coefficient(form_analysis: FormAnalysis):
     form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
                                          form_analysis.punkt7.total_data7.total_coefficient, 2)
     form_analysis.save()
+
 def update_percentage_compliance(punkt7: Punkt7):
     punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls) * 100
     punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl) * 100
