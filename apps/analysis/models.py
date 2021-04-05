@@ -47,14 +47,18 @@ class Punkt5(models.Model):
     length_kls = models.FloatField("Протяженность кан*км КЛС", default=0, blank=True, null=True)
     downtime_kls = models.FloatField("Простои КЛС", default=0, blank=True, null=True)
     coefficient_kls = models.IntegerField("Коэффициент качества КЛС", default=0, blank=True, null=True)
+
     outfit_period_of_time_vls = models.FloatField("Продолжительность всех ПВ кан*час ВЛС", blank=True, null=True, default=0)
     length_vls = models.FloatField("Протяженность кан*км ВЛС", default=0, blank=True, null=True)
     downtime_vls = models.FloatField("Простои ВЛС", default=0, blank=True, null=True)
     coefficient_vls = models.IntegerField("Коэффициент качества ВЛС", default=0, blank=True, null=True)
+
     outfit_period_of_time_rrl = models.FloatField("Продолжительность всех ПВ кан*час РРЛ", blank=True, null=True, default=0)
     length_rrl = models.FloatField("Протяженность кан*км РРЛ", default=0, blank=True, null=True)
     downtime_rrl = models.FloatField("Простои РРЛ", default=0, blank=True, null=True)
     coefficient_rrl = models.IntegerField("Коэффициент качества РРЛ", default=0, blank=True, null=True)
+
+    formula_activate = models.BooleanField(default=True)
     date_from = models.DateField("Начало", blank=True, null=True)
     date_to = models.DateField("Конец", blank=True, null=True)
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
