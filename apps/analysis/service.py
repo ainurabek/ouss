@@ -223,18 +223,18 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             else:
                 fin_punkt7 = Punkt7.objects.create(form_analysis=analysis_form, user=user,
                                                    outfit=out,
-                                                   total_number_kls=out.total_number_kls,
-                                                   corresponding_norm_kls=out.corresponding_norm_kls,
+                                                   total_number_kls=form.punkt7.total_number_kls,
+                                                   corresponding_norm_kls=form.punkt7.corresponding_norm_kls,
                                                    percentage_compliance_kls=form.punkt7.percentage_compliance_kls,
                                                    coefficient_kls=form.punkt7.coefficient_kls,
 
-                                                   total_number_vls=out.total_number_vls,
-                                                   corresponding_norm_vls=out.corresponding_norm_vls,
+                                                   total_number_vls=form.punkt7.total_number_vls,
+                                                   corresponding_norm_vls=form.punkt7.corresponding_norm_vls,
                                                    percentage_compliance_vls=form.punkt7.percentage_compliance_vls,
                                                    coefficient_vls=form.punkt7.coefficient_vls,
 
-                                                   total_number_rrl=out.total_number_rrl,
-                                                   corresponding_norm_rrl=out.corresponding_norm_rrl,
+                                                   total_number_rrl=form.punkt7.total_number_rrl,
+                                                   corresponding_norm_rrl=form.punkt7.corresponding_norm_rrl,
                                                    percentage_compliance_rrl=form.punkt7.percentage_compliance_rrl,
                                                    coefficient_rrl=form.punkt7.coefficient_rrl,
                                                    )
@@ -418,21 +418,25 @@ def update_coefficient_punkt7(punkt7: Punkt7):
 def update_percentage_compliance_and_coefficient(punkt7: Punkt7):
     update_percentage_compliance(punkt7)
     update_coefficient_punkt7(punkt7)
+
 def update_type_line_value_punkt7(total_data: TotalData):
     total_data.kls = division(total_data.punkt7.total_number_kls * 100, total_data.total_length)
     total_data.vls = division(total_data.punkt7.total_number_vls * 100, total_data.total_length)
     total_data.rrl = division(total_data.punkt7.total_number_rrl * 100, total_data.total_length)
     total_data.save()
+
 def update_total_object(punkt7: Punkt7):
     punkt7.total_data7.total_length = punkt7.total_number_kls + punkt7.total_number_vls + punkt7.total_number_rrl
     punkt7.total_data7.save()
     update_type_line_value_punkt7(punkt7.total_data7)
+
 def update_total_coefficient_punkt7(total_data: TotalData):
     punkt7 = total_data.punkt7
     total_data.total_coefficient = division((
             punkt7.coefficient_kls * total_data.kls + punkt7.coefficient_vls * total_data.vls +
             punkt7.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
+
 def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
     total_number_kls = 0
     total_number_rrl = 0
@@ -455,6 +459,7 @@ def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
     form.punkt7.corresponding_norm_rrl = corresponding_norm_rrl
     form.punkt7.corresponding_norm_vls = corresponding_norm_vls
     form.punkt7.save()
+
 def update_punkt7(punkt7: Punkt7):
     update_percentage_compliance_and_coefficient(punkt7)
     update_total_object(punkt7)
@@ -465,6 +470,7 @@ def update_punkt7(punkt7: Punkt7):
     update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
     update_analysis_form_coefficient(punkt7.form_analysis)
     update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
+
 def delete_punkt7(punkt7: Punkt7):
     rep_punkt7 = punkt7.form_analysis.id_parent.punkt7
     analysis_form = punkt7.form_analysis.id_parent
