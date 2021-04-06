@@ -91,16 +91,16 @@ class EventDetailAPIView(APIView):
         serializer = EventDetailSerializer(calls, many=True)
         return Response(serializer.data)
 
-from django.http import HttpResponse
+
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    # permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser|SuperUser)
     """Создания Event"""
     def post(self, request, pk):
         point = Point.objects.get(pk=pk)
         created_events = Event.objects.filter(ips=point, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            message = {"detail": 'По такому ИПу уже существует событие. Добавить к существующему обьекту как второй звонок? Или создать новое событие?'}
+            message = {"detail": 'По такому ИПу уже существует событие'}
             return Response(message, status=status.HTTP_403_FORBIDDEN)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
@@ -150,11 +150,15 @@ class CircuitParentList(APIView):
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, IngenerUser | SuperUser)
     """Создания Event"""
 
     def post(self, request, pk):
         circuit = get_object_or_404(Circuit, pk=pk)
+        created_events = Event.objects.filter(circuit=circuit, callsorevent=True).exclude(index1__index='4')
+        if created_events.exists():
+            message = {"detail": 'По такому каналу уже существует событие'}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
@@ -177,6 +181,10 @@ class EventObjectCreateViewAPI(APIView):
 
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
+        created_events = Event.objects.filter(object=object, callsorevent=True).exclude(index1__index='4')
+        if created_events.exists():
+            message = {"detail": 'По такому КО уже существует событие'}
+            return Response(message, status=status.HTTP_403_FORBIDDEN)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(object=object, created_by=self.request.user.profile)
@@ -196,7 +204,7 @@ class EventObjectCreateViewAPI(APIView):
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, IngenerUser|SuperUser)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -226,7 +234,7 @@ class EventCallsCreateViewAPI(APIView):
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, IngenerUser|SuperUser)
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
@@ -254,7 +262,7 @@ class EventUpdateAPIView(UpdateAPIView):
 class EventDeleteAPIView(DestroyAPIView):
     """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, IngenerUser | SuperUser)
     queryset = Event.objects.all()
     lookup_field = 'pk'
 

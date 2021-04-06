@@ -66,7 +66,7 @@ urlpatterns = [
     path("api/event/calls/create/<int:pk>/", views.EventCallsCreateViewAPI.as_view()),
 
     path("api/unknown/event/create/", views.EventUnknownCreateViewAPI.as_view()),
-
+ #для проверки существует ли события с похожими и открытыми ипами, и отправляем их айди для создания 2о звонка
     path("api/event/point/parents/<int:pk>/", views.PointParentList.as_view()),
     path("api/event/object/parents/<int:pk>/", views.ObjectParentList.as_view()),
     path("api/event/circuit/parents/<int:pk>/", views.CircuitParentList.as_view()),
