@@ -82,9 +82,7 @@ class EventDetailAPIView(APIView):
 
     def get(self, request, pk=None):
         created_at = request.GET.get("created_at")
-
         calls = Event.objects.get(pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
-
         serializer = EventDetailSerializer(calls, many=True)
         return Response(serializer.data)
 
@@ -95,11 +93,11 @@ class EventIPCreateViewAPI(APIView):
 
     """Создания Event"""
     def post(self, request, pk):
+        data = request.data
         point = Point.objects.get(pk=pk)
         created_events = Event.objects.filter(ips=point, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            data = request.data
-            if data['create_new_call'] != True:
+            if data['create_new_call'] == False:
                 message = {"detail": 'По такому ИПу уже существует событие'}
                 return Response(message, status=status.HTTP_403_FORBIDDEN)
             else:
@@ -170,11 +168,11 @@ class EventCircuitCreateViewAPI(APIView):
     """Создания Event"""
 
     def post(self, request, pk):
+        data = request.data
         circuit = get_object_or_404(Circuit, pk=pk)
         created_events = Event.objects.filter(circuit=circuit, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            data = request.data
-            if data['create_new_call'] != True:
+            if data['create_new_call'] == False:
                 message = {"detail": 'По такому каналу уже существует событие'}
                 return Response(message, status=status.HTTP_403_FORBIDDEN)
             else:
@@ -213,11 +211,11 @@ class EventObjectCreateViewAPI(APIView):
     """Создания Event"""
 
     def post(self, request, pk):
+        data = request.data
         object = get_object_or_404(Object, pk=pk)
         created_events = Event.objects.filter(object=object, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            data = request.data
-            if data['create_new_call'] != True:
+            if data['create_new_call'] == False:
                 message = {"detail": 'По такому КО уже существует событие'}
                 return Response(message, status=status.HTTP_403_FORBIDDEN)
             else:
