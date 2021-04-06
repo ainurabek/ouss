@@ -67,6 +67,10 @@ urlpatterns = [
 
     path("api/unknown/event/create/", views.EventUnknownCreateViewAPI.as_view()),
 
+    path("api/event/point/parents/<int:pk>/", views.PointParentList.as_view()),
+    path("api/event/object/parents/<int:pk>/", views.ObjectParentList.as_view()),
+    path("api/event/circuit/parents/<int:pk>/", views.CircuitParentList.as_view()),
+
 
     path('', include(router.urls)),
 
