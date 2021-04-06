@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from rest_framework.permissions import BasePermission
 
 
@@ -39,3 +41,10 @@ class IngenerUser(BasePermission):
 class IsReadOnlyUser(BasePermission):
     def has_permission(self, request, view):
         return True if request.user.role.id == 3 else False
+
+
+class DateCheck(BasePermission):
+    def has_permission(self, request, view):
+        if datetime.now().date()-view.get_object().created_at > timedelta(days=3) and request.user.role.id != 1:
+            return False
+        return True

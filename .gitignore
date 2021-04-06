@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-.gitignore
+
 .idea/
 __pycache__/
 *.py[cod]
@@ -150,3 +150,4 @@ data.py
 
 #**/migrations/
 #**/**/migrations
+.gitignore
