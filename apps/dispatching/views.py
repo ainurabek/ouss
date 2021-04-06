@@ -98,8 +98,25 @@ class EventIPCreateViewAPI(APIView):
         point = Point.objects.get(pk=pk)
         created_events = Event.objects.filter(ips=point, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            message = {"detail": 'По такому ИПу уже существует событие'}
-            return Response(message, status=status.HTTP_403_FORBIDDEN)
+            data = request.data
+            if data['create_new_call'] != True:
+                message = {"detail": 'По такому ИПу уже существует событие'}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = EventCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    event = serializer.save(ips=point, created_by=self.request.user.profile)
+                    Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                         time_created_at=event.time_created_at,
+                                         date_from=event.date_from, index1=event.index1,
+                                         type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                         reason=event.reason, comments1=event.comments1, ips=event.ips,
+                                         responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                         customer=event.customer, created_by=event.created_by,
+                                         contact_name=event.contact_name, )
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(ips=point, created_by=self.request.user.profile)
@@ -156,8 +173,25 @@ class EventCircuitCreateViewAPI(APIView):
         circuit = get_object_or_404(Circuit, pk=pk)
         created_events = Event.objects.filter(circuit=circuit, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            message = {"detail": 'По такому каналу уже существует событие'}
-            return Response(message, status=status.HTTP_403_FORBIDDEN)
+            data = request.data
+            if data['create_new_call'] != True:
+                message = {"detail": 'По такому каналу уже существует событие'}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = EventCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
+                    Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                         time_created_at=event.time_created_at,
+                                         date_from=event.date_from, index1=event.index1,
+                                         type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                         reason=event.reason, comments1=event.comments1, circuit=event.circuit,
+                                         responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                         customer=event.customer, created_by=event.created_by,
+                                         contact_name=event.contact_name,
+                                         )
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
@@ -182,8 +216,28 @@ class EventObjectCreateViewAPI(APIView):
         object = get_object_or_404(Object, pk=pk)
         created_events = Event.objects.filter(object=object, callsorevent=True).exclude(index1__index='4')
         if created_events.exists():
-            message = {"detail": 'По такому КО уже существует событие'}
-            return Response(message, status=status.HTTP_403_FORBIDDEN)
+            data = request.data
+            if data['create_new_call'] != True:
+                message = {"detail": 'По такому КО уже существует событие'}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = EventCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    event = serializer.save(object=object, created_by=self.request.user.profile)
+
+                    Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                         time_created_at=event.time_created_at,
+                                         date_from=event.date_from, index1=event.index1,
+                                         type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                         reason=event.reason, comments1=event.comments1, object=event.object,
+                                         responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                         customer=event.customer, created_by=event.created_by,
+                                         contact_name=event.contact_name,
+                                         )
+
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(object=object, created_by=self.request.user.profile)
