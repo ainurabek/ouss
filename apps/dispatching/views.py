@@ -1,6 +1,4 @@
 import datetime
-from pprint import pprint
-
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -9,7 +7,7 @@ from django.http import JsonResponse
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to
-from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser
+from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..opu.circuits.models import Circuit
 from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
@@ -67,7 +65,6 @@ class EventListAPIView(viewsets.ModelViewSet):
         if name is not None and name != '':
             queryset = queryset.filter(name=name)
         queryset = queryset.filter(Q(date_to__date=created_at) | Q(date_to__date=None)|Q(date_from__date=created_at)) | (queryset.exclude(index1__index='4', date_to__date__lt=created_at).filter(date_from__date__lt=created_at))
-
         return queryset
 
     def retrieve(self, request, pk=None):
@@ -94,7 +91,7 @@ class EventDetailAPIView(APIView):
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,   SuperUser|IsDispOnly, SuperUser|IngenerUser)
     """Создания Event"""
     def post(self, request, pk):
 
@@ -118,7 +115,7 @@ class EventIPCreateViewAPI(APIView):
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,   SuperUser|IsDispOnly, SuperUser|IngenerUser )
     """Создания Event"""
 
     def post(self, request, pk):
@@ -164,7 +161,7 @@ class EventObjectCreateViewAPI(APIView):
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, SuperUser|IngenerUser,)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -194,7 +191,7 @@ class EventCallsCreateViewAPI(APIView):
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser, DateCheck)
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
 
@@ -222,7 +219,7 @@ class EventUpdateAPIView(UpdateAPIView):
 class EventDeleteAPIView(DestroyAPIView):
     """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser, DateCheck)
     queryset = Event.objects.all()
     lookup_field = 'pk'
 
