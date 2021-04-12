@@ -293,7 +293,7 @@ class EventUpdateAPIView(UpdateAPIView):
 
     def perform_update(self, serializer):
 
-        instance = serializer.save()
+        instance = serializer.save(created_by=self.request.user.profile)
         instance.id_parent.save()
         all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
         i = 0

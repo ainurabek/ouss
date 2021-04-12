@@ -11,10 +11,10 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
-    CircuitListSerializer, SignalizationSerializer
+    CircuitListSerializer, SignalizationSerializer, PointSerializer
 from apps.opu.form_customer.serializers import CustomerFormSerializer
 from apps.opu.form_customer.serializers import ObjectFormCustomer
-from apps.opu.objects.models import Object
+from apps.opu.objects.models import Object, Point
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
@@ -51,6 +51,12 @@ class FormCustomerListAPIView(ListAPIView):
     queryset = Form_Customer.objects.all()
     serializer_class = FormCustomerSerializer
 
+class PointListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Point.objects.all()
+    serializer_class = PointSerializer
+
 
 class CircuitListAPIView(APIView, ListWithPKMixin):
     authentication_classes = (TokenAuthentication,)
@@ -66,6 +72,7 @@ class ObjectListAPIView(APIView, ListWithPKMixin):
     model = Object
     serializer = ObjectFormCustomer
     field_for_filter = "customer_id"
+
 
 
 class FormCustomerCircCreateAPIView(APIView):
@@ -103,6 +110,24 @@ class FormCustomerObjCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class FormCustomerIPCreateAPIView(APIView):
+    """Создания Формы арендаторов через ИПы"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
+
+    def post(self, request, pk1, pk2, customer_id):
+        point1 = get_object_or_404(Point, pk=pk1)
+        point2 = get_object_or_404(Point, pk=pk2)
+        customer = get_object_or_404(Customer, pk = customer_id)
+        if Form_Customer.objects.filter(point1=point1, point2=point2).exists():
+            content = {'message': 'С такими ИПами уже форма арендаторов создана'}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = FormCustomerCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(point1=point1, point2=point2, customer=customer, created_by=self.request.user.profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""

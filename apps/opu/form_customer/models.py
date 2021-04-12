@@ -1,7 +1,7 @@
 from django.db import models
 from apps.accounts.models import Profile
 from apps.opu.customer.models import Customer
-from apps.opu.objects.models import Object
+from apps.opu.objects.models import Object, Point
 from apps.opu.circuits.models import Circuit
 from simple_history.models import HistoricalRecords
 
@@ -31,6 +31,10 @@ class Form_Customer(models.Model):
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     history = HistoricalRecords(related_name='history_form_customer_log')
+    point1 = models.ForeignKey(Point, related_name='form_cust_point', verbose_name='ИП от', on_delete=models.SET_NULL,
+                               blank=True, null=True)
+    point2 = models.ForeignKey(Point, related_name='form_cust_point2', verbose_name='ИП до', on_delete=models.SET_NULL,
+                               blank=True, null=True)
 
     class Meta:
         verbose_name = 'Форма для Арендаторов'

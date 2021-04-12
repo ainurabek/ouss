@@ -83,11 +83,13 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     signalization = SignalizationSerializer()
     customer = CustomerFormSerializer()
     order_cust_photo = OrderCusPhotoSerializer(many=True)
+    point1 = PointSerializer()
+    point2 = PointSerializer()
 
     class Meta:
         model = Form_Customer
         fields = ("id", "circuit", 'customer', "object", "amount_flow", "signalization",
-                  "type_of_using", "num_order", "order_cust_photo", "comments")
+                  "type_of_using", "num_order", "order_cust_photo", "comments", 'point1', 'point2')
 
 
 class FormCustomerCreateSerializer(serializers.ModelSerializer):
