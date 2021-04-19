@@ -140,3 +140,84 @@ class TotalData(models.Model):
     class Meta:
         verbose_name = "Удельный вес протяженности"
         verbose_name_plural = "Удельный вес протяженности"
+
+
+class MethodLaying(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    class Meta:
+        verbose_name = "Способ прокладки"
+        verbose_name_plural = "Способы прокладки"
+
+    def __str__(self):
+        return self.name
+
+class TypeCable(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    class Meta:
+        verbose_name = "Тип кабеля"
+        verbose_name_plural = "Тип кабеля"
+
+    def __str__(self):
+        return self.name
+
+class TypeConnection(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    class Meta:
+        verbose_name = "Тип связи"
+        verbose_name_plural = "Тип связи"
+
+    def __str__(self):
+        return self.name
+
+class Form61KLS(models.Model):
+    point1 = models.ForeignKey(Point, related_name='form61_KLS_point', verbose_name='ИП от', on_delete=models.SET_NULL,
+                               blank=True, null=True)
+    point2 = models.ForeignKey(Point, related_name='form61_KLS_point2', verbose_name='ИП до', on_delete=models.SET_NULL,
+                               blank=True, null=True)
+    total_length_line = models.FloatField("Общая протяженность линии КЛС", default=0, blank=True, null=True)
+    total_length_cable = models.FloatField("Общая протяженность кабеля КЛС", default=0, blank=True, null=True)
+
+    above_ground= models.FloatField("Проложено над землей", default=0, blank=True, null=True)
+    under_ground = models.FloatField("Проложено под землей", default=0, blank=True, null=True)
+
+    year_of_laying = models.CharField("Год прокладки", max_length=255, blank=True, null=True)
+    laying_method = models.ForeignKey(MethodLaying, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Способ прокладки")
+    type_cable = models.ForeignKey(TypeCable, on_delete=models.SET_NULL, blank=True, null=True,
+                                   verbose_name="Тип кабеля")
+    type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
+                                   verbose_name="Тип Связи", related_name='form61_KLS_connection')
+    outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия", related_name='form61_KLS_out')
+
+    src = models.ImageField('Схема', upload_to='files/', blank=True)
+
+
+    def __str__(self):
+        return f"{self.point1.name}-{self.point2.name}"
+
+    class Meta:
+        verbose_name = "Форма 61 (ВОЛС)"
+        verbose_name_plural = "Форма 61 (ВОЛС)"
+
+class Form61RRL(models.Model):
+    point1 = models.ForeignKey(Point, related_name='form61_RRL_point', verbose_name='ИП от', on_delete=models.SET_NULL,
+                               blank=True, null=True)
+    point2 = models.ForeignKey(Point, related_name='form61_RRL_point2', verbose_name='ИП до', on_delete=models.SET_NULL,
+                               blank=True, null=True)
+    total_length_line = models.FloatField("Общая протяженность линии РРЛ", default=0, blank=True, null=True)
+    type_equipment = models.CharField("Тип аппаратуры", max_length=255, blank=True, null=True)
+    outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, related_name='form61_RRL_out',
+                               verbose_name="Предприятия")
+    type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
+                                        verbose_name="Тип Связи", related_name='form61_RRL_connection')
+    src = models.ImageField('Схема', upload_to='files/', blank=True)
+
+
+    def __str__(self):
+        return f"{self.point1.name}-{self.point2.name}"
+
+    class Meta:
+        verbose_name = "Форма 61 (РРЛ)"
+        verbose_name_plural = "Форма 61 (РРЛ)"

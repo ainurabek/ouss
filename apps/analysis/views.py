@@ -1,13 +1,13 @@
 import copy
 from rest_framework import viewsets, generics
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
-from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5
+from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS
 from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
-    Punkt7ListSerializer, FormAnalysisCreateSerializer
-from django.http import JsonResponse
+    Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer
+from django.http import JsonResponse, HttpResponse
 
 from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
@@ -27,7 +27,7 @@ from apps.dispatching.services import get_date_to
 from apps.analysis.models import AmountChannelsKLSRRL
 from apps.analysis.serializers import AmountChannelsKLSRRLSerializer
 from apps.analysis.service import get_amount
-
+from apps.analysis.service import form61_kls_filter, form61_kls_distinct
 
 # @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 # def get_report(request):
@@ -575,3 +575,106 @@ class WinnerReportAPIView(APIView):
                 data.append({"outfit": outfit.outfit, "index": index.index, "winners": winners[index.index]})
 
         return JsonResponse(data, safe=False)
+
+class Form61KLSCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def post(self, request):
+        serializer = Form61KLSCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Form61KLSList(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def get(self, request):
+        outfit = self.request.query_params.get('outfit', None)
+        type_connection = self.request.query_params.get('type_connection', None)
+        queryset = Form61KLS.objects.all().order_by('type_connection').prefetch_related('outfit', 'point1', 'point2', 'type_cable', 'type_connection')
+        if outfit is not None and outfit != "":
+            queryset = queryset.filter(outfit_id=outfit)
+        if type_connection is not None and type_connection != "":
+            queryset = queryset.filter(type_connection=type_connection)
+        serializer = Form61KLSSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class Form61KLSUpdateAPIView(UpdateAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    queryset = Form61KLS.objects.all()
+    serializer_class = Form61KLSCreateSerializer
+
+@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+def get_report_form61_kls(request):
+    """ Форма61 KLS"""
+    outfit = request.GET.getlist("outfit")
+    type_connection = request.GET.get("type_connection")
+    forms61 = Form61KLS.objects.all()
+    all_form61 = form61_kls_filter(forms61, outfit, type_connection)
+    outfits = form61_kls_distinct(all_form61, "outfit")
+    data = []
+    content = {'id': None, "name": None, "year_of_laying": None, "type_cable": None, "total_length_line": 0,
+               'total_length_cable': 0, "laying_method": None, 'color':None
+    }
+    total_rep = copy.deepcopy(content)
+    for outfit in outfits:
+        total_outfit = copy.deepcopy(content)
+        out_data = copy.deepcopy(content)
+        out_data['name'] = outfit.outfit.outfit
+        out_data['color'] = "1"
+        data.append(out_data)
+        for form61 in all_form61.filter(outfit=outfit.outfit):
+            form61_data = copy.deepcopy(content)
+            form61_data['id'] = form61.id
+            form61_data['name'] = str(form61.point1.point), str(form61.point2.point)
+            form61_data['year_of_laying'] = form61.year_of_laying
+            form61_data['type_cable'] = form61.type_cable
+            form61_data['total_length_line'] = form61.total_length_line
+            form61_data['total_length_cable'] = form61.total_length_cable
+            form61_data['laying_method'] = form61.laying_method.name
+            data.append(form61_data)
+            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+            total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
+        total_outfit['name'] = 'ИТОГО:'
+        total_outfit['color'] = '2'
+        data.append(total_outfit)
+        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+        total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
+    total_rep['name'] = 'ИТОГО:'
+    total_rep['color'] = '3'
+    data.append(total_rep)
+    return JsonResponse(data, safe=False)
+
+def get_distance_length_kls(request):
+    point1 = request.GET.get("point1")
+    point2 = request.GET.get("point2")
+    forms1 = Form61KLS.objects.filter(point1=point1, type_connection_id = 1)
+    data = []
+    content = {'point1': None, "point2": None, "sum_line": 0, "sum_cable": 0 }
+    for form in forms1:
+        finish_total = copy.deepcopy(content)
+        finish_total['point1'] = form.point1.point
+        while form:
+            total = copy.deepcopy(content)
+            total['point1'] = form.point1.point
+            total['point2'] = form.point2.point
+            total['sum_line'] = form.total_length_line
+            total['sum_cable'] = form.total_length_cable
+            data.append(total)
+            finish_total['point2'] = form.point2.point
+            finish_total['sum_line'] += total['sum_line']
+            finish_total['sum_cable'] += total['sum_cable']
+            test = Form61KLS.objects.filter(point1=form.point2).first()
+            if test is None:
+                break
+            form = test
+        data.append(finish_total)
+    return JsonResponse(data, safe=False)
+
+
+

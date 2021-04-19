@@ -7,6 +7,8 @@ from django import template
 from apps.dispatching.models import Reason, Index
 from django.db.models import Q
 
+from apps.analysis.models import Form61KLS
+
 register = template.Library()
 
 
@@ -651,3 +653,15 @@ def get_amount(obj:Event):
                 obj.ips.point_channelKLSRRL.amount_channelsRRL
     if obj.circuit is not None:
         return  None, 1, 1
+
+def form61_kls_filter(form61: Form61KLS, outfit, type_connection) -> Form61KLS:
+    if not isinstance(outfit, list) and outfit is not None and outfit != '':
+        outfit = [outfit]
+    if outfit is not None and outfit != '' and outfit != []:
+        form61 = form61.filter(outfit__in=outfit)
+    if type_connection is not None and type_connection != '':
+        form61 = form61.filter(type_connection = type_connection)
+    return form61
+
+def form61_kls_distinct(form61: Form61KLS, *args):
+    return form61.order_by(*args).distinct(*args)
