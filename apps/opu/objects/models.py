@@ -20,8 +20,8 @@ class Bug(models.Model):
 
 
 class TPO(models.Model):
-	name = models.CharField('Название', max_length=100, error_messages={"invalid": "Это поле обязательно."}) #название ТПО
-	index = models.CharField('Индекс', max_length=100) #номер ТПО
+	name = models.CharField('Название', max_length=500, error_messages={"invalid": "Это поле обязательно."}) #название ТПО
+	index = models.CharField('Индекс', max_length=500) #номер ТПО
 
 	class Meta:
 		verbose_name = 'ТПО'
@@ -32,7 +32,7 @@ class TPO(models.Model):
 
 
 class TypeOfTrakt(models.Model):
-	name = models.CharField('Название', max_length=100)
+	name = models.CharField('Название', max_length=500)
 
 	class Meta:
 
@@ -45,7 +45,7 @@ class TypeOfTrakt(models.Model):
 
 class TypeOfLocation(models.Model):
 
-	name = models.CharField('Название', max_length=100)
+	name = models.CharField('Название', max_length=500)
 
 	class Meta:
 		verbose_name = 'Тип принадлежности'
@@ -56,7 +56,7 @@ class TypeOfLocation(models.Model):
 
 
 class MainLineType(models.Model):
-	name = models.CharField(max_length=50)
+	name = models.CharField(max_length=550)
 
 	class Meta:
 		verbose_name = 'Тип линии АК'
@@ -67,7 +67,7 @@ class MainLineType(models.Model):
 
 
 class LineType(models.Model):
-	name = models.CharField('Название', max_length=100)
+	name = models.CharField('Название', max_length=500)
 	main_line_type = models.ForeignKey(MainLineType, related_name="main_line_type", on_delete=models.CASCADE, blank=True, null=True)
 
 	class Meta:
@@ -79,8 +79,8 @@ class LineType(models.Model):
 
 
 class Category(models.Model):
-	index = models.CharField('Индекс', max_length=100)
-	name = models.CharField('Обозначение', max_length=100)
+	index = models.CharField('Индекс', max_length=500)
+	name = models.CharField('Обозначение', max_length=500)
 
 	class Meta:
 		verbose_name = 'Индекс назначения КО'
@@ -91,9 +91,9 @@ class Category(models.Model):
 
 
 class Outfit(models.Model):
-	outfit = models.CharField('Аббревиатура', max_length=100, blank=True, null=True)
-	adding = models.CharField('Название', max_length=100)
-	num_outfit = models.CharField('Номер', max_length=100, blank=True, null=True)
+	outfit = models.CharField('Аббревиатура', max_length=500, blank=True, null=True)
+	adding = models.CharField('Название', max_length=500)
+	num_outfit = models.CharField('Номер', max_length=500, blank=True, null=True)
 	tpo = models.ForeignKey('TPO', null = True, on_delete=models.SET_NULL)
 	type_outfit = models.ForeignKey('TypeOfLocation', null = True, on_delete=models.SET_NULL)
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
@@ -121,7 +121,7 @@ class Outfit(models.Model):
 
 
 class OutfitWorker(models.Model):
-	name = models.CharField('ФИО', max_length=100)
+	name = models.CharField('ФИО', max_length=500)
 	outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE, related_name='outfit_worker')
 
 	class Meta:
@@ -134,12 +134,12 @@ class OutfitWorker(models.Model):
 
 
 class Point(models.Model):
-	point = models.CharField('ИП', max_length=100, unique=True)
+	point = models.CharField('ИП', max_length=500, unique=True)
 	name = models.CharField('Название', max_length=100)
 	id_outfit = models.ForeignKey(Outfit, related_name='point_out', on_delete=models.CASCADE, blank=True, null=True)
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
-	region = models.CharField('Район', max_length=150, blank=True, null=True)
-	type_equipment = models.CharField('Тип оборудования', max_length=150, blank=True, null=True)
+	region = models.CharField('Район', max_length=550, blank=True, null=True)
+	type_equipment = models.CharField('Тип оборудования', max_length=550, blank=True, null=True)
 	total_point_channels_KLS = models.IntegerField("Значение_КЛС", default=0)
 	total_point_channels_RRL = models.IntegerField("Значение_ЦРРЛ", default=0)
 	history = HistoricalRecords(related_name='history_point_log')
@@ -149,7 +149,7 @@ class Point(models.Model):
 
 
 class AmountChannel(models.Model):
-	name = models.CharField("Название", max_length=150)
+	name = models.CharField("Название", max_length=550)
 	value = models.IntegerField("Значение")
 	is_read_only = models.BooleanField(default=False) #if True - то название канала нельзя редактировать
 
@@ -162,7 +162,7 @@ class AmountChannel(models.Model):
 
 
 class Consumer(models.Model):
-	name = models.CharField("Название", max_length=150)
+	name = models.CharField("Название", max_length=550)
 
 	class Meta:
 		verbose_name = "Потребитель"
@@ -175,7 +175,7 @@ class Consumer(models.Model):
 class Object(models.Model):
 	'''Линии Передачи, Тракт , ВГ-ПГ'''
 	id_parent = models.ForeignKey('Object', on_delete=models.CASCADE, related_name='parents', blank=True, null=True)
-	name = models.CharField('Название', max_length=100)
+	name = models.CharField('Название', max_length=500)
 	id_outfit = models.ForeignKey(Outfit, related_name='obj_out',on_delete=models.SET_NULL, blank=True, null=True)
 	tpo1 = models.ForeignKey(TPO, related_name='obj_tpo', on_delete=models.SET_NULL, blank=True, null=True)
 	point1 = models.ForeignKey(Point, related_name='obj_point', verbose_name='ИП приема', on_delete=models.SET_NULL, blank=True, null=True)
@@ -186,8 +186,8 @@ class Object(models.Model):
 	transit2 = SortedManyToManyField('Object', related_name='transit_obj2', blank=True)
 	reserve_transit = SortedManyToManyField('Object', related_name='reserve_transit_obj1', blank=True)
 	reserve_transit2 = SortedManyToManyField('Object', related_name='reserve_transit_obj2', blank=True)
-	comments = models.CharField('Примечание', max_length=100, blank=True, null=True)
-	comments_GOZ = models.CharField('Примечание(ГОЗ)', max_length=100, blank=True, null=True)
+	comments = models.CharField('Примечание', max_length=500, blank=True, null=True)
+	comments_GOZ = models.CharField('Примечание(ГОЗ)', max_length=500, blank=True, null=True)
 	our = models.ForeignKey(TypeOfLocation, related_name='obj_our', on_delete=models.SET_NULL, blank=True, null=True)
 	amount_channels = models.ForeignKey(AmountChannel, related_name='object_channel', verbose_name='Монтированные каналы',
 										blank=True, null=True, on_delete=models.SET_NULL)
@@ -197,7 +197,7 @@ class Object(models.Model):
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 	total_amount_channels = models.IntegerField('Задействованные каналы', default=0, blank=True, null=True)
-	order = models.CharField('№ и дата распоряжения', max_length=100, blank=True, null=True)
+	order = models.CharField('№ и дата распоряжения', max_length=500, blank=True, null=True)
 	src = models.ImageField('Скан распоряжения', upload_to='files/', blank=True)
 	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
 	is_transit = models.BooleanField(default=False)  # if True - то его компоненты участвуют в транзите, при измнении, эти компоненты перезапишутся

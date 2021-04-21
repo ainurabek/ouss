@@ -1,6 +1,8 @@
 import copy
+
+from networkx.readwrite import json_graph
 from rest_framework import viewsets, generics
-from rest_framework.generics import UpdateAPIView, ListAPIView
+from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS
@@ -28,6 +30,10 @@ from apps.analysis.models import AmountChannelsKLSRRL
 from apps.analysis.serializers import AmountChannelsKLSRRLSerializer
 from apps.analysis.service import get_amount
 from apps.analysis.service import form61_kls_filter, form61_kls_distinct
+import networkx as nx
+from apps.opu.objects.models import Point
+from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
+from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
 
 # @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 # def get_report(request):
@@ -650,31 +656,71 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
-def get_distance_length_kls(request):
-    point1 = request.GET.get("point1")
-    point2 = request.GET.get("point2")
-    forms1 = Form61KLS.objects.filter(point1=point1, type_connection_id = 1)
+
+
+def get_distance_length_kls(request, pk1, pk2):
+    point1 = get_object_or_404(Point, pk=pk1)
+    point2 = get_object_or_404(Point, pk=pk2)
+    g = nx.Graph()
+    g2 = nx.Graph()
     data = []
-    content = {'point1': None, "point2": None, "sum_line": 0, "sum_cable": 0 }
-    for form in forms1:
-        finish_total = copy.deepcopy(content)
-        finish_total['point1'] = form.point1.point
-        while form:
+    content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0}
+
+    for form in Form61KLS.objects.all():
+        g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
+        g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
+
+    for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
+        for u in g.edges(tuple(p), data=True):
+            sum_line = [item for item in (g.get_edge_data(u[0], u[1])).values()]
+            sum_cable = [item for item in (g2.get_edge_data(u[0], u[1])).values()]
             total = copy.deepcopy(content)
-            total['point1'] = form.point1.point
-            total['point2'] = form.point2.point
-            total['sum_line'] = form.total_length_line
-            total['sum_cable'] = form.total_length_cable
+            total['name'] = "Разбивка:"
+            total['points'] = str(u[0]) +'-' +str(u[1])
+            total['sum_line'] = sum_line[0]
+            total['sum_cable'] = sum_cable[0]
             data.append(total)
-            finish_total['point2'] = form.point2.point
-            finish_total['sum_line'] += total['sum_line']
-            finish_total['sum_cable'] += total['sum_cable']
-            test = Form61KLS.objects.filter(point1=form.point2).first()
-            if test is None:
-                break
-            form = test
+
+    path = []
+    for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
+        path.append(p)
+    for p in path:
+        path_length = nx.path_weight(g, p, weight='weight')
+        path_length1 = nx.path_weight(g2, p, weight='weight')
+        finish_total = copy.deepcopy(content)
+        finish_total['name'] = "Варианты:"
+        finish_total['points'] = p
+        finish_total['sum_line'] = path_length
+        finish_total['sum_cable'] = path_length1
         data.append(finish_total)
     return JsonResponse(data, safe=False)
 
+class TypeConnectionViewSet(viewsets.ModelViewSet):
+    queryset = TypeConnection.objects.all().order_by('-id')
+    serializer_class = TypeConnectionSerializer
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
 
+class MethodLayingViewSet(viewsets.ModelViewSet):
+    queryset = MethodLaying.objects.all().order_by('-id')
+    serializer_class = MethodLayingSerializer
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
+
+class TypeCableViewSet(viewsets.ModelViewSet):
+    queryset = TypeCable.objects.all().order_by('-id')
+    serializer_class = TypeCableSerializer
+    authentication_classes = (TokenAuthentication,)
+    lookup_field = "pk"
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user.profile)
