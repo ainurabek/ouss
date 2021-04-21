@@ -669,21 +669,10 @@ def get_distance_length_kls(request, pk1, pk2):
     for form in Form61KLS.objects.all():
         g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
         g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
-
-    for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
-        for u in g.edges(tuple(p), data=True):
-            sum_line = [item for item in (g.get_edge_data(u[0], u[1])).values()]
-            sum_cable = [item for item in (g2.get_edge_data(u[0], u[1])).values()]
-            total = copy.deepcopy(content)
-            total['name'] = "Разбивка:"
-            total['points'] = str(u[0]) +'-' +str(u[1])
-            total['sum_line'] = sum_line[0]
-            total['sum_cable'] = sum_cable[0]
-            data.append(total)
-
     path = []
     for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
         path.append(p)
+
     for p in path:
         path_length = nx.path_weight(g, p, weight='weight')
         path_length1 = nx.path_weight(g2, p, weight='weight')
@@ -693,6 +682,16 @@ def get_distance_length_kls(request, pk1, pk2):
         finish_total['sum_line'] = path_length
         finish_total['sum_cable'] = path_length1
         data.append(finish_total)
+    for p in nx.all_simple_edge_paths(g, source=point1.point, target=point2.point):
+        for t in p:
+            total = copy.deepcopy(content)
+            total['name'] = "Разбивка:"
+            total['points'] = t
+            path_length = nx.path_weight(g, t, weight='weight')
+            path_length1 = nx.path_weight(g2, t, weight='weight')
+            total['sum_line'] = path_length
+            total['sum_cable'] = path_length1
+            data.append(total)
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
