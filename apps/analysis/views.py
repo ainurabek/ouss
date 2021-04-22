@@ -1,5 +1,5 @@
 import copy
-
+import os
 import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, generics
@@ -644,7 +644,7 @@ def get_report_form61_kls(request):
             form61_data['id'] = form61.id
             form61_data['name'] = str(form61.point1.point), str(form61.point2.point)
             form61_data['year_of_laying'] = form61.year_of_laying
-            form61_data['type_cable'] = form61.type_cable
+            form61_data['type_cable'] = form61.type_cable.name
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
             form61_data['laying_method'] = form61.laying_method.name if form61.laying_method.name is not None else ""
@@ -680,14 +680,10 @@ def get_distance_length_kls(request, pk1, pk2):
     labels = nx.get_edge_attributes(g, 'weight')
     nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
     nx.draw(g, pos, with_labels=True)
-    src = BytesIO()
+
+    if os.path.exists("/home/ainura/Desktop/2020/KT/graph"):
+        os.remove("/home/ainura/Desktop/2020/KT/graph")
     plt.savefig('graph', format='png')
-
-    # content_file = ContentFile(f.getvalue())
-    # model_object = Form61KLS
-    # model_object.src.save('graph', content_file)
-    # model_object.save()
-
 
     path = []
     for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
