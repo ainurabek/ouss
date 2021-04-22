@@ -631,7 +631,8 @@ def get_report_form61_kls(request):
     all_form61 = form61_kls_filter(forms61, outfit, type_connection)
     outfits = form61_kls_distinct(all_form61, "outfit")
     data = []
-    content = {'id': None, "name": None, "year_of_laying": None, "type_cable": None, "total_length_line": 0,
+    content = {'id': None, "name": None, 'outfit':None, 'above_ground':0, 'under_ground':0,
+               'type_connection':None, "year_of_laying": None, "type_cable": None, "total_length_line": 0,
                'total_length_cable': 0, "laying_method": None, 'color':None
     }
     total_rep = copy.deepcopy(content)
@@ -639,7 +640,7 @@ def get_report_form61_kls(request):
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
-        out_data['color'] = "1"
+        out_data['color'] = "outfit"
         data.append(out_data)
         for form61 in all_form61.filter(outfit=outfit.outfit):
             form61_data = copy.deepcopy(content)
@@ -654,12 +655,12 @@ def get_report_form61_kls(request):
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
         total_outfit['name'] = 'ИТОГО:'
-        total_outfit['color'] = '2'
+        total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
         total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
     total_rep['name'] = 'ИТОГО:'
-    total_rep['color'] = '3'
+    total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
