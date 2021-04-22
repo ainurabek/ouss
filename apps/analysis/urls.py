@@ -35,6 +35,7 @@ urlpatterns = [
     path("form61/kls/update/<int:pk>/", views.Form61KLSUpdateAPIView.as_view()),
     path("form61/kls/report/", views.get_report_form61_kls),
     path("form61/kls/distance/<int:pk1>/<int:pk2>/", views.get_distance_length_kls),
+
     path('', include(router.urls)),
 
 ]

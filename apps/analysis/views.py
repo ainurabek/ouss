@@ -1,6 +1,7 @@
 import copy
 
-from networkx.readwrite import json_graph
+import matplotlib.pyplot as plt
+from django.core.files.base import ContentFile
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -32,8 +33,12 @@ from apps.analysis.service import get_amount
 from apps.analysis.service import form61_kls_filter, form61_kls_distinct
 import networkx as nx
 from apps.opu.objects.models import Point
+from rest_framework.viewsets import ModelViewSet
 from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
+import matplotlib
+matplotlib.use('tkagg')
+
 
 # @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 # def get_report(request):
@@ -642,7 +647,7 @@ def get_report_form61_kls(request):
             form61_data['type_cable'] = form61.type_cable
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
-            form61_data['laying_method'] = form61.laying_method.name
+            form61_data['laying_method'] = form61.laying_method.name if form61.laying_method.name is not None else ""
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
@@ -656,7 +661,7 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
-
+from io import BytesIO
 
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
@@ -664,15 +669,31 @@ def get_distance_length_kls(request, pk1, pk2):
     g = nx.Graph()
     g2 = nx.Graph()
     data = []
-    content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0}
+    content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0, 'src':None}
 
     for form in Form61KLS.objects.all():
         g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
         g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
+        g.add_node(form.point1.point, pos=(1, 20))
+        g.add_node(form.point2.point, pos=(1, 20))
+    pos = nx.spring_layout(g)
+    labels = nx.get_edge_attributes(g, 'weight')
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
+    nx.draw(g, pos, with_labels=True)
+    src = BytesIO()
+    plt.savefig('graph', format='png')
+
+    # content_file = ContentFile(f.getvalue())
+    # model_object = Form61KLS
+    # model_object.src.save('graph', content_file)
+    # model_object.save()
+
+
+
+
     path = []
     for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
         path.append(p)
-
     for p in path:
         path_length = nx.path_weight(g, p, weight='weight')
         path_length1 = nx.path_weight(g2, p, weight='weight')
@@ -692,6 +713,7 @@ def get_distance_length_kls(request, pk1, pk2):
             total['sum_line'] = path_length
             total['sum_cable'] = path_length1
             data.append(total)
+
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
@@ -714,12 +736,10 @@ class MethodLayingViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
 
-class TypeCableViewSet(viewsets.ModelViewSet):
-    queryset = TypeCable.objects.all().order_by('-id')
+class TypeCableViewSet(ModelViewSet):
+    queryset = TypeCable.objects.all()
     serializer_class = TypeCableSerializer
     authentication_classes = (TokenAuthentication,)
-    lookup_field = "pk"
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
+

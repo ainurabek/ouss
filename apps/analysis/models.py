@@ -154,7 +154,6 @@ class MethodLaying(models.Model):
 
 class TypeCable(models.Model):
     name = models.CharField("Название", max_length=150)
-
     class Meta:
         verbose_name = "Тип кабеля"
         verbose_name_plural = "Тип кабеля"
@@ -164,7 +163,6 @@ class TypeCable(models.Model):
 
 class TypeConnection(models.Model):
     name = models.CharField("Название", max_length=150)
-
     class Meta:
         verbose_name = "Тип связи"
         verbose_name_plural = "Тип связи"
@@ -190,8 +188,8 @@ class Form61KLS(models.Model):
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
                                    verbose_name="Тип Связи", related_name='form61_KLS_connection')
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия", related_name='form61_KLS_out')
-
     src = models.ImageField('Схема', upload_to='files/', blank=True)
+
 
 
     def __str__(self):
@@ -215,9 +213,12 @@ class Form61RRL(models.Model):
     src = models.ImageField('Схема', upload_to='files/', blank=True)
 
 
+
     def __str__(self):
         return f"{self.point1.name}-{self.point2.name}"
 
     class Meta:
         verbose_name = "Форма 61 (РРЛ)"
         verbose_name_plural = "Форма 61 (РРЛ)"
+
+# src = models.ImageField('Схема', upload_to='files/', blank=True)

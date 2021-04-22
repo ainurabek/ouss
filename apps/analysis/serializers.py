@@ -151,10 +151,13 @@ class MethodLayingSerializer(serializers.ModelSerializer):
         model = MethodLaying
         fields = ("id", "name")
 
+
+
+
 class TypeCableSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeCable
-        fields = ("id", "name")
+        fields = ('id', 'name',)
 
 class TypeConnectionSerializer(serializers.ModelSerializer):
     class Meta:
