@@ -37,7 +37,7 @@ from rest_framework.viewsets import ModelViewSet
 from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
 import matplotlib
-matplotlib.use('tkagg')
+
 
 
 # @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
@@ -687,8 +687,6 @@ def get_distance_length_kls(request, pk1, pk2):
     # model_object = Form61KLS
     # model_object.src.save('graph', content_file)
     # model_object.save()
-
-
 
 
     path = []
