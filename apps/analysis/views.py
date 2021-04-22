@@ -1,7 +1,6 @@
 import copy
 import os
 import matplotlib.pyplot as plt
-from django.core.files.base import ContentFile
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -37,6 +36,9 @@ from rest_framework.viewsets import ModelViewSet
 from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
 import matplotlib
+from project.settings import BASE_DIR
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 
@@ -661,8 +663,6 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
-from io import BytesIO
-
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -676,14 +676,6 @@ def get_distance_length_kls(request, pk1, pk2):
         g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
         g.add_node(form.point1.point, pos=(1, 20))
         g.add_node(form.point2.point, pos=(1, 20))
-    pos = nx.spring_layout(g)
-    labels = nx.get_edge_attributes(g, 'weight')
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
-    nx.draw(g, pos, with_labels=True)
-
-    if os.path.exists("/home/ainura/Desktop/2020/KT/graph"):
-        os.remove("/home/ainura/Desktop/2020/KT/graph")
-    plt.savefig('graph', format='png')
 
     path = []
     for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
@@ -708,6 +700,15 @@ def get_distance_length_kls(request, pk1, pk2):
             total['sum_cable'] = path_length1
             data.append(total)
 
+    pos = nx.spring_layout(g)
+    labels = nx.get_edge_attributes(g, 'weight')
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
+    nx.draw(g, pos, with_labels=True)
+
+    if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
+        os.remove(BASE_DIR + "/mediafiles/files/graph.png")
+    plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
+    plt.clf()
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
