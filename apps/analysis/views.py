@@ -723,8 +723,6 @@ class TypeConnectionViewSet(viewsets.ModelViewSet):
     lookup_field = "pk"
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
 
 class MethodLayingViewSet(viewsets.ModelViewSet):
     queryset = MethodLaying.objects.all().order_by('-id')
@@ -733,8 +731,6 @@ class MethodLayingViewSet(viewsets.ModelViewSet):
     lookup_field = "pk"
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
 
 class TypeCableViewSet(ModelViewSet):
     queryset = TypeCable.objects.all()
