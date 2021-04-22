@@ -703,8 +703,11 @@ def get_distance_length_kls(request, pk1, pk2):
 
     pos = nx.spring_layout(g)
     labels = nx.get_edge_attributes(g, 'weight')
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
-    nx.draw(g, pos, with_labels=True)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels, font_size=8, font_color='blue',
+                                 font_family='sans-serif', font_weight='normal', horizontalalignment='center', verticalalignment='center', ax=None)
+
+    nx.draw(g, pos=pos,  node_size=250, node_color='blue', linewidths=1, font_size=7,
+            font_family='sans-serif', edge_color='y', with_labels=True)
 
     if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
         os.remove(BASE_DIR + "/mediafiles/files/graph.png")
