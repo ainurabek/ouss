@@ -1,6 +1,6 @@
 import copy
 import os
-import matplotlib.pyplot as plt
+from copy import deepcopy
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -613,8 +613,61 @@ class Form61KLSList(APIView):
             queryset = queryset.filter(outfit_id=outfit)
         if type_connection is not None and type_connection != "":
             queryset = queryset.filter(type_connection=type_connection)
-        serializer = Form61KLSSerializer(queryset, many=True)
-        return Response(serializer.data)
+        queryset = form61_kls_distinct(queryset, "outfit")
+        data = []
+        content = {
+            'id': None,
+            'name':None,
+            'outfit': {'id':None,'outfit': None, 'adding':None},
+            'point1': {'id':None,'point': None, 'name':None},
+            'point2': {'id':None,'point': None, 'name':None},
+            'type_cable': {'id':None, 'name':None},
+            'type_connection': {'id':None, 'name':None},
+            'laying_method': {'id':None, 'name':None},
+            'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
+            'year_of_laying': None, 'color': None
+        }
+        total_rep = copy.deepcopy(content)
+        for outfit in queryset:
+            total_outfit = copy.deepcopy(content)
+            out_data = copy.deepcopy(content)
+            out_data['outfit']['id'] = outfit.outfit.id
+            out_data['outfit']['outfit'] = outfit.outfit.outfit
+            out_data['outfit']['adding'] = outfit.outfit.adding
+            out_data['color'] = "outfit"
+            data.append(out_data)
+            for form61 in queryset.filter(outfit=outfit.outfit):
+                form61_data = copy.deepcopy(content)
+                form61_data['id'] = form61.id
+                form61_data['point1']['id'] = form61.point1.id
+                form61_data['point1']['point'] = form61.point1.point
+                form61_data['point1']['name'] = form61.point1.name
+                form61_data['point2']['id'] = form61.point2.id
+                form61_data['point2']['point'] = form61.point2.point
+                form61_data['point2']['name'] = form61.point2.name
+                form61_data['year_of_laying'] = form61.year_of_laying
+                form61_data['type_cable']['id'] = form61.type_cable.id if form61.type_cable is not None else ""
+                form61_data['type_cable']['name'] = form61.type_cable.name if form61.type_cable is not None else ""
+                form61_data['type_connection']['id'] = form61.type_connection.id if form61.type_connection is not None else ""
+                form61_data['type_connection']['name'] = form61.type_connection.name if form61.type_connection is not None else ""
+                form61_data['laying_method']['id']= form61.laying_method.id if form61.laying_method is not None else ""
+                form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
+                form61_data['above_ground'] = form61.above_ground
+                form61_data['under_ground'] = form61.under_ground
+                form61_data['total_length_line'] = form61.total_length_line
+                form61_data['total_length_cable'] = form61.total_length_cable
+                data.append(form61_data)
+                total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+                total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
+            total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
+            total_outfit['color'] = 'Total_outfit'
+            data.append(total_outfit)
+            total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+            total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
+        total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
+        total_rep['color'] = 'Total_country'
+        data.append(total_rep)
+        return JsonResponse(data, safe=False)
 
 class Form61KLSUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
@@ -647,7 +700,7 @@ def get_report_form61_kls(request):
             form61_data['id'] = form61.id
             form61_data['name'] = str(form61.point1.point), str(form61.point2.point)
             form61_data['year_of_laying'] = form61.year_of_laying
-            form61_data['type_cable'] = form61.type_cable.name
+            form61_data['type_cable'] = form61.type_cable.name if form61.type_cable is not None else ""
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
             form61_data['laying_method'] = form61.laying_method.name if form61.laying_method.name is not None else ""
@@ -664,6 +717,7 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
+
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -671,13 +725,11 @@ def get_distance_length_kls(request, pk1, pk2):
     g2 = nx.Graph()
     data = []
     content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0, 'src':None}
-
     for form in Form61KLS.objects.all():
         g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
         g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
         g.add_node(form.point1.point, pos=(1, 20))
         g.add_node(form.point2.point, pos=(1, 20))
-
     path = []
     for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
         path.append(p)
@@ -700,7 +752,6 @@ def get_distance_length_kls(request, pk1, pk2):
             total['sum_line'] = path_length
             total['sum_cable'] = path_length1
             data.append(total)
-
     pos = nx.spring_layout(g)
     labels = nx.get_edge_attributes(g, 'weight')
     nx.draw_networkx_edge_labels(g, pos, edge_labels=labels, font_size=8, font_color='blue',
