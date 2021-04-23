@@ -176,7 +176,6 @@ class Profile(models.Model):
 class Log(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name="log_profile")
     start_at = models.DateTimeField(blank=True, null=True)
-    date = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:

@@ -1,15 +1,16 @@
 import datetime
+
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model, login, logout
-from django.db.models import Q
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, viewsets, status
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
+
 from .permissions import IsCreator
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
     DepartmentSerializer, SubdepartmentSerializer, LogSerializer, LogUpdateSerializer
@@ -49,6 +50,7 @@ class Register(APIView):
         else:
             return JsonResponse('Username не указан', safe=False)
 
+
 '''
 Данная функция позволяет залогиниться зарегистрированному ползователю. Необходимо, чтобы фрон отправил логин и пароль юзера
 '''
@@ -63,26 +65,20 @@ class LoginAPI(KnoxLoginView):
 
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        try:
+        if request.user.is_profile_created:
             profile = Profile.objects.get(user__username=user)
             profile.online = True
             profile.save()
 
-            if Log.objects.filter(user=profile, end_time__gte=timezone.now()).exists():
-                pass
-            elif Log.objects.filter(user=profile, end_time=None).exists():
-                pass
-            else:
-                Log.objects.create(user=profile, start_at=timezone.now())
-
-        except ObjectDoesNotExist:
-            pass
-
         login(request, user)
         return super().post(request, format=None)
+
+
 '''
 Данная функция показывает всех существующих юзеров
 '''
+
+
 class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
@@ -102,16 +98,12 @@ class LogoutView(APIView):
         logout(request)
         return Response(status=status.HTTP_200_OK)
 
-class LogUpdateAPIView(UpdateAPIView):
-    queryset = Log.objects.all()
-    permission_classes = (IsAuthenticated, IsCreator,)
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = LogUpdateSerializer
-
 
 '''
 Данная функция позволяет создать профиль сотрудника. Из фронта приходят данные, которые вводит юзер, также его id (role, user and password)
 '''
+
+
 class CreateProfileAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, ]
@@ -136,8 +128,6 @@ class CreateProfileAPIView(APIView):
         return HttpResponse(response, status=status.HTTP_201_CREATED)
 
 
-
-
 class ProfileListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -152,6 +142,7 @@ class ProfileListAPIView(viewsets.ModelViewSet):
             pass
         return queryset
 
+
 class AllProfileAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -162,12 +153,15 @@ class AllProfileAPIView(viewsets.ModelViewSet):
 '''
 Данная функция позволяет создать отделы КТ
 '''
+
+
 class DepartmentKTAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = DepartmentKT.objects.all()
     lookup_field = 'pk'
     serializer_class = DepartmentSerializer
+
 
 def department_view(request, department_id):
     department = DepartmentKT.objects.get(id=department_id)
@@ -177,15 +171,19 @@ def department_view(request, department_id):
     else:
         return JsonResponse({'success': 'Success'}, status=202)
 
+
 '''
 Данная функция позволяет создать подотделы КТ
 '''
+
+
 class SubdepartmentKTAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = SubdepartmentKT.objects.all()
     lookup_field = 'pk'
     serializer_class = SubdepartmentSerializer
+
 
 def subdepartment_view(request, department_id, subdepartment_id):
     department = DepartmentKT.objects.get(id=department_id)
@@ -205,35 +203,34 @@ class LogListAPIView(ListAPIView):
     filterset_fields = ('user',)
 
     def get_queryset(self):
-        subdep = SubdepartmentKT.objects.get(id=3)
-        queryset = Log.objects.filter(user__user__subdepartment=subdep)
-        start_at = self.request.query_params.get('start_at', None)
-        end_time = self.request.query_params.get('end_time', None)
+        queryset = Log.objects.all()
+        start_at = self.request.query_params.get('start_at', "")
+        end_time = self.request.query_params.get('end_time', "")
 
-        if start_at is not None and start_at != "":
-            start_at += 'T00:00:00'
-            queryset = queryset.filter(start_at__gte=start_at)
-        if end_time is not None and end_time != "":
-            end_time += 'T23:59:00'
-            queryset = queryset.filter(end_time=end_time)
+        if start_at != "":
+            queryset = queryset.filter(start_at__date__gte=start_at)
+        if end_time != "":
+            queryset = queryset.filter(end_time__date=end_time)
         return queryset
 
 
+class LogUpdateAPIView(UpdateAPIView):
+    queryset = Log.objects.all()
+    permission_classes = (IsAuthenticated, IsCreator,)
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = LogUpdateSerializer
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        if instance.end_time is not None and instance.end_time < datetime.datetime.now():
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 
+class LogCreateAPIView(CreateAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+    serializer_class = LogUpdateSerializer
+    queryset = Log.objects.all()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user.profile)
