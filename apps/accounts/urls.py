@@ -15,10 +15,7 @@ router.register('profiles', AllProfileAPIView)
 router.register('departments', DepartmentKTAPIView)
 router.register('subdepartments', SubdepartmentKTAPIView)
 
-
-
 urlpatterns = [
-
     url(r'^register/$', Register.as_view()),
     url(r'^login/$', LoginAPI.as_view()),
     url(r'^logout/$', LogoutView.as_view()),
@@ -27,6 +24,7 @@ urlpatterns = [
     url(r'^subdepartments/(?P<department_id>\S+)/(?P<subdepartment_id>\S+)/$', views.subdepartment_view, name='subdepartment_view'),
     path("log-user-list/", views.LogListAPIView.as_view()),
     path("log-user/update/<int:pk>/", views.LogUpdateAPIView.as_view()),
+    path("log-user-create/", views.LogCreateAPIView.as_view()),
     path('', include(router.urls))
 
 ]
