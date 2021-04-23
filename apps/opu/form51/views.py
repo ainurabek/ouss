@@ -26,6 +26,7 @@ class FormListAPIView(ListAPIView):
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
         object = self.request.query_params.get('object', None)
+        consumer = self.request.query_params.get('consumer', None)
 
         if outfit is not None:
             queryset = queryset.filter(object__id_outfit=outfit)
@@ -33,8 +34,10 @@ class FormListAPIView(ListAPIView):
             queryset = queryset.filter(customer=customer)
         if object is not None:
             queryset = queryset.filter(object=object)
+        if consumer is not None and consumer != '':
+            queryset = queryset.filter(object__consumer=consumer)
 
-        return queryset
+        return queryset.order_by('object')
 
 
 class Form51UpdateAPIView(UpdateAPIView):
