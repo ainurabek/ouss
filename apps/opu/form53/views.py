@@ -1,5 +1,4 @@
 from copy import deepcopy
-
 from django.shortcuts import get_object_or_404
 from apps.opu.form53.models import Form53, Order53Photo, Schema53Photo
 from rest_framework.views import APIView
@@ -10,13 +9,10 @@ from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
-
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
-
 from apps.opu.services import PhotoDeleteMixin
 from apps.opu.form53.services import get_form53_diff
 from apps.opu.services import create_photo
-
 from apps.opu.services import PhotoCreateMixin
 
 
@@ -40,7 +36,7 @@ class Form53CreateViewAPI(APIView):
             #мы 4 января удалили возможность создавать форму 5.3 для транзитов в канале.
             #Теперь будет создаваться форма 5.3 только для основного канала, который выбрали
 
-            response = {"message": "Форма 5.3 создана успешно"}
+            response = {"detail": "Форма 5.3 создана успешно"}
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -165,7 +161,7 @@ class Order53PhotoCreateView(APIView, PhotoCreateMixin):
         for img in request.FILES.getlist('order'):
             Order53Photo.objects.create(src=img, form53=form53)
 
-        response = {"message": "Изображение успешно добавлено"}
+        response = {"detail": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 
@@ -183,7 +179,7 @@ class Schema53PhotoCreateView(APIView, PhotoCreateMixin ):
         form53 = get_object_or_404(Form53, pk=pk)
         for img in request.FILES.getlist('schema'):
             Schema53Photo.objects.create(src=img, form53=form53)
-        response = {"message": "Изображение успешно добавлено"}
+        response = {"detail": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 

@@ -100,7 +100,7 @@ class CreateLeftTrassaView(APIView):
                         tr.transit2.clear()
                         tr.transit.clear()
 
-        response = {"data": "Объект успешно добавлен в трассу"}
+        response = {"detail": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 
@@ -143,7 +143,7 @@ class CreateRightTrassaView(APIView):
                     for tr in circuit.transit2.all():
                         tr.transit2.clear()
                         tr.transit.clear()
-        response = {"data": "Объект успешно добавлен в трассу"}
+        response = {"detail": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 
@@ -300,7 +300,7 @@ class CreateRightReserveTrassaView(APIView):
         if not main_obj.reserve_transit2.filter(pk=pk).exists():
             main_obj.reserve_transit2.add(obj)
 
-        response = {"data": "Объект успешно добавлен в трассу"}
+        response = {"detail": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 
@@ -417,7 +417,7 @@ class CreateLeftCircuitTrassaView(APIView):
             for tr in obj.transit2.all():
                 tr.transit2.clear()
                 tr.transit.clear()
-        response = {"data": "Объект успешно добавлен в трассу"}
+        response = {"detail": "Объект успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 
@@ -444,7 +444,7 @@ class CreateRightCircuitTrassaView(APIView):
             for tr in obj.transit2.all():
                 tr.transit2.clear()
                 tr.transit.clear()
-        response = {"data": "Канал успешно добавлен в трассу"}
+        response = {"detail": "Канал успешно добавлен в трассу"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 

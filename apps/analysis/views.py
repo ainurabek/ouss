@@ -694,6 +694,8 @@ def get_report_form61_kls(request):
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
         out_data['color'] = "outfit"
+        out_data['total_length_line'] = None
+        out_data['total_length_cable'] = None
         data.append(out_data)
         for form61 in all_form61.filter(outfit=outfit.outfit):
             form61_data = copy.deepcopy(content)

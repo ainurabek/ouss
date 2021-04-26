@@ -206,6 +206,7 @@ class LPCreateView(generics.CreateAPIView):
             create_form51(obj=instance)
             # create_circuit(instance, self.request)
             adding_an_object_to_trassa(obj=instance)
+            create_object_KLSS_RRL_amount_channels(obj=instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -273,7 +274,7 @@ class ObjectDetailView(RetrieveDestroyAPIView):
 
         self.perform_destroy(instance)
         update_total_amount_channels(instance=instance)
-        response = {"message": "Объект успешно удален"}
+        response = {"detail": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -334,7 +335,7 @@ class ObjectEditView(APIView):
             instance = serializer.save()
             update_circuit(old_obj=old_obj, obj=instance)
             # update_total_point_channels(instance=instance)
-            response = {"message": "Объект успешно отредактирован"}
+            response = {"detail": "Объект успешно отредактирован"}
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

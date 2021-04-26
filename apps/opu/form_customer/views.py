@@ -101,7 +101,7 @@ class FormCustomerObjCreateAPIView(APIView):
     def post(self, request, pk):
         object = get_object_or_404(Object, pk=pk)
         if Form_Customer.objects.filter(object=object).exists():
-            content = {'message': 'По такому обьекту уже форма арендаторов создана'}
+            content = {'detail': 'По такому обьекту уже форма арендаторов создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
 
         serializer = FormCustomerCreateSerializer(data=request.data)
@@ -120,7 +120,7 @@ class FormCustomerIPCreateAPIView(APIView):
         point2 = get_object_or_404(Point, pk=pk2)
         customer = get_object_or_404(Customer, pk = customer_id)
         if Form_Customer.objects.filter(point1=point1, point2=point2).exists():
-            content = {'message': 'С такими ИПами уже форма арендаторов создана'}
+            content = {'detail': 'С такими ИПами уже форма арендаторов создана'}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
 
         serializer = FormCustomerCreateSerializer(data=request.data)
@@ -155,7 +155,7 @@ class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):
         form_cus = Form_Customer.objects.get(pk=pk)
         for img in request.FILES.getlist('order'):
             OrderCusPhoto.objects.create(src=img, form_customer=form_cus)
-        response = {"data": "Изображение успешно добавлено"}
+        response = {"detail": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
 

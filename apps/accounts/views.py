@@ -127,7 +127,7 @@ class CreateProfileAPIView(APIView):
 
         user.is_profile_created = True
         user.save()
-        response = {"data": "Профиль пользователя успешно создан"}
+        response = {"detail": "Профиль пользователя успешно создан"}
         return HttpResponse(response, status=status.HTTP_201_CREATED)
 
 
@@ -170,9 +170,9 @@ def department_view(request, department_id):
     department = DepartmentKT.objects.get(id=department_id)
     user = request.user
     if user.department.id != department.id:
-        return JsonResponse({'error': 'Вы не имеете право зайти в этот отдел'}, status=401)
+        return JsonResponse({'detail': 'Вы не имеете право зайти в этот отдел'}, status=401)
     else:
-        return JsonResponse({'success': 'Success'}, status=202)
+        return JsonResponse({'detail': 'Успешно'}, status=202)
 
 
 '''
@@ -193,9 +193,9 @@ def subdepartment_view(request, department_id, subdepartment_id):
     subdepartment= SubdepartmentKT.objects.get(department=department, id=subdepartment_id)
     user = request.user
     if user.department.id != department.id and user.subdeparment.id != subdepartment.id:
-        return JsonResponse({'error': 'Вы не имеете право зайти в этот отдел'}, status=401)
+        return JsonResponse({'detail': 'Вы не имеете право зайти в этот отдел'}, status=401)
     else:
-        return JsonResponse({'success': 'Success'}, status=202)
+        return JsonResponse({'detail': 'Успешно'}, status=202)
 
 
 class LogListAPIView(ListAPIView):
