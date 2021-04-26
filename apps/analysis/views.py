@@ -37,6 +37,9 @@ from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
 import matplotlib
 from project.settings import BASE_DIR
+
+from apps.analysis.serializers import Form61KLSEditSerializer
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -601,120 +604,163 @@ class Form61KLSCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class Form61KLSList(APIView):
+class Form61KLSList(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+                                                                                    'type_cable', 'type_connection')
+    serializer_class = Form61KLSSerializer
 
-    def get(self, request):
-        outfit = self.request.query_params.get('outfit', None)
-        type_connection = self.request.query_params.get('type_connection', None)
-        queryset = Form61KLS.objects.all().order_by('type_connection').prefetch_related('outfit', 'point1', 'point2', 'type_cable', 'type_connection')
-        if outfit is not None and outfit != "":
-            queryset = queryset.filter(outfit_id=outfit)
-        if type_connection is not None and type_connection != "":
-            queryset = queryset.filter(type_connection=type_connection)
-        queryset = form61_kls_distinct(queryset, "outfit")
-        data = []
-        content = {
-            'id': None,
-            'name':None,
-            'outfit': {'id':None,'outfit': None, 'adding':None},
-            'point1': {'id':None,'point': None, 'name':None},
-            'point2': {'id':None,'point': None, 'name':None},
-            'type_cable': {'id':None, 'name':None},
-            'type_connection': {'id':None, 'name':None},
-            'laying_method': {'id':None, 'name':None},
-            'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
-            'year_of_laying': None, 'color': None
-        }
-        total_rep = copy.deepcopy(content)
-        for outfit in queryset:
-            total_outfit = copy.deepcopy(content)
-            out_data = copy.deepcopy(content)
-            out_data['outfit']['id'] = outfit.outfit.id
-            out_data['outfit']['outfit'] = outfit.outfit.outfit
-            out_data['outfit']['adding'] = outfit.outfit.adding
-            out_data['color'] = "outfit"
-            data.append(out_data)
-            for form61 in queryset.filter(outfit=outfit.outfit):
-                form61_data = copy.deepcopy(content)
-                form61_data['id'] = form61.id
-                form61_data['point1']['id'] = form61.point1.id
-                form61_data['point1']['point'] = form61.point1.point
-                form61_data['point1']['name'] = form61.point1.name
-                form61_data['point2']['id'] = form61.point2.id
-                form61_data['point2']['point'] = form61.point2.point
-                form61_data['point2']['name'] = form61.point2.name
-                form61_data['year_of_laying'] = form61.year_of_laying
-                form61_data['type_cable']['id'] = form61.type_cable.id if form61.type_cable is not None else ""
-                form61_data['type_cable']['name'] = form61.type_cable.name if form61.type_cable is not None else ""
-                form61_data['type_connection']['id'] = form61.type_connection.id if form61.type_connection is not None else ""
-                form61_data['type_connection']['name'] = form61.type_connection.name if form61.type_connection is not None else ""
-                form61_data['laying_method']['id']= form61.laying_method.id if form61.laying_method is not None else ""
-                form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
-                form61_data['above_ground'] = form61.above_ground
-                form61_data['under_ground'] = form61.under_ground
-                form61_data['total_length_line'] = form61.total_length_line
-                form61_data['total_length_cable'] = form61.total_length_cable
-                data.append(form61_data)
-                total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
-                total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
-            total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
-            total_outfit['color'] = 'Total_outfit'
-            data.append(total_outfit)
-            total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
-            total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
-        total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
-        total_rep['color'] = 'Total_country'
-        data.append(total_rep)
-        return JsonResponse(data, safe=False)
+    # def get(self, request):
+    #     outfit = self.request.query_params.get('outfit', None)
+    #     type_connection = self.request.query_params.get('type_connection', None)
+    #     queryset = Form61KLS.objects.all().order_by('type_connection').prefetch_related('outfit', 'point1', 'point2', 'type_cable', 'type_connection')
+    #     if outfit is not None and outfit != "":
+    #         queryset = queryset.filter(outfit_id=outfit)
+    #     if type_connection is not None and type_connection != "":
+    #         queryset = queryset.filter(type_connection=type_connection)
+    #     queryset = form61_kls_distinct(queryset, "outfit")
+    #     data = []
+    #     content = {
+    #         'id': None,
+    #         'name':None,
+    #         'outfit': {'id':None,'outfit': None, 'adding':None},
+    #         'point1': {'id':None,'point': None, 'name':None},
+    #         'point2': {'id':None,'point': None, 'name':None},
+    #         'type_cable': {'id':None, 'name':None},
+    #         'type_connection': {'id':None, 'name':None},
+    #         'laying_method': {'id':None, 'name':None},
+    #         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
+    #         'year_of_laying': None, 'color': None
+    #     }
+    #     total_rep = copy.deepcopy(content)
+    #     for outfit in queryset:
+    #         total_outfit = copy.deepcopy(content)
+    #         out_data = copy.deepcopy(content)
+    #         out_data['outfit']['id'] = outfit.outfit.id
+    #         out_data['outfit']['outfit'] = outfit.outfit.outfit
+    #         out_data['outfit']['adding'] = outfit.outfit.adding
+    #         out_data['total_length_line'] = None
+    #         out_data['total_length_cable'] = None
+    #         out_data['above_ground'] = None
+    #         out_data['under_ground'] = None
+    #         out_data['color'] = "outfit"
+    #         data.append(out_data)
+    #         for form61 in queryset.filter(outfit=outfit.outfit):
+    #             form61_data = copy.deepcopy(content)
+    #             form61_data['id'] = form61.id
+    #             form61_data['outfit']['id'] = form61.outfit.id
+    #             form61_data['outfit']['outfit'] = form61.outfit.outfit
+    #             form61_data['outfit']['adding'] = form61.outfit.adding
+    #             form61_data['point1']['id'] = form61.point1.id
+    #             form61_data['point1']['point'] = form61.point1.point
+    #             form61_data['point1']['name'] = form61.point1.name
+    #             form61_data['point2']['id'] = form61.point2.id
+    #             form61_data['point2']['point'] = form61.point2.point
+    #             form61_data['point2']['name'] = form61.point2.name
+    #             form61_data['year_of_laying'] = form61.year_of_laying
+    #             form61_data['type_cable']['id'] = form61.type_cable.id if form61.type_cable is not None else ""
+    #             form61_data['type_cable']['name'] = form61.type_cable.name if form61.type_cable is not None else ""
+    #             form61_data['type_connection']['id'] = form61.type_connection.id if form61.type_connection is not None else ""
+    #             form61_data['type_connection']['name'] = form61.type_connection.name if form61.type_connection is not None else ""
+    #             form61_data['laying_method']['id']= form61.laying_method.id if form61.laying_method is not None else ""
+    #             form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
+    #             form61_data['above_ground'] = form61.above_ground
+    #             form61_data['under_ground'] = form61.under_ground
+    #             form61_data['total_length_line'] = form61.total_length_line
+    #             form61_data['total_length_cable'] = form61.total_length_cable
+    #             data.append(form61_data)
+    #             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+    #             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
+    #         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
+    #         total_outfit['color'] = 'Total_outfit'
+    #         data.append(total_outfit)
+    #         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+    #         total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
+    #     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
+    #     total_rep['color'] = 'Total_country'
+    #     data.append(total_rep)
+    #     return JsonResponse(data, safe=False)
 
-class Form61KLSUpdateAPIView(UpdateAPIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+class Form61KLSUpdateAPIView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
     queryset = Form61KLS.objects.all()
-    serializer_class = Form61KLSCreateSerializer
+    serializer_class = Form61KLSEditSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_form61_kls(request):
     """ Форма61 KLS"""
-    outfit = request.GET.getlist("outfit")
+    outfit = request.GET.get("outfit")
     type_connection = request.GET.get("type_connection")
-    forms61 = Form61KLS.objects.all()
-    all_form61 = form61_kls_filter(forms61, outfit, type_connection)
-    outfits = form61_kls_distinct(all_form61, "outfit")
+    queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+                                                                                    'type_cable', 'type_connection')
+    queryset = form61_kls_filter(queryset, outfit, type_connection)
+    outfits = form61_kls_distinct(queryset, 'outfit')
+
     data = []
-    content = {'id': None, "name": None, 'outfit':None, 'above_ground':0, 'under_ground':0,
-               'type_connection':None, "year_of_laying": None, "type_cable": None, "total_length_line": 0,
-               'total_length_cable': 0, "laying_method": None, 'color':None
+    content = {
+        'id': None,
+        'name': None,
+        'outfit': {'id': None, 'outfit': None, 'adding': None},
+        'point1': {'id': None, 'point': None, 'name': None},
+        'point2': {'id': None, 'point': None, 'name': None},
+        'type_cable': {'id': None, 'name': None},
+        'type_connection': {'id': None, 'name': None},
+        'laying_method': {'id': None, 'name': None},
+        'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
+        'year_of_laying': None, 'color': None
     }
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
-        out_data['name'] = outfit.outfit.outfit
-        out_data['color'] = "outfit"
+        out_data['outfit']['id'] = outfit.outfit.id
+        out_data['outfit']['outfit'] = outfit.outfit.outfit
+        out_data['outfit']['adding'] = outfit.outfit.adding
         out_data['total_length_line'] = None
         out_data['total_length_cable'] = None
+        out_data['above_ground'] = None
+        out_data['under_ground'] = None
+        out_data['color'] = "outfit"
+
         data.append(out_data)
-        for form61 in all_form61.filter(outfit=outfit.outfit):
+        for form61 in queryset.filter(outfit=outfit.outfit):
             form61_data = copy.deepcopy(content)
             form61_data['id'] = form61.id
-            form61_data['name'] = str(form61.point1.point), str(form61.point2.point)
+            form61_data['outfit']['id'] = form61.outfit.id
+            form61_data['outfit']['outfit'] = form61.outfit.outfit
+            form61_data['outfit']['adding'] = form61.outfit.adding
+            form61_data['point1']['id'] = form61.point1.id
+            form61_data['point1']['point'] = form61.point1.point
+            form61_data['point1']['name'] = form61.point1.name
+            form61_data['point2']['id'] = form61.point2.id
+            form61_data['point2']['point'] = form61.point2.point
+            form61_data['point2']['name'] = form61.point2.name
             form61_data['year_of_laying'] = form61.year_of_laying
-            form61_data['type_cable'] = form61.type_cable.name if form61.type_cable is not None else ""
+            form61_data['type_cable']['id'] = form61.type_cable.id if form61.type_cable is not None else ""
+            form61_data['type_cable']['name'] = form61.type_cable.name if form61.type_cable is not None else ""
+            form61_data['type_connection'][
+                'id'] = form61.type_connection.id if form61.type_connection is not None else ""
+            form61_data['type_connection'][
+                'name'] = form61.type_connection.name if form61.type_connection is not None else ""
+            form61_data['laying_method']['id'] = form61.laying_method.id if form61.laying_method is not None else ""
+            form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
+            form61_data['above_ground'] = form61.above_ground
+            form61_data['under_ground'] = form61.under_ground
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
-            form61_data['laying_method'] = form61.laying_method.name if form61.laying_method.name is not None else ""
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
-        total_outfit['name'] = 'ИТОГО:'
+        total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
         total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
-    total_rep['name'] = 'ИТОГО:'
+    total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)

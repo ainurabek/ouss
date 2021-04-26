@@ -175,3 +175,20 @@ class Form61KLSSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form61KLS
         fields = ("__all__")
+
+class Form61KLSEditSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+
+    laying_method = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=MethodLaying.objects.all())
+    type_cable = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True,  queryset=TypeCable.objects.all())
+    type_connection = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
+
+    class Meta:
+        model = Form61KLS
+        fields = ('outfit', 'total_length_line', 'total_length_cable', 'above_ground',
+                  'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection', 'src')
+        depth = 1
