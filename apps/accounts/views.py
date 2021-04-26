@@ -11,13 +11,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 
-from .permissions import IsCreator
+from .permissions import IsCreator, SuperUser
 from .serializers import LoginUserSerializer, UserSerializer, ProfileListSerializer, CreateUserSerializer, \
-    DepartmentSerializer, SubdepartmentSerializer, LogSerializer, LogUpdateSerializer
+    DepartmentSerializer, SubdepartmentSerializer, LogSerializer, LogUpdateSerializer, ChangePasswordSerializer
 from django.http.response import HttpResponse, JsonResponse
 from .models import Profile, DepartmentKT, SubdepartmentKT, Log
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from rest_framework.decorators import permission_classes
+from rest_framework.generics import  get_object_or_404
 
 
 User = get_user_model()
@@ -65,12 +67,13 @@ class LoginAPI(KnoxLoginView):
 
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+
+
+        login(request, user)
         if request.user.is_profile_created:
             profile = Profile.objects.get(user__username=user)
             profile.online = True
             profile.save()
-
-        login(request, user)
         return super().post(request, format=None)
 
 
@@ -234,3 +237,22 @@ class LogCreateAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user.profile)
+
+
+class ChangePasswordView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, SuperUser)
+    search_fields = ('name',)
+    serializer = ChangePasswordSerializer
+
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        self.object = user
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {"detail": "Пароль для {} успешно изменен".format(user)}
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

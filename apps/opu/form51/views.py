@@ -36,7 +36,6 @@ class FormListAPIView(ListAPIView):
             queryset = queryset.filter(object=object)
         if consumer is not None and consumer != '':
             queryset = queryset.filter(object__consumer=consumer)
-
         return queryset.order_by('object')
 
 
@@ -56,9 +55,6 @@ class Form51DetailAPIView(RetrieveDestroyAPIView):
     serializer_class = Form51ReserveSerializer
 
 
-#
-#
-#
 # class Form51DeleteAPIView(DestroyAPIView):
 #     """Удаления Формы 5.1"""
 #     authentication_classes = (TokenAuthentication,)

@@ -92,5 +92,8 @@ class LogUpdateSerializer(serializers.ModelSerializer):
 
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
 
+    new_password = serializers.CharField(required=True)
 

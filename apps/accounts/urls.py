@@ -25,6 +25,8 @@ urlpatterns = [
     path("log-user-list/", views.LogListAPIView.as_view()),
     path("log-user/update/<int:pk>/", views.LogUpdateAPIView.as_view()),
     path("log-user-create/", views.LogCreateAPIView.as_view()),
+
+    path("change_password/<int:pk>/", views.ChangePasswordView.as_view()),
     path('', include(router.urls))
 
 ]
