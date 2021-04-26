@@ -772,7 +772,7 @@ def get_distance_length_kls(request, pk1, pk2):
     g = nx.Graph()
     g2 = nx.Graph()
     data = []
-    content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0, 'src':None}
+    content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0}
     for form in Form61KLS.objects.all():
         g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
         g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
@@ -800,18 +800,18 @@ def get_distance_length_kls(request, pk1, pk2):
             total['sum_line'] = path_length
             total['sum_cable'] = path_length1
             data.append(total)
-    pos = nx.spring_layout(g)
-    labels = nx.get_edge_attributes(g, 'weight')
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=labels, font_size=8, font_color='blue',
-                                 font_family='sans-serif', font_weight='normal', horizontalalignment='center', verticalalignment='center', ax=None)
-
-    nx.draw(g, pos=pos,  node_size=250, node_color='blue', linewidths=1, font_size=7,
-            font_family='sans-serif', edge_color='y', with_labels=True)
-
-    if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
-        os.remove(BASE_DIR + "/mediafiles/files/graph.png")
-    plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
-    plt.clf()
+    # pos = nx.spring_layout(g)
+    # labels = nx.get_edge_attributes(g, 'weight')
+    # nx.draw_networkx_edge_labels(g, pos, edge_labels=labels, font_size=8, font_color='blue',
+    #                              font_family='sans-serif', font_weight='normal', horizontalalignment='center', verticalalignment='center', ax=None)
+    #
+    # nx.draw(g, pos=pos,  node_size=250, node_color='blue', linewidths=1, font_size=7,
+    #         font_family='sans-serif', edge_color='y', with_labels=True)
+    #
+    # if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
+    #     os.remove(BASE_DIR + "/mediafiles/files/graph.png")
+    # plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
+    # plt.clf()
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
