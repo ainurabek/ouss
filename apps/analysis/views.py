@@ -812,7 +812,7 @@ def get_distance_length_kls(request, pk1, pk2):
                 font_family='sans-serif', edge_color='y', with_labels=True)
         if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
             os.remove(BASE_DIR + "/mediafiles/files/graph.png")
-        plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
+        plt.savefig("/files/graph.png")
         plt.close()
         plt.clf()
     return JsonResponse(data, safe=False)
