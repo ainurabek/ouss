@@ -1,5 +1,6 @@
 import copy
 import os
+import random
 from copy import deepcopy
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
@@ -770,7 +771,7 @@ def get_report_form61_kls(request):
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
-
+from shutil import rmtree
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -810,16 +811,21 @@ def get_distance_length_kls(request, pk1, pk2):
                 final_g.add_edge(t[0], t[1], weight=path_length)
         pos = nx.spring_layout(final_g)
         labels = nx.get_edge_attributes(final_g, 'weight')
-        nx.draw_networkx_edge_labels(final_g, pos, edge_labels=labels, font_size=8, font_color='blue',
+        nx.draw_networkx_edge_labels(final_g, pos, edge_labels=labels, font_size=9, font_color='blue',
                                      font_family='sans-serif', font_weight='normal', horizontalalignment='center',
                                      verticalalignment='center')
-        nx.draw(final_g, pos=pos, node_size=250, node_color='blue', linewidths=1, font_size=7,
+        nx.draw(final_g, pos=pos, node_size=350, node_color='blue', linewidths=1, font_size=8,
                 font_family='sans-serif', edge_color='y', with_labels=True)
-        if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
-            os.remove(BASE_DIR + "/mediafiles/files/graph.png")
-        plt.savefig(BASE_DIR+"/mediafiles/files/graph.png")
+        image_name = f"graph{str(random.randint(0, 100))}.png"
+
+        if os.path.exists(BASE_DIR + "/mediafiles/files/graphs/"):
+            rmtree(BASE_DIR + "/mediafiles/files/graphs/")
+        os.mkdir(BASE_DIR+"/mediafiles/files/graphs")
+        plt.savefig(BASE_DIR+"/mediafiles/files/graphs/" + image_name)
         plt.close()
         plt.clf()
+        data.append({"image_name": image_name})
+
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):

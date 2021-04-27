@@ -38,7 +38,7 @@ class OutfitAdmin(admin.ModelAdmin):
 
 @admin.register(Object)
 class ObjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_parent', 'name', 'point1', 'point2', 'amount_channels', 'total_amount_channels')
+    list_display = ('id', 'id_parent', 'name', 'point1', 'point2', 'amount_channels', 'total_amount_channels', 'is_main')
     search_fields = ('name',)
 
 
