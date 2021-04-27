@@ -2,7 +2,7 @@ import copy
 import os
 from copy import deepcopy
 from rest_framework import viewsets, generics
-from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404
+from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS
@@ -691,6 +691,11 @@ class Form61KLSUpdateAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
+class Form61KLSDeleteAPIView(DestroyAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    queryset = Form61KLS.objects.all()
+
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_form61_kls(request):
     """ Форма61 KLS"""
@@ -812,7 +817,7 @@ def get_distance_length_kls(request, pk1, pk2):
                 font_family='sans-serif', edge_color='y', with_labels=True)
         if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
             os.remove(BASE_DIR + "/mediafiles/files/graph.png")
-        plt.savefig("/files/graph.png")
+        plt.savefig(BASE_DIR+"/mediafiles/files/graph.png")
         plt.close()
         plt.clf()
     return JsonResponse(data, safe=False)
