@@ -35,13 +35,14 @@ from apps.opu.objects.models import Point
 from rest_framework.viewsets import ModelViewSet
 from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
-import matplotlib
+
 from project.settings import BASE_DIR
 
 from apps.analysis.serializers import Form61KLSEditSerializer
-
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+
 
 
 
@@ -765,7 +766,6 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
-
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -779,39 +779,42 @@ def get_distance_length_kls(request, pk1, pk2):
         g.add_node(form.point1.point, pos=(1, 20))
         g.add_node(form.point2.point, pos=(1, 20))
     path = []
-    for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
-        path.append(p)
-    for p in path:
-        path_length = nx.path_weight(g, p, weight='weight')
-        path_length1 = nx.path_weight(g2, p, weight='weight')
-        finish_total = copy.deepcopy(content)
-        finish_total['name'] = "Варианты:"
-        finish_total['points'] = p
-        finish_total['sum_line'] = path_length
-        finish_total['sum_cable'] = path_length1
-        data.append(finish_total)
-    for p in nx.all_simple_edge_paths(g, source=point1.point, target=point2.point):
-        for t in p:
-            total = copy.deepcopy(content)
-            total['name'] = "Разбивка:"
-            total['points'] = t
-            path_length = nx.path_weight(g, t, weight='weight')
-            path_length1 = nx.path_weight(g2, t, weight='weight')
-            total['sum_line'] = path_length
-            total['sum_cable'] = path_length1
-            data.append(total)
-    # pos = nx.spring_layout(g)
-    # labels = nx.get_edge_attributes(g, 'weight')
-    # nx.draw_networkx_edge_labels(g, pos, edge_labels=labels, font_size=8, font_color='blue',
-    #                              font_family='sans-serif', font_weight='normal', horizontalalignment='center', verticalalignment='center', ax=None)
-    #
-    # nx.draw(g, pos=pos,  node_size=250, node_color='blue', linewidths=1, font_size=7,
-    #         font_family='sans-serif', edge_color='y', with_labels=True)
-    #
-    # if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
-    #     os.remove(BASE_DIR + "/mediafiles/files/graph.png")
-    # plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
-    # plt.clf()
+    if point1.point in g and point2.point in g:
+        final_g = nx.Graph()
+        for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
+            path.append(p)
+        for p in path:
+            path_length = nx.path_weight(g, p, weight='weight')
+            path_length1 = nx.path_weight(g2, p, weight='weight')
+            finish_total = copy.deepcopy(content)
+            finish_total['name'] = "Варианты:"
+            finish_total['points'] = p
+            finish_total['sum_line'] = path_length
+            finish_total['sum_cable'] = path_length1
+            data.append(finish_total)
+        for p in nx.all_simple_edge_paths(g, source=point1.point, target=point2.point):
+            for t in p:
+                total = copy.deepcopy(content)
+                total['name'] = "Разбивка:"
+                total['points'] = t
+                path_length = nx.path_weight(g, t, weight='weight')
+                path_length1 = nx.path_weight(g2, t, weight='weight')
+                total['sum_line'] = path_length
+                total['sum_cable'] = path_length1
+                data.append(total)
+                final_g.add_edge(t[0], t[1], weight=path_length)
+        pos = nx.spring_layout(final_g)
+        labels = nx.get_edge_attributes(final_g, 'weight')
+        nx.draw_networkx_edge_labels(final_g, pos, edge_labels=labels, font_size=8, font_color='blue',
+                                     font_family='sans-serif', font_weight='normal', horizontalalignment='center',
+                                     verticalalignment='center')
+        nx.draw(final_g, pos=pos, node_size=250, node_color='blue', linewidths=1, font_size=7,
+                font_family='sans-serif', edge_color='y', with_labels=True)
+        if os.path.exists(BASE_DIR + "/mediafiles/files/graph.png"):
+            os.remove(BASE_DIR + "/mediafiles/files/graph.png")
+        plt.savefig(BASE_DIR + "/mediafiles/files/graph.png")
+        plt.close()
+        plt.clf()
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
