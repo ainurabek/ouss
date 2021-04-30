@@ -694,10 +694,11 @@ def get_report_form61_kls(request):
             form61_data['under_ground'] = form61.under_ground
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
-            if int(laying_method) == 1 or int(laying_method) == 2:
-                form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
-            if int(laying_method) == 3:
-                form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
+            if laying_method is not None and laying_method != '':
+                if int(laying_method) == 1 or int(laying_method) == 2:
+                    form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
+                if int(laying_method) == 3:
+                    form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
