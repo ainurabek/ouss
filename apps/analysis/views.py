@@ -1,23 +1,23 @@
 import copy
 import os
 import random
-from copy import deepcopy
+from shutil import rmtree
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS
-from apps.analysis.serializers import DispEvent1ListSerializer, FormAnalysisSerializer, FormAnalysisDetailSerializer, \
+from apps.analysis.serializers import FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
     Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 
-from apps.analysis.service import get_period, get_type_line, get_calls_list, get_amount_of_channels, \
+from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
     set_response_for_winners, get_winners
 from apps.dispatching.models import Event, HistoricalEvent, Index
-from apps.dispatching.services import get_event_name, get_event
+from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -159,14 +159,12 @@ matplotlib.use('Agg')
 #     return JsonResponse(data, safe=False)
 
 
-
 class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
-    '''сохранение количества каналов для Обьекта'''
+    """сохранение количества каналов для Обьекта"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = AmountChannelsKLSRRL.objects.all()
     serializer_class = AmountChannelsKLSRRLSerializer
-
 
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
@@ -176,10 +174,8 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.getlist("responsible_outfit")
 
-
     all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
                                                                                               'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
-
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
 
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
@@ -261,16 +257,31 @@ def get_report_analysis(request):
     date_to = request.GET.get("date_to")
     index = request.GET.get("index")
     responsible_outfit = request.GET.getlist('responsible_outfit')
+    order_name = request.GET.get("order_name", "")
+    order_date = request.GET.get("order_date", "")
+    order_date = "-"
+    if order_name == "+":
+        order_name = ["object__name", "ips__name", "name", "circuit__name"]
+    else:
+        order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
+
+    if order_date == "+":
+        order_date = "date_from"
+    else:
+        order_date = "-date_from"
 
     all_events = Event.objects.filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4')
 
     if index is not None and index != "":
         all_events = all_events.filter(index1__id=index)
 
-    all_events= event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
+    all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
 
-    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id').distinct('ips_id', 'object_id',
-                                                                                                'circuit_id')
+    all_event_names = all_events.distinct('ips_id', 'object_id', 'circuit_id').order_by('ips_id', 'object_id', 'circuit_id')
+    if isinstance(order_name, list):
+        all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name, order_date)
+    if order_date != "":
+        all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = []
@@ -594,6 +605,7 @@ class WinnerReportAPIView(APIView):
 
         return JsonResponse(data, safe=False)
 
+
 class Form61KLSCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
@@ -692,10 +704,12 @@ class Form61KLSUpdateAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
+
 class Form61KLSDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
     queryset = Form61KLS.objects.all()
+
 
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_form61_kls(request):
@@ -771,7 +785,8 @@ def get_report_form61_kls(request):
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
-from shutil import rmtree
+
+
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
