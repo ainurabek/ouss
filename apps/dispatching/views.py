@@ -286,7 +286,7 @@ class EventCallsCreateViewAPI(APIView):
 class EventUpdateAPIView(UpdateAPIView):
     """Редактирования event"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser, DateCheck)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer

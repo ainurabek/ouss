@@ -36,7 +36,7 @@ from apps.opu.objects.models import Point
 from rest_framework.viewsets import ModelViewSet
 from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
-
+from shutil import rmtree
 from project.settings import BASE_DIR
 
 from apps.analysis.serializers import Form61KLSEditSerializer
@@ -606,83 +606,12 @@ class Form61KLSCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class Form61KLSList(ListAPIView):
+class Form61KLSList(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
     queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
                                                                                     'type_cable', 'type_connection')
     serializer_class = Form61KLSSerializer
-
-    # def get(self, request):
-    #     outfit = self.request.query_params.get('outfit', None)
-    #     type_connection = self.request.query_params.get('type_connection', None)
-    #     queryset = Form61KLS.objects.all().order_by('type_connection').prefetch_related('outfit', 'point1', 'point2', 'type_cable', 'type_connection')
-    #     if outfit is not None and outfit != "":
-    #         queryset = queryset.filter(outfit_id=outfit)
-    #     if type_connection is not None and type_connection != "":
-    #         queryset = queryset.filter(type_connection=type_connection)
-    #     queryset = form61_kls_distinct(queryset, "outfit")
-    #     data = []
-    #     content = {
-    #         'id': None,
-    #         'name':None,
-    #         'outfit': {'id':None,'outfit': None, 'adding':None},
-    #         'point1': {'id':None,'point': None, 'name':None},
-    #         'point2': {'id':None,'point': None, 'name':None},
-    #         'type_cable': {'id':None, 'name':None},
-    #         'type_connection': {'id':None, 'name':None},
-    #         'laying_method': {'id':None, 'name':None},
-    #         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
-    #         'year_of_laying': None, 'color': None
-    #     }
-    #     total_rep = copy.deepcopy(content)
-    #     for outfit in queryset:
-    #         total_outfit = copy.deepcopy(content)
-    #         out_data = copy.deepcopy(content)
-    #         out_data['outfit']['id'] = outfit.outfit.id
-    #         out_data['outfit']['outfit'] = outfit.outfit.outfit
-    #         out_data['outfit']['adding'] = outfit.outfit.adding
-    #         out_data['total_length_line'] = None
-    #         out_data['total_length_cable'] = None
-    #         out_data['above_ground'] = None
-    #         out_data['under_ground'] = None
-    #         out_data['color'] = "outfit"
-    #         data.append(out_data)
-    #         for form61 in queryset.filter(outfit=outfit.outfit):
-    #             form61_data = copy.deepcopy(content)
-    #             form61_data['id'] = form61.id
-    #             form61_data['outfit']['id'] = form61.outfit.id
-    #             form61_data['outfit']['outfit'] = form61.outfit.outfit
-    #             form61_data['outfit']['adding'] = form61.outfit.adding
-    #             form61_data['point1']['id'] = form61.point1.id
-    #             form61_data['point1']['point'] = form61.point1.point
-    #             form61_data['point1']['name'] = form61.point1.name
-    #             form61_data['point2']['id'] = form61.point2.id
-    #             form61_data['point2']['point'] = form61.point2.point
-    #             form61_data['point2']['name'] = form61.point2.name
-    #             form61_data['year_of_laying'] = form61.year_of_laying
-    #             form61_data['type_cable']['id'] = form61.type_cable.id if form61.type_cable is not None else ""
-    #             form61_data['type_cable']['name'] = form61.type_cable.name if form61.type_cable is not None else ""
-    #             form61_data['type_connection']['id'] = form61.type_connection.id if form61.type_connection is not None else ""
-    #             form61_data['type_connection']['name'] = form61.type_connection.name if form61.type_connection is not None else ""
-    #             form61_data['laying_method']['id']= form61.laying_method.id if form61.laying_method is not None else ""
-    #             form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
-    #             form61_data['above_ground'] = form61.above_ground
-    #             form61_data['under_ground'] = form61.under_ground
-    #             form61_data['total_length_line'] = form61.total_length_line
-    #             form61_data['total_length_cable'] = form61.total_length_cable
-    #             data.append(form61_data)
-    #             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
-    #             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
-    #         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
-    #         total_outfit['color'] = 'Total_outfit'
-    #         data.append(total_outfit)
-    #         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
-    #         total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
-    #     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
-    #     total_rep['color'] = 'Total_country'
-    #     data.append(total_rep)
-    #     return JsonResponse(data, safe=False)
 
 
 class Form61KLSUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -700,11 +629,12 @@ class Form61KLSDeleteAPIView(DestroyAPIView):
 @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
 def get_report_form61_kls(request):
     """ Форма61 KLS"""
-    outfit = request.GET.get("outfit")
+    outfit = request.GET.getlist("outfit")
     type_connection = request.GET.get("type_connection")
+    laying_method = request.GET.get("laying_method")
     queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
                                                                                     'type_cable', 'type_connection')
-    queryset = form61_kls_filter(queryset, outfit, type_connection)
+    queryset = form61_kls_filter(queryset, outfit, type_connection, laying_method)
     outfits = form61_kls_distinct(queryset, 'outfit')
 
     data = []
@@ -716,7 +646,7 @@ def get_report_form61_kls(request):
         'point2': {'id': None, 'point': None, 'name': None},
         'type_cable': {'id': None, 'name': None},
         'type_connection': {'id': None, 'name': None},
-        'laying_method': {'id': None, 'name': None},
+        'laying_method': [{'id': None, 'name': None}],
         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
         'year_of_laying': None, 'color': None
     }
@@ -753,25 +683,39 @@ def get_report_form61_kls(request):
                 'id'] = form61.type_connection.id if form61.type_connection is not None else ""
             form61_data['type_connection'][
                 'name'] = form61.type_connection.name if form61.type_connection is not None else ""
-            form61_data['laying_method']['id'] = form61.laying_method.id if form61.laying_method is not None else ""
-            form61_data['laying_method']['name'] = form61.laying_method.id if form61.laying_method is not None else ""
+            form61_data['laying_method'] = [
+                {
+                    'id': obj.id,
+                    'name': obj.name,
+                }
+                for obj in form61.laying_method.all()
+            ]
             form61_data['above_ground'] = form61.above_ground
             form61_data['under_ground'] = form61.under_ground
             form61_data['total_length_line'] = form61.total_length_line
             form61_data['total_length_cable'] = form61.total_length_cable
+            if int(laying_method) == 1 or int(laying_method) == 2:
+                form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
+            if int(laying_method) == 3:
+                form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
+            total_outfit['above_ground'] += round(form61_data['above_ground'], 2)
+            total_outfit['under_ground'] += round(form61_data['under_ground'], 2)
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
         total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
+        total_rep['above_ground'] += round(total_outfit['above_ground'], 2)
+        total_rep['under_ground'] += round(total_outfit['under_ground'], 2)
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
-from shutil import rmtree
+
+
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -780,14 +724,14 @@ def get_distance_length_kls(request, pk1, pk2):
     data = []
     content = {'name':None, 'points': None, 'sum_line':0, "sum_cable": 0}
     for form in Form61KLS.objects.all():
-        g.add_edge(form.point1.point, form.point2.point, weight=form.total_length_line)
-        g2.add_edge(form.point1.point, form.point2.point, weight=form.total_length_cable)
-        g.add_node(form.point1.point, pos=(1, 20))
-        g.add_node(form.point2.point, pos=(1, 20))
+        g.add_edge(form.point1.name, form.point2.name, weight=form.total_length_line)
+        g2.add_edge(form.point1.name, form.point2.name, weight=form.total_length_cable)
+        g.add_node(form.point1.name, pos=(1, 30))
+        g.add_node(form.point2.name, pos=(1, 30))
     path = []
-    if point1.point in g and point2.point in g:
+    if point1.name in g and point2.name in g:
         final_g = nx.Graph()
-        for p in nx.all_simple_paths(g, source=point1.point, target=point2.point):
+        for p in nx.all_simple_paths(g, source=point1.name, target=point2.name):
             path.append(p)
         for p in path:
             path_length = nx.path_weight(g, p, weight='weight')
@@ -798,7 +742,7 @@ def get_distance_length_kls(request, pk1, pk2):
             finish_total['sum_line'] = path_length
             finish_total['sum_cable'] = path_length1
             data.append(finish_total)
-        for p in nx.all_simple_edge_paths(g, source=point1.point, target=point2.point):
+        for p in nx.all_simple_edge_paths(g, source=point1.name, target=point2.name):
             for t in p:
                 total = copy.deepcopy(content)
                 total['name'] = "Разбивка:"
@@ -811,11 +755,11 @@ def get_distance_length_kls(request, pk1, pk2):
                 final_g.add_edge(t[0], t[1], weight=path_length)
         pos = nx.spring_layout(final_g)
         labels = nx.get_edge_attributes(final_g, 'weight')
-        nx.draw_networkx_edge_labels(final_g, pos, edge_labels=labels, font_size=9, font_color='blue',
+        nx.draw_networkx_edge_labels(final_g, pos, edge_labels=labels, font_size=10, font_color='orange',
                                      font_family='sans-serif', font_weight='normal', horizontalalignment='center',
                                      verticalalignment='center')
-        nx.draw(final_g, pos=pos, node_size=350, node_color='blue', linewidths=1, font_size=8,
-                font_family='sans-serif', edge_color='y', with_labels=True)
+        nx.draw(final_g, pos=pos, node_size=350, node_color='orange', linewidths=1, font_size=10, font_color='blue',
+                font_family='sans-serif', edge_color='black', with_labels=True)
         image_name = f"graph{str(random.randint(0, 100))}.png"
 
         if os.path.exists(BASE_DIR + "/mediafiles/files/graphs/"):

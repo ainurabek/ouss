@@ -11,6 +11,7 @@ router.register('type_cable', views.TypeCableViewSet, basename='type_cable')
 router.register('method_laying', views.MethodLayingViewSet, basename='method_laying')
 router.register('type_connection', views.TypeConnectionViewSet, basename='type_connection')
 
+
 urlpatterns = [
 
 
@@ -31,7 +32,7 @@ urlpatterns = [
     path("update/amount_channels/<int:pk>/", views.AmountChannelsObjectKLSRRLAPIView.as_view()),
 
     path("form61/kls/create/", views.Form61KLSCreateView.as_view()),
-    path("form61/kls/list/", views.Form61KLSList.as_view()),
+    path("form61/kls/list/", views.Form61KLSList.as_view({'get': 'list'})),
     path("form61/kls/update/<int:pk>/", views.Form61KLSUpdateAPIView.as_view()),
     path("form61/kls/delete/<int:pk>/", views.Form61KLSDeleteAPIView.as_view()),
     path("form61/kls/distance/<int:pk1>/<int:pk2>/", views.get_distance_length_kls),

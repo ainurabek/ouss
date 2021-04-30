@@ -202,7 +202,7 @@ class Object(models.Model):
 	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
 	is_transit = models.BooleanField(default=False)  # if True - то его компоненты участвуют в транзите, при измнении, эти компоненты перезапишутся
 	history = HistoricalRecords(related_name='history_object_log')
-	is_main = models.BooleanField(default=False)  # if True - то через обьект была создана трасса
+
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'

@@ -311,8 +311,6 @@ class SaveReserveTrassaView(APIView):
 
     def get(self, request, pk):
         main_obj = get_object_or_404(Object, pk=pk)
-        main_obj.is_main = True
-        main_obj.save()
 
         for i in main_obj.reserve_transit.all():
             i.reserve_transit.add(*main_obj.reserve_transit.all())

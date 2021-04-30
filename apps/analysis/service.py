@@ -654,11 +654,14 @@ def get_amount(obj:Event):
     if obj.circuit is not None:
         return  None, 1, 1
 
-def form61_kls_filter(form61: Form61KLS, outfit, type_connection) -> Form61KLS:
+def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method) -> Form61KLS:
     if not isinstance(outfit, list) and outfit is not None and outfit != '':
         outfit = [outfit]
+
     if outfit is not None and outfit != '' and outfit != []:
         form61 = form61.filter(outfit__in=outfit)
+    if laying_method is not None and laying_method != '':
+        form61 = form61.filter(laying_method=laying_method)
     if type_connection is not None and type_connection != '':
         form61 = form61.filter(type_connection = type_connection)
     return form61

@@ -226,8 +226,9 @@ class LogUpdateAPIView(UpdateAPIView):
     def perform_update(self, serializer):
         instance = self.get_object()
         if instance.end_time is not None and instance.end_time < datetime.datetime.now():
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer.save()
 
 class LogCreateAPIView(CreateAPIView):
     authentication_classes = (TokenAuthentication,)

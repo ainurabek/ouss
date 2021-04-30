@@ -144,6 +144,7 @@ class TotalData(models.Model):
 
 class MethodLaying(models.Model):
     name = models.CharField("Название", max_length=150)
+    is_read_only = models.BooleanField(default=False)  # if True - то название нельзя редактировать
 
     class Meta:
         verbose_name = "Способ прокладки"
@@ -182,7 +183,7 @@ class Form61KLS(models.Model):
     under_ground = models.FloatField("Проложено под землей", default=0, blank=True, null=True)
 
     year_of_laying = models.CharField("Год прокладки", max_length=255, blank=True, null=True)
-    laying_method = models.ForeignKey(MethodLaying, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Способ прокладки")
+    laying_method = models.ManyToManyField(MethodLaying,  verbose_name="Способ прокладки", related_name='form61_methods')
     type_cable = models.ForeignKey(TypeCable, on_delete=models.SET_NULL, blank=True, null=True,
                                    verbose_name="Тип кабеля")
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
