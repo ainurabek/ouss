@@ -259,8 +259,7 @@ def get_report_analysis(request):
     responsible_outfit = request.GET.getlist('responsible_outfit')
     order_name = request.GET.get("order_name", "")
     order_date = request.GET.get("order_date", "")
-    order_date = "-"
-    if order_name == "+":
+    if order_name == "+" or order_name == "":
         order_name = ["object__name", "ips__name", "name", "circuit__name"]
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
@@ -279,7 +278,7 @@ def get_report_analysis(request):
 
     all_event_names = all_events.distinct('ips_id', 'object_id', 'circuit_id').order_by('ips_id', 'object_id', 'circuit_id')
     if isinstance(order_name, list):
-        all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name, order_date)
+        all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
     if order_date != "":
         all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
@@ -287,7 +286,7 @@ def get_report_analysis(request):
     data = []
 
     example = {"outfit": None, 'id': None, "name": None, "reason": None,
-               "date_from": None,  "date_to": None, 'region': None,
+               "date_from": None,  "date_to": None, 'get_period':None, 'region': None,
                "index1": None, "comments1": None}
 
     for out in outfits:
@@ -307,6 +306,7 @@ def get_report_analysis(request):
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
+                call_data['get_period'] = call.period_of_time
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
