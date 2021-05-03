@@ -259,16 +259,10 @@ def get_report_analysis(request):
     responsible_outfit = request.GET.getlist('responsible_outfit')
     order_name = request.GET.get("order_name", "")
     order_date = request.GET.get("order_date", "")
-    if order_name == "+" or order_name == "":
+    if order_name == "name":
         order_name = ["object__name", "ips__name", "name", "circuit__name"]
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
-
-    if order_date == "+":
-        order_date = "date_from"
-    else:
-        order_date = "-date_from"
-
     all_events = Event.objects.filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4')
 
     if index is not None and index != "":
@@ -277,10 +271,13 @@ def get_report_analysis(request):
     all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
 
     all_event_names = all_events.distinct('ips_id', 'object_id', 'circuit_id').order_by('ips_id', 'object_id', 'circuit_id')
+
     if isinstance(order_name, list):
         all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
+
     if order_date != "":
         all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
+
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = []
