@@ -6,10 +6,8 @@ from rest_framework import routers
 from . import views
 from .views import LPCreateView, LPEditView, IPCreateView, ObjectCreateView, ObjectEditView, ObjectListView, \
           ObjectDetailView,  MainLineTypeList
-from .trassa import SelectObjectView, SaveTrassaView, DeleteTrassaView, CreateLeftTrassaView, CreateRightTrassaView,\
-    SelectCircuitView, CreateLeftCircuitTrassaView, CreateRightCircuitTrassaView, SaveCircuitTrassaView, \
-    DeleteCircuitTrassaView, PointListTrassa, ObjectList, SelectPointView, CircuitListTrassa,  \
-    PGCircuitListView, CreateLeftReserveTrassaView, CreateRightReserveTrassaView, SaveReserveTrassaView, DeleteReserveTrassaView
+from .trassa import SelectCircuitView, PointListTrassa, ObjectList, SelectPointView, CircuitListTrassa, \
+    PGCircuitListView, TransitCreateAPIView, RetrieveUpdateDelete
 
 app_name = 'objects'
 
@@ -40,21 +38,10 @@ urlpatterns = [
     path('trakt/object-create/<int:pk>/',  ObjectCreateView.as_view(), name='object_create'),
     path('trakt/object-edit/<int:pk>/', ObjectEditView.as_view(), name='object_edit'),
     path('trakt/object-detail/<int:pk>/', ObjectDetailView.as_view(), name='object_delete'),
-#ds,jh
-    path('trakt/select-lp/<int:pk>/', SelectObjectView.as_view(), name='select_lp'),
+
     path('trakt/point-list/', PointListTrassa.as_view(), name='point_list'),
     path('trakt/select-point/<int:pk>/', SelectPointView.as_view(), name='select_point'),
     path('trakt/select-object/<int:pk>/', ObjectList.as_view(), name='select_obj'),
-    #основная трасса
-    path('trakt/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftTrassaView.as_view(), name='left_trassa'),
-    path('trakt/right-trassa/<int:main_pk>/<int:pk>/', CreateRightTrassaView.as_view(), name='right_trassa'),
-    path('trakt/save-trassa/<int:pk>/', SaveTrassaView.as_view(), name='save_trassa'),
-    path('trakt/delete-trass/<int:main_pk>/<int:pk>/', DeleteTrassaView.as_view(), name='delete_trassa'),
-    #резервная трасса
-    path('reserve/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftReserveTrassaView.as_view(), name='reserve_left_trassa'),
-    path('reserve/right-trassa/<int:main_pk>/<int:pk>/', CreateRightReserveTrassaView.as_view(), name='reserve_right_trassa'),
-    path('reserve/save-trassa/<int:pk>/', SaveReserveTrassaView.as_view(), name='save_reserve_trassa'),
-    path('reserve/delete-trass/<int:main_pk>/<int:pk>/', DeleteReserveTrassaView.as_view(), name='delete_reserve_trassa'),
 
     path('filter-object/', views.FilterObjectList.as_view(), name='filter_object'),
 
@@ -78,15 +65,16 @@ urlpatterns = [
     path('cir_trassa/pg_list/<int:pk>/', PGCircuitListView.as_view(), name='cir_pg_list'),
     path('cir_trassa/select-circuit/<int:pk>/', SelectCircuitView.as_view(), name='select_circuit'),
     path('cir_trassa/circuit_list/', CircuitListTrassa.as_view(), name='circuit_list'),
-    path('cir_trassa/left-trassa/<int:main_pk>/<int:pk>/', CreateLeftCircuitTrassaView.as_view(), name='left_trassa_circuit'),
-    path('cir_trassa/right-trassa/<int:main_pk>/<int:pk>/', CreateRightCircuitTrassaView.as_view(), name='right_trassa_circuit'),
-    path('cir_trassa/save-trassa/<int:pk>/', SaveCircuitTrassaView.as_view(), name='save_trassa_circ'),
-    path('cir_trassa/delete-trass/<int:main_pk>/<int:pk>/', DeleteCircuitTrassaView.as_view(), name='delete_trassa_circ'),
 
     path('main-line-type/list/', MainLineTypeList.as_view(), name='line_type'),
 
     path('GOZ/', views.GOZListView.as_view(), name='goz_list'),
     path("GOZ/update/<int:pk>/", views.GOZUpdateAPIView.as_view()),
+
+
+    path("transit/create/", TransitCreateAPIView.as_view()),
+    path("transit/<int:pk>/", RetrieveUpdateDelete.as_view()),
+
 
     path('', include(router.urls))
 

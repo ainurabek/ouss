@@ -1,9 +1,10 @@
+from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
-from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetail
+from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetail, CircuitUpdateSerializer
 from rest_framework import generics, status
-from apps.opu.circuits.models import Circuit
+from apps.opu.circuits.models import Circuit, CircuitTransit
 from rest_framework.views import APIView
 from apps.accounts.permissions import IsPervichkaOnly, IngenerUser, SuperUser
 from apps.opu.circuits.service import get_circuit_diff
@@ -87,3 +88,8 @@ class CircuitHistory(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
+
+class UpdateCircuitAPIView(UpdateAPIView):
+    queryset = CircuitTransit.objects.all()
+    serializer_class = CircuitUpdateSerializer
