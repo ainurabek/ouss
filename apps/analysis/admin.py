@@ -24,16 +24,20 @@ class Punkt5Admin(admin.ModelAdmin):
 @admin.register(Form61KLS)
 class Form61KLSAdmin(admin.ModelAdmin):
     list_display = ('id', 'point1', 'point2', "outfit", "total_length_line", "total_length_cable",
-                    'above_ground', 'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection')
+                    'above_ground', 'under_ground', 'year_of_laying', 'type_cable', 'type_connection')
 
 @admin.register(TypeConnection)
-class Form61KLSAdmin(admin.ModelAdmin):
+class TypeConnectionAdmin(admin.ModelAdmin):
     list_display = ('id', "name")
 
 @admin.register(TypeCable)
-class Form61KLSAdmin(admin.ModelAdmin):
+class TypeCableAdmin(admin.ModelAdmin):
     list_display = ('id', "name")
 
 @admin.register(MethodLaying)
-class Form61KLSAdmin(admin.ModelAdmin):
-    list_display = ('id', "name")
+class MethodLayingAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
+
+@admin.register(Form61RRL)
+class Form61RRLAdmin(admin.ModelAdmin):
+    list_display = ('id', 'point1', 'point2', "outfit", "total_length_line",  'type_equipment', 'type_connection')

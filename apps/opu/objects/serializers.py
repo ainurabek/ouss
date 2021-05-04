@@ -1,15 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
-
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
     AmountChannel, OrderObjectPhoto, Consumer, Bug, MainLineType, Transit, Bridge
-
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
 
 User = get_user_model()
-
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
