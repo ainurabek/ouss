@@ -38,3 +38,6 @@ class TypeCableAdmin(admin.ModelAdmin):
 class MethodLayingAdmin(admin.ModelAdmin):
     list_display = ('name', 'id')
 
+@admin.register(Form61RRL)
+class Form61RRLAdmin(admin.ModelAdmin):
+    list_display = ('id', 'point1', 'point2', "outfit", "total_length_line",  'type_equipment', 'type_connection')

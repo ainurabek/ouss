@@ -10,10 +10,9 @@ router.register('form', views.FormAnalysisAPIViewSet, basename='index')
 router.register('type_cable', views.TypeCableViewSet, basename='type_cable')
 router.register('method_laying', views.MethodLayingViewSet, basename='method_laying')
 router.register('type_connection', views.TypeConnectionViewSet, basename='type_connection')
-
+router.register('type_equipment', views.TypeEquipmentViewSet, basename='type_equipment')
 
 urlpatterns = [
-
 
     path("api/form/", views.get_report),
     path("history/<int:pk>/", views.DispEventHistory.as_view(), name='history'),
@@ -32,12 +31,15 @@ urlpatterns = [
     path("update/amount_channels/<int:pk>/", views.AmountChannelsObjectKLSRRLAPIView.as_view()),
 
     path("form61/kls/create/", views.Form61KLSCreateView.as_view()),
-    path("form61/kls/list/", views.Form61KLSList.as_view({'get': 'list'})),
     path("form61/kls/update/<int:pk>/", views.Form61KLSUpdateAPIView.as_view()),
     path("form61/kls/delete/<int:pk>/", views.Form61KLSDeleteAPIView.as_view()),
     path("form61/kls/distance/<int:pk1>/<int:pk2>/", views.get_distance_length_kls),
-
     path("form61/kls/report/", views.get_report_form61_kls),
+
+    path("form61/rrl/create/", views.Form61RRLCreateView.as_view()),
+    path("form61/rrl/update/<int:pk>/", views.Form61RRLUpdateAPIView.as_view()),
+    path("form61/rrl/delete/<int:pk>/", views.Form61RRLDeleteAPIView.as_view()),
+    path("form61/rrl/report/", views.get_report_form61_rrl),
 
     path('', include(router.urls)),
 

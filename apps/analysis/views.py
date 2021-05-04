@@ -6,16 +6,17 @@ from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
-from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS
+from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS, Form61RRL, TypeEquipment
 from apps.analysis.serializers import FormAnalysisSerializer, FormAnalysisDetailSerializer, \
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
-    Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer
+    Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer,\
+    Form61RRLCreateSerializer, Form61RRLSerializer, Form61RRLEditSerializer, TypeEquipmentSerializer
 from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
-    set_response_for_winners, get_winners
+    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct
 from apps.dispatching.models import Event, HistoricalEvent, Index
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
@@ -259,10 +260,12 @@ def get_report_analysis(request):
     responsible_outfit = request.GET.getlist('responsible_outfit')
     order_name = request.GET.get("order_name", "")
     order_date = request.GET.get("order_date", "")
+
     if order_name == "name":
         order_name = ["object__name", "ips__name", "name", "circuit__name"]
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
+
     all_events = Event.objects.filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4')
 
     if index is not None and index != "":
@@ -276,6 +279,7 @@ def get_report_analysis(request):
         all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
 
     if order_date != "":
+        order_date = "date_from" if order_date == "start" else "-date_from"
         all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
 
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
@@ -297,13 +301,14 @@ def get_report_analysis(request):
             data.append(event_data)
 
             for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from'):
+
                 call_data = example.copy()
                 call_data['id'] = None
                 call_data['name'] = '-'
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
-                call_data['get_period'] = call.period_of_time
+                call_data['get_period'] = get_period(call, date_to)
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
@@ -773,7 +778,6 @@ def get_distance_length_kls(request, pk1, pk2):
         nx.draw(final_g, pos=pos, node_size=350, node_color='orange', linewidths=1, font_size=10, font_color='blue',
                 font_family='sans-serif', edge_color='black', with_labels=True)
         image_name = f"graph{str(random.randint(0, 100))}.png"
-
         if os.path.exists(BASE_DIR + "/mediafiles/files/graphs/"):
             rmtree(BASE_DIR + "/mediafiles/files/graphs/")
         os.mkdir(BASE_DIR+"/mediafiles/files/graphs")
@@ -781,7 +785,6 @@ def get_distance_length_kls(request, pk1, pk2):
         plt.close()
         plt.clf()
         data.append({"image_name": image_name})
-
     return JsonResponse(data, safe=False)
 
 class TypeConnectionViewSet(viewsets.ModelViewSet):
@@ -806,4 +809,102 @@ class TypeCableViewSet(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
+class TypeEquipmentViewSet(ModelViewSet):
+    queryset = TypeEquipment.objects.all()
+    serializer_class = TypeEquipmentSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
+
+class Form61RRLCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def post(self, request):
+        serializer = Form61RRLCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Form61RRLList(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    queryset = Form61RRL.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+                                                                                    'type_equipment', 'type_connection')
+    serializer_class = Form61RRLSerializer
+
+class Form61RRLUpdateAPIView(generics.RetrieveUpdateAPIView):
+    lookup_field = 'pk'
+    queryset = Form61RRL.objects.all()
+    serializer_class = Form61RRLEditSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+class Form61RRLDeleteAPIView(DestroyAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    queryset = Form61RRL.objects.all()
+
+@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+def get_report_form61_rrl(request):
+    """ Форма61 RRL"""
+    outfit = request.GET.getlist("outfit")
+    type_connection = request.GET.get("type_connection")
+    type_equipment = request.GET.get("type_equipment")
+    queryset = Form61RRL.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+                                                                                    'type_equipment', 'type_connection')
+    queryset = form61_rrl_filter(queryset, outfit, type_connection, type_equipment)
+    outfits = form61_rrl_distinct(queryset, 'outfit')
+    data = []
+    content = {
+        'id': None,
+        'name': None,
+        'outfit': {'id': None, 'outfit': None, 'adding': None},
+        'point1': {'id': None, 'point': None, 'name': None},
+        'point2': {'id': None, 'point': None, 'name': None},
+        'type_equipment': {'id': None, 'name': None},
+        'type_connection': {'id': None, 'name': None},
+        'total_length_line': 0, 'color': None
+    }
+    total_rep = copy.deepcopy(content)
+    for outfit in outfits:
+        total_outfit = copy.deepcopy(content)
+        out_data = copy.deepcopy(content)
+        out_data['outfit']['id'] = outfit.outfit.id
+        out_data['outfit']['outfit'] = outfit.outfit.outfit
+        out_data['outfit']['adding'] = outfit.outfit.adding
+        out_data['total_length_line'] = None
+        out_data['color'] = "outfit"
+
+        data.append(out_data)
+        for form61 in queryset.filter(outfit=outfit.outfit):
+            form61_data = copy.deepcopy(content)
+            form61_data['id'] = form61.id
+            form61_data['outfit']['id'] = form61.outfit.id
+            form61_data['outfit']['outfit'] = form61.outfit.outfit
+            form61_data['outfit']['adding'] = form61.outfit.adding
+            form61_data['point1']['id'] = form61.point1.id
+            form61_data['point1']['point'] = form61.point1.point
+            form61_data['point1']['name'] = form61.point1.name
+            form61_data['point2']['id'] = form61.point2.id
+            form61_data['point2']['point'] = form61.point2.point
+            form61_data['point2']['name'] = form61.point2.name
+            form61_data['type_equipment']['id'] = form61.type_equipment.id if form61.type_equipment is not None else ""
+            form61_data['type_equipment']['name'] = form61.type_equipment.name if form61.type_equipment is not None else ""
+            form61_data['type_connection'][
+                'id'] = form61.type_connection.id if form61.type_connection is not None else ""
+            form61_data['type_connection'][
+                'name'] = form61.type_connection.name if form61.type_connection is not None else ""
+            form61_data['total_length_line'] = form61.total_length_line
+            data.append(form61_data)
+            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+        total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
+        total_outfit['color'] = 'Total_outfit'
+        data.append(total_outfit)
+        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+    total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
+    total_rep['color'] = 'Total_country'
+    data.append(total_rep)
+    return JsonResponse(data, safe=False)

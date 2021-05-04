@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from apps.analysis.models import FormAnalysis, Punkt5, TotalData, Punkt7, Form61KLS, MethodLaying, TypeCable, TypeConnection
+from apps.analysis.models import FormAnalysis, Punkt5, TotalData, Punkt7, Form61KLS, MethodLaying, TypeCable, \
+    TypeConnection, TypeEquipment, Form61RRL
 from apps.dispatching.models import Event, HistoricalEvent
 
 from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSerializer
@@ -8,6 +9,7 @@ from apps.opu.objects.models import Outfit, Point
 from apps.opu.objects.serializers import IPListSerializer, PointList, OutfitListSerializer
 
 from apps.analysis.models import AmountChannelsKLSRRL
+
 
 
 class DispEvent1ListSerializer(serializers.ModelSerializer):
@@ -140,6 +142,11 @@ class TypeConnectionSerializer(serializers.ModelSerializer):
         model = TypeConnection
         fields = ("id", "name")
 
+class TypeEquipmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeEquipment
+        fields = ("id", "name")
+
 class Form61KLSCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
@@ -186,4 +193,45 @@ class Form61KLSEditSerializer(serializers.ModelSerializer):
         model = Form61KLS
         fields = ('outfit', 'total_length_line', 'total_length_cable', 'above_ground',
                   'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection', 'src')
+        depth = 1
+
+class Form61RRLCreateSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+    point1 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    point2 = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all())
+    type_equipment = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True,  queryset=TypeEquipment.objects.all())
+    type_connection = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
+
+    class Meta:
+        model = Form61RRL
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment', 'type_connection', 'src')
+        depth = 1
+
+class Form61RRLSerializer(serializers.ModelSerializer):
+    point1 = PointList()
+    point2 = PointList()
+    outfit = OutfitListSerializer()
+    type_connection = TypeConnectionSerializer()
+    type_equipment = TypeEquipmentSerializer()
+
+    class Meta:
+        model = Form61RRL
+        fields = ("__all__")
+
+class Form61RRLEditSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+    type_equipment = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeEquipment.objects.all())
+    type_connection = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
+
+    class Meta:
+        model = Form61RRL
+        fields = ('outfit', 'total_length_line', 'type_equipment', 'type_connection', 'src')
         depth = 1

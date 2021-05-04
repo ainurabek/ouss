@@ -171,6 +171,15 @@ class TypeConnection(models.Model):
     def __str__(self):
         return self.name
 
+class TypeEquipment(models.Model):
+    name = models.CharField("Название", max_length=150)
+    class Meta:
+        verbose_name = "Тип аппаратуры"
+        verbose_name_plural = "Тип аппаратуры"
+
+    def __str__(self):
+        return self.name
+
 class Form61KLS(models.Model):
     point1 = models.ForeignKey(Point, related_name='form61_KLS_point', verbose_name='ИП от', on_delete=models.SET_NULL,
                                blank=True, null=True)
@@ -206,7 +215,8 @@ class Form61RRL(models.Model):
     point2 = models.ForeignKey(Point, related_name='form61_RRL_point2', verbose_name='ИП до', on_delete=models.SET_NULL,
                                blank=True, null=True)
     total_length_line = models.FloatField("Общая протяженность линии РРЛ", default=0, blank=True, null=True)
-    type_equipment = models.CharField("Тип аппаратуры", max_length=255, blank=True, null=True)
+    type_equipment = models.ForeignKey(TypeEquipment, related_name = 'type_equipment_rrl', verbose_name= 'Тип аппаратуры',
+                                       on_delete=models.SET_NULL, blank=True, null=True)
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, related_name='form61_RRL_out',
                                verbose_name="Предприятия")
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
@@ -222,4 +232,3 @@ class Form61RRL(models.Model):
         verbose_name = "Форма 61 (РРЛ)"
         verbose_name_plural = "Форма 61 (РРЛ)"
 
-# src = models.ImageField('Схема', upload_to='files/', blank=True)

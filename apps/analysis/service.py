@@ -7,7 +7,7 @@ from django import template
 from apps.dispatching.models import Reason, Index
 from django.db.models import Q
 
-from apps.analysis.models import Form61KLS
+from apps.analysis.models import Form61KLS, Form61RRL
 
 register = template.Library()
 
@@ -667,4 +667,19 @@ def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method)
     return form61
 
 def form61_kls_distinct(form61: Form61KLS, *args):
+    return form61.order_by(*args).distinct(*args)
+
+def form61_rrl_filter(form61: Form61RRL, outfit, type_connection, type_equipment) -> Form61RRL:
+    if not isinstance(outfit, list) and outfit is not None and outfit != '':
+        outfit = [outfit]
+
+    if outfit is not None and outfit != '' and outfit != []:
+        form61 = form61.filter(outfit__in=outfit)
+    if type_equipment is not None and type_equipment != '':
+        form61 = form61.filter(type_equipment=type_equipment)
+    if type_connection is not None and type_connection != '':
+        form61 = form61.filter(type_connection = type_connection)
+    return form61
+
+def form61_rrl_distinct(form61: Form61RRL, *args):
     return form61.order_by(*args).distinct(*args)
