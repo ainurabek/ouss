@@ -111,7 +111,6 @@ class Outfit(models.Model):
 	total_number_rrl = models.IntegerField("Общее количество линейных трактов РРЛ", default=0, blank=True, null=True)
 	corresponding_norm_rrl = models.IntegerField("Соответствующих норме РРЛ", default=0, blank=True, null=True)
 
-
 	class Meta:
 		verbose_name = 'Предприятие'
 		verbose_name_plural = 'Предприятия'
@@ -212,6 +211,7 @@ class Object(models.Model):
 	def __str__(self):
 		return str(self.name)
 
+
 class IP(models.Model):
 	object_id = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='ip_object')
 	point_id = models.ForeignKey(Point, on_delete=models.CASCADE, related_name='ip_point')
@@ -229,11 +229,21 @@ class IP(models.Model):
 
 class OrderObjectPhoto(models.Model):
 	src = models.FileField(upload_to='files/', blank=True, null=True)
-	object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Распоряжение",
-                                 blank=True, related_name="order_object_photo")
+	object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Распоряжение", blank=True, related_name="order_object_photo")
 
 
+class Transit(models.Model):
+	name = models.CharField(max_length=255)
+	trassa = SortedManyToManyField(Object, related_name="transits", blank=True)
+	create_circuit_transit = models.BooleanField(default=False)
+
+	def __str__(self):
+		return self.name
 
 
+class Bridge(models.Model):
+	object = models.ForeignKey(Object, related_name="bridges", on_delete=models.CASCADE)
+	transit = models.ForeignKey(Transit, related_name="can_see", on_delete=models.CASCADE)
 
-
+	def __str__(self):
+		return object.name

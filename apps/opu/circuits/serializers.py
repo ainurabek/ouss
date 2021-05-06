@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Circuit
+from .models import Circuit, CircuitTransit
 from ..customer.models import Customer
 from ..objects.models import Category, Object, Point
 from ..objects.serializers import ObjectSerializer, CategorySerializer
@@ -20,9 +20,6 @@ class PointCircSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'point')
 
 
-
-
-
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
@@ -38,26 +35,33 @@ class TransitCircSerializer(serializers.ModelSerializer):
         fields = ('id', 'point1', 'name', 'point2')
 
 
+class CircuitTransitSerializer(serializers.ModelSerializer):
+    trassa = TransitCircSerializer(many=True)
+
+    class Meta:
+        model = CircuitTransit
+        fields = ("id", "trassa")
+
+
 class CircuitList(serializers.ModelSerializer):
-    id_object = ObjectCircSerializer(many=True)
     point1 = PointCircSerializer()
     point2 = PointCircSerializer()
-    transit = TransitCircSerializer(many=True)
-    transit2 = TransitCircSerializer(many=True)
+    trassa = CircuitTransitSerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
-    object =  ObjectSerializer()
+    # object = ObjectSerializer()
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'id_object', 'num_circuit', 'category', 'num_order',
-                   'comments', 'transit', 'transit2', 'first', 'point1', 'point2',
-                  'customer', 'object')
+        fields = ('id', 'name', 'num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
+                  'point1', 'point2', 'customer', 'object')
+
 
 class CircuitTrassaList(serializers.ModelSerializer):
     class Meta:
         model = Circuit
         fields = ('id', 'num_circuit')
+
 
 class CircuitEdit(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
@@ -69,7 +73,6 @@ class CircuitEdit(serializers.ModelSerializer):
         read_only=False, queryset=Point.objects.all())
     customer = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=Customer.objects.all())
-
 
     class Meta:
         model = Circuit
@@ -93,9 +96,17 @@ class CircuitEdit(serializers.ModelSerializer):
 
 
 class CircuitDetail(serializers.ModelSerializer):
-    transit = TransitCircSerializer(many=True)
-    transit2 = TransitCircSerializer(many=True)
+    trassa = TransitCircSerializer(many=True)
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'transit', 'transit2')
+        fields = ('id', 'name', 'trassa')
+
+
+class CircuitUpdateSerializer(serializers.ModelSerializer):
+    trassa = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Point.objects.all(), many=True)
+
+    class Meta:
+        model = CircuitTransit
+        fields = ("trassa", )

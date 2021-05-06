@@ -1,14 +1,10 @@
 from django.db import models
 # Create your models here.
-from apps.opu.objects.models import IP, Object, Category, Point
+from apps.opu.objects.models import IP, Object, Category, Point, Transit
 from apps.opu.customer.models import Customer
 from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
-
 from apps.accounts.models import Profile
-
-
-
 
 
 class Circuit(models.Model):
@@ -31,21 +27,21 @@ class Circuit(models.Model):
 	customer = models.ForeignKey(Customer, related_name='circ_cust', on_delete=models.SET_NULL, blank=True, null=True)
 	id_object = models.ManyToManyField(Object, related_name='circ_obj', blank=True)
 
-
-
 	created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	history = HistoricalRecords(related_name='history_circuit_log')
+
+	trassa = models.ForeignKey("CircuitTransit", on_delete=models.SET_NULL, related_name="circuits", null=True)
 
 	class Meta:
 		verbose_name = 'Канал для Формы 5.3'
 		verbose_name_plural = 'Каналы для Формы 5.3'
 		ordering = ('id',)
 
-
-
 	def __str__(self):
 		return self.name
 
 
-
+class CircuitTransit(models.Model):
+	trassa = SortedManyToManyField(Circuit, related_name="transits", blank=True)
+	obj_trassa = models.ForeignKey(Transit, related_name="circuit_transit", on_delete=models.CASCADE)
