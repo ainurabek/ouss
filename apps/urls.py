@@ -6,6 +6,7 @@ from apps.dispatching import urls as dispatching_urls
 from apps.opu import urls as opu_urls
 from apps.analysis import urls as analysis_urls
 from apps.secondary import urls as secondary_urls
+from apps.logging import urls as logging_urls
 
 router = DefaultRouter()
 
@@ -20,6 +21,7 @@ urlpatterns = [
     path('opu/', include(opu_urls, namespace='opu')),
     path('analysis/', include(analysis_urls, namespace='analysis')),
     path('secondary/', include(secondary_urls, namespace='secondary')),
+    path('logging/', include(logging_urls, namespace='logging')),
     path('', include(router.urls)),
 
 ]

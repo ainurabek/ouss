@@ -38,6 +38,11 @@ from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, cr
 from apps.opu.objects.serializers import GOZListSerializer
 from apps.opu.objects.serializers import GOZUpdateSerializer
 
+from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil, AmountChannelsActivityLogUtil, \
+    TypeTraktActivityLogUtil, OutfitActivityLogUtil, PointActivityLogUtil, IPActivityLogUtil, TypeOfLocationLogUtil, \
+    LineTypeLogUtil, CategoryLogUtil, ConsumerLogUtil
+
+
 
 class TPOListView(viewsets.ModelViewSet):
     queryset = TPO.objects.all().order_by('name')
@@ -56,6 +61,12 @@ class TPOListView(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+    def perform_create(self, serializer):
+         instance = serializer.save()
+         instance.save()
+         TPOActivityLogUtil(self.request.user, instance.pk).tpo_create_action('tpo_created')
+
+
 
 class AmountChannelListAPIView(viewsets.ModelViewSet):
     queryset = AmountChannel.objects.all().order_by('value')
@@ -69,6 +80,10 @@ class AmountChannelListAPIView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+    def perform_create(self, serializer):
+         instance = serializer.save()
+         instance.save()
+         AmountChannelsActivityLogUtil(self.request.user, instance.pk).obj_create_action('amount_channels_created')
 
 
 class TypeTraktListView(viewsets.ModelViewSet):
@@ -84,6 +99,11 @@ class TypeTraktListView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
+    def perform_create(self, serializer):
+         instance = serializer.save()
+         instance.save()
+         TypeTraktActivityLogUtil(self.request.user, instance.pk).obj_create_action('type_trakt_created')
 
 
 class OutfitsListView(viewsets.ModelViewSet):
@@ -111,7 +131,9 @@ class OutfitsListView(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user.profile)
+        instance = serializer.save(created_by=self.request.user.profile)
+        instance.save()
+        OutfitActivityLogUtil(self.request.user, instance.pk).obj_create_action('outfit_created')
 
 
 class PointListView(viewsets.ModelViewSet):
@@ -139,6 +161,7 @@ class PointListView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         create_point_KLSS_RRL_amount_channels(ips=instance)
+        PointActivityLogUtil(self.request.user, instance.pk).obj_create_action('point_created')
 
 
 class IPCreateView(APIView):
@@ -149,7 +172,10 @@ class IPCreateView(APIView):
         request.data["object_id"] = pk
         serializer = IPCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            instance = serializer.save()
+            instance.save()
+            IPActivityLogUtil(self.request.user, instance.pk).obj_create_action('ip_created')
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -207,6 +233,7 @@ class LPCreateView(generics.CreateAPIView):
             # create_circuit(instance, self.request)
             adding_an_object_to_trassa(obj=instance)
             create_object_KLSS_RRL_amount_channels(obj=instance)
+            ObjectActivityLogUtil(request.user, instance.pk).object_create_action('object_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -318,6 +345,7 @@ class ObjectCreateView(APIView):
             adding_an_object_to_trassa(obj=instance)
             create_circuit(instance, self.request)
             update_total_amount_channels(instance=instance)
+            ObjectActivityLogUtil(request.user, instance.pk).object_create_action('object_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -378,6 +406,10 @@ class TypeOfLocationAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        TypeOfLocationLogUtil(self.request.user, instance.pk).obj_create_action('type_location_created')
+
 
 class MainLineTypeList(ListAPIView):
     """Список главных типов линии"""
@@ -406,6 +438,9 @@ class LineTypeAPIVIew(ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        LineTypeLogUtil(self.request.user, instance.pk).obj_create_action('type_line_created')
 
 
 class CategoryAPIVIew(ModelViewSet):
@@ -422,6 +457,10 @@ class CategoryAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        CategoryLogUtil(self.request.user, instance.pk).obj_create_action('category_created')
+
 
 class ConsumerModelViewSet(ModelViewSet):
     serializer_class = ConsumerSerializer
@@ -436,6 +475,10 @@ class ConsumerModelViewSet(ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        ConsumerLogUtil(self.request.user, instance.pk).obj_create_action('consumer_created')
 
 
 class ObjectHistory(APIView):

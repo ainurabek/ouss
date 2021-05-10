@@ -5,8 +5,7 @@ from apps.opu.objects.models import Point, Category, Object, Transit
 from apps.opu.customer.models import Customer
 from apps.opu.circuits.models import Circuit, CircuitTransit
 from apps.opu.objects.services import update_total_amount_channels
-from django.db.models import Q
-
+from django.db.models import Q, Count
 
 register = template.Library()
 
@@ -89,7 +88,7 @@ def update_circuit_active(object: Object):
 
 def create_circuit_transit(object_transit: Transit):
     if object_transit.create_circuit_transit:
-        max_count = object_transit.trassa.all().order_by('circuit_object_parent').first()
+        max_count = object_transit.trassa.all().annotate(circuit_count=Count('circuit_object_parent')).order_by('circuit_count').first()
         if max_count is not None:
             circuit_transits = {
                 str(num): CircuitTransit.objects.create(obj_trassa=object_transit)

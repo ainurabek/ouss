@@ -16,7 +16,7 @@ from django.http import JsonResponse
 from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
-    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct
+    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct, get_period_date_to, get_period_ak
 from apps.dispatching.models import Event, HistoricalEvent, Index
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
@@ -308,7 +308,7 @@ def get_report_analysis(request):
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
-                call_data['get_period'] = get_period(call, date_to)
+                call_data['get_period'] = get_period_ak(call, date_from, date_to)
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index

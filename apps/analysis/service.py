@@ -9,6 +9,8 @@ from django.db.models import Q
 
 from apps.analysis.models import Form61KLS, Form61RRL
 
+from apps.dispatching.services import get_date_to
+
 register = template.Library()
 
 
@@ -39,6 +41,25 @@ def get_period(obj, date_to):
     period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
 
     return round(period_of_time, 2)
+
+def get_period_ak(obj, date_from, date_to):
+    if date_from is not None and date_to is None:
+        if obj.date_to is not None and obj.date_from is not None:
+            return obj.period_of_time
+        elif obj.date_to is None and obj.date_from is not None:
+            date_to1 = datetime.fromisoformat(date_from + "T23:59:59")
+            date = date_to1 - obj.date_from
+            period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+            return round(period_of_time, 2)
+
+    if date_from is not None and date_to is not None:
+        if obj.date_to is not None and obj.date_from is not None:
+            return obj.period_of_time
+        elif obj.date_to is None and obj.date_from is not None:
+            date_to1 = datetime.fromisoformat(date_to + "T23:59:59")
+            date = date_to1 - obj.date_from
+            period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+            return round(period_of_time, 2)
 
 
 def get_coefficient_kls(downtime):
