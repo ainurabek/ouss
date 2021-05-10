@@ -244,6 +244,3 @@ class Transit(models.Model):
 class Bridge(models.Model):
 	object = models.ForeignKey(Object, related_name="bridges", on_delete=models.CASCADE)
 	transit = models.ForeignKey(Transit, related_name="can_see", on_delete=models.CASCADE)
-
-	def __str__(self):
-		return object.name
