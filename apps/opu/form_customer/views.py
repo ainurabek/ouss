@@ -20,6 +20,9 @@ from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixi
 from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
 
+from apps.logging.form_customer.views import SignalizationLogUtil, FormCustomerCircuitLogUtil, \
+    FormCustomerObjectLogUtil, FormCustomerIPLogUtil
+
 
 class SignalizationView(viewsets.ModelViewSet):
     queryset = Signalization.objects.all().order_by('name')
@@ -32,6 +35,9 @@ class SignalizationView(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]
         return [permission() for permission in permission_classes]
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        SignalizationLogUtil(self.request.user, instance.pk).obj_create_action('signalization_created')
 
 
 class CustomerFormListView(ListAPIView):
@@ -87,9 +93,10 @@ class FormCustomerCircCreateAPIView(APIView):
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
+            instance = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
+            instance.save()
+            FormCustomerCircuitLogUtil(self.request.user, instance.pk).obj_create_action('form_customer_circuit_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -106,7 +113,10 @@ class FormCustomerObjCreateAPIView(APIView):
 
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            instance = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            instance.save()
+            FormCustomerObjectLogUtil(self.request.user, instance.pk).obj_create_action(
+                'form_customer_object_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,7 +135,10 @@ class FormCustomerIPCreateAPIView(APIView):
 
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(point1=point1, point2=point2, customer=customer, created_by=self.request.user.profile)
+            instance = serializer.save(point1=point1, point2=point2, customer=customer, created_by=self.request.user.profile)
+            instance.save()
+            FormCustomerIPLogUtil(self.request.user, instance.pk, instance.pk).obj_create_action(
+                'form_customer_ip_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

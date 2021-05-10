@@ -15,6 +15,8 @@ from apps.opu.form53.services import get_form53_diff
 from apps.opu.services import create_photo
 from apps.opu.services import PhotoCreateMixin
 
+from apps.logging.form53.views import Form53LogUtil
+
 
 class Form53CreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -28,6 +30,8 @@ class Form53CreateViewAPI(APIView):
         serializer = Form53CreateSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.save(circuit=circuit, created_by=self.request.user.profile)
+            Form53LogUtil(self.request.user, data.pk).obj_create_action(
+                'form53_created')
             create_photo(model=Form53, model_photo=Schema53Photo,
                                     obj=data, field_name="schema", request=request)
             create_photo(model=Form53, model_photo=Order53Photo,

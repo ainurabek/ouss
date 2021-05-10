@@ -16,19 +16,6 @@ from django.db.models import Q
 
 
 
-# class ActivityLogAPIVIew(ModelViewSet):
-#     serializer_class = ActivityLogSerializer
-#     authentication_classes = (TokenAuthentication,)
-#     lookup_field = "pk"
-#     queryset = ActivityLogModel.objects.all().order_by('-action_time')
-#
-#     def get_permissions(self):
-#         if self.action == 'list' or self.action =='retrieve':
-#             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser]
-#         else:
-#             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser]
-#
-#         return [permission() for permission in permission_classes]
 
 class ActivityLogAPIVIew(ListAPIView):
     authentication_classes = (TokenAuthentication,)
@@ -37,13 +24,9 @@ class ActivityLogAPIVIew(ListAPIView):
 
     def get_queryset(self):
         queryset = ActivityLogModel.objects.all()
-
         date_from = self.request.query_params.get('date_from', None)
         date_to = self.request.query_params.get('date_to', None)
         if date_from is not None and date_from != '' and date_to is not None and date_to != '':
             q1 = queryset.filter(action_time__date__gte=date_from)
-
-            q2 = queryset.filter(action_time__date__lte=date_to)
-            queryset = q1|q2
-
+            queryset = q1.filter(action_time__date__lte=date_to)
         return queryset.order_by('-action_time')

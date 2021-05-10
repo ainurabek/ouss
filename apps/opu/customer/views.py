@@ -12,6 +12,8 @@ from rest_framework.views import APIView
 
 from apps.opu.customer.service import get_customer_diff
 
+from apps.logging.customer.views import CustomerLogUtil
+
 
 class CustomerViewSet(viewsets.ModelViewSet):
 	queryset = Customer.objects.all()
@@ -28,6 +30,10 @@ class CustomerViewSet(viewsets.ModelViewSet):
 		else:
 			permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]
 		return [permission() for permission in permission_classes]
+
+	def perform_create(self, serializer):
+		instance = serializer.save()
+		CustomerLogUtil(self.request.user, instance.pk).obj_create_action('customer_created')
 
 
 class CustomerHistory(APIView):

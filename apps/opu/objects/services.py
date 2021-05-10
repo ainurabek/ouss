@@ -5,6 +5,8 @@ from apps.opu.form51.models import Form51
 
 from apps.analysis.models import AmountChannelsKLSRRL
 
+from apps.logging.form51.views import Form51LogUtil
+
 
 def check_parent_type_of_trakt(parent: Object):
     return True if parent.type_of_trakt is not None else False
@@ -123,7 +125,8 @@ def adding_an_object_to_trassa(obj: Object):
 
 
 def create_form51(obj:Object):
-    Form51.objects.create(object = obj, customer = obj.customer)
+    instance = Form51.objects.create(object = obj, customer = obj.customer)
+    Form51LogUtil(instance.created_by, instance.pk).object_create_action('form51_created')
 
 
 def create_object_KLSS_RRL_amount_channels(obj:Object):
