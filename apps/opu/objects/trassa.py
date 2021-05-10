@@ -1,6 +1,6 @@
 # coding: utf-8
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
@@ -9,7 +9,7 @@ from apps.accounts.permissions import IsPervichkaOnly
 from apps.opu.circuits.serializers import CircuitTrassaList
 from apps.opu.circuits.service import create_circuit_transit
 from apps.opu.objects.serializers import PGListSerializer, TransitCreateSerializer, \
-    TransitDetailSerializer
+    TransitDetailSerializer, BridgeListSerializer
 from apps.opu.circuits.models import Circuit
 from apps.opu.circuits.serializers import CircuitList
 from apps.opu.objects.models import Object, Point, Transit, Bridge
@@ -120,3 +120,13 @@ class RetrieveUpdateDelete(RetrieveUpdateDestroyAPIView):
         for obj_id in bridge:
             Bridge.objects.create(object_id=obj_id, transit=trassa)
         create_circuit_transit(trassa)
+
+
+class TransitListAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        obj = get_object_or_404(Object, pk=pk)
+        serializer = BridgeListSerializer(obj.bridges.all(), many=True)
+        return Response(serializer.data)

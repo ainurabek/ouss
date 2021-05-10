@@ -193,15 +193,6 @@ class TransitSerializer(serializers.ModelSerializer):
         fields = ('id', 'point1', 'name', 'point2')
 
 
-class ReserveTransitSerializer(serializers.ModelSerializer):
-    point1 = PointList()
-    point2 = PointList()
-
-    class Meta:
-        model = Object
-        fields = ('id', 'point1', 'name', 'point2')
-
-
 class IPSerializer(serializers.ModelSerializer):
     point_id = serializers.SlugRelatedField(slug_field='point', read_only=True)
     object_id = serializers.SlugRelatedField(slug_field='name', read_only=True)
@@ -263,19 +254,17 @@ class AllObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2',
-                  'transit', 'transit2', 'tpo1', 'tpo2', 'customer')
+        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer')
         depth = 1
 
 
 class LPSerializer(serializers.ModelSerializer):
-    bridges = BridgeListSerializer(many=True)
     point1 = PointList()
     point2 = PointList()
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'bridges')
+        fields = ('id', 'name', 'point1', 'point2')
 
 
 class LPDetailSerializer(serializers.ModelSerializer):
@@ -293,8 +282,7 @@ class LPDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'type_line', 'transit',
-                  'transit2', 'reserve_transit', 'reserve_transit2', 'tpo1', 'tpo2', 'id_outfit', 'comments',
+        fields = ('id', 'name', 'point1', 'point2', 'type_line', 'tpo1', 'tpo2', 'id_outfit', 'comments',
                   'customer', 'ip_object', 'our', 'total_amount_channels', 'order_object_photo', 'bridges')
         depth = 1
 
@@ -344,8 +332,8 @@ class LPEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our',
-        'comments', 'customer')
+        fields = ('id', 'name', 'id_outfit', 'tpo1', 'point1', 'tpo2', 'point2', 'type_line', 'our', 'comments',
+                  'customer')
         depth = 1
 
 
@@ -362,7 +350,6 @@ class ObjectSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     type_of_trakt = TypeOfTraktSerializer()
-    bridges = BridgeListSerializer(many=True)
     id_outfit = OutfitListSerializer()
     type_line = TypeLineSerializer()
     ip_object = IPSerializer(many=True)
@@ -376,8 +363,8 @@ class ObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'id_parent', 'name', 'id_outfit', 'category', 'point1', 'point2',
-                  'type_of_trakt', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer', 'bridges')
+                  'type_of_trakt', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
+                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer')
 
 
 class ObjectCreateSerializer(serializers.ModelSerializer):
@@ -409,8 +396,7 @@ class ObjectCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
-                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our',
-                  'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'category', 'comments', 'customer', 'consumer')
+                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'amount_channels', 'our', 'category', 'comments', 'customer', 'consumer')
 
 
 class ObjectEditSerializer(serializers.ModelSerializer):
@@ -442,21 +428,18 @@ class ObjectEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
         fields = ('id', 'id_parent','name', 'id_outfit', 'tpo1',
-                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'our',
-                  'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'category', 'comments', 'customer', 'consumer', 'type_line')
+                  'point1', 'tpo2', 'point2', 'type_of_trakt', 'our', 'category', 'comments', 'customer', 'consumer',
+                  'type_line')
 
 
 class SelectObjectSerializer(serializers.ModelSerializer):
     point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
-    transit = TransitSerializer(many=True, read_only=True)
-    transit2 = TransitSerializer(many=True, read_only=True)
-    reserve_transit = ReserveTransitSerializer(many=True, read_only=True)
-    reserve_transit2 = ReserveTransitSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2')
+        fields = ('id', 'name', 'point1', 'point2', 'type_of_trakt')
 
 
 class ObjectListSerializer(serializers.ModelSerializer):
@@ -473,13 +456,11 @@ class TraktListSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     type_of_trakt = TypeOfTraktSerializer()
-    bridges = BridgeListSerializer(many=True)
     id_parent = serializers.SlugRelatedField(slug_field='id', read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', 'id_parent', 'name', 'point1', 'point2', 'type_of_trakt', "transit", "transit2",
-                  'reserve_transit', 'reserve_transit2', 'bridges')
+        fields = ('id', 'id_parent', 'name', 'point1', 'point2', 'type_of_trakt')
 
 
 class ObjectFilterSerializer(serializers.ModelSerializer):
@@ -501,15 +482,11 @@ class PGListSerializer(serializers.ModelSerializer):
 
 
 class GOZListSerializer(serializers.ModelSerializer):
-    transit = TransitSerializer(many=True)
-    transit2 = TransitSerializer(many=True)
-    reserve_transit = ReserveTransitSerializer(many=True)
-    reserve_transit2 = ReserveTransitSerializer(many=True)
     consumer = ConsumerSerializer()
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'transit', 'transit2', 'reserve_transit', 'reserve_transit2', 'comments_GOZ', 'consumer')
+        fields = ('id', 'name', 'comments_GOZ', 'consumer')
 
 
 class GOZUpdateSerializer(serializers.ModelSerializer):

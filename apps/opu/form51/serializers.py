@@ -12,14 +12,13 @@ from apps.opu.form51.models import OrderPhoto, SchemaPhoto
 
 from apps.opu.objects.serializers import ConsumerSerializer
 
-from apps.opu.objects.serializers import ReserveTransitSerializer
-
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ("id", "customer", 'abr' )
+        fields = ("id", "customer", 'abr')
+
 
 class PointForm51Serializer(serializers.ModelSerializer):
 
@@ -33,10 +32,12 @@ class OrderPhotoSerializer(serializers.ModelSerializer):
         model = OrderPhoto
         fields = ("id", "src")
 
+
 class SchemaPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchemaPhoto
         fields = ("id", "src")
+
 
 class Form51CreateSerializer(serializers.ModelSerializer):
     """Создания Формы 5.1"""
@@ -48,13 +49,7 @@ class Form51CreateSerializer(serializers.ModelSerializer):
         fields = ("id", "customer", "num_order", "reserve", "comments")
 
 
-
-
 class ObjectForm51Serializer(serializers.ModelSerializer):
-    transit = TransitSerializer(many=True)
-    transit2 = TransitSerializer(many=True)
-    reserve_transit = ReserveTransitSerializer(many=True)
-    reserve_transit2 = ReserveTransitSerializer(many=True)
     point1 = PointForm51Serializer()
     point2 = PointForm51Serializer()
     category = CategorySerializer()
@@ -62,7 +57,7 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ("name", "transit", "transit2", "reserve_transit", "reserve_transit2", "category", "point1", "point2", 'consumer')
+        fields = ("name", "category", "point1", "point2", 'consumer')
         depth = 1
 
 
@@ -79,12 +74,9 @@ class Form51Serializer(serializers.ModelSerializer):
         depth=1
 
 
-
-
 class ObjectReserveSerializer(serializers.ModelSerializer):
-    reserve_transit = ReserveTransitSerializer(many=True)
-    reserve_transit2 = ReserveTransitSerializer(many=True)
     category = CategorySerializer()
+
     class Meta:
         model = Object
         fields = ('id', "name", "reserve_transit", "reserve_transit2", "category")

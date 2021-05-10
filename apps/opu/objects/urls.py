@@ -7,7 +7,7 @@ from . import views
 from .views import LPCreateView, LPEditView, IPCreateView, ObjectCreateView, ObjectEditView, ObjectListView, \
           ObjectDetailView,  MainLineTypeList
 from .trassa import SelectCircuitView, PointListTrassa, ObjectList, SelectPointView, CircuitListTrassa, \
-    PGCircuitListView, TransitCreateAPIView, RetrieveUpdateDelete
+    PGCircuitListView, TransitCreateAPIView, RetrieveUpdateDelete, TransitListAPIView
 
 app_name = 'objects'
 
@@ -71,7 +71,7 @@ urlpatterns = [
     path('GOZ/', views.GOZListView.as_view(), name='goz_list'),
     path("GOZ/update/<int:pk>/", views.GOZUpdateAPIView.as_view()),
 
-
+    path('transit/list/<int:pk>/', TransitListAPIView.as_view()),
     path("transit/create/", TransitCreateAPIView.as_view()),
     path("transit/<int:pk>/", RetrieveUpdateDelete.as_view()),
 
