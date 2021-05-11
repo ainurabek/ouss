@@ -254,7 +254,7 @@ class AllObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer')
+        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges')
         depth = 1
 
 
