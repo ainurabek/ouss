@@ -107,7 +107,7 @@ class CircuitDetail(serializers.ModelSerializer):
 
 class CircuitUpdateSerializer(serializers.ModelSerializer):
     trassa = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Point.objects.all(), many=True)
+        read_only=False, queryset=Circuit.objects.all(), many=True)
 
     class Meta:
         model = CircuitTransit
