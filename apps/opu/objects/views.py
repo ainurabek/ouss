@@ -624,8 +624,7 @@ class GOZListView(APIView):
             queryset = queryset.filter(id_outfit_id=outfit)
         obj_with_reserves = []
         for obj in queryset:
-            if obj.reserve_transit.all().exists() or obj.reserve_transit2.all().exists():
-                if not obj in obj.reserve_transit.all() and not obj in obj.reserve_transit2.all():
+            if len(obj.transits.all()) > 1:
                         obj_with_reserves.append(obj)
         serializer = GOZListSerializer(obj_with_reserves, many=True)
         return Response(serializer.data)

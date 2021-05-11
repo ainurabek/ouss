@@ -7,7 +7,8 @@ from apps.opu.circuits.models import Circuit
 from apps.opu.circuits.serializers import PointCircSerializer
 from apps.opu.objects.serializers import CategorySerializer
 
-from apps.opu.circuits.serializers import TransitCircSerializer
+
+from apps.opu.circuits.serializers import CircuitTrassaerializer
 
 
 class Order53PhotoSerializer(serializers.ModelSerializer):
@@ -49,7 +50,7 @@ class Form53CreateSerializer(serializers.ModelSerializer):
 
 class CircuitForm53(serializers.ModelSerializer):
 
-    trassa = TransitCircSerializer(many=True)
+    trassa = CircuitTrassaerializer()
     category = CategorySerializer()
 
     class Meta:
