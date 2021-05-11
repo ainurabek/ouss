@@ -58,9 +58,11 @@ class CircuitList(serializers.ModelSerializer):
 
 
 class CircuitTrassaList(serializers.ModelSerializer):
+    point1 = PointCircSerializer()
+    point2 = PointCircSerializer()
     class Meta:
         model = Circuit
-        fields = ('id', 'num_circuit')
+        fields = ('id', 'num_circuit', 'point1', 'point2', 'name')
 
 
 class CircuitEdit(serializers.ModelSerializer):

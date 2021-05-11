@@ -475,10 +475,11 @@ class ObjectFilterSerializer(serializers.ModelSerializer):
 
 
 class PGListSerializer(serializers.ModelSerializer):
-
+    point1 = PointList()
+    point2 = PointList()
     class Meta:
         model = Object
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'point1', 'point2')
 
 
 class GOZListSerializer(serializers.ModelSerializer):
