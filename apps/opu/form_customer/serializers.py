@@ -7,6 +7,10 @@ from apps.opu.circuits.models import Circuit
 
 from apps.opu.customer.models import Customer
 
+from apps.opu.objects.serializers import BridgeListSerializer
+
+from apps.opu.circuits.serializers import TransitCircSerializer
+
 
 class CustomerFormSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,25 +53,19 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
 
 class CircuitSerializer(serializers.ModelSerializer):
-    transit = CircuitTransitSerializer(many=True)
-    transit2 = CircuitTransitSerializer(many=True)
-    point1 = PointSerializer()
-    point2 = PointSerializer()
+    trassa = TransitCircSerializer(many=True)
 
     class Meta:
         model = Circuit
-        fields = ("name", "transit", "transit2", "point1", "point2")
+        fields = ('trassa',)
 
 
 class ObjectFormCustomer(serializers.ModelSerializer):
-    transit = TransitSerializer(many=True)
-    transit2 = TransitSerializer(many=True)
-    point1 = PointSerializer()
-    point2 = PointSerializer()
+    bridges = BridgeListSerializer(many=True)
 
     class Meta:
         model = Object
-        fields = ('id', "name", "transit", "transit2", "point1", "point2")
+        fields = ('bridges',)
 
 
 class SignalizationSerializer(serializers.ModelSerializer):

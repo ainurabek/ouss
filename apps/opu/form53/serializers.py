@@ -7,6 +7,8 @@ from apps.opu.circuits.models import Circuit
 from apps.opu.circuits.serializers import PointCircSerializer
 from apps.opu.objects.serializers import CategorySerializer
 
+from apps.opu.circuits.serializers import TransitCircSerializer
+
 
 class Order53PhotoSerializer(serializers.ModelSerializer):
     src = serializers.SerializerMethodField('get_src_url')
@@ -36,25 +38,24 @@ class Form53CreateSerializer(serializers.ModelSerializer):
         fields = ("id",  "comments")
 
 
-class TransitForm53Serializer(serializers.ModelSerializer):
-    point1 = PointCircSerializer()
-    point2 = PointCircSerializer()
-
-    class Meta:
-        model = Circuit
-        fields = ('id', 'point1', 'name', 'point2')
+# class TransitForm53Serializer(serializers.ModelSerializer):
+#     point1 = PointCircSerializer()
+#     point2 = PointCircSerializer()
+#
+#     class Meta:
+#         model = Circuit
+#         fields = ('id', 'point1', 'name', 'point2')
 
 
 class CircuitForm53(serializers.ModelSerializer):
 
-    transit = TransitForm53Serializer(many=True)
-    transit2 = TransitForm53Serializer(many=True)
+    trassa = TransitCircSerializer(many=True)
     category = CategorySerializer()
 
     class Meta:
         model = Circuit
         fields = ('id', 'name',  'num_circuit', 'category', 'num_order',
-                   'comments', 'transit', 'transit2')
+                   'comments', 'trassa',)
 
 
 class Form53Serializer(serializers.ModelSerializer):

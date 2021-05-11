@@ -12,6 +12,8 @@ from apps.opu.form51.models import OrderPhoto, SchemaPhoto
 
 from apps.opu.objects.serializers import ConsumerSerializer
 
+from apps.opu.objects.serializers import BridgeListSerializer
+
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
 
@@ -50,14 +52,13 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 
 
 class ObjectForm51Serializer(serializers.ModelSerializer):
-    point1 = PointForm51Serializer()
-    point2 = PointForm51Serializer()
+    bridges = BridgeListSerializer(many=True)
     category = CategorySerializer()
     consumer = ConsumerSerializer()
 
     class Meta:
         model = Object
-        fields = ("name", "category", "point1", "point2", 'consumer')
+        fields = ("name", "category", 'bridges', 'consumer')
         depth = 1
 
 
