@@ -19,7 +19,7 @@ class Form53LogUtil:
             action_description=FORM53_LOG_DESCRIPTIONS[action]
                                % (
                                   self.action_applied_to_object.circuit.name,
-                                  self.action_applied_to_object.object.name,
+                                  self.action_applied_to_object.circuit.object.name,
                                   ),
             action_time=self.action_time
         )
