@@ -13,13 +13,12 @@ class Form51LogUtil:
         self.action_applied_to_object = Form51.objects.get(pk=action_applied_to_object)
         self.action_time = datetime.now()
 
-    def obj_create_action(self, action):
+    def form51_create_action(self, action):
         ActivityLogModel.objects.create(
             action_by=self.action_by,
             action_description=FORM51_LOG_DESCRIPTIONS[action]
                                % (
                                   self.action_applied_to_object.object.name,
-                                  self.action_applied_to_object.customer.abr,
                                   ),
             action_time=self.action_time
         )
