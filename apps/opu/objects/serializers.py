@@ -484,10 +484,11 @@ class PGListSerializer(serializers.ModelSerializer):
 
 class GOZListSerializer(serializers.ModelSerializer):
     consumer = ConsumerSerializer()
+    bridges = BridgeListSerializer(many=True)
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'comments_GOZ', 'consumer')
+        fields = ('id', 'name', 'comments_GOZ', 'consumer', 'bridges')
 
 
 class GOZUpdateSerializer(serializers.ModelSerializer):

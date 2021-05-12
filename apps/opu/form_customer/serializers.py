@@ -11,6 +11,8 @@ from apps.opu.objects.serializers import BridgeListSerializer
 
 from apps.opu.circuits.serializers import TransitCircSerializer
 
+from apps.opu.circuits.serializers import CircuitTrassaerializer
+
 
 class CustomerFormSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,7 +55,7 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
 
 class CircuitSerializer(serializers.ModelSerializer):
-    trassa = TransitCircSerializer(many=True)
+    trassa = CircuitTrassaerializer()
 
     class Meta:
         model = Circuit
