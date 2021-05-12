@@ -4,8 +4,9 @@ from apps.opu.form51.models import Form51
 from apps.opu.objects.models import Object, Point
 from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.form51.models import OrderPhoto, SchemaPhoto
-from apps.opu.objects.serializers import ConsumerSerializer
-from apps.opu.objects.serializers import BridgeListSerializer
+
+from apps.opu.objects.serializers import ConsumerSerializer, BridgeListSerializer
+
 
 
 class CustomerForm51Serializer(serializers.ModelSerializer):

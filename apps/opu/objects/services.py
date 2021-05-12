@@ -125,8 +125,8 @@ def adding_an_object_to_trassa(obj: Object):
 
 
 def create_form51(obj:Object):
-    instance = Form51.objects.create(object = obj, customer = obj.customer)
-    Form51LogUtil(instance.created_by, instance.pk).object_create_action('form51_created')
+    instance = Form51.objects.create(object = obj, customer = obj.customer, created_by = obj.created_by)
+    Form51LogUtil(instance.created_by.user, instance.pk).form51_create_action('form51_created')
 
 
 def create_object_KLSS_RRL_amount_channels(obj:Object):
