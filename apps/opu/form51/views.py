@@ -4,14 +4,13 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView, RetrieveDestroyAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, RetrieveDestroyAPIView
 
 from apps.opu.form51.models import Form51
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer, Form51ReserveSerializer
-from apps.opu.objects.models import Object
 from apps.opu.form51.models import SchemaPhoto, OrderPhoto
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
-from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
+from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin
 from apps.opu.form51.service import get_form51_diff
 
 

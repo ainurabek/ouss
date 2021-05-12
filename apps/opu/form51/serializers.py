@@ -1,17 +1,10 @@
 from rest_framework import serializers
-
 from apps.opu.customer.models import Customer
-from apps.opu.customer.serializers import CustomerSerializer
 from apps.opu.form51.models import Form51
 from apps.opu.objects.models import Object, Point
-from apps.opu.objects.serializers import TransitSerializer
-
 from apps.opu.circuits.serializers import CategorySerializer
-
 from apps.opu.form51.models import OrderPhoto, SchemaPhoto
-
 from apps.opu.objects.serializers import ConsumerSerializer
-
 from apps.opu.objects.serializers import BridgeListSerializer
 
 
