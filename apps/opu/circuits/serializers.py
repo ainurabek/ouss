@@ -34,6 +34,7 @@ class TransitCircSerializer(serializers.ModelSerializer):
         model = Circuit
         fields = ('id', 'point1', 'name', 'point2')
 
+
 class CircuitTrassaerializer(serializers.ModelSerializer):
     trassa = TransitCircSerializer(many=True)
 

@@ -1,15 +1,17 @@
 from copy import deepcopy
 from django.shortcuts import get_object_or_404
+from apps.opu.circuits.serializers import TransitCircSerializer
 from apps.opu.form53.models import Form53, Order53Photo, Schema53Photo
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
 from rest_framework.response import Response
 from rest_framework import status
-from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer
+from apps.opu.form53.serializers import Form53CreateSerializer, Form53Serializer, CircuitForm53
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import UpdateAPIView, DestroyAPIView
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
+from apps.opu.objects.serializers import BridgeListSerializer
 from apps.opu.services import PhotoDeleteMixin
 from apps.opu.form53.services import get_form53_diff
 from apps.opu.services import create_photo
@@ -90,7 +92,7 @@ class Form53ListAPIView(APIView):
         example = {
             'id': None, 'circuit': {
                 'id': None, 'name': None,  'num_circuit': None, 'category': {},
-                'num_order': None, 'comments': None, 'transit': [], 'transit2': []
+                'num_order': None, 'comments': None, 'bridges': [],
             },
             'order53_photo': [], 'schema53_photo': [], 'comments': None, 'object_id': None
         }
@@ -98,20 +100,8 @@ class Form53ListAPIView(APIView):
         if len(queryset) != 0:
             response_data = deepcopy(example)
             form53 = queryset[0]
-            response_data['circuit']['transit'] = [
-                {
-                    'point1': {'id':obj.point1.id,'point': obj.point1.point, 'name': obj.point1.name},
-                    'name': obj.name,
-                    'point2': {'id': obj.point2.id,'point': obj.point2.point, 'name': obj.point2.name}}
-                for obj in form53.circuit.object.transit.all()
-            ]
-            response_data['circuit']['transit2'] = [
-                {
-                    'point1': {'id': obj.point1.id, 'point': obj.point1.point, 'name': obj.point1.name},
-                    'name': obj.name,
-                    'point2': {'id': obj.point2.id, 'point': obj.point2.point, 'name': obj.point2.name}}
-                for obj in form53.circuit.object.transit2.all()
-            ]
+            response_data['circuit']['bridges'] = BridgeListSerializer(form53.circuit.object.bridges.all(),
+                                                                       context={'request': request}, many=True).data
             response_data['object_id'] = form53.circuit.object.id
             data.append(response_data)
 
@@ -119,23 +109,17 @@ class Form53ListAPIView(APIView):
             response_data = deepcopy(example)
             form53 = queryset[i]
             if data[-1]['object_id'] != form53.circuit.object.id:
-                response_data['circuit']['transit'] = [
-                    {
-                        'point1': {'id': obj.point1.id, 'point': obj.point1.point, 'name': obj.point1.name},
-                        'name': obj.name,
-                        'point2': {'id': obj.point2.id, 'point': obj.point2.point, 'name': obj.point2.name}}
-                    for obj in form53.circuit.object.transit.all()
-                ]
-                response_data['circuit']['transit2'] = [
-                    {
-                        'point1': {'id': obj.point1.id, 'point': obj.point1.point, 'name': obj.point1.name},
-                        'name': obj.name,
-                        'point2': {'id': obj.point2.id, 'point': obj.point2.point, 'name': obj.point2.name}}
-                    for obj in form53.circuit.object.transit2.all()
-                ]
+                response_data['circuit']['bridges'] = BridgeListSerializer(form53.circuit.object.bridges.all(),
+                                                                           context={'request': request}, many=True).data
                 response_data['object_id'] = form53.circuit.object.id
                 data.append(response_data)
+
+            circuit_trassa = None if form53.circuit.trassa is None else form53.circuit.trassa.trassa.all()
             response_data = Form53Serializer(form53, context={'request': request}).data
+            response_data['circuit'] = CircuitForm53(form53.circuit, context={'request': request}).data
+            response_data['circuit']['bridges'] = [
+                {'transit': {'name': None, 'trassa': TransitCircSerializer(circuit_trassa, many=True, context={'request': request}).data}}
+            ]
             response_data['object_id'] = form53.circuit.object.id
             data.append(response_data)
         return Response(data, status=status.HTTP_200_OK)
