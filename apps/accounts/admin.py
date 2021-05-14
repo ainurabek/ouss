@@ -1,16 +1,12 @@
 # coding: utf-8
 from django.contrib import admin
-
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
-
-
 from .models import Profile, Role, DepartmentKT, SubdepartmentKT, Log
 from .forms import UserAdminChangeForm, UserAdminCreationForm
-
 
 
 class ProfileInline(admin.StackedInline):
@@ -18,8 +14,6 @@ class ProfileInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'Profile'
     fk_name = 'user'
-
-
 
 
 class CustomUserAdmin(UserAdmin):

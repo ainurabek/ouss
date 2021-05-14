@@ -32,12 +32,9 @@ from apps.opu.objects.models import OrderObjectPhoto, MainLineType
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 from apps.opu.objects.serializers import LineTypeCreateSerializer
-
 from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, create_point_KLSS_RRL_amount_channels
-
 from apps.opu.objects.serializers import GOZListSerializer
 from apps.opu.objects.serializers import GOZUpdateSerializer
-
 from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil, AmountChannelsActivityLogUtil, \
     TypeTraktActivityLogUtil, OutfitActivityLogUtil, PointActivityLogUtil, IPActivityLogUtil, TypeOfLocationLogUtil, \
     LineTypeLogUtil, CategoryLogUtil, ConsumerLogUtil

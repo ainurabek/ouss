@@ -41,7 +41,7 @@ class EventListAPIView(viewsets.ModelViewSet):
             return EventListSerializer
         elif self.action == "retrieve":
             return EventDetailSerializer
-    # событие считается завершенным, если придать ему второй индекс, пока его нет, оно будет висеть как незавершенное
+
 
     def get_queryset(self):
         created_at = self.request.query_params.get('created_at', None)

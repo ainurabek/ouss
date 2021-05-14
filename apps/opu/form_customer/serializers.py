@@ -46,12 +46,11 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
     point1 = PointSerializer()
     point2 = PointSerializer()
-    transit = CircuitTransitSerializer(many=True)
-    transit2 = CircuitTransitSerializer(many=True)
+    trassa = CircuitTrassaerializer()
 
     class Meta:
         model = Circuit
-        fields = ('id', "name", "point1", "point2", "transit", "transit2")
+        fields = ('id', "name", "point1", "point2", 'trassa')
 
 
 class CircuitSerializer(serializers.ModelSerializer):
@@ -67,7 +66,7 @@ class ObjectFormCustomer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('bridges',)
+        fields = ('bridges', 'name')
 
 
 class SignalizationSerializer(serializers.ModelSerializer):

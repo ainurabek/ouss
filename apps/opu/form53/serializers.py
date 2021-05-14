@@ -4,6 +4,8 @@ from apps.opu.circuits.models import Circuit
 from apps.opu.objects.serializers import CategorySerializer
 
 
+
+
 class Order53PhotoSerializer(serializers.ModelSerializer):
     src = serializers.SerializerMethodField('get_src_url')
 
@@ -56,6 +58,7 @@ class Form53Serializer(serializers.ModelSerializer):
     """Список Формы 5.3"""
     order53_photo = Order53PhotoSerializer(many=True)
     schema53_photo = Schema53PhotoSerializer(many=True)
+
 
     class Meta:
         model = Form53
