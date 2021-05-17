@@ -25,7 +25,6 @@ from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_tr
     update_circuit, update_total_amount_channels
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
 get_ip_diff, get_point_diff, get_outfit_diff
-from apps.opu.objects.services import adding_an_object_to_trassa
 from apps.opu.circuits.service import create_circuit
 from apps.opu.objects.serializers import ObjectEditSerializer, MainLineTypeListSerializer
 from apps.opu.objects.models import OrderObjectPhoto, MainLineType
