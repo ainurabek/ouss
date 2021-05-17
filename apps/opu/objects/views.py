@@ -435,6 +435,7 @@ class LineTypeAPIVIew(ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
     def perform_create(self, serializer):
         instance = serializer.save()
         LineTypeLogUtil(self.request.user, instance.pk).obj_create_action('type_line_created')

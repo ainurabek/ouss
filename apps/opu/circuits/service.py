@@ -48,12 +48,13 @@ def create_circuit(obj: Object, request):
     active = int(request.data['active'])
     if int(request.data['create_circuit']):
         for num_cir in range(1, obj.amount_channels.value+1):
+            transit = CircuitTransit.objects.create()
             c = Circuit.objects.create(name=obj.name + '/' + str(num_cir), num_circuit=num_cir,
                                  category=Category.objects.get(index='6'), point1=obj.point1, point2=obj.point2,
-                                 created_by=request.user.profile, first=active, object=obj, )
-
+                                 created_by=request.user.profile, first=active, object=obj, trassa=transit)
+            transit.trassa.add(c)
             c.id_object.add(obj)
-            c.transit.add(c)
+
         if active == 1:
             if obj.type_line.main_line_type.name == 'КЛС':
                 obj.point1.total_point_channels_KLS += obj.amount_channels.value
@@ -89,19 +90,18 @@ def update_circuit_active(object: Object):
 def create_circuit_transit(object_transit: Transit):
     if object_transit.create_circuit_transit:
         max_count = object_transit.trassa.all().annotate(circuit_count=Count('circuit_object_parent')).order_by('circuit_count').first()
-        if max_count is not None:
-            circuit_transits = {
-                str(num): CircuitTransit.objects.create(obj_trassa=object_transit)
-                for num in range(1, max_count.circuit_object_parent.count() + 1)
-            }
-            for key, transit in circuit_transits.items():
-                for obj in object_transit.trassa.all():
-                    try:
-                        circuit = obj.circuit_object_parent.get(num_circuit=key)
-                        if circuit.trassa is not None:
-                            circuit.trassa.delete()
-                        circuit.trassa = transit
-                        circuit.save()
-                        transit.trassa.add(circuit)
-                    except ObjectDoesNotExist:
-                        pass
+        circuit_transits = {
+            str(num): CircuitTransit.objects.create(obj_trassa=object_transit)
+            for num in range(1, max_count.circuit_object_parent.count() + 1)
+        }
+        for key, transit in circuit_transits.items():
+            for obj in object_transit.trassa.all():
+                try:
+                    circuit = obj.circuit_object_parent.get(num_circuit=key)
+                    if circuit.trassa is not None:
+                        circuit.trassa.delete()
+                    circuit.trassa = transit
+                    circuit.save()
+                    transit.trassa.add(circuit)
+                except ObjectDoesNotExist:
+                    pass
