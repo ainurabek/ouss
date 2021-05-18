@@ -864,7 +864,7 @@ def get_report_form61_rrl(request):
         'outfit': {'id': None, 'outfit': None, 'adding': None},
         'point1': {'id': None, 'point': None, 'name': None},
         'point2': {'id': None, 'point': None, 'name': None},
-        'type_equipment': {'id': None, 'name': None},
+        'type_equipment_rrl': {'id': None, 'name': None},
         'type_connection': {'id': None, 'name': None},
         'total_length_line': 0, 'color': None
     }
@@ -891,8 +891,8 @@ def get_report_form61_rrl(request):
             form61_data['point2']['id'] = form61.point2.id
             form61_data['point2']['point'] = form61.point2.point
             form61_data['point2']['name'] = form61.point2.name
-            form61_data['type_equipment']['id'] = form61.type_equipment.id if form61.type_equipment is not None else ""
-            form61_data['type_equipment']['name'] = form61.type_equipment.name if form61.type_equipment is not None else ""
+            form61_data['type_equipment_rrl']['id'] = form61.type_equipment_rrl.id if form61.type_equipment_rrl is not None else ""
+            form61_data['type_equipment_rrl']['name'] = form61.type_equipment_rrl.name if form61.type_equipment_rrl is not None else ""
             form61_data['type_connection'][
                 'id'] = form61.type_connection.id if form61.type_connection is not None else ""
             form61_data['type_connection'][

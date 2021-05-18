@@ -202,14 +202,14 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Point.objects.all())
     point2 = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Point.objects.all())
-    type_equipment = serializers.PrimaryKeyRelatedField(
+    type_equipment_rrl = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True,  queryset=TypeEquipment.objects.all())
     type_connection = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment', 'type_connection')
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection')
         depth = 1
 
 class Form61RRLSerializer(serializers.ModelSerializer):
@@ -217,7 +217,7 @@ class Form61RRLSerializer(serializers.ModelSerializer):
     point2 = PointList()
     outfit = OutfitListSerializer()
     type_connection = TypeConnectionSerializer()
-    type_equipment = TypeEquipmentSerializer()
+    type_equipment_rrl = TypeEquipmentSerializer()
 
     class Meta:
         model = Form61RRL
@@ -226,12 +226,12 @@ class Form61RRLSerializer(serializers.ModelSerializer):
 class Form61RRLEditSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
-    type_equipment = serializers.PrimaryKeyRelatedField(
+    type_equipment_rrl = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeEquipment.objects.all())
     type_connection = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'total_length_line', 'type_equipment', 'type_connection')
+        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection')
         depth = 1
