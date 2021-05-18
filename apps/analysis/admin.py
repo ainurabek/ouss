@@ -40,4 +40,4 @@ class MethodLayingAdmin(admin.ModelAdmin):
 
 @admin.register(Form61RRL)
 class Form61RRLAdmin(admin.ModelAdmin):
-    list_display = ('id', 'point1', 'point2', "outfit", "total_length_line",  'type_equipment', 'type_connection')
+    list_display = ('id', 'point1', 'point2', "outfit", "total_length_line",  'type_equipment_rrl', 'type_connection')

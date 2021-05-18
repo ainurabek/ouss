@@ -215,13 +215,13 @@ class Form61RRL(models.Model):
     point2 = models.ForeignKey(Point, related_name='form61_RRL_point2', verbose_name='ИП до', on_delete=models.SET_NULL,
                                blank=True, null=True)
     total_length_line = models.FloatField("Общая протяженность линии РРЛ", default=0, blank=True, null=True)
-    type_equipment = models.ForeignKey(TypeEquipment, related_name = 'type_equipment_rrl', verbose_name= 'Тип аппаратуры',
+    type_equipment_rrl = models.ForeignKey(TypeEquipment, related_name = 'type_equipment_rrl', verbose_name= 'Тип аппаратуры',
                                        on_delete=models.SET_NULL, blank=True, null=True)
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, related_name='form61_RRL_out',
                                verbose_name="Предприятия")
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
                                         verbose_name="Тип Связи", related_name='form61_RRL_connection')
-    src = models.ImageField('Схема', upload_to='files/', blank=True)
+
 
 
 
