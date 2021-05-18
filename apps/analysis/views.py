@@ -852,10 +852,10 @@ def get_report_form61_rrl(request):
     """ Форма61 RRL"""
     outfit = request.GET.getlist("outfit")
     type_connection = request.GET.get("type_connection")
-    type_equipment = request.GET.get("type_equipment")
+    type_equipment_rrl = request.GET.get("type_equipment_rrl")
     queryset = Form61RRL.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
-                                                                                    'type_equipment', 'type_connection')
-    queryset = form61_rrl_filter(queryset, outfit, type_connection, type_equipment)
+                                                                                    'type_equipment_rrl', 'type_connection')
+    queryset = form61_rrl_filter(queryset, outfit, type_connection, type_equipment_rrl)
     outfits = form61_rrl_distinct(queryset, 'outfit')
     data = []
     content = {

@@ -690,14 +690,14 @@ def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method)
 def form61_kls_distinct(form61: Form61KLS, *args):
     return form61.order_by(*args).distinct(*args)
 
-def form61_rrl_filter(form61: Form61RRL, outfit, type_connection, type_equipment) -> Form61RRL:
+def form61_rrl_filter(form61: Form61RRL, outfit, type_connection, type_equipment_rrl) -> Form61RRL:
     if not isinstance(outfit, list) and outfit is not None and outfit != '':
         outfit = [outfit]
 
     if outfit is not None and outfit != '' and outfit != []:
         form61 = form61.filter(outfit__in=outfit)
-    if type_equipment is not None and type_equipment != '':
-        form61 = form61.filter(type_equipment=type_equipment)
+    if type_equipment_rrl is not None and type_equipment_rrl != '':
+        form61 = form61.filter(type_equipment_rrl=type_equipment_rrl)
     if type_connection is not None and type_connection != '':
         form61 = form61.filter(type_connection = type_connection)
     return form61
