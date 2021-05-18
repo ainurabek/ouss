@@ -193,6 +193,7 @@ def subdepartment_view(request, department_id, subdepartment_id):
     else:
         return JsonResponse({'detail': 'Успешно'}, status=202)
 
+
 '''Эта функция для создания журнала регистрации для дисп-ов'''
 class LogListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
@@ -210,7 +211,7 @@ class LogListAPIView(ListAPIView):
             queryset = queryset.filter(start_at__date__gte=start_at)
         if end_time != "":
             queryset = queryset.filter(end_time__date=end_time)
-        return queryset
+        return queryset.order_by('-start_at')
 
 
 class LogUpdateAPIView(UpdateAPIView):
@@ -222,15 +223,24 @@ class LogUpdateAPIView(UpdateAPIView):
     def perform_update(self, serializer):
         instance = self.get_object()
         if instance.end_time is not None and instance.end_time < datetime.datetime.now():
-
             return Response(status=status.HTTP_403_FORBIDDEN)
         serializer.save()
+
 
 class LogCreateAPIView(CreateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, )
     serializer_class = LogUpdateSerializer
     queryset = Log.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if self.queryset.filter(user=self.request.user.profile, end_time__gte=self.request.data['start_at']).exists():
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user.profile)

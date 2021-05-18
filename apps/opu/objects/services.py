@@ -34,6 +34,7 @@ def get_type_of_trakt(parent_obj: Object):
         return type_obj
     return None
 
+
 def save_old_object(obj):
     obj_name = str(obj.name)
     obj_point1 = str(obj.point1)
@@ -44,13 +45,10 @@ def save_old_object(obj):
 def update_circuit(old_obj, obj: Object):
     obj_name, obj_point1, obj_point2 = old_obj
     if obj_name != obj.name:
-        circuits = Circuit.objects.filter(id_object=obj)
-        all =  obj.circuit_object_parent.all() + 1
-        cir = 1
+        circuits = obj.circuit_object_parent.all()
         for circuit in circuits:
-            if cir <= all:
-                circuit.name = Circuit.objects.filter(pk=circuit.id).update(name=obj.name + "/" + str(cir))
-                cir += 1
+            circuit.name = obj.name + "/" + circuit.num_circuit
+            circuit.save()
 
     if obj_point1 != obj.point1.point or obj_point2 != obj.point2.point:
 
@@ -90,7 +88,6 @@ def update_circuit(old_obj, obj: Object):
                 circuit.save()
 
 
-
 def get_count_active_channels(instance: Object):
     count = 0
 
@@ -113,15 +110,6 @@ def update_total_amount_channels(instance: Object):
         id_parent_instance.total_amount_channels = get_count_active_channels(id_parent_instance)
         id_parent_instance.save()
         id_parent_instance = id_parent_instance.id_parent
-
-
-
-
-
-
-def adding_an_object_to_trassa(obj: Object):
-    obj.transit.add(obj)
-
 
 
 def create_form51(obj:Object):
