@@ -192,7 +192,7 @@ class Form61KLSEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form61KLS
         fields = ('outfit', 'total_length_line', 'total_length_cable', 'above_ground',
-                  'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection', 'src')
+                  'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection')
         depth = 1
 
 class Form61RRLCreateSerializer(serializers.ModelSerializer):
@@ -209,7 +209,7 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment', 'type_connection', 'src')
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment', 'type_connection')
         depth = 1
 
 class Form61RRLSerializer(serializers.ModelSerializer):
@@ -233,5 +233,5 @@ class Form61RRLEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'total_length_line', 'type_equipment', 'type_connection', 'src')
+        fields = ('outfit', 'total_length_line', 'type_equipment', 'type_connection')
         depth = 1
