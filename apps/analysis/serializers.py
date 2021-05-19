@@ -217,7 +217,7 @@ class Form61RRLSerializer(serializers.ModelSerializer):
     point2 = PointList()
     outfit = OutfitListSerializer()
     type_connection = TypeConnectionSerializer()
-    type_equipment_rrl = TypeEquipmentSerializer()
+    type_equipment_rrl = TypeEquipmentSerializer() #rename to rrl
 
     class Meta:
         model = Form61RRL

@@ -1,29 +1,13 @@
 # coding: utf-8
 from apps.accounts.models import Profile
 from apps.logging.models import ActivityLogModel
-from .constants import SIGNALIZATION_LOG_DESCRIPTIONS, FORM_CUSTOMER_CIRCUIT_LOG_DESCRIPTIONS, \
+from .constants import FORM_CUSTOMER_CIRCUIT_LOG_DESCRIPTIONS, \
     FORM_CUSTOMER_OBJECT_LOG_DESCRIPTIONS, FORM_CUSTOMER_IP_LOG_DESCRIPTIONS
 from apps.opu.form_customer.models import Signalization, Form_Customer
 from datetime import datetime
 
 
 
-
-class SignalizationLogUtil:
-    def __init__(self, action_by, action_applied_to_object):
-        self.action_by = Profile.objects.get(user=action_by)
-        self.action_applied_to_object = Signalization.objects.get(pk=action_applied_to_object)
-        self.action_time = datetime.now()
-
-    def obj_create_action(self, action):
-        ActivityLogModel.objects.create(
-            action_by=self.action_by,
-            action_description=SIGNALIZATION_LOG_DESCRIPTIONS[action]
-                               % (
-                                  self.action_applied_to_object.name,
-                                  ),
-            action_time=self.action_time
-        )
 
 class FormCustomerCircuitLogUtil:
     def __init__(self, action_by, action_applied_to_object):

@@ -19,6 +19,7 @@ class Form51LogUtil:
             action_description=FORM51_LOG_DESCRIPTIONS[action]
                                % (
                                   self.action_applied_to_object.object.name,
+                                  self.action_applied_to_object.object.id_outfit.outfit,
                                   ),
             action_time=self.action_time
         )

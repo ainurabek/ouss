@@ -19,8 +19,8 @@ class Form53LogUtil:
             action_description=FORM53_LOG_DESCRIPTIONS[action]
                                % (
                                   self.action_applied_to_object.circuit.name,
-                                  self.action_applied_to_object.circuit.object.name,
-                                  ),
+                                  self.action_applied_to_object.circuit.object.id_outfit.outfit,
+                               ),
             action_time=self.action_time
         )
 

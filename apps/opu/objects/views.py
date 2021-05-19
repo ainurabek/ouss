@@ -34,9 +34,8 @@ from apps.opu.objects.serializers import LineTypeCreateSerializer
 from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, create_point_KLSS_RRL_amount_channels
 from apps.opu.objects.serializers import GOZListSerializer
 from apps.opu.objects.serializers import GOZUpdateSerializer
-from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil, AmountChannelsActivityLogUtil, \
-    TypeTraktActivityLogUtil, OutfitActivityLogUtil, PointActivityLogUtil, IPActivityLogUtil, TypeOfLocationLogUtil, \
-    LineTypeLogUtil, CategoryLogUtil, ConsumerLogUtil
+from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil,  OutfitActivityLogUtil, PointActivityLogUtil
+
 
 
 
@@ -79,7 +78,7 @@ class AmountChannelListAPIView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
          instance = serializer.save()
          instance.save()
-         AmountChannelsActivityLogUtil(self.request.user, instance.pk).obj_create_action('amount_channels_created')
+
 
 
 class TypeTraktListView(viewsets.ModelViewSet):
@@ -99,7 +98,7 @@ class TypeTraktListView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
          instance = serializer.save()
          instance.save()
-         TypeTraktActivityLogUtil(self.request.user, instance.pk).obj_create_action('type_trakt_created')
+
 
 
 class OutfitsListView(viewsets.ModelViewSet):
@@ -170,7 +169,6 @@ class IPCreateView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             instance.save()
-            IPActivityLogUtil(self.request.user, instance.pk).obj_create_action('ip_created')
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -227,7 +225,7 @@ class LPCreateView(generics.CreateAPIView):
             instance.save()
             create_form51(obj=instance)
             # create_circuit(instance, self.request)
-            adding_an_object_to_trassa(obj=instance)
+
             create_object_KLSS_RRL_amount_channels(obj=instance)
             ObjectActivityLogUtil(request.user, instance.pk).object_create_action('object_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -338,7 +336,7 @@ class ObjectCreateView(APIView):
             create_object_KLSS_RRL_amount_channels(obj = instance)
             create_form51(obj = instance)
             # create_circuit(obj=instance, request=request)
-            adding_an_object_to_trassa(obj=instance)
+
             create_circuit(instance, self.request)
             update_total_amount_channels(instance=instance)
             ObjectActivityLogUtil(request.user, instance.pk).object_create_action('object_created')
@@ -404,7 +402,7 @@ class TypeOfLocationAPIVIew(ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        TypeOfLocationLogUtil(self.request.user, instance.pk).obj_create_action('type_location_created')
+
 
 
 class MainLineTypeList(ListAPIView):
@@ -437,7 +435,7 @@ class LineTypeAPIVIew(ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        LineTypeLogUtil(self.request.user, instance.pk).obj_create_action('type_line_created')
+
 
 
 class CategoryAPIVIew(ModelViewSet):
@@ -456,7 +454,7 @@ class CategoryAPIVIew(ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        CategoryLogUtil(self.request.user, instance.pk).obj_create_action('category_created')
+
 
 
 class ConsumerModelViewSet(ModelViewSet):
@@ -475,7 +473,7 @@ class ConsumerModelViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        ConsumerLogUtil(self.request.user, instance.pk).obj_create_action('consumer_created')
+
 
 
 class ObjectHistory(APIView):
@@ -608,7 +606,7 @@ class BugModelViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user.profile)
 
 
-
+from collections import Counter
 class GOZListView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly,)
@@ -620,9 +618,15 @@ class GOZListView(APIView):
         if outfit is not None and outfit != "":
             queryset = queryset.filter(id_outfit_id=outfit)
         obj_with_reserves = []
+        test = []
         for obj in queryset:
-            if len(obj.bridges.all()) > 1:
-                        obj_with_reserves.append(obj)
+            if len(obj.bridges.all()) > 1: #если у каждого обьекта больше одной трассы, это значит, что у них есть еще и рез.трасса
+                pks = ''
+                for item in obj.transits.all():
+                    pks += str(item.id) #в стринг собираю айди трасс одного обьекта
+                if not pks in test: #если стринг с точно такими айди, то это значит повторяющиеся и их не добавляем
+                    test.append(pks)
+                    obj_with_reserves.append(obj)
         serializer = GOZListSerializer(obj_with_reserves, many=True)
         return Response(serializer.data)
 

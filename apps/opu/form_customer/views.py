@@ -20,7 +20,7 @@ from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixi
 from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
 
-from apps.logging.form_customer.views import SignalizationLogUtil, FormCustomerCircuitLogUtil, \
+from apps.logging.form_customer.views import FormCustomerCircuitLogUtil, \
     FormCustomerObjectLogUtil, FormCustomerIPLogUtil
 
 
@@ -37,7 +37,7 @@ class SignalizationView(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     def perform_create(self, serializer):
         instance = serializer.save()
-        SignalizationLogUtil(self.request.user, instance.pk).obj_create_action('signalization_created')
+
 
 
 class CustomerFormListView(ListAPIView):

@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 from apps.opu.customer.service import get_customer_diff
 
-from apps.logging.customer.views import CustomerLogUtil
+
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -33,7 +33,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 	def perform_create(self, serializer):
 		instance = serializer.save()
-		CustomerLogUtil(self.request.user, instance.pk).obj_create_action('customer_created')
+
 
 
 class CustomerHistory(APIView):
