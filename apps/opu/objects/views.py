@@ -133,7 +133,8 @@ class OutfitsListView(viewsets.ModelViewSet):
 
 class PointListView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    queryset = Point.objects.all().order_by('point').prefetch_related('tpo', 'id_outfit')
+    queryset = Point.objects.all().order_by('point').prefetch_related('tpo', 'id_outfit')\
+        .only('point', 'name', 'tpo', 'id_outfit', 'region', 'type_equipment')
     lookup_field = 'pk'
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('point', 'name', 'tpo__index', 'tpo__name', 'id_outfit__outfit', 'id_outfit__adding',
