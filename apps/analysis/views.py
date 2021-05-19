@@ -43,6 +43,9 @@ from project.settings import BASE_DIR
 from apps.analysis.serializers import Form61KLSEditSerializer
 import matplotlib.pyplot as plt
 import matplotlib
+
+from apps.analysis.service import get_date_from_ak
+
 matplotlib.use('Agg')
 
 
@@ -307,6 +310,7 @@ def get_report_analysis(request):
                 call_data['name'] = '-'
                 call_data['reason'] = call.reason.name
                 call_data['date_from'] = call.date_from
+                call_data['date_from'] = get_date_from_ak(call, date_from)
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
                 call_data['get_period'] = get_period_ak(call, date_from, date_to)
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""

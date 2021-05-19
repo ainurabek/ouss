@@ -47,15 +47,54 @@ def get_period_ak(obj, date_from, date_to):
         if obj.date_to is not None and obj.date_from is not None:
             return obj.period_of_time
         elif obj.date_to is None and obj.date_from is not None:
-            date_to1 = datetime.fromisoformat(date_from + "T23:59:59")
+            date_to1 = datetime.fromisoformat(date_from + "T00:00:01")
             date = date_to1 - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
             return round(period_of_time, 2)
 
     if date_from is not None and date_to is not None:
+        date_from_date = datetime.strptime(date_from, '%Y-%m-%d')
+        date_to_date = datetime.strptime(date_to, '%Y-%m-%d')
+        #Закрытые события, у которых есть начало и конец
         if obj.date_to is not None and obj.date_from is not None:
+
+
+            #если событие началось до заданного в фильтре даты и закончился до даты в date_to
+            if obj.date_from.date() < date_from_date.date() and obj.date_to.date() <= date_to_date.date():
+                new_date_from = datetime.fromisoformat(date_from + "T00:00:01")
+                date = obj.date_to - new_date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
+            # если событие началось до заданного в фильтре даты и закончился после даты в date_to
+            elif obj.date_from.date() < date_from_date.date() and obj.date_to.date() > date_to_date.date():
+                new_date_from = datetime.fromisoformat(date_from + "T00:00:01")
+                new_date_to = datetime.fromisoformat(date_to + "T23:59:59")
+                date = new_date_to - new_date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
+            # если событие началось в день заданного в фильтре даты и закончился после даты в date_to
+            elif obj.date_from.date()== date_from_date.date() and obj.date_to.date() > date_to_date.date():
+                new_date_to= datetime.fromisoformat(date_to + "T23:59:59")
+                date = new_date_to - obj.date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
+
+            # если событие началось после заданного в фильтре даты и закончился после даты в date_to
+            elif obj.date_from.date() > date_from_date.date() and obj.date_to.date() > date_to_date.date():
+                date_to1 = datetime.fromisoformat(date_to + "T23:59:59")
+                date = date_to1 - obj.date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
+
             return obj.period_of_time
         elif obj.date_to is None and obj.date_from is not None:
+            if obj.date_from.date() < date_from_date.date():
+                date_to1 = datetime.fromisoformat(date_to + "T23:59:59")
+                new_date_from = datetime.fromisoformat(date_from + "T00:00:01")
+                date = date_to1 - new_date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
+
             date_to1 = datetime.fromisoformat(date_to + "T23:59:59")
             date = date_to1 - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
@@ -663,6 +702,14 @@ def get_date_to_ak(obj: Event, created_at: str):
         data = created_at + "T24:00:00"
     elif obj.date_to.date() > datetime.strptime(created_at, '%Y-%m-%d').date():
         data = created_at + "T24:00:00"
+    return data
+
+def get_date_from_ak(obj: Event, created_at: str):
+    data = obj.date_from
+
+    if obj.date_from.date() < datetime.strptime(created_at, '%Y-%m-%d').date():
+        data = created_at + "T00:00:01"
+
     return data
 
 def get_amount(obj:Event):
