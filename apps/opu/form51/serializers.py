@@ -3,10 +3,7 @@ from apps.opu.customer.models import Customer
 from apps.opu.form51.models import Form51
 from apps.opu.objects.models import Object, Point
 from apps.opu.circuits.serializers import CategorySerializer
-from apps.opu.form51.models import OrderPhoto, SchemaPhoto
-
-from apps.opu.objects.serializers import ConsumerSerializer, BridgeListSerializer
-
+from apps.opu.objects.serializers import ConsumerSerializer, BridgeListSerializer, OrderObjectPhotoSerializer
 
 
 class CustomerForm51Serializer(serializers.ModelSerializer):
@@ -23,18 +20,6 @@ class PointForm51Serializer(serializers.ModelSerializer):
         fields = ("name", "point")
 
 
-class OrderPhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderPhoto
-        fields = ("id", "src")
-
-
-class SchemaPhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SchemaPhoto
-        fields = ("id", "src")
-
-
 class Form51CreateSerializer(serializers.ModelSerializer):
     """Создания Формы 5.1"""
     customer = serializers.PrimaryKeyRelatedField(
@@ -42,17 +27,18 @@ class Form51CreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form51
-        fields = ("id", "customer", "num_order", "reserve", "comments")
+        fields = ("id", "customer", "comments")
 
 
 class ObjectForm51Serializer(serializers.ModelSerializer):
     bridges = BridgeListSerializer(many=True)
     category = CategorySerializer()
     consumer = ConsumerSerializer()
+    order_object_photo = OrderObjectPhotoSerializer(many=True)
 
     class Meta:
         model = Object
-        fields = ("name", "category", 'bridges', 'consumer')
+        fields = ("name", "category", "bridges", "consumer", "comments", "order_object_photo")
         depth = 1
 
 
@@ -60,28 +46,8 @@ class Form51Serializer(serializers.ModelSerializer):
     """Список Формы 5.1"""
     object = ObjectForm51Serializer()
     customer = CustomerForm51Serializer()
-    order_photo = OrderPhotoSerializer(many=True)
-    schema_photo = SchemaPhotoSerializer(many=True)
 
     class Meta:
         model = Form51
-        fields = ("id", "object", "customer", "num_order", "order_photo", "schema_photo", "reserve", 'comments')
-        depth=1
-
-
-class ObjectReserveSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-
-    class Meta:
-        model = Object
-        fields = ('id', "name", "reserve_transit", "reserve_transit2", "category")
-
-
-class Form51ReserveSerializer(serializers.ModelSerializer):
-    """ Резерв """
-    object = ObjectReserveSerializer()
-
-    class Meta:
-        model = Form51
-        fields = ("id", "object")
+        fields = ("id", "object", "customer", "comments")
         depth = 1

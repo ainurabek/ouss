@@ -202,7 +202,6 @@ class Object(models.Model):
 	is_transit = models.BooleanField(default=False)  # if True - то его компоненты участвуют в транзите, при измнении, эти компоненты перезапишутся
 	history = HistoricalRecords(related_name='history_object_log')
 
-
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
 		verbose_name_plural = 'Линия передачи/Обьект/Тракт'
