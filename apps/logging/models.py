@@ -14,4 +14,4 @@ class ActivityLogModel(models.Model):
         verbose_name_plural = 'Список действий'
 
     def __str__(self):
-        return self.id
+        return f'{self.id}, {self.action_description}'
