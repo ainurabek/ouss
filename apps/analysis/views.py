@@ -46,9 +46,8 @@ import matplotlib
 
 from apps.analysis.service import get_date_from_ak
 
+
 matplotlib.use('Agg')
-
-
 
 
 # @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
@@ -166,7 +165,7 @@ matplotlib.use('Agg')
 class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
     """сохранение количества каналов для Обьекта"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, SuperUser | IsAKOnly, SuperUser | IngenerUser)
     queryset = AmountChannelsKLSRRL.objects.all()
     serializer_class = AmountChannelsKLSRRLSerializer
 
@@ -352,7 +351,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
         if self.action == 'list' or self.action == 'retrieve':
             permission_classes = [IsAuthenticated, SuperUser|IsAKOnly]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly, IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly, SuperUser|IngenerUser]
 
         return [permission() for permission in permission_classes]
 
@@ -383,7 +382,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     lookup_field = "pk"
     queryset = FormAnalysis.objects.all()
     serializer_class = FormAnalysisUpdateSerializer
@@ -392,7 +391,7 @@ class FormAnalysisUpdateAPIView(generics.UpdateAPIView):
 class FormAnalysisCreateAPIView(APIView):
     """ Создание ср.КФТ отчета """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
 
     def post(self, request, pk):
         outfit = request.data['outfit']
@@ -437,7 +436,7 @@ class Punkt7ListAPIView(APIView, ListWithPKMixin):
 class Punkt5UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     lookup_field = "pk"
     queryset = Punkt5.objects.all()
     serializer_class = Punkt5UpdateSerializer
@@ -449,7 +448,7 @@ class Punkt5UpdateAPIView(generics.UpdateAPIView):
 
 class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     queryset = Punkt5.objects.all()
     lookup_field = "pk"
 
@@ -460,7 +459,7 @@ class Punkt5DeleteAPIVIew(generics.DestroyAPIView):
 class Punkt7UpdateAPIView(generics.UpdateAPIView):
     """Редактирование п.7"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     lookup_field = "pk"
     queryset = Punkt7.objects.all()
     serializer_class = Punkt7UpdateSerializer
@@ -472,7 +471,7 @@ class Punkt7UpdateAPIView(generics.UpdateAPIView):
 
 class Punkt7DeleteAPIView(generics.DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     queryset = Punkt7.objects.all()
     lookup_field = "pk"
 
@@ -614,7 +613,7 @@ class WinnerReportAPIView(APIView):
 
 class Form61KLSCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
 
     def post(self, request):
         serializer = Form61KLSCreateSerializer(data=request.data)
@@ -626,7 +625,7 @@ class Form61KLSCreateView(APIView):
 
 class Form61KLSList(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,)
     queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
                                                                                     'type_cable', 'type_connection')
     serializer_class = Form61KLSSerializer
@@ -637,16 +636,16 @@ class Form61KLSUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Form61KLS.objects.all()
     serializer_class = Form61KLSEditSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
 
 
 class Form61KLSDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
     queryset = Form61KLS.objects.all()
 
 
-@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+@permission_classes([IsAuthenticated,])
 def get_report_form61_kls(request):
     """ Форма61 KLS"""
     outfit = request.GET.getlist("outfit")
@@ -736,7 +735,7 @@ def get_report_form61_kls(request):
     data.append(total_rep)
     return JsonResponse(data, safe=False)
 
-
+@permission_classes([IsAuthenticated,])
 def get_distance_length_kls(request, pk1, pk2):
     point1 = get_object_or_404(Point, pk=pk1)
     point2 = get_object_or_404(Point, pk=pk2)
@@ -822,7 +821,7 @@ class TypeEquipmentViewSet(ModelViewSet):
 
 class Form61RRLCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
 
     def post(self, request):
         serializer = Form61RRLCreateSerializer(data=request.data)
@@ -834,7 +833,7 @@ class Form61RRLCreateView(APIView):
 
 class Form61RRLList(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated, )
     queryset = Form61RRL.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
                                                                                     'type_equipment', 'type_connection')
     serializer_class = Form61RRLSerializer
@@ -844,14 +843,14 @@ class Form61RRLUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Form61RRL.objects.all()
     serializer_class = Form61RRLEditSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
 
 class Form61RRLDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     queryset = Form61RRL.objects.all()
 
-@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+@permission_classes([IsAuthenticated, ])
 def get_report_form61_rrl(request):
     """ Форма61 RRL"""
     outfit = request.GET.getlist("outfit")
@@ -869,6 +868,7 @@ def get_report_form61_rrl(request):
         'point1': {'id': None, 'point': None, 'name': None},
         'point2': {'id': None, 'point': None, 'name': None},
         'type_equipment_rrl': {'id': None, 'name': None},
+        'number_trunk': 0,
         'type_connection': {'id': None, 'name': None},
         'total_length_line': 0, 'color': None
     }
@@ -880,6 +880,7 @@ def get_report_form61_rrl(request):
         out_data['outfit']['outfit'] = outfit.outfit.outfit
         out_data['outfit']['adding'] = outfit.outfit.adding
         out_data['total_length_line'] = None
+        out_data['number_trunk'] = None
         out_data['color'] = "outfit"
 
         data.append(out_data)
@@ -897,6 +898,7 @@ def get_report_form61_rrl(request):
             form61_data['point2']['name'] = form61.point2.name
             form61_data['type_equipment_rrl']['id'] = form61.type_equipment_rrl.id if form61.type_equipment_rrl is not None else ""
             form61_data['type_equipment_rrl']['name'] = form61.type_equipment_rrl.name if form61.type_equipment_rrl is not None else ""
+            form61_data['number_trunk'] = form61.number_trunk
             form61_data['type_connection'][
                 'id'] = form61.type_connection.id if form61.type_connection is not None else ""
             form61_data['type_connection'][
@@ -904,10 +906,12 @@ def get_report_form61_rrl(request):
             form61_data['total_length_line'] = form61.total_length_line
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+            total_outfit['number_trunk'] += round(form61_data['number_trunk'], 2)
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+        total_rep['number_trunk'] += round(total_outfit['number_trunk'], 2)
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)

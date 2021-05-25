@@ -54,7 +54,8 @@ class FormCustomerListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('object', 'circuit', 'customer',)
-    queryset = Form_Customer.objects.all()
+    queryset = Form_Customer.objects.defer('created_by', 'object__transit', 'object__transit2').select_related('customer', 'signalization', 'point1', 'point2').\
+        prefetch_related('circuit__trassa__trassa', 'object__bridges__transit__trassa', 'order_cust_photo')
     serializer_class = FormCustomerSerializer
 
 class PointListAPIView(ListAPIView):

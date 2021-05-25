@@ -10,7 +10,6 @@ class Form51(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Арендатор", blank=True, null=True)
     object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО")
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, blank=True, null=True)
-    comments = models.TextField('Примечание', blank=True, null=True)
     history = HistoricalRecords(related_name='history_form51_log')
 
     class Meta:

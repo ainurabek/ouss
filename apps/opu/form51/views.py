@@ -18,11 +18,11 @@ class FormListAPIView(ListAPIView):
     serializer_class = Form51Serializer
 
     def get_queryset(self):
-        queryset = Form51.objects.all().only(
-            'customer__customer', 'object__consumer', 'object__category', 'object__consumer', 'object__name',
-            'object__comments', 'comments'
-        ).select_related('object__consumer', 'object__category', 'customer').\
-            prefetch_related('object__bridges', 'object__order_object_photo')
+        queryset = Form51.objects. \
+            defer('created_by', 'object__tpo1', 'object__tpo2', 'object__point1', 'object__transit', 'object__transit2',
+                  'object__point2', 'object__id_parent', 'object__amount_channels', 'object__created_by',
+                  'object__customer', 'object__type_line', 'object__type_of_trakt'). \
+            select_related('customer', 'object').prefetch_related('object__bridges__transit__trassa')
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
         object = self.request.query_params.get('object', None)
