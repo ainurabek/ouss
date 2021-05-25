@@ -905,8 +905,10 @@ def get_report_form61_rrl(request):
                 'name'] = form61.type_connection.name if form61.type_connection is not None else ""
             form61_data['total_length_line'] = form61.total_length_line
             data.append(form61_data)
+
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
-            total_outfit['number_trunk'] += form61_data['number_trunk']
+            if form61_data['number_trunk'] is not None:
+                total_outfit['number_trunk'] += form61_data['number_trunk']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
