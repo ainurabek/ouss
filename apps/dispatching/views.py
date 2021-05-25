@@ -5,11 +5,12 @@ from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
-    ReasonSerializer, IndexSerializer, CallsCreateSerializer
+    ReasonSerializer, IndexSerializer, CallsCreateSerializer, DamageReportListSerializer, DamageUpdateSerializer, \
+    InternationalDamageReportListSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object, IP, OutfitWorker, Outfit, Point
+from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
 
@@ -19,11 +20,10 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
 from .models import TypeOfJournal, Comments, Reason, Index, Event
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
-
 
 
 class EventListAPIView(viewsets.ModelViewSet):
@@ -35,13 +35,11 @@ class EventListAPIView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     serializer_class = EventListSerializer
 
-
     def get_serializer_class(self):
         if self.action == 'list':
             return EventListSerializer
         elif self.action == "retrieve":
             return EventDetailSerializer
-
 
     def get_queryset(self):
         created_at = self.request.query_params.get('created_at', None)
@@ -78,7 +76,6 @@ class EventListAPIView(viewsets.ModelViewSet):
 class EventDetailAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
-
 
     def get(self, request, pk=None):
         created_at = request.GET.get("created_at")
@@ -150,6 +147,7 @@ class ObjectParentList(APIView):
         created_events = Event.objects.filter(object=obj, callsorevent=True).exclude(index1__index='4')
         serializer = EventListSerializer(created_events, many=True).data
         return Response(serializer)
+
 
 class CircuitParentList(APIView):
     permission_classes = (IsAuthenticated,)
@@ -309,7 +307,6 @@ class EventUpdateAPIView(UpdateAPIView):
         instance.id_parent.created_at = all_calls[0].created_at
         instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
         instance.id_parent.save()
-
 
 
 class EventDeleteAPIView(DestroyAPIView):
@@ -631,6 +628,7 @@ class IndexModelViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class EventUnknownCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -652,3 +650,55 @@ class EventUnknownCreateViewAPI(APIView):
             # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DamageReportListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DamageReportListSerializer
+
+    def get_queryset(self):
+        date_from = self.request.query_params.get("date_from", "")
+        date_to = self.request.query_params.get("date_to", "")
+        outfit = self.request.query_params.get("outfit", "")
+        if date_from == "" or date_to == "":
+            return []
+        queryset = Event.objects.\
+            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1").\
+            filter(Q(object__tpo1__index="35", object__tpo2__index="35") | Q(ips__tpo__index="35") |
+                   Q(circuit__point1__tpo__index="35", circuit__point2__tpo__index="35"), index1__index="1",
+                   callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
+            prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+
+        if outfit != "":
+            queryset = queryset.filter(responsible_outfit=outfit)
+        return queryset
+
+
+class DamageUpdateAPIView(UpdateAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser | IsDispOnly, IngenerUser)
+    queryset = Event.objects.filter(callsorevent=False)
+    serializer_class = DamageUpdateSerializer
+    lookup_field = "pk"
+
+
+class InternationalDamageReportListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = InternationalDamageReportListSerializer
+
+    def get_queryset(self):
+        date_from = self.request.query_params.get("date_from", "")
+        date_to = self.request.query_params.get("date_to", "")
+
+        if date_from == "" or date_to == "":
+            return []
+        queryset = Event.objects. \
+            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1"). \
+            exclude(Q(object__tpo1__index="35", object__tpo2__index="35") | Q(ips__tpo__index="35") |
+                    Q(circuit__point1__tpo__index="35", circuit__point2__tpo__index="35")). \
+            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to). \
+            prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+
+        return queryset

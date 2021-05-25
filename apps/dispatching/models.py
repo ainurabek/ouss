@@ -33,7 +33,6 @@ class Reason(models.Model):
     name = models.CharField(max_length=150)
     is_read_only = models.BooleanField(default=False)  # if True - то название нельзя редактировать
 
-
     def __str__(self):
         return self.name
 
@@ -41,9 +40,9 @@ class Reason(models.Model):
         verbose_name = 'Причины'
         verbose_name_plural = 'Причины'
 
+
 class Comments(models.Model):
     name = models.CharField(max_length=150)
-
 
     def __str__(self):
         return self.name
@@ -51,6 +50,7 @@ class Comments(models.Model):
     class Meta:
         verbose_name = 'Примечание'
         verbose_name_plural = 'Примечание'
+
 
 class Index(models.Model):
     '''Тип заявки (Например Квартирная заявка)'''
@@ -64,7 +64,6 @@ class Index(models.Model):
 
     def __str__(self):
         return self.index
-
 
 
 class Event(models.Model):
@@ -97,6 +96,9 @@ class Event(models.Model):
     history = HistoricalRecords(related_name='history_log')
     period_of_time = models.FloatField(default=0, blank=True, null=True)
 
+    arrival_date = models.DateTimeField("Дата приезда бригады", blank=True, null=True)
+    downtime = models.CharField("Длителность простоя", max_length=150, blank=True, null=True)
+
     class Meta:
         verbose_name = 'Журнал событий'
         verbose_name_plural = 'Журнал событий'
@@ -107,14 +109,16 @@ class Event(models.Model):
         return str(self.id)
 
     def save(self, *args, **kwargs):
-        if self.index1.index in ["1", "0д", "0а", "0тв"]:
+        event_index = {"1": True, "0д": True, "0а": True, "0тв": True}
+        if event_index.get(self.index1.index):
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
-                self.period_of_time = round((((date.total_seconds() / 60) * 100) / 60) / 100, 2)
+                total_seconds = date.total_seconds()
+                self.period_of_time = round((((total_seconds / 60) * 100) / 60) / 100, 2)
+                hour = int(total_seconds//3600)
+                if hour != 0:
+                    self.downtime = f"{int(hour)}ч {int((total_seconds-(hour*3600)) // 60)}мин"
+                else:
+                    self.downtime = f"{int((total_seconds - (hour * 3600)) // 60)}мин"
+
         super().save(*args, **kwargs)
-
-
-
-
-
-
