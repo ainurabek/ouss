@@ -12,6 +12,7 @@ from apps.analysis.models import AmountChannelsKLSRRL
 
 
 
+
 class DispEvent1ListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
     circuit = EventCircuitSerializer()
@@ -147,6 +148,7 @@ class TypeEquipmentSerializer(serializers.ModelSerializer):
         model = TypeEquipment
         fields = ("id", "name")
 
+
 class Form61KLSCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
@@ -207,9 +209,10 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
     type_connection = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
 
+
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection')
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk')
         depth = 1
 
 class Form61RRLSerializer(serializers.ModelSerializer):
@@ -218,6 +221,7 @@ class Form61RRLSerializer(serializers.ModelSerializer):
     outfit = OutfitListSerializer()
     type_connection = TypeConnectionSerializer()
     type_equipment_rrl = TypeEquipmentSerializer() #rename to rrl
+
 
     class Meta:
         model = Form61RRL
@@ -231,7 +235,8 @@ class Form61RRLEditSerializer(serializers.ModelSerializer):
     type_connection = serializers.PrimaryKeyRelatedField(
         read_only=False, allow_null=True, queryset=TypeConnection.objects.all())
 
+
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection')
+        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk')
         depth = 1

@@ -33,14 +33,25 @@ def get_period(obj, date_to):
         return round(period_of_time, 2)
 
     date = datetime.now()
-
     newdate = date.replace(hour=23, minute=59, second=59)
-
     date = newdate - obj.date_from
-
     period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
-
     return round(period_of_time, 2)
+
+def get_date_from_ak(obj: Event, created_at: str):
+    #для открытых
+    data = obj.date_from
+    # только для закрытых
+    if obj.date_to is not None:
+        if obj.date_from.date() >= datetime.strptime(created_at, '%Y-%m-%d').date():
+            data = obj.date_from
+        if obj.date_from.date() < datetime.strptime(created_at, '%Y-%m-%d').date():
+            data = created_at + "T00:00:01"
+    else:
+        if obj.date_from.date() < datetime.strptime(created_at, '%Y-%m-%d').date():
+            data = created_at + "T00:00:01"
+
+    return data
 
 def get_period_ak(obj, date_from, date_to):
     date_from_date = datetime.strptime(date_from, '%Y-%m-%d')
@@ -65,6 +76,12 @@ def get_period_ak(obj, date_from, date_to):
             return obj.period_of_time
         #когда открытые события
         elif obj.date_to is None and obj.date_from is not None:
+            if obj.date_from.date() < date_from_date.date():
+                new_date_from = datetime.fromisoformat(date_from +"T00:00:01")
+                new_date_to = datetime.fromisoformat(date_from + "T23:59:59")
+                date = new_date_to - new_date_from
+                period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
+                return round(period_of_time, 2)
             new_date_to = datetime.fromisoformat(date_from +"T23:59:59")
             date = new_date_to - obj.date_from
             period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
@@ -724,17 +741,7 @@ def get_date_to_ak(obj: Event, created_at: str):
         data = created_at + "T24:00:00"
     return data
 
-def get_date_from_ak(obj: Event, created_at: str):
-    #для открытых
-    data = obj.date_from
-    # только для закрытых
-    if obj.date_to is not None:
-        if obj.date_from.date() >= datetime.strptime(created_at, '%Y-%m-%d').date():
-            data = obj.date_from
-        if obj.date_from.date() < datetime.strptime(created_at, '%Y-%m-%d').date():
-            data = created_at + "T00:00:01"
 
-    return data
 
 def get_amount(obj:Event):
     if obj.object is not None:

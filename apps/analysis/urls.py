@@ -12,6 +12,7 @@ router.register('method_laying', views.MethodLayingViewSet, basename='method_lay
 router.register('type_connection', views.TypeConnectionViewSet, basename='type_connection')
 router.register('type_equipment', views.TypeEquipmentViewSet, basename='type_equipment')
 
+
 urlpatterns = [
 
     path("api/form/", views.get_report),

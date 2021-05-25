@@ -180,6 +180,7 @@ class TypeEquipment(models.Model):
     def __str__(self):
         return self.name
 
+
 class Form61KLS(models.Model):
     point1 = models.ForeignKey(Point, related_name='form61_KLS_point', verbose_name='ИП от', on_delete=models.SET_NULL,
                                blank=True, null=True)
@@ -221,6 +222,7 @@ class Form61RRL(models.Model):
                                verbose_name="Предприятия")
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
                                         verbose_name="Тип Связи", related_name='form61_RRL_connection')
+    number_trunk = models.IntegerField("Количество стволов", default=0, blank=True, null=True)
 
 
 

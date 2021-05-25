@@ -76,7 +76,7 @@ class Form53ListAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        queryset = Form53.objects.all().prefetch_related('order53_photo', 'schema53_photo', 'circuit')
+        queryset = Form53.objects.all().prefetch_related('order53_photo', 'schema53_photo', 'circuit__trassa__trassa')
         outfit = self.request.query_params.get('outfit', None)
         customer = self.request.query_params.get('customer', None)
         pg_object = self.request.query_params.get('pg_object', None)
