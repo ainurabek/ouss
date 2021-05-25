@@ -906,12 +906,12 @@ def get_report_form61_rrl(request):
             form61_data['total_length_line'] = form61.total_length_line
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
-            total_outfit['number_trunk'] += round(form61_data['number_trunk'], 2)
+            total_outfit['number_trunk'] += form61_data['number_trunk']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
-        total_rep['number_trunk'] += round(total_outfit['number_trunk'], 2)
+        total_rep['number_trunk'] += total_outfit['number_trunk']
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
