@@ -35,7 +35,7 @@ from apps.analysis.service import form61_kls_filter, form61_kls_distinct
 import networkx as nx
 from apps.opu.objects.models import Point
 from rest_framework.viewsets import ModelViewSet
-from apps.analysis.models import TypeConnection, MethodLaying, TypeCable
+from apps.analysis.models import TypeConnection, MethodLaying, TypeCable, OrderKLSPhoto, OrderRRLPhoto
 from apps.analysis.serializers import TypeConnectionSerializer, MethodLayingSerializer, TypeCableSerializer
 from shutil import rmtree
 from project.settings import BASE_DIR
@@ -46,6 +46,9 @@ import matplotlib
 
 from apps.analysis.service import get_date_from_ak
 
+from apps.opu.services import create_photo
+
+from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
 
 matplotlib.use('Agg')
 
@@ -618,7 +621,9 @@ class Form61KLSCreateView(APIView):
     def post(self, request):
         serializer = Form61KLSCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            data = serializer.save()
+            create_photo(model=Form61KLS, model_photo=OrderKLSPhoto,
+                         obj=data, field_name="order", request=request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -644,6 +649,22 @@ class Form61KLSDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
     queryset = Form61KLS.objects.all()
 
+class OrderKLSPhotoCreateView(APIView, PhotoCreateMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
+
+    def post(self, request, pk):
+        form61_kls = get_object_or_404(Form61KLS, pk=pk)
+        for img in request.FILES.getlist('order'):
+            OrderKLSPhoto.objects.create(src=img, form61_kls=form61_kls)
+
+        response = {"detail": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
+
+class OrderKLSPhotoDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
+    model_for_delete = OrderKLSPhoto
 
 @permission_classes([IsAuthenticated,])
 def get_report_form61_kls(request):
@@ -651,7 +672,7 @@ def get_report_form61_kls(request):
     outfit = request.GET.getlist("outfit")
     type_connection = request.GET.get("type_connection")
     laying_method = request.GET.get("laying_method")
-    queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+    queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2', 'form61_kls_order_photo',
                                                                                     'type_cable', 'type_connection')
     queryset = form61_kls_filter(queryset, outfit, type_connection, laying_method)
     outfits = form61_kls_distinct(queryset, 'outfit')
@@ -667,7 +688,7 @@ def get_report_form61_kls(request):
         'type_connection': {'id': None, 'name': None},
         'laying_method': [{'id': None, 'name': None}],
         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
-        'year_of_laying': None, 'color': None
+        'year_of_laying': None, 'color': None, 'form61_kls_order_photo': [{'id': None, 'src': None}]
     }
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
@@ -718,16 +739,18 @@ def get_report_form61_kls(request):
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
                 if int(laying_method) == 3:
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
+            form61_data['form61_kls_order_photo'] = [{'id': obj.id, 'src': obj.src.url} for obj in
+                                                     form61.form61_kls_order_photo.all()]
             data.append(form61_data)
-            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
-            total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 2)
+            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
+            total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 1)
             total_outfit['above_ground'] += round(form61_data['above_ground'], 2)
             total_outfit['under_ground'] += round(form61_data['under_ground'], 2)
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
-        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
-        total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 2)
+        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 1)
+        total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 1)
         total_rep['above_ground'] += round(total_outfit['above_ground'], 2)
         total_rep['under_ground'] += round(total_outfit['under_ground'], 2)
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
@@ -826,7 +849,9 @@ class Form61RRLCreateView(APIView):
     def post(self, request):
         serializer = Form61RRLCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            data = serializer.save()
+            create_photo(model=Form61RRL, model_photo=OrderRRLPhoto,
+                         obj=data, field_name="order", request=request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -850,6 +875,23 @@ class Form61RRLDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     queryset = Form61RRL.objects.all()
 
+class OrderRRLPhotoCreateView(APIView, PhotoCreateMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
+
+    def post(self, request, pk):
+        form61_rrl = get_object_or_404(Form61RRL, pk=pk)
+        for img in request.FILES.getlist('order'):
+            OrderRRLPhoto.objects.create(src=img, form61_rrl=form61_rrl)
+
+        response = {"detail": "Изображение успешно добавлено"}
+        return Response(response, status=status.HTTP_201_CREATED)
+
+class OrderRRLPhotoDeleteView(APIView, PhotoDeleteMixin):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
+    model_for_delete = OrderRRLPhoto
+
 @permission_classes([IsAuthenticated, ])
 def get_report_form61_rrl(request):
     """ Форма61 RRL"""
@@ -870,7 +912,7 @@ def get_report_form61_rrl(request):
         'type_equipment_rrl': {'id': None, 'name': None},
         'number_trunk': 0,
         'type_connection': {'id': None, 'name': None},
-        'total_length_line': 0, 'color': None
+        'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': [{'id': None, 'src': None}]
     }
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
@@ -904,15 +946,18 @@ def get_report_form61_rrl(request):
             form61_data['type_connection'][
                 'name'] = form61.type_connection.name if form61.type_connection is not None else ""
             form61_data['total_length_line'] = form61.total_length_line
+
+            form61_data['form61_rrl_order_photo'] = [{ 'id': obj.id, 'src':obj.src.url} for obj in form61.form61_rrl_order_photo.all()]
+
             data.append(form61_data)
 
-            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 2)
+            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
             if form61_data['number_trunk'] is not None:
                 total_outfit['number_trunk'] += form61_data['number_trunk']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
-        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 2)
+        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 1)
         total_rep['number_trunk'] += total_outfit['number_trunk']
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'

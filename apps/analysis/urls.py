@@ -36,11 +36,15 @@ urlpatterns = [
     path("form61/kls/delete/<int:pk>/", views.Form61KLSDeleteAPIView.as_view()),
     path("form61/kls/distance/<int:pk1>/<int:pk2>/", views.get_distance_length_kls),
     path("form61/kls/report/", views.get_report_form61_kls),
+    path("form61/kls/order_kls_photo/create/<int:pk>/", views.OrderKLSPhotoCreateView.as_view()),
+    path("form61/kls/order_kls_photo/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderKLSPhotoDeleteView.as_view()),
 
     path("form61/rrl/create/", views.Form61RRLCreateView.as_view()),
     path("form61/rrl/update/<int:pk>/", views.Form61RRLUpdateAPIView.as_view()),
     path("form61/rrl/delete/<int:pk>/", views.Form61RRLDeleteAPIView.as_view()),
     path("form61/rrl/report/", views.get_report_form61_rrl),
+    path("form61/rrl/order_rrl_photo/create/<int:pk>/", views.OrderRRLPhotoCreateView.as_view()),
+    path("form61/rrl/order_rrl_photo/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderRRLPhotoDeleteView.as_view()),
 
     path('', include(router.urls)),
 

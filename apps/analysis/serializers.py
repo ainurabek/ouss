@@ -8,8 +8,7 @@ from apps.dispatching.serializers import EventObjectSerializer, EventCircuitSeri
 from apps.opu.objects.models import Outfit, Point
 from apps.opu.objects.serializers import IPListSerializer, PointList, OutfitListSerializer
 
-from apps.analysis.models import AmountChannelsKLSRRL
-
+from apps.analysis.models import AmountChannelsKLSRRL, OrderKLSPhoto, OrderRRLPhoto
 
 
 
@@ -148,6 +147,15 @@ class TypeEquipmentSerializer(serializers.ModelSerializer):
         model = TypeEquipment
         fields = ("id", "name")
 
+class OrderKLSSerializer(serializers.ModelSerializer):
+    src = serializers.SerializerMethodField('get_src_url')
+
+    class Meta:
+        model = OrderKLSPhoto
+        fields = ("id", "src")
+
+    def get_src_url(self, obj):
+        return self.context['request'].build_absolute_uri(obj.src.url)
 
 class Form61KLSCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
@@ -176,10 +184,13 @@ class Form61KLSSerializer(serializers.ModelSerializer):
     laying_method = MethodLayingSerializer(many=True, read_only=True)
     type_connection = TypeConnectionSerializer()
     type_cable = TypeCableSerializer()
+    form61_kls_order_photo = OrderKLSSerializer(many=True)
 
     class Meta:
         model = Form61KLS
-        fields = ("__all__")
+        fields = ("id", 'point1', 'point2', 'outfit', 'laying_method', 'type_connection', 'type_cable',
+                  'form61_kls_order_photo', 'total_length_line', 'total_length_cable', 'above_ground', 'under_ground',
+                  'year_of_laying')
 
 
 class Form61KLSEditSerializer(serializers.ModelSerializer):
@@ -197,6 +208,13 @@ class Form61KLSEditSerializer(serializers.ModelSerializer):
                   'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection')
         depth = 1
 
+class OrderRRLSerializer(serializers.ModelSerializer):
+    src = serializers.SerializerMethodField('get_src_url')
+
+    class Meta:
+        model = OrderRRLPhoto
+        fields = ("id", "src")
+
 class Form61RRLCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
@@ -212,7 +230,8 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk')
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk',
+                  'year_of_building')
         depth = 1
 
 class Form61RRLSerializer(serializers.ModelSerializer):
@@ -221,11 +240,13 @@ class Form61RRLSerializer(serializers.ModelSerializer):
     outfit = OutfitListSerializer()
     type_connection = TypeConnectionSerializer()
     type_equipment_rrl = TypeEquipmentSerializer() #rename to rrl
+    form61_rrl_order_photo = OrderRRLSerializer(many=True)
 
 
     class Meta:
         model = Form61RRL
-        fields = ("__all__")
+        fields = ("id", 'point1', 'point2', 'outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection',
+                  'number_trunk', 'year_of_building', 'form61_rrl_order_photo')
 
 class Form61RRLEditSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
@@ -238,5 +259,5 @@ class Form61RRLEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk')
+        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk', 'year_of_building')
         depth = 1

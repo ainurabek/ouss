@@ -199,8 +199,6 @@ class Form61KLS(models.Model):
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
                                    verbose_name="Тип Связи", related_name='form61_KLS_connection')
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия", related_name='form61_KLS_out')
-    src = models.ImageField('Схема', upload_to='files/', blank=True)
-
 
 
     def __str__(self):
@@ -209,6 +207,11 @@ class Form61KLS(models.Model):
     class Meta:
         verbose_name = "Форма 61 (ВОЛС)"
         verbose_name_plural = "Форма 61 (ВОЛС)"
+
+class OrderKLSPhoto(models.Model):
+    src = models.FileField('Схема', upload_to='files/', blank=True)
+    form61_kls = models.ForeignKey(Form61KLS, verbose_name="Распоряжение",
+                               blank=True, null=True,  on_delete=models.CASCADE, related_name="form61_kls_order_photo")
 
 class Form61RRL(models.Model):
     point1 = models.ForeignKey(Point, related_name='form61_RRL_point', verbose_name='ИП от', on_delete=models.SET_NULL,
@@ -223,9 +226,7 @@ class Form61RRL(models.Model):
     type_connection = models.ForeignKey(TypeConnection, on_delete=models.SET_NULL, blank=True, null=True,
                                         verbose_name="Тип Связи", related_name='form61_RRL_connection')
     number_trunk = models.IntegerField("Количество стволов", default=0, blank=True, null=True)
-
-
-
+    year_of_building = models.CharField("Год постройки", max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.point1.name}-{self.point2.name}"
@@ -234,3 +235,8 @@ class Form61RRL(models.Model):
         verbose_name = "Форма 61 (РРЛ)"
         verbose_name_plural = "Форма 61 (РРЛ)"
 
+
+class OrderRRLPhoto(models.Model):
+    src = models.FileField('Схема', upload_to='files/', blank=True)
+    form61_rrl = models.ForeignKey(Form61RRL, verbose_name="Распоряжение",
+                               blank=True, null=True,  on_delete=models.CASCADE, related_name="form61_rrl_order_photo")
