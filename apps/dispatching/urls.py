@@ -71,7 +71,9 @@ urlpatterns = [
     path("api/event/object/parents/<int:pk>/", views.ObjectParentList.as_view()),
     path("api/event/circuit/parents/<int:pk>/", views.CircuitParentList.as_view()),
 
-
+    path("api/damage/report/", views.DamageReportListAPIView.as_view()),
+    path("api/damage/report/<int:pk>/", views.DamageUpdateAPIView.as_view()),
+    path("api/international/damage/report/", views.InternationalDamageReportListAPIView.as_view()),
     path('', include(router.urls)),
 
 ]

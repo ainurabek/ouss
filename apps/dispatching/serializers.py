@@ -1,28 +1,15 @@
 from rest_framework import serializers
-from apps.dispatching.models import Event
-from apps.opu.circuits.models import Circuit
-from apps.opu.objects.models import Object, IP
-from apps.opu.customer.models import Customer
 from apps.opu.customer.serializers import CustomerSerializer
 from apps.opu.objects.models import Object, Point
 from apps.opu.circuits.models import Circuit
-from apps.opu.circuits.serializers import CircuitList
 from apps.dispatching.models import Event
 from apps.dispatching.models import TypeOfJournal, Index, Reason, Comments
 from apps.opu.objects.models import IP, Outfit, OutfitWorker
-from apps.opu.objects.serializers import OutfitListSerializer, ObjectSerializer, IPListSerializer
-
-from apps.opu.circuits.serializers import PointCircSerializer, CategorySerializer
-from apps.opu.objects.serializers import TPOSerializer, PointList, TransitSerializer, PointListSerializer
-
-from apps.opu.circuits.serializers import TransitCircSerializer
-
-from apps.opu.objects.serializers import AllObjectSerializer, OutfitWorkerListSerializer
-
+from apps.opu.objects.serializers import OutfitListSerializer
+from apps.opu.objects.serializers import PointList, PointListSerializer
+from apps.opu.objects.serializers import OutfitWorkerListSerializer
 from apps.accounts.serializers import UserLogSerializer
-
 from apps.opu.objects.serializers import ObjectOutfitSerializer
-from rest_framework.fields import ReadOnlyField
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -30,27 +17,31 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ('id', "name")
 
+
 class TypeJournalSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeOfJournal
         fields = ('id', "name")
+
 
 class ReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reason
         fields = ('id', "name", 'is_read_only')
 
+
 class IndexSerializer(serializers.ModelSerializer):
     class Meta:
         model = Index
         fields = ('id', 'index', "name", 'is_read_only')
+
 
 #event obj detail - Ainur
 class EventObjectSerializer(serializers.ModelSerializer):
     id_outfit = ObjectOutfitSerializer()
     point1 = PointList()
     point2 = PointList()
-    type_line= serializers.SlugRelatedField(slug_field='name', read_only=True)
+    type_line = serializers.SlugRelatedField(slug_field='name', read_only=True)
 
     class Meta:
         model = Object
@@ -74,8 +65,9 @@ class CircuitDetailObjectSerializer(serializers.ModelSerializer):
 
 
 class EventCircuitSerializer(serializers.ModelSerializer):
-    point1=serializers.SlugRelatedField(slug_field='point', read_only=True)
+    point1 = serializers.SlugRelatedField(slug_field='point', read_only=True)
     point2 = serializers.SlugRelatedField(slug_field='point', read_only=True)
+
     class Meta:
         model = Circuit
         fields = ('id', "name", 'point1', 'point2')
@@ -87,6 +79,7 @@ class IPDetailObjectSerializer(serializers.ModelSerializer):
         fields = ['event_ips']
         depth=1
 
+
 #event list - Ainur
 class EventListSerializer(serializers.ModelSerializer):
     object = EventObjectSerializer()
@@ -94,7 +87,6 @@ class EventListSerializer(serializers.ModelSerializer):
     ips = PointListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
-
    
     class Meta:
         model = Event
@@ -122,8 +114,6 @@ class EventCreateSerializer(serializers.ModelSerializer):
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
 
-
-
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
@@ -131,6 +121,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
+
 
 class CallsCreateSerializer(serializers.ModelSerializer):
     """Создания события"""
@@ -164,8 +155,8 @@ class CallsCreateSerializer(serializers.ModelSerializer):
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1',
                   'point2')
-
         depth = 2
+
 
 #event detail - Ainur
 class EventDetailSerializer(serializers.ModelSerializer):
@@ -183,13 +174,12 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
 
-
-
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name')
+
 
 class ReportSerializer(serializers.ModelSerializer):
 
@@ -198,3 +188,34 @@ class ReportSerializer(serializers.ModelSerializer):
         fields = ('id', 'date_from', 'date_to', 'index1', 'created_at',  'object', 'circuit', 'ips', 'name')
 
 
+class DamageReportListSerializer(serializers.ModelSerializer):
+    ips = PointListSerializer()
+    object = EventObjectSerializer()
+    circuit = EventCircuitSerializer()
+    responsible_outfit = OutfitListSerializer()
+    point1 = PointList()
+    point2 = PointList()
+
+    class Meta:
+        model = Event
+        fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "comments1",
+                  "responsible_outfit", "ips", "object", "circuit", "point1", "point2")
+
+
+class DamageUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ("id", "arrival_date")
+
+
+class InternationalDamageReportListSerializer(serializers.ModelSerializer):
+    ips = PointListSerializer()
+    object = EventObjectSerializer()
+    circuit = EventCircuitSerializer()
+    point1 = PointList()
+    point2 = PointList()
+
+    class Meta:
+        model = Event
+        fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "comments1", "ips", "object",
+                  "circuit", "point1", "point2")
