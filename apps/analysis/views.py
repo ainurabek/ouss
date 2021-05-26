@@ -910,7 +910,7 @@ def get_report_form61_rrl(request):
         'point1': {'id': None, 'point': None, 'name': None},
         'point2': {'id': None, 'point': None, 'name': None},
         'type_equipment_rrl': {'id': None, 'name': None},
-        'number_trunk': 0,
+        'number_trunk': 0, 'year_of_building': None,
         'type_connection': {'id': None, 'name': None},
         'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': [{'id': None, 'src': None}]
     }
@@ -941,6 +941,7 @@ def get_report_form61_rrl(request):
             form61_data['type_equipment_rrl']['id'] = form61.type_equipment_rrl.id if form61.type_equipment_rrl is not None else ""
             form61_data['type_equipment_rrl']['name'] = form61.type_equipment_rrl.name if form61.type_equipment_rrl is not None else ""
             form61_data['number_trunk'] = form61.number_trunk
+            form61_data['year_of_building'] = form61.year_of_building
             form61_data['type_connection'][
                 'id'] = form61.type_connection.id if form61.type_connection is not None else ""
             form61_data['type_connection'][
