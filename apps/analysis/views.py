@@ -739,7 +739,7 @@ def get_report_form61_kls(request):
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
                 if int(laying_method) == 3:
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
-            form61_data['form61_kls_order_photo'] = [{'id': obj.id, 'src': obj.src.url} for obj in
+            form61_data['form61_kls_order_photo'] = [{'id': obj.id, 'src': BASE_DIR + obj.src.url} for obj in
                                                      form61.form61_kls_order_photo.all()]
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
@@ -898,7 +898,7 @@ def get_report_form61_rrl(request):
     outfit = request.GET.getlist("outfit")
     type_connection = request.GET.get("type_connection")
     type_equipment_rrl = request.GET.get("type_equipment_rrl")
-    queryset = Form61RRL.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2',
+    queryset = Form61RRL.objects.all().order_by('point1__name').prefetch_related('outfit', 'point1', 'point2',
                                                                                     'type_equipment_rrl', 'type_connection')
     queryset = form61_rrl_filter(queryset, outfit, type_connection, type_equipment_rrl)
     outfits = form61_rrl_distinct(queryset, 'outfit')
@@ -948,7 +948,7 @@ def get_report_form61_rrl(request):
                 'name'] = form61.type_connection.name if form61.type_connection is not None else ""
             form61_data['total_length_line'] = form61.total_length_line
 
-            form61_data['form61_rrl_order_photo'] = [{ 'id': obj.id, 'src':obj.src.url} for obj in form61.form61_rrl_order_photo.all()]
+            form61_data['form61_rrl_order_photo'] = [{ 'id': obj.id, 'src':BASE_DIR + obj.src.url} for obj in form61.form61_rrl_order_photo.all()]
 
             data.append(form61_data)
 
