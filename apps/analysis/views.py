@@ -50,6 +50,10 @@ from apps.opu.services import create_photo
 
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
 
+from apps.analysis.serializers import OrderKLSSerializer
+
+from apps.analysis.serializers import OrderRRLSerializer
+
 matplotlib.use('Agg')
 
 
@@ -672,7 +676,7 @@ def get_report_form61_kls(request):
     outfit = request.GET.getlist("outfit")
     type_connection = request.GET.get("type_connection")
     laying_method = request.GET.get("laying_method")
-    queryset = Form61KLS.objects.all().order_by('id').prefetch_related('outfit', 'point1', 'point2', 'form61_kls_order_photo',
+    queryset = Form61KLS.objects.all().order_by('point1__name').prefetch_related('outfit', 'point1', 'point2', 'form61_kls_order_photo',
                                                                                     'type_cable', 'type_connection')
     queryset = form61_kls_filter(queryset, outfit, type_connection, laying_method)
     outfits = form61_kls_distinct(queryset, 'outfit')
@@ -688,7 +692,7 @@ def get_report_form61_kls(request):
         'type_connection': {'id': None, 'name': None},
         'laying_method': [{'id': None, 'name': None}],
         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
-        'year_of_laying': None, 'color': None, 'form61_kls_order_photo': [{'id': None, 'src': None}]
+        'year_of_laying': None, 'color': None, 'form61_kls_order_photo': []
     }
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
@@ -739,8 +743,10 @@ def get_report_form61_kls(request):
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.above_ground
                 if int(laying_method) == 3:
                     form61_data['total_length_cable'] = form61.total_length_cable - form61.under_ground
-            form61_data['form61_kls_order_photo'] = [{'id': obj.id, 'src': BASE_DIR + obj.src.url} for obj in
-                                                     form61.form61_kls_order_photo.all()]
+            form61_data = Form61KLSSerializer(form61, context={'request': request}).data
+            form61_data['form61_kls_order_photo'] = OrderKLSSerializer(form61.form61_kls_order_photo.all(), many=True,
+                                                                       context={'request': request}).data
+
             data.append(form61_data)
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
             total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 1)
@@ -912,7 +918,7 @@ def get_report_form61_rrl(request):
         'type_equipment_rrl': {'id': None, 'name': None},
         'number_trunk': 0, 'year_of_building': None,
         'type_connection': {'id': None, 'name': None},
-        'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': [{'id': None, 'src': None}]
+        'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': []
     }
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
@@ -948,8 +954,8 @@ def get_report_form61_rrl(request):
                 'name'] = form61.type_connection.name if form61.type_connection is not None else ""
             form61_data['total_length_line'] = form61.total_length_line
 
-            form61_data['form61_rrl_order_photo'] = [{ 'id': obj.id, 'src':BASE_DIR + obj.src.url} for obj in form61.form61_rrl_order_photo.all()]
-
+            form61_data = Form61RRLSerializer(form61, context={'request': request}).data
+            form61_data['form61_rrl_order_photo'] = OrderRRLSerializer(form61.form61_rrl_order_photo.all(), many=True, context={'request': request}).data
             data.append(form61_data)
 
             total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
@@ -964,3 +970,5 @@ def get_report_form61_rrl(request):
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
+
+

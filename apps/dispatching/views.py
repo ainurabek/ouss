@@ -6,10 +6,14 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, DamageReportListSerializer, DamageUpdateSerializer, \
-    InternationalDamageReportListSerializer
-from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to
+    InternationalDamageReportListSerializer, TechStopReportListSerializer
+from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to, \
+    event_form_customer_filter_date_from_date_to_and_customer
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..opu.circuits.models import Circuit
+from ..opu.customer.models import Customer
+from ..opu.form_customer.models import Form_Customer
+from ..opu.form_customer.serializers import FormCustomerSerializer
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
@@ -30,7 +34,7 @@ class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
     queryset = Event.objects.filter(callsorevent=True).prefetch_related('object', 'circuit', 'ips', 'index1',
-                                                                        'responsible_outfit')
+                                                                        'responsible_outfit', 'form_customer')
 
     lookup_field = 'pk'
     serializer_class = EventListSerializer
@@ -251,6 +255,7 @@ class EventObjectCreateViewAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, SuperUser|IngenerUser,)
@@ -459,7 +464,7 @@ def get_report_object(request):
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
-    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
+    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'form_customer_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'form_customer_id', 'name')
 
     if index is not None and index != "":
         all_events = all_events.filter(index1_id=index)
@@ -502,7 +507,7 @@ def get_report_object(request):
                              "reason": None,
                              "comments1": None})
 
-                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, name= event.name).order_by('date_from'):
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, form_customer=event.form_customer, name= event.name).order_by('date_from'):
                     data.append({"outfit": None,
                                  "name": '-',
                                  "type_journal": None,
@@ -512,9 +517,6 @@ def get_report_object(request):
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,
                                  "comments1": call.comments1})
-
-
-
     return JsonResponse(data, safe=False)
 
 
@@ -701,4 +703,88 @@ class InternationalDamageReportListAPIView(ListAPIView):
             filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to). \
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
+        return queryset
+
+
+
+class EventFormCustomerAPIView(APIView):
+    """статистика событий по предприятиям за сегодня"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk):
+        customer = Customer.objects.get(pk=pk)
+        form_customer = Form_Customer.objects.filter(customer=customer)
+        serializer = FormCustomerSerializer(form_customer, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class EventFormCustomerCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
+    """Создания Event"""
+
+    def post(self, request, pk):
+        data = request.data
+        form_customer = get_object_or_404(Form_Customer, pk=pk)
+        created_events = Event.objects.filter(form_customer=form_customer, callsorevent=True).exclude(index1__index='4')
+        if created_events.exists():
+            if data['create_new_call'] == False:
+                message = {"detail": 'По такому Арендатору уже существует событие'}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = EventCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    event = serializer.save(form_customer=form_customer, form_customer__object=form_customer.object if form_customer.object is not None else '',
+                                            form_customer__circuit=form_customer.circuit if form_customer.circuit is not None else '', created_by=self.request.user.profile)
+
+                    Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                         time_created_at=event.time_created_at,
+                                         date_from=event.date_from, index1=event.index1,
+                                         type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                         reason=event.reason, comments1=event.comments1, form_customer=event.form_customer,
+                                         form_customer__object=event.form_customer.object if event.form_customer.object is not None else '',
+                                         form_customer__circuit=event.form_customer.circuit if event.form_customer.circuit is not None else '',
+                                         responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                         customer=event.customer, created_by=event.created_by,
+                                         contact_name=event.contact_name,
+                                         )
+
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            event = serializer.save(form_customer=form_customer,
+                                    form_customer__object=form_customer.object if form_customer.object is not None else '',
+                                    form_customer__circuit=form_customer.circuit if form_customer.circuit is not None else '',
+                                    created_by=self.request.user.profile)
+
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
+                                 date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1, form_customer=event.form_customer,
+                                 form_customer__object=event.form_customer.object if event.form_customer.object is not None else '',
+                                 form_customer__circuit=event.form_customer.circuit if event.form_customer.circuit is not None else '',
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by,
+                                 contact_name=event.contact_name,
+                                 )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TechStopReportListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TechStopReportListSerializer
+
+    def get_queryset(self):
+        date_from = self.request.query_params.get("date_from")
+        date_to = self.request.query_params.get("date_to")
+        customer = self.request.query_params.get("customer")
+        queryset = Event.objects.filter(index1__index="1", callsorevent=False, form_customer__isnull=False).prefetch_related("form_customer", "form_customer__object", "form_customer__circuit")
+
+        if date_from is not None and date_from != "" or date_to is not None and date_to != "":
+            queryset = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
         return queryset

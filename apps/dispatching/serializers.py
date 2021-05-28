@@ -11,6 +11,10 @@ from apps.opu.objects.serializers import OutfitWorkerListSerializer
 from apps.accounts.serializers import UserLogSerializer
 from apps.opu.objects.serializers import ObjectOutfitSerializer
 
+from apps.opu.form_customer.models import Form_Customer
+
+from apps.opu.form_customer.serializers import FormCustomerSerializer
+
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -87,10 +91,12 @@ class EventListSerializer(serializers.ModelSerializer):
     ips = PointListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
+    form_customer = FormCustomerSerializer()
    
     class Meta:
         model = Event
-        fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'time_created_at', 'name', "responsible_outfit", )
+        fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'time_created_at', 'name',
+                  "responsible_outfit", 'form_customer' )
         depth=1
 
 
@@ -113,12 +119,14 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
+    form_customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Form_Customer.objects.all())
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
+                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'form_customer')
 
         depth = 2
 
@@ -148,13 +156,15 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Point.objects.all(), allow_null=True)
     circuit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Circuit.objects.all(), allow_null=True)
+    form_customer = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Form_Customer.objects.all(), allow_null=True)
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1',
-                  'point2')
+                  'point2', 'form_customer')
         depth = 2
 
 
@@ -173,12 +183,13 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
+    form_customer = FormCustomerSerializer()
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name')
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name', "form_customer")
 
 
 class ReportSerializer(serializers.ModelSerializer):
@@ -219,3 +230,10 @@ class InternationalDamageReportListSerializer(serializers.ModelSerializer):
         model = Event
         fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "comments1", "ips", "object",
                   "circuit", "point1", "point2")
+
+class TechStopReportListSerializer(serializers.ModelSerializer):
+    form_customer = FormCustomerSerializer()
+
+    class Meta:
+        model = Event
+        fields = ("id", "date_from", "date_to", 'form_customer')

@@ -176,11 +176,17 @@ class Form61KLSCreateSerializer(serializers.ModelSerializer):
                   'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection', 'src')
         depth = 1
 
+class Outfit61tSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Outfit
+        fields = ('id', 'outfit', 'adding', 'num_outfit')
+        depth = 1
 
 class Form61KLSSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
-    outfit = OutfitListSerializer()
+    outfit = Outfit61tSerializer()
     laying_method = MethodLayingSerializer(many=True, read_only=True)
     type_connection = TypeConnectionSerializer()
     type_cable = TypeCableSerializer()
@@ -215,6 +221,10 @@ class OrderRRLSerializer(serializers.ModelSerializer):
         model = OrderRRLPhoto
         fields = ("id", "src")
 
+    def get_src_url(self, obj):
+
+        return self.context['request'].build_absolute_uri(obj.src.url)
+
 class Form61RRLCreateSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Outfit.objects.all())
@@ -237,7 +247,7 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
 class Form61RRLSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
-    outfit = OutfitListSerializer()
+    outfit = Outfit61tSerializer()
     type_connection = TypeConnectionSerializer()
     type_equipment_rrl = TypeEquipmentSerializer() #rename to rrl
     form61_rrl_order_photo = OrderRRLSerializer(many=True)
@@ -245,8 +255,8 @@ class Form61RRLSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ("id", 'point1', 'point2', 'outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection',
-                  'number_trunk', 'year_of_building', 'form61_rrl_order_photo')
+        fields = ("id", 'outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk', 'year_of_building',
+                  'form61_rrl_order_photo')
 
 class Form61RRLEditSerializer(serializers.ModelSerializer):
     outfit = serializers.PrimaryKeyRelatedField(
