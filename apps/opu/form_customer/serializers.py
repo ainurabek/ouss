@@ -60,7 +60,7 @@ class CircuitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ('trassa',)
+        fields = ( 'id', 'trassa',)
 
 
 class ObjectFormCustomer(serializers.ModelSerializer):
@@ -70,7 +70,7 @@ class ObjectFormCustomer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('bridges', 'name', 'point1', 'point2')
+        fields = ('id', 'bridges', 'name', 'point1', 'point2')
 
 
 class SignalizationSerializer(serializers.ModelSerializer):
@@ -113,10 +113,24 @@ class AllObjectFormSerializer(serializers.ModelSerializer):
     bridges = BridgeListSerializer(many=True)
     id_outfit = OutfitListSerializer()
     category = CategorySerializer()
-    customer = CustomerFormSerializer
+    customer = CustomerFormSerializer()
+
 
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges', 'form_cust_obj')
         depth = 1
 
+class CircuitFormList(serializers.ModelSerializer):
+    point1 = PointList()
+    point2 = PointList()
+    trassa = CircuitTrassaerializer()
+    customer = CustomerFormSerializer()
+    category = CategorySerializer()
+    form_cust_cir = FormCustomerSerializer()
+    # object = ObjectSerializer()
+
+    class Meta:
+        model = Circuit
+        fields = ('id', 'name', 'num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
+                  'point1', 'point2', 'customer', 'object', 'form_cust_cir')

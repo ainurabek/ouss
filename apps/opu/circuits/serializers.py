@@ -50,12 +50,13 @@ class CircuitList(serializers.ModelSerializer):
     trassa = CircuitTrassaerializer()
     customer = CustomerSerializer()
     category = CategorySerializer()
+
     # object = ObjectSerializer()
 
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
-                  'point1', 'point2', 'customer', 'object')
+                  'point1', 'point2', 'customer', 'object', )
 
 
 class CircuitTrassaList(serializers.ModelSerializer):

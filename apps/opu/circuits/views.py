@@ -11,6 +11,8 @@ from apps.opu.circuits.service import get_circuit_diff
 from apps.opu.circuits.service import update_circuit_active
 from apps.opu.objects.models import Object
 
+from apps.opu.form_customer.serializers import CircuitFormList
+
 
 class CircuitListViewSet(APIView):
     permission_classes = (IsAuthenticated,)
@@ -20,7 +22,7 @@ class CircuitListViewSet(APIView):
         circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'transit',
                                                                          'transit2', 'id_object', 'customer',
                                                                          'category')
-        serializer = CircuitList(circuits, many=True)
+        serializer = CircuitFormList(circuits, many=True)
         return Response(serializer.data)
 
 
