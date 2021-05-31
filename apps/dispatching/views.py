@@ -788,3 +788,6 @@ class TechStopReportListAPIView(ListAPIView):
         if date_from is not None and date_from != "" or date_to is not None and date_to != "":
             queryset = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
         return queryset
+
+
+

@@ -36,7 +36,7 @@ from apps.opu.objects.serializers import GOZListSerializer
 from apps.opu.objects.serializers import GOZUpdateSerializer
 from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil,  OutfitActivityLogUtil, PointActivityLogUtil
 
-
+from apps.opu.form_customer.serializers import AllObjectFormSerializer
 
 
 class TPOListView(viewsets.ModelViewSet):
@@ -250,7 +250,7 @@ class ObjectAllView(ListAPIView):
     queryset = Object.objects.all().order_by('name').prefetch_related('tpo1', 'tpo2',
                                                                       'point1', 'point2', 'transit', 'transit2',
                                                                       'id_outfit', 'category', 'customer')
-    serializer_class = AllObjectSerializer
+    serializer_class = AllObjectFormSerializer
 
 
 #we use this view in form 5.3

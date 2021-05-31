@@ -5,6 +5,7 @@ from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, Ty
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
 
+
 User = get_user_model()
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -242,6 +243,7 @@ class TransitDetailSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "trassa", "can_see")
 
 
+
 class AllObjectSerializer(serializers.ModelSerializer):
     tpo1 = TPOSerializer()
     tpo2 = TPOSerializer()
@@ -252,9 +254,11 @@ class AllObjectSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     customer = CustomerSerializer()
 
+
+
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges')
+        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges', 'form_cust_obj')
         depth = 1
 
 

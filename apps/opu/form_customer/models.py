@@ -20,8 +20,8 @@ class Signalization(models.Model):
 class Form_Customer(models.Model):
     """Форма для арендаторов"""
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
-    object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО", blank=True, null=True)
-    circuit = models.OneToOneField(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", blank=True, null=True)
+    object = models.OneToOneField(Object, on_delete=models.CASCADE, verbose_name="КО", related_name='form_cust_obj', blank=True, null=True)
+    circuit = models.OneToOneField(Circuit, on_delete=models.CASCADE, verbose_name="Каналы", related_name='form_cust_cir',blank=True, null=True)
     amount_flow = models.CharField('Количество потоков', max_length=200, blank=True, null=True)
     signalization = models.ForeignKey(Signalization, related_name='cust_sign', on_delete=models.SET_NULL, blank=True,
                                       null=True)

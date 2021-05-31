@@ -13,6 +13,8 @@ from apps.opu.circuits.serializers import TransitCircSerializer
 
 from apps.opu.circuits.serializers import CircuitTrassaerializer
 
+from apps.opu.objects.serializers import TPOSerializer, PointList, OutfitListSerializer, CategorySerializer
+
 
 class CustomerFormSerializer(serializers.ModelSerializer):
     class Meta:
@@ -100,3 +102,21 @@ class FormCustomerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form_Customer
         fields = ('id', "amount_flow", "signalization", "type_of_using", "num_order", "comments")
+
+
+class AllObjectFormSerializer(serializers.ModelSerializer):
+    form_cust_obj = FormCustomerSerializer()
+    tpo1 = TPOSerializer()
+    tpo2 = TPOSerializer()
+    point1 = PointList()
+    point2 = PointList()
+    bridges = BridgeListSerializer(many=True)
+    id_outfit = OutfitListSerializer()
+    category = CategorySerializer()
+    customer = CustomerFormSerializer
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges', 'form_cust_obj')
+        depth = 1
+
