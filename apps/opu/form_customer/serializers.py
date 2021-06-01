@@ -57,16 +57,18 @@ class CircuitListSerializer(serializers.ModelSerializer):
 
 class CircuitSerializer(serializers.ModelSerializer):
     trassa = CircuitTrassaerializer()
+    customer = CustomerFormSerializer()
 
     class Meta:
         model = Circuit
-        fields = ( 'id', 'trassa',)
+        fields = ( 'id', 'trassa', 'customer')
 
 
 class ObjectFormCustomer(serializers.ModelSerializer):
     bridges = BridgeListSerializer(many=True)
     point1 = PointSerializer()
     point2 = PointSerializer()
+    customer = CustomerFormSerializer()
 
     class Meta:
         model = Object
@@ -86,7 +88,6 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     order_cust_photo = OrderCusPhotoSerializer(many=True)
     point1 = PointSerializer()
     point2 = PointSerializer()
-
     class Meta:
         model = Form_Customer
         fields = ("id", "circuit", "object", "amount_flow", "signalization",
