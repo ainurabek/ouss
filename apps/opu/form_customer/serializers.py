@@ -83,14 +83,13 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     object = ObjectFormCustomer()
     circuit = CircuitSerializer()
     signalization = SignalizationSerializer()
-    customer = CustomerFormSerializer()
     order_cust_photo = OrderCusPhotoSerializer(many=True)
     point1 = PointSerializer()
     point2 = PointSerializer()
 
     class Meta:
         model = Form_Customer
-        fields = ("id", "circuit", 'customer', "object", "amount_flow", "signalization",
+        fields = ("id", "circuit", "object", "amount_flow", "signalization",
                   "type_of_using", "num_order", "order_cust_photo", "comments", 'point1', 'point2')
 
 
@@ -105,7 +104,6 @@ class FormCustomerCreateSerializer(serializers.ModelSerializer):
 
 
 class AllObjectFormSerializer(serializers.ModelSerializer):
-
     tpo1 = TPOSerializer()
     tpo2 = TPOSerializer()
     point1 = PointList()
@@ -146,9 +144,8 @@ class EventObjFormCustSerializer(serializers.ModelSerializer):
 
 class EventCircuitFormCustSerializer(serializers.ModelSerializer):
     form_customer= FormCustomerSerializer()
-    # trassa = CircuitTrassaerializer()
 
     class Meta:
-        model = Object
+        model = Circuit
         fields = ('id', 'name', 'form_customer')
         depth = 1

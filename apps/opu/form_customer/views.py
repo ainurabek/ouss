@@ -53,8 +53,8 @@ class FormCustomerListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'circuit', 'customer',)
-    queryset = Form_Customer.objects.defer('created_by', 'object__transit', 'object__transit2').select_related('customer', 'signalization', 'point1', 'point2').\
+    filterset_fields = ('object', 'circuit', 'object__customer', 'circuit__customer')
+    queryset = Form_Customer.objects.defer('created_by', 'object__transit', 'object__transit2').select_related('signalization', 'point1', 'point2').\
         prefetch_related('circuit__trassa__trassa', 'object__bridges__transit__trassa', 'order_cust_photo')
     serializer_class = FormCustomerSerializer
 
@@ -94,7 +94,7 @@ class FormCustomerCircCreateAPIView(APIView):
             return Response(content, status=status.HTTP_403_FORBIDDEN)
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save(circuit=circuit, customer=circuit.customer, created_by=self.request.user.profile)
+            instance = serializer.save(circuit=circuit, created_by=self.request.user.profile)
             instance.save()
             FormCustomerCircuitLogUtil(self.request.user, instance.pk).obj_create_action('form_customer_circuit_created')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -114,7 +114,7 @@ class FormCustomerObjCreateAPIView(APIView):
 
         serializer = FormCustomerCreateSerializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save(object=object, customer=object.customer, created_by=self.request.user.profile)
+            instance = serializer.save(object=object, created_by=self.request.user.profile)
             instance.save()
             FormCustomerObjectLogUtil(self.request.user, instance.pk).obj_create_action(
                 'form_customer_object_created')
