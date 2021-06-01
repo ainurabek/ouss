@@ -53,11 +53,18 @@ class FormCustomerListAPIView(ListAPIView):
     """ Фильтрация Формы арендаторов  по арендаторам """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    filter_backends = (SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('object', 'circuit', Q('object__customer')|Q('circuit__customer')|Q('customer'))
-    queryset = Form_Customer.objects.defer('created_by').select_related('signalization', 'point1', 'point2').\
-        prefetch_related('circuit__trassa__trassa', 'object__bridges__transit__trassa', 'order_cust_photo')
     serializer_class = FormCustomerSerializer
+
+    def get_queryset(self):
+        queryset = Form_Customer.objects.defer('created_by').select_related('signalization', 'point1', 'point2'). \
+            prefetch_related('circuit__trassa__trassa', 'object__bridges__transit__trassa', 'order_cust_photo')
+        customer = self.request.query_params.get('customer', None)
+
+        if customer is not None and customer != '':
+            queryset = queryset.filter(Q(customer=customer) | Q(object__customer=customer)| Q(circuit__customer=customer))
+
+        return queryset.order_by('-created_at')
+
 
 class PointListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
