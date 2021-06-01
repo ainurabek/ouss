@@ -82,7 +82,7 @@ def get_date_to(obj: Event, created_at: str):
 def event_form_customer_filter_date_from_date_to_and_customer(event: Event, date_from, date_to, customer) -> Event:
 
     if customer is not None and customer != '':
-        event = event.filter(Q(object__customer=customer)|Q(circuit__object__customer=customer))
+        event = event.filter(Q(object__customer=customer)|Q(circuit__customer=customer))
     if date_from is not None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
 
