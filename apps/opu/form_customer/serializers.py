@@ -72,7 +72,7 @@ class ObjectFormCustomer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'bridges', 'name', 'point1', 'point2')
+        fields = ('id', 'bridges', 'customer', 'name', 'point1', 'point2')
 
 
 class SignalizationSerializer(serializers.ModelSerializer):
