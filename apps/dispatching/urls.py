@@ -75,8 +75,7 @@ urlpatterns = [
     path("api/damage/report/<int:pk>/", views.DamageUpdateAPIView.as_view()),
     path("api/international/damage/report/", views.InternationalDamageReportListAPIView.as_view()),
  #создания событий по арендаторам
-    path("api/event/form_cust/<int:pk>/", views.EventFormCustomerAPIView.as_view()),
-    path("api/event/form_cust/create/<int:pk>/", views.EventFormCustomerCreateViewAPI.as_view()),
+
     path("api/tech_stop/report/", views.TechStopReportListAPIView.as_view()),
 
     path('', include(router.urls)),

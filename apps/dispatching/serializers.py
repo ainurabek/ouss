@@ -15,6 +15,9 @@ from apps.opu.form_customer.models import Form_Customer
 
 from apps.opu.form_customer.serializers import FormCustomerSerializer
 
+from apps.opu.form_customer.serializers import EventObjFormCustSerializer, EventCircuitFormCustSerializer
+
+
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,12 +94,12 @@ class EventListSerializer(serializers.ModelSerializer):
     ips = PointListSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
-    form_customer = FormCustomerSerializer()
+
    
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "index1", "date_from", "date_to", 'created_at', 'time_created_at', 'name',
-                  "responsible_outfit", 'form_customer' )
+                  "responsible_outfit")
         depth=1
 
 
@@ -119,14 +122,13 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
-    form_customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Form_Customer.objects.all())
+
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'form_customer')
+                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
 
         depth = 2
 
@@ -156,15 +158,13 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Point.objects.all(), allow_null=True)
     circuit = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Circuit.objects.all(), allow_null=True)
-    form_customer = serializers.PrimaryKeyRelatedField(
-        read_only=False, queryset=Form_Customer.objects.all(), allow_null=True)
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1',
-                  'point2', 'form_customer')
+                  'point2')
         depth = 2
 
 
@@ -183,13 +183,13 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
-    form_customer = FormCustomerSerializer()
+
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name', "form_customer")
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name')
 
 
 class ReportSerializer(serializers.ModelSerializer):
@@ -232,8 +232,9 @@ class InternationalDamageReportListSerializer(serializers.ModelSerializer):
                   "circuit", "point1", "point2")
 
 class TechStopReportListSerializer(serializers.ModelSerializer):
-    form_customer = FormCustomerSerializer()
+    object = EventObjFormCustSerializer()
+    circuit = EventCircuitFormCustSerializer()
 
     class Meta:
         model = Event
-        fields = ("id", "date_from", "date_to", 'form_customer')
+        fields = ("id", 'index1', "date_from", "date_to", 'object', 'circuit')

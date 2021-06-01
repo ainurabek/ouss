@@ -105,7 +105,7 @@ class FormCustomerCreateSerializer(serializers.ModelSerializer):
 
 
 class AllObjectFormSerializer(serializers.ModelSerializer):
-    form_cust_obj = FormCustomerSerializer()
+
     tpo1 = TPOSerializer()
     tpo2 = TPOSerializer()
     point1 = PointList()
@@ -118,7 +118,7 @@ class AllObjectFormSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges', 'form_cust_obj')
+        fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges')
         depth = 1
 
 class CircuitFormList(serializers.ModelSerializer):
@@ -127,10 +127,28 @@ class CircuitFormList(serializers.ModelSerializer):
     trassa = CircuitTrassaerializer()
     customer = CustomerFormSerializer()
     category = CategorySerializer()
-    form_cust_cir = FormCustomerSerializer()
+
     # object = ObjectSerializer()
 
     class Meta:
         model = Circuit
         fields = ('id', 'name', 'num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
-                  'point1', 'point2', 'customer', 'object', 'form_cust_cir')
+                  'point1', 'point2', 'customer', 'object')
+
+class EventObjFormCustSerializer(serializers.ModelSerializer):
+    form_customer= FormCustomerSerializer()
+    # bridges = BridgeListSerializer(many=True)
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'form_customer')
+        depth = 1
+
+class EventCircuitFormCustSerializer(serializers.ModelSerializer):
+    form_customer= FormCustomerSerializer()
+    # trassa = CircuitTrassaerializer()
+
+    class Meta:
+        model = Object
+        fields = ('id', 'name', 'form_customer')
+        depth = 1

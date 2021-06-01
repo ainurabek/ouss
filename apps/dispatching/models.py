@@ -99,7 +99,6 @@ class Event(models.Model):
 
     arrival_date = models.DateTimeField("Дата приезда бригады", blank=True, null=True)
     downtime = models.CharField("Длителность простоя", max_length=150, blank=True, null=True)
-    form_customer = models.ForeignKey(Form_Customer, on_delete=models.CASCADE, related_name='event_form_customer', verbose_name="События по арендаторам",  null=True, blank=True)
 
     class Meta:
         verbose_name = 'Журнал событий'
