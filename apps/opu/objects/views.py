@@ -184,9 +184,7 @@ class IPDeleteView(generics.DestroyAPIView):
 class LPListView(viewsets.ModelViewSet):
     """ Линии передачи """
     authentication_classes = (TokenAuthentication,)
-    queryset = Object.objects.filter(id_parent=None).order_by('name').prefetch_related('transit',
-                                                                                       'transit2', 'reserve_transit',
-                                                                                       'reserve_transit2', 'point1',
+    queryset = Object.objects.filter(id_parent=None).order_by('name').prefetch_related('bridges__transit__trassa', 'point1',
                                                                                        'point2')
     lookup_field = 'pk'
     serializer_class = LPSerializer
@@ -248,7 +246,7 @@ class LPEditView(generics.RetrieveUpdateAPIView):
 class ObjectAllView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     queryset = Object.objects.all().order_by('name').prefetch_related('tpo1', 'tpo2',
-                                                                      'point1', 'point2', 'transit', 'transit2',
+                                                                      'point1', 'point2', 'bridges__transit__trassa',
                                                                       'id_outfit', 'category', 'customer')
     serializer_class = AllObjectFormSerializer
 
@@ -614,8 +612,7 @@ class GOZListView(APIView):
 
     def get(self, request):
         outfit = self.request.query_params.get('outfit', None)
-        queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name').prefetch_related('transit', 'transit2', 'reserve_transit',
-                                                                                                     'reserve_transit2')
+        queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name').prefetch_related('bridges__transit__trassa')
         if outfit is not None and outfit != "":
             queryset = queryset.filter(id_outfit_id=outfit)
         obj_with_reserves = []

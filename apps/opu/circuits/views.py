@@ -19,8 +19,7 @@ class CircuitListViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
-        circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'transit',
-                                                                         'transit2', 'id_object', 'customer',
+        circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'id_object', 'customer',
                                                                          'category')
         serializer = CircuitFormList(circuits, many=True)
         return Response(serializer.data)

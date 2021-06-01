@@ -18,8 +18,6 @@ class Circuit(models.Model):
 	num_order = models.CharField(max_length=100, blank=True, null=True)
 
 	comments = models.CharField(max_length=100, blank=True, null=True)
-	transit = SortedManyToManyField("Circuit", related_name='cir_transit_obj1', blank=True)
-	transit2 = SortedManyToManyField("Circuit", related_name='cir_transit_obj2', blank=True)
 	first = models.BooleanField('Используется/Не используется', default = True)
 
 	point1 = models.ForeignKey(Point, related_name='circ_ip1', on_delete=models.SET_NULL, blank=True, null=True)

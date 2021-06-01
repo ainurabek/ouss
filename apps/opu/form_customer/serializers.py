@@ -133,19 +133,23 @@ class CircuitFormList(serializers.ModelSerializer):
         fields = ('id', 'name', 'num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
                   'point1', 'point2', 'customer', 'object')
 
+
 class EventObjFormCustSerializer(serializers.ModelSerializer):
-    form_customer= FormCustomerSerializer()
-    # bridges = BridgeListSerializer(many=True)
+    form_customer= serializers.SlugRelatedField(slug_field="type_of_using", read_only=True)
+    bridges = BridgeListSerializer(many=True)
+    customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
 
     class Meta:
         model = Object
-        fields = ('id', 'name', 'form_customer')
+        fields = ('id', 'name', 'customer', 'form_customer', 'bridges')
         depth = 1
 
 class EventCircuitFormCustSerializer(serializers.ModelSerializer):
-    form_customer= FormCustomerSerializer()
+    form_customer= serializers.SlugRelatedField(slug_field="type_of_using", read_only=True)
+    trassa = TransitCircSerializer(many=True)
+    customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name', 'form_customer')
+        fields = ('id', 'name', 'customer',  'form_customer', 'trassa')
         depth = 1

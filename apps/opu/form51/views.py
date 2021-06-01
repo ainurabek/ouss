@@ -19,7 +19,7 @@ class FormListAPIView(ListAPIView):
 
     def get_queryset(self):
         queryset = Form51.objects. \
-            defer('created_by', 'object__tpo1', 'object__tpo2', 'object__point1', 'object__transit', 'object__transit2',
+            defer('created_by', 'object__tpo1', 'object__tpo2', 'object__point1',
                   'object__point2', 'object__id_parent', 'object__amount_channels', 'object__created_by',
                   'object__customer', 'object__type_line', 'object__type_of_trakt'). \
             select_related('customer', 'object').prefetch_related('object__bridges__transit__trassa')
