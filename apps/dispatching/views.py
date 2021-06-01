@@ -714,7 +714,6 @@ class TechStopReportListAPIView(ListAPIView):
         customer = self.request.query_params.get("customer")
         queryset = Event.objects.filter(index1__index="1", callsorevent=False).filter(Q(object__form_customer__isnull=False)|Q(circuit__form_customer__isnull=False)).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
-
         queryset = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
         return queryset
 

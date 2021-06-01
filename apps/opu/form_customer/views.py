@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from apps.opu.circuits.models import Circuit
@@ -53,7 +54,7 @@ class FormCustomerListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filter_fields = ('object', 'circuit', 'object__customer', 'circuit__customer', 'customer')
+    filterset_fields = ('object', 'circuit', Q('object__customer')|Q('circuit__customer')|Q('customer'))
     queryset = Form_Customer.objects.defer('created_by').select_related('signalization', 'point1', 'point2').\
         prefetch_related('circuit__trassa__trassa', 'object__bridges__transit__trassa', 'order_cust_photo')
     serializer_class = FormCustomerSerializer
