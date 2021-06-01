@@ -627,9 +627,7 @@ class IndexModelViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
-
         return [permission() for permission in permission_classes]
-
 
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class EventUnknownCreateViewAPI(APIView):
@@ -648,7 +646,6 @@ class EventUnknownCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
-
             # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -706,9 +703,6 @@ class InternationalDamageReportListAPIView(ListAPIView):
         return queryset
 
 
-
-
-
 class TechStopReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -718,7 +712,7 @@ class TechStopReportListAPIView(ListAPIView):
         date_from = self.request.query_params.get("date_from")
         date_to = self.request.query_params.get("date_to")
         customer = self.request.query_params.get("customer")
-        queryset = Event.objects.filter(index1__index="1", callsorevent=False).filter(Q(object__form_customer__isnull=False)|Q(circuit__form_customer__isnull=False))
+        queryset = Event.objects.filter(index1__index="1", callsorevent=False).filter(Q(object__form_customer__isnull=False)|Q(circuit__form_customer__isnull=False)).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
         if date_from is not None and date_from != "" or date_to is not None and date_to != "":
             queryset = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)

@@ -10,11 +10,6 @@ from apps.opu.objects.serializers import PointList, PointListSerializer
 from apps.opu.objects.serializers import OutfitWorkerListSerializer
 from apps.accounts.serializers import UserLogSerializer
 from apps.opu.objects.serializers import ObjectOutfitSerializer
-
-from apps.opu.form_customer.models import Form_Customer
-
-from apps.opu.form_customer.serializers import FormCustomerSerializer
-
 from apps.opu.form_customer.serializers import EventObjFormCustSerializer, EventCircuitFormCustSerializer
 
 
