@@ -11,9 +11,7 @@ from .services import get_minus_date, ListFilterAPIView, get_event_name, get_dat
     event_form_customer_filter_date_from_date_to_and_customer
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..opu.circuits.models import Circuit
-from ..opu.customer.models import Customer
-from ..opu.form_customer.models import Form_Customer
-from ..opu.form_customer.serializers import FormCustomerSerializer
+
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from rest_framework import viewsets, generics
@@ -32,12 +30,19 @@ from rest_framework.decorators import permission_classes
 
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
     queryset = Event.objects.filter(callsorevent=True).prefetch_related('object', 'circuit', 'ips', 'index1',
                                                                         'responsible_outfit')
 
     lookup_field = 'pk'
     serializer_class = EventListSerializer
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser]
+
+        return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -79,7 +84,7 @@ class EventListAPIView(viewsets.ModelViewSet):
 
 class EventDetailAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk=None):
         created_at = request.GET.get("created_at")
@@ -455,7 +460,7 @@ class UncompletedEventList(ListFilterAPIView):
     queryset = Event.objects.filter(date_to=None).exclude(callsorevent=False).exclude(index1__index='4')
 
 
-@permission_classes([IsAuthenticated, SuperUser|IsDispOnly])
+@permission_classes([IsAuthenticated, ])
 def get_report_object(request):
     date = request.GET.get("date")
 
@@ -464,7 +469,7 @@ def get_report_object(request):
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
-    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'form_customer_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'form_customer_id', 'name')
+    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
 
     if index is not None and index != "":
         all_events = all_events.filter(index1_id=index)
@@ -507,7 +512,7 @@ def get_report_object(request):
                              "reason": None,
                              "comments1": None})
 
-                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, form_customer=event.form_customer, name= event.name).order_by('date_from'):
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, name= event.name).order_by('date_from'):
                     data.append({"outfit": None,
                                  "name": '-',
                                  "type_journal": None,
@@ -523,7 +528,7 @@ def get_report_object(request):
 class OutfitWorkerGet(APIView):
     """статистика событий по предприятиям за сегодня"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         outfit = Outfit.objects.get(pk=pk)
@@ -562,7 +567,7 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
     queryset = OutfitWorker.objects.all().order_by('id')
     lookup_field = 'pk'
 
@@ -632,7 +637,7 @@ class IndexModelViewSet(viewsets.ModelViewSet):
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class EventUnknownCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser|SuperUser)
     """Создания Unknown Event"""
 
     def post(self, request):
@@ -653,7 +658,7 @@ class EventUnknownCreateViewAPI(APIView):
 
 class DamageReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = DamageReportListSerializer
 
     def get_queryset(self):
@@ -676,7 +681,7 @@ class DamageReportListAPIView(ListAPIView):
 
 class DamageUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser | IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser | IsDispOnly, SuperUser|IngenerUser)
     queryset = Event.objects.filter(callsorevent=False)
     serializer_class = DamageUpdateSerializer
     lookup_field = "pk"
@@ -684,7 +689,7 @@ class DamageUpdateAPIView(UpdateAPIView):
 
 class InternationalDamageReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, SuperUser|IngenerUser)
     serializer_class = InternationalDamageReportListSerializer
 
     def get_queryset(self):
@@ -705,7 +710,7 @@ class InternationalDamageReportListAPIView(ListAPIView):
 
 class TechStopReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = TechStopReportListSerializer
 
     def get_queryset(self):
