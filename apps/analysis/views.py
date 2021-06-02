@@ -824,7 +824,14 @@ class TypeConnectionViewSet(viewsets.ModelViewSet):
     serializer_class = TypeConnectionSerializer
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, IngenerUser | SuperUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class MethodLayingViewSet(viewsets.ModelViewSet):
@@ -832,20 +839,42 @@ class MethodLayingViewSet(viewsets.ModelViewSet):
     serializer_class = MethodLayingSerializer
     authentication_classes = (TokenAuthentication,)
     lookup_field = "pk"
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly, IngenerUser | SuperUser]
+
+        return [permission() for permission in permission_classes]
+
 
 
 class TypeCableViewSet(ModelViewSet):
     queryset = TypeCable.objects.all()
     serializer_class = TypeCableSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, IngenerUser | SuperUser]
+
+        return [permission() for permission in permission_classes]
 
 class TypeEquipmentViewSet(ModelViewSet):
     queryset = TypeEquipment.objects.all()
     serializer_class = TypeEquipmentSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, IngenerUser | SuperUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class Form61RRLCreateView(APIView):
