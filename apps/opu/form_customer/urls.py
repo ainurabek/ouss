@@ -27,10 +27,6 @@ urlpatterns = [
 
     path("history/form_customer/<int:pk>/", views.FormCustomerHistory.as_view(), name='form_customer_history'),
 
-#list of points
-    path("api/point/list/", views.PointListAPIView.as_view()),
-    path("api/point/create/<int:pk1>/<int:pk2>/<int:customer_id>/", views.FormCustomerIPCreateAPIView.as_view()),
-
 
     path('', include(router.urls))
 ]

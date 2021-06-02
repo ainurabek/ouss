@@ -61,16 +61,9 @@ class FormCustomerListAPIView(ListAPIView):
         customer = self.request.query_params.get('customer', None)
 
         if customer is not None and customer != '':
-            queryset = queryset.filter(Q(customer=customer) | Q(object__customer=customer)| Q(circuit__customer=customer))
+            queryset = queryset.filter(Q(object__customer=customer)| Q(circuit__customer=customer))
 
         return queryset.order_by('-created_at')
-
-
-class PointListAPIView(ListAPIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Point.objects.all()
-    serializer_class = PointSerializer
 
 
 class CircuitListAPIView(APIView, ListWithPKMixin):
@@ -129,27 +122,6 @@ class FormCustomerObjCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class FormCustomerIPCreateAPIView(APIView):
-    """Создания Формы арендаторов через ИПы"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
-
-    def post(self, request, pk1, pk2, customer_id):
-        point1 = get_object_or_404(Point, pk=pk1)
-        point2 = get_object_or_404(Point, pk=pk2)
-        customer = get_object_or_404(Customer, pk = customer_id)
-        if Form_Customer.objects.filter(point1=point1, point2=point2).exists():
-            content = {'detail': 'С такими ИПами уже форма арендаторов создана'}
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
-
-        serializer = FormCustomerCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            instance = serializer.save(point1=point1, point2=point2, customer=customer, created_by=self.request.user.profile)
-            instance.save()
-            FormCustomerIPLogUtil(self.request.user, instance.pk, instance.pk).obj_create_action(
-                'form_customer_ip_created')
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FormCustomerUpdateAPIView(UpdateAPIView):
     """Создания Формы арендаторов"""
