@@ -651,7 +651,6 @@ class EventUnknownCreateViewAPI(APIView):
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
                                  )
-            # update_period_of_time(instance=obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -668,11 +667,12 @@ class DamageReportListAPIView(ListAPIView):
         if date_from == "" or date_to == "":
             return []
         queryset = Event.objects.\
-            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1").\
-            filter(Q(object__tpo1__index="35", object__tpo2__index="35") | Q(ips__tpo__index="35") |
-                   Q(circuit__point1__tpo__index="35", circuit__point2__tpo__index="35"), index1__index="1",
-                   callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
-            prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1",
+                  "circuit", "ips", ).\
+            filter(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
+                   Q(object__tpo2__index="51"), Q(object__name__contains="K") | Q(object__name__contains="К"),
+                   index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
+            prefetch_related("object", "responsible_outfit", "point1", "point2")
 
         if outfit != "":
             queryset = queryset.filter(responsible_outfit=outfit)
@@ -689,7 +689,7 @@ class DamageUpdateAPIView(UpdateAPIView):
 
 class InternationalDamageReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser | IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated,)
     serializer_class = InternationalDamageReportListSerializer
 
     def get_queryset(self):
@@ -700,8 +700,10 @@ class InternationalDamageReportListAPIView(ListAPIView):
             return []
         queryset = Event.objects. \
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1"). \
-            exclude(Q(object__tpo1__index="35", object__tpo2__index="35") | Q(ips__tpo__index="35") |
-                    Q(circuit__point1__tpo__index="35", circuit__point2__tpo__index="35")). \
+            exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
+                    Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
+                    Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
+                    Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
             filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to). \
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
