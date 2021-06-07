@@ -20,7 +20,7 @@ class SecondaryBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = SecondaryBase
         fields = ('id', 'point', 'outfit', 'type_station', 'year_of_launch', 'installed_value',
-                  'active_value', 'active_numbering', 'free_numbering', 'GAS_numbering', 'GAS_return', 'KT_numbering', 'comments')
+                  'active_value', 'active_numbering', 'free_numbering', 'GAS_numbering', 'GAS_return', 'KT_numbering', 'comments', 'administrative_division')
         depth = 1
 
 class SecondaryBaseCreateSerializer(serializers.ModelSerializer):
@@ -35,5 +35,5 @@ class SecondaryBaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SecondaryBase
         fields = ('id', 'point', 'outfit', 'type_station', 'year_of_launch', 'installed_value',
-                  'active_value', 'active_numbering', 'free_numbering', 'GAS_numbering', 'GAS_return', 'KT_numbering', 'comments')
+                  'active_value', 'active_numbering', 'free_numbering', 'GAS_numbering', 'GAS_return', 'KT_numbering', 'comments', 'administrative_division')
         depth = 1

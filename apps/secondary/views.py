@@ -43,7 +43,6 @@ class PointsByOutfittView(APIView):
 
 
 class BaseModelView(viewsets.ModelViewSet):
-    """ Линии передачи """
     authentication_classes = (TokenAuthentication,)
     queryset = SecondaryBase.objects.all().order_by('outfit').prefetch_related('point', 'outfit', 'type_station')
     lookup_field = 'pk'

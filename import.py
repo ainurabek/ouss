@@ -12,6 +12,7 @@ from apps.opu.objects.models import Object, Transit, Bridge
 from apps.opu.circuits.service import create_circuit_transit
 # from apps.analysis.models import AmountChannelsKLSRRL
 from apps.dispatching.models import Event
+from apps.secondary.models import TypeStation
 
 
 #добавить все задействованные каналы к ипам обьектов
@@ -99,29 +100,36 @@ from apps.dispatching.models import Event
 #     all_calls[i].id_parent.responsible_outfit = all_calls[0].responsible_outfit
 #     all_calls[i].id_parent.save()
 
-unique_trassa = []
-reserve_trassa = []
+# unique_trassa = []
+# reserve_trassa = []
+#
+# for obj in Object.objects.all():
+#     trassa = [*obj.transit.all()[::-1], *obj.transit2.all()]
+#     res_trassa = [*obj.reserve_transit.all()[::-1], *obj.reserve_transit2.all()]
+#
+#     if len(trassa) > 1 and trassa not in unique_trassa:
+#         unique_trassa.append(trassa)
+#     if len(res_trassa) > 1 and res_trassa not in reserve_trassa:
+#         reserve_trassa.append(res_trassa)
+#
+#
+# for trassa in unique_trassa:
+#     tr = Transit.objects.create(name="Основная трасса", create_circuit_transit=True)
+#     for obj in trassa:
+#         tr.trassa.add(obj)
+#         Bridge.objects.create(object=obj, transit=tr)
+#     create_circuit_transit(tr)
+#
+#
+# for trassa in reserve_trassa:
+#     tr = Transit.objects.create(name="Резерв", create_circuit_transit=False)
+#     for obj in trassa:
+#         tr.trassa.add(obj)
+#         Bridge.objects.create(object=obj, transit=tr)
 
-for obj in Object.objects.all():
-    trassa = [*obj.transit.all()[::-1], *obj.transit2.all()]
-    res_trassa = [*obj.reserve_transit.all()[::-1], *obj.reserve_transit2.all()]
-
-    if len(trassa) > 1 and trassa not in unique_trassa:
-        unique_trassa.append(trassa)
-    if len(res_trassa) > 1 and res_trassa not in reserve_trassa:
-        reserve_trassa.append(res_trassa)
-
-
-for trassa in unique_trassa:
-    tr = Transit.objects.create(name="Основная трасса", create_circuit_transit=True)
-    for obj in trassa:
-        tr.trassa.add(obj)
-        Bridge.objects.create(object=obj, transit=tr)
-    create_circuit_transit(tr)
-
-
-for trassa in reserve_trassa:
-    tr = Transit.objects.create(name="Резерв", create_circuit_transit=False)
-    for obj in trassa:
-        tr.trassa.add(obj)
-        Bridge.objects.create(object=obj, transit=tr)
+data_type_station = csv.reader(open("/home/ainura/Desktop/DB/type_station.csv"), delimiter=',')
+for row in data_type_station:
+    if row[0] != 'id':
+        type_station = TypeStation()
+        type_station.name = row[1]
+        type_station.save()
