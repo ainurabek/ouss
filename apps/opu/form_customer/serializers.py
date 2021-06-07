@@ -136,7 +136,7 @@ class CircuitFormList(serializers.ModelSerializer):
 
 
 class EventObjFormCustSerializer(serializers.ModelSerializer):
-    form_customer= serializers.SlugRelatedField(slug_field="type_of_using", read_only=True)
+    form_customer= FormCustomerSerializer()
     bridges = BridgeListSerializer(many=True)
     customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
 
@@ -146,7 +146,7 @@ class EventObjFormCustSerializer(serializers.ModelSerializer):
         depth = 1
 
 class EventCircuitFormCustSerializer(serializers.ModelSerializer):
-    form_customer= serializers.SlugRelatedField(slug_field="type_of_using", read_only=True)
+    form_customer= FormCustomerSerializer()
     trassa = TransitCircSerializer(many=True)
     customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
 
