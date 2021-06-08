@@ -472,8 +472,7 @@ def get_report_object(request):
     all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
 
     if index is not None and index != "":
-        all_events = all_events.filter(index1_id=index)
-
+        all_events = all_events.filter(index1__id=index)
 
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")

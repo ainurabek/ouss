@@ -17,7 +17,7 @@ class TypeStation(models.Model):
         return self.name
 
 class SecondaryBase(models.Model):
-    '''База вторичной сети'''
+    '''База вторичной сети Для СВС'''
     point = models.ForeignKey(Point, verbose_name="ИП", on_delete=models.SET_NULL, related_name="point_secondary", null=True, blank=True)
     outfit = models.ForeignKey(Outfit, related_name='second_out', on_delete=models.SET_NULL, blank=True, null=True)
     type_station = models.ForeignKey(TypeStation, related_name='type_station_second', on_delete=models.SET_NULL, blank=True, null=True)

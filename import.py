@@ -8,11 +8,11 @@ import django
 
 django.setup()
 
-from apps.opu.objects.models import Object, Transit, Bridge
+from apps.opu.objects.models import Object, Transit, Bridge, Point, Outfit
 from apps.opu.circuits.service import create_circuit_transit
 # from apps.analysis.models import AmountChannelsKLSRRL
 from apps.dispatching.models import Event
-from apps.secondary.models import TypeStation
+from apps.secondary.models import TypeStation, SecondaryBase
 
 
 #добавить все задействованные каналы к ипам обьектов
@@ -127,9 +127,30 @@ from apps.secondary.models import TypeStation
 #         tr.trassa.add(obj)
 #         Bridge.objects.create(object=obj, transit=tr)
 
-data_type_station = csv.reader(open("/home/ainura/Desktop/DB/type_station.csv"), delimiter=',')
-for row in data_type_station:
+# data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
+data_second = csv.reader(open("/home/ainura/Desktop/DB/second2.csv"), delimiter=',')
+# for row in data_type_station:
+#     if row[0] != 'id':
+#         type_station = TypeStation()
+#         type_station.name = row[1]
+#         type_station.save()
+
+for row in data_second:
     if row[0] != 'id':
-        type_station = TypeStation()
-        type_station.name = row[1]
-        type_station.save()
+        second = SecondaryBase()
+        second.point = Point.objects.get(point=row[1])
+        second.type_station = TypeStation.objects.get(name=row[2])
+        second.administrative_division = row[3]
+        outfit = Outfit.objects.get(id=row[4])
+        second.outfit = outfit
+        second.year_of_launch = row[5]
+        second.free_numbering = row[6]
+        second.installed_value = row[7]
+        second.active_value = row[8]
+        second.active_numbering=row[9]
+        second.KT_numbering=row[10]
+        second.GAS_numbering = row[11]
+        second.GAS_return=row[12]
+        second.comments=row[13]
+
+        second.save()
