@@ -147,7 +147,7 @@ class EventObjFormCustSerializer(serializers.ModelSerializer):
 
 class EventCircuitFormCustSerializer(serializers.ModelSerializer):
     form_customer= FormCustomerSerializer()
-    trassa = TransitCircSerializer(many=True)
+    trassa = CircuitTrassaerializer()
     customer = serializers.SlugRelatedField(slug_field="customer", read_only=True)
 
     class Meta:

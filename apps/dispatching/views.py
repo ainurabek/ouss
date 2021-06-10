@@ -463,17 +463,16 @@ class UncompletedEventList(ListFilterAPIView):
 @permission_classes([IsAuthenticated, ])
 def get_report_object(request):
     date = request.GET.get("date")
-
     index = request.GET.get("index")
 
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
-    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id', 'circuit_id', 'name')
-
     if index is not None and index != "":
         all_events = all_events.filter(index1__id=index)
 
+    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id',
+                                                                                                'circuit_id', 'name')
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
     data = []
