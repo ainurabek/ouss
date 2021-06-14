@@ -501,7 +501,7 @@ class ReportOaAndOdApiView(APIView):
         date_to = request.GET.get("date_to")
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
-        get_detail = self.request.data["get_detail"]
+        get_detail = request.GET.get("get_detail")
 
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
@@ -570,7 +570,7 @@ class ReportOaAndOdApiView(APIView):
 
                 for call in get_calls_list(all_event, event):
                     sum = get_period(call, date_to)
-                    if get_detail is True:
+                    if get_detail:
                         call_detail_data['detail']['total_sum']['sum'] +=sum
                         call_detail_data['detail']['total_sum']['count'] += 1
                         if call.index1 == od:
