@@ -537,14 +537,17 @@ class ReportOaAndOdApiView(APIView):
             "name": None,
             "oa": {"sum": 0, "count": 0},
             "od": {"sum": 0, "count": 0},
-            "total_sum": {"sum": 0, "count": 0}
+            "total_sum": {"sum": 0, "count": 0},
+            "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}
 
         }
 
         for out in outfits:
             outfit = out.responsible_outfit
-            data.append({"outfit": outfit.outfit, "name": None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
-            outfit_data = {"outfit": outfit.outfit, "name": None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}}
+            data.append({"outfit": outfit.outfit, "name": None, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
+                         "total_sum": {"sum": None, "count": None}, "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []} })
+            outfit_data = {"outfit": outfit.outfit, "name": None,  "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+                           "total_sum": {"sum": 0, "count": 0},  "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}}
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, event, od, outfit)
                 count_oa = get_count_event(all_event, event, oa, outfit)
@@ -556,23 +559,25 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                data.append({"name": get_event_name(event), "outfit": None, "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
+                data.append({"name": get_event_name(event), "outfit": None,
                                        "oa": { "sum": sum_oa, "count": count_oa, "color": None},
-                                       "od": { "sum": sum_od, "count": count_od, "color": None}})
+                                       "od": { "sum": sum_od, "count": count_od, "color": None},
+                                     "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
+                                     "detail": {"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}})
 
-                call_detail_data = {"outfit": None, "name": None, "total_sum": {"sum": 0, "count": 0},
-                               "oa": [],
-                               "od": []}
+                call_detail_data = {"outfit": None, "name": None,  "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
+                           "total_sum": {"sum": 0, "count": 0},  "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}}
+
                 for call in get_calls_list(all_event, event):
                     sum = get_period(call, date_to)
                     if get_detail is True:
-                        call_detail_data['total_sum']['sum'] +=sum
-                        call_detail_data['total_sum']['count'] += 1
+                        call_detail_data['detail']['total_sum']['sum'] +=sum
+                        call_detail_data['detail']['total_sum']['count'] += 1
                         if call.index1 == od:
-                            call_detail_data['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
+                            call_detail_data['detail']['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
                                       "sum": sum, "count": 1})
                         elif call.index1 == oa:
-                            call_detail_data['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
+                            call_detail_data['detail']['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
                                  "date_to": call.date_to,
                                  "sum": sum, "count": 1})
                 data.append(call_detail_data)
