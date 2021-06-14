@@ -379,7 +379,6 @@ class ReportOaAndOdApiView(APIView):
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
 
-
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
 
@@ -418,7 +417,6 @@ class ReportOaAndOdApiView(APIView):
             "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}
 
         }
-
         for out in outfits:
             outfit = out.responsible_outfit
             data.append({"outfit": outfit.outfit, "name": None, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
