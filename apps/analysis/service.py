@@ -641,6 +641,7 @@ def get_count_event(events: Event, event, index, outfit) -> int:
     return filter_event(events, event, index, outfit).count()
 
 
+
 def get_sum_period_of_time_event(events: Event, instance, index, outfit, date_to):
     a = 0
     for event in filter_event(events, instance, index, outfit):

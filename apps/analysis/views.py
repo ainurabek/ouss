@@ -1,7 +1,11 @@
 import copy
 import os
 import random
+from collections import Counter
 from shutil import rmtree
+
+from django.db.models import Count
+from django.db.models.functions import ExtractDay
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -11,7 +15,7 @@ from apps.analysis.serializers import FormAnalysisSerializer, FormAnalysisDetail
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
     Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer,\
     Form61RRLCreateSerializer, Form61RRLSerializer, Form61RRLEditSerializer, TypeEquipmentSerializer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
@@ -53,6 +57,7 @@ from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
 from apps.analysis.serializers import OrderKLSSerializer
 
 from apps.analysis.serializers import OrderRRLSerializer
+
 
 matplotlib.use('Agg')
 
@@ -496,6 +501,7 @@ class ReportOaAndOdApiView(APIView):
         date_to = request.GET.get("date_to")
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
+        get_detail = self.request.data["get_detail"]
 
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
@@ -512,6 +518,7 @@ class ReportOaAndOdApiView(APIView):
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
+
         data = []
 
         winners_oa = {
@@ -549,10 +556,27 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                data.append({"name": get_event_name(event), "outfit": None,
-                                       "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
-                                       "oa": {"sum": sum_oa, "count": count_oa, "color": None},
-                                       "od": {"sum": sum_od, "count": count_od, "color": None}})
+                data.append({"name": get_event_name(event), "outfit": None, "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
+                                       "oa": { "sum": sum_oa, "count": count_oa, "color": None},
+                                       "od": { "sum": sum_od, "count": count_od, "color": None}})
+
+                call_detail_data = {"outfit": None, "name": None, "total_sum": {"sum": 0, "count": 0},
+                               "oa": [],
+                               "od": []}
+                for call in get_calls_list(all_event, event):
+                    sum = get_period(call, date_to)
+                    if get_detail is True:
+                        call_detail_data['total_sum']['sum'] +=sum
+                        call_detail_data['total_sum']['count'] += 1
+                        if call.index1 == od:
+                            call_detail_data['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
+                                      "sum": sum, "count": 1})
+                        elif call.index1 == oa:
+                            call_detail_data['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
+                                 "date_to": call.date_to,
+                                 "sum": sum, "count": 1})
+                data.append(call_detail_data)
+
                 outfit_data["oa"]["count"] += count_oa
                 outfit_data["od"]["count"] += count_od
                 outfit_data["oa"]["sum"] += round(sum_oa, 2)
@@ -999,5 +1023,4 @@ def get_report_form61_rrl(request):
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
-
 

@@ -89,7 +89,7 @@ def update_circuit_active(object: Object):
 
 def create_circuit_transit(object_transit: Transit):
     if object_transit.create_circuit_transit:
-        max_count = object_transit.trassa.all().annotate(circuit_count=Count('circuit_object_parent')).order_by('circuit_count').first()
+        max_count = object_transit.trassa.all().annotate(circuit_count=Count('circuit_object_parent')).order_by('-circuit_count').first()
         circuit_transits = {
             str(num): CircuitTransit.objects.create(obj_trassa=object_transit)
             for num in range(1, max_count.circuit_object_parent.count() + 1)
