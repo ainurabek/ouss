@@ -1,11 +1,6 @@
 import copy
 import os
 import random
-from collections import Counter
-from shutil import rmtree
-
-from django.db.models import Count
-from django.db.models.functions import ExtractDay
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -49,130 +44,12 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 from apps.analysis.service import get_date_from_ak
-
 from apps.opu.services import create_photo
-
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
-
 from apps.analysis.serializers import OrderKLSSerializer
-
 from apps.analysis.serializers import OrderRRLSerializer
 
-
 matplotlib.use('Agg')
-
-
-# @permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
-# def get_report(request):
-#     """ Форма анализа"""
-#     date_from = request.GET.get("date_from")
-#     date_to = request.GET.get("date_to")
-#     responsible_outfit = request.GET.getlist("responsible_outfit")
-#
-#     all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
-#                                                                                               'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
-#
-#     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
-#
-#     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
-#     outfits = event_distinct(all_event, "responsible_outfit")
-#
-#     data = []
-#
-#     list_reason_typ_line = {
-#         "Откл. ЭЭКЛС": None, "Откл. ЭЭЦРРЛ": None, "ПВ аппаратурыКЛС": None,
-#         "ПВ аппаратурыЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
-#         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
-#         }
-#
-#     example = {"name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
-#                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
-#     }
-#
-#     for outfit in outfits:
-#         total_outfit = copy.deepcopy(example)
-#         total_outfit['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
-#         out_data = copy.deepcopy(example)
-#         out_data['name'] = outfit.responsible_outfit.outfit
-#         out_data['color'] = "1"
-#         data.append(out_data)
-#
-#         for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
-#             event_data = copy.deepcopy(example)
-#             event_data['name'] = get_event_name(event)
-#             data.append(event_data)
-#             example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
-#             total_period_of_time = copy.deepcopy(example)
-#
-#             for call in get_calls_list(all_event, event):
-#                 period = get_period(call, date_to)
-#
-#                 if call.ips is None:
-#                     type_line = get_type_line(call)
-#                     amount_of_channels = get_amount_of_channels(call)
-#
-#                     call_data = copy.deepcopy(example)
-#                     call_data['date_from'] = call.date_from
-#                     call_data['date_to'] = call.date_to
-#                     call_data['period_of_time'][call.reason.name+type_line] = period
-#
-#                     call_data['amount_of_channels'][type_line] = amount_of_channels
-#                     call_data['comments'] = call.comments1
-#
-#                     total_period_of_time['period_of_time'][call.reason.name+type_line] += period
-#
-#                     data.append(call_data)
-#                 else:
-#                     call_data = copy.deepcopy(example)
-#                     call_data['date_from'] = call.date_from
-#                     call_data['date_to'] = call.date_to
-#                     call_data['comments'] = call.comments1
-#                     kls = call.ips.total_point_channels_KLS
-#                     rrl = call.ips.total_point_channels_RRL
-#
-#                     if kls != 0:
-#                         call_data['amount_of_channels']["КЛС"] = kls
-#                         call_data['period_of_time'][call.reason.name + 'КЛС'] = period
-#                         total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
-#
-#                     if rrl != 0:
-#                         call_data['amount_of_channels']["ЦРРЛ"] = rrl
-#                         call_data['period_of_time'][call.reason.name + 'ЦРРЛ'] = period
-#                         total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
-#                     data.append(call_data)
-#
-#
-#             total = dict(total_period_of_time)
-#             if event.ips is None:
-#                 for i in total['period_of_time']:
-#                     total['period_of_time'][i] = round(total['period_of_time'][i] * int(get_amount_of_channels(event)), 2)
-#                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
-#             else:
-#                 k = event.ips.total_point_channels_KLS
-#                 r = event.ips.total_point_channels_RRL
-#
-#                 for i in total['period_of_time']:
-#                     if k != 0:
-#                         total['period_of_time'][i] = round(total['period_of_time'][i] * k, 2)
-#                         total_outfit['period_of_time'][i] += total['period_of_time'][i]
-#                     if r != 0:
-#                         total['period_of_time'][i] = round(total['period_of_time'][i] * r, 2)
-#                         total_outfit['period_of_time'][i] += total['period_of_time'][i]
-#
-#             total_period_of_time['name'] = 'всего'
-#             total_period_of_time['date_from'] = 'час'
-#             total_period_of_time['color'] = '2'
-#             data.append(total_period_of_time)
-#             total['name'] = 'всего'
-#             total['date_from'] = 'кнл/час'
-#             total['color'] = '3'
-#             data.append(total)
-#
-#         total_outfit['name'] = 'Общий итог'
-#         total_outfit['color'] = '4'
-#         data.append(total_outfit)
-#     return JsonResponse(data, safe=False)
-
 
 class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
     """сохранение количества каналов для Обьекта"""
@@ -182,7 +59,7 @@ class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
     serializer_class = AmountChannelsKLSRRLSerializer
 
 
-@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+@permission_classes([IsAuthenticated,])
 def get_report(request):
     """ Форма анализа"""
     date_from = request.GET.get("date_from")
@@ -265,7 +142,7 @@ def get_report(request):
     return JsonResponse(data, safe=False)
 
 
-@permission_classes([IsAuthenticated, SuperUser|IsAKOnly])
+@permission_classes([IsAuthenticated,])
 def get_report_analysis(request):
     """Отчет дисп.службы по разным индексам"""
     date_from = request.GET.get("date_from")
@@ -334,7 +211,7 @@ def get_report_analysis(request):
 
 class DispEventHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
@@ -428,7 +305,7 @@ class FormAnalysisCreateAPIView(APIView):
 class Punkt5ListAPIView(APIView, ListWithPKMixin):
     """Список п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated, )
     model = Punkt5
     serializer = Punkt5ListSerializer
     field_for_filter = "form_analysis__id_parent"
@@ -438,7 +315,7 @@ class Punkt5ListAPIView(APIView, ListWithPKMixin):
 class Punkt7ListAPIView(APIView, ListWithPKMixin):
     """Список п.5"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated, )
     model = Punkt7
     serializer = Punkt7ListSerializer
     field_for_filter = "form_analysis__id_parent"
@@ -494,14 +371,14 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
         responsible_outfit = request.GET.getlist("responsible_outfit")
         index = request.GET.get("index")
-        get_detail = request.GET.get("get_detail")
+
 
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
@@ -570,16 +447,15 @@ class ReportOaAndOdApiView(APIView):
 
                 for call in get_calls_list(all_event, event):
                     sum = get_period(call, date_to)
-                    if get_detail:
-                        call_detail_data['detail']['total_sum']['sum'] +=sum
-                        call_detail_data['detail']['total_sum']['count'] += 1
-                        if call.index1 == od:
-                            call_detail_data['detail']['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
-                                      "sum": sum, "count": 1})
-                        elif call.index1 == oa:
-                            call_detail_data['detail']['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
-                                 "date_to": call.date_to,
-                                 "sum": sum, "count": 1})
+                    call_detail_data['detail']['total_sum']['sum'] +=sum
+                    call_detail_data['detail']['total_sum']['count'] += 1
+                    if call.index1 == od:
+                        call_detail_data['detail']['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
+                                  "sum": sum, "count": 1})
+                    elif call.index1 == oa:
+                        call_detail_data['detail']['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
+                             "date_to": call.date_to,
+                             "sum": sum, "count": 1})
                 data.append(call_detail_data)
 
                 outfit_data["oa"]["count"] += count_oa
@@ -611,7 +487,7 @@ class ReportOaAndOdApiView(APIView):
 
 class WinnerReportAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         date_from = request.GET.get("date_from")

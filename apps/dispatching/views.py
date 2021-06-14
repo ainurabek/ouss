@@ -52,7 +52,6 @@ class EventListAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         created_at = self.request.query_params.get('created_at', None)
-
         type_journal = self.request.query_params.get('type_journal', None)
         responsible_outfit = self.request.query_params.get('responsible_outfit', None)
         index1 = self.request.query_params.get('index1', None)
@@ -559,7 +558,7 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly,  SuperUser|IngenerUser)
 
 
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
@@ -581,7 +580,7 @@ class CommentModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
 
         return [permission() for permission in permission_classes]
 
@@ -597,7 +596,7 @@ class TypeJournalModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
 
         return [permission() for permission in permission_classes]
 
@@ -613,7 +612,7 @@ class ReasonModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
 
         return [permission() for permission in permission_classes]
 
@@ -629,7 +628,7 @@ class IndexModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
         return [permission() for permission in permission_classes]
 
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
