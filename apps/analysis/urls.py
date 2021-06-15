@@ -45,7 +45,6 @@ urlpatterns = [
     path("form61/rrl/report/", views.get_report_form61_rrl),
     path("form61/rrl/order_rrl_photo/create/<int:pk>/", views.OrderRRLPhotoCreateView.as_view()),
     path("form61/rrl/order_rrl_photo/delete/<int:obj_pk>/<int:deleted_pk>/", views.OrderRRLPhotoDeleteView.as_view()),
-
     path("detail/report/od/oa/", views.DetailOaAndOdApiView.as_view()),
 
     path('', include(router.urls)),

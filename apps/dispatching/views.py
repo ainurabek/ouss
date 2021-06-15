@@ -321,7 +321,7 @@ class EventUpdateAPIView(UpdateAPIView):
 class EventDeleteAPIView(DestroyAPIView):
     """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser, DateCheck)
+    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
 
     queryset = Event.objects.all()
     lookup_field = 'pk'

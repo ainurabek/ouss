@@ -785,7 +785,6 @@ def form61_rrl_distinct(form61: Form61RRL, *args):
     return form61.order_by(*args).distinct(*args)
 
 def event_filter_date_from_date_to(event: Event, date_from, date_to) -> Event:
-
     if date_from is not None and date_to is None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None))
         event= event.filter(date_from__date__lte=date_from)
@@ -794,5 +793,4 @@ def event_filter_date_from_date_to(event: Event, date_from, date_to) -> Event:
         event = event.filter(date_from__date__lte=date_to)
     elif date_from is not None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
-
     return event

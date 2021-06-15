@@ -463,7 +463,6 @@ class ReportOaAndOdApiView(APIView):
             data.append(outfit_data)
         rep["oa"]["sum"] = round(rep["oa"]["sum"], 2)
         rep["od"]["sum"] = round(rep["od"]["sum"], 2)
-
         data.append(rep)
         return JsonResponse(data, safe=False)
 
@@ -476,12 +475,9 @@ class DetailOaAndOdApiView(APIView):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
         pk = request.GET.get("pk")
-
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
-
         all_event = Event.objects.filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False)
-
         if Object.objects.filter(pk=pk).exists():
             object = Object.objects.get(pk=pk)
             all_events = all_event.filter(object=object)
@@ -491,16 +487,15 @@ class DetailOaAndOdApiView(APIView):
         elif Circuit.objects.filter(pk=pk).exists():
             circuit = Circuit.objects.get(pk=pk)
             all_events = all_event.filter(circuit=circuit)
-
         all_events = event_filter_date_from_date_to(all_events, date_from, date_to)
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
         data = []
-        content = {"id": None, "date_from": None, "date_to": None, "sum": 0, "count": 0}
+        content = {"id": None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
         for event in all_event_name:
             for call in get_calls_list(all_events, event):
                 sum = get_period(call, date_to)
-                call_data = {"id": call.id, "date_from": call.date_from, "date_to": call.date_to, "sum": sum, "count": 1}
+                call_data = {"id": call.id, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
                 data.append(call_data)
                 total_data['sum'] += call_data['sum']
                 total_data['count'] += call_data['count']
