@@ -49,6 +49,13 @@ from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
 from apps.analysis.serializers import OrderKLSSerializer
 from apps.analysis.serializers import OrderRRLSerializer
 
+from apps.dispatching.services import get_event_pk
+
+from apps.analysis.service import event_filter_date_from_date_to
+
+from apps.opu.circuits.models import Circuit
+from apps.opu.objects.models import Object
+
 matplotlib.use('Agg')
 
 class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
@@ -371,7 +378,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
 
     def get(self, request):
         date_from = request.GET.get("date_from")
@@ -394,7 +401,6 @@ class ReportOaAndOdApiView(APIView):
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
-
         data = []
 
         winners_oa = {
@@ -410,18 +416,16 @@ class ReportOaAndOdApiView(APIView):
         }
         rep = {
             "outfit": None,
-            "name": None,
+            "name": None, "pk":None,
             "oa": {"sum": 0, "count": 0},
             "od": {"sum": 0, "count": 0},
-            "total_sum": {"sum": 0, "count": 0},
-            "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}
+            "total_sum": {"sum": 0, "count": 0}
         }
+
         for out in outfits:
             outfit = out.responsible_outfit
-            data.append({"outfit": outfit.outfit, "name": None, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None},
-                         "total_sum": {"sum": None, "count": None}, "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []} })
-            outfit_data = {"outfit": outfit.outfit, "name": None,  "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0},
-                           "total_sum": {"sum": 0, "count": 0},  "detail":{"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}}
+            data.append({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
+            outfit_data = {"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}}
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, event, od, outfit)
                 count_oa = get_count_event(all_event, event, oa, outfit)
@@ -433,30 +437,10 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                call_detail_data = {"outfit": None, "name": get_event_name(event), "oa": {"sum": sum_oa, "count": count_oa},
-                                    "od": {"sum": sum_od, "count": count_od},
-                                    "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od},
-                                    "detail": {"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}}
-
-                # data.append({"name": get_event_name(event), "outfit": None,
-                #                        "oa": { "sum": sum_oa, "count": count_oa, "color": None},
-                #                        "od": { "sum": sum_od, "count": count_od, "color": None},
-                #                      "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
-                #                      "detail": {"total_sum": {"sum": 0, "count": 0}, "oa": [], "od": []}})
-
-                for call in get_calls_list(all_event, event):
-                    sum = get_period(call, date_to)
-                    call_detail_data['detail']['total_sum']['sum'] +=sum
-                    call_detail_data['detail']['total_sum']['count'] += 1
-                    if call.index1 == od:
-                        call_detail_data['detail']['od'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from, "date_to": call.date_to,
-                                  "sum": sum, "count": 1})
-                    elif call.index1 == oa:
-                        call_detail_data['detail']['oa'].append({"id": call.id, "index": call.index1.index, "date_from": call.date_from,
-                             "date_to": call.date_to,
-                             "sum": sum, "count": 1})
-                data.append(call_detail_data)
-
+                data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": None,
+                                       "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
+                                       "oa": {"sum": sum_oa, "count": count_oa, "color": None},
+                                       "od": {"sum": sum_od, "count": count_od, "color": None}})
                 outfit_data["oa"]["count"] += count_oa
                 outfit_data["od"]["count"] += count_od
                 outfit_data["oa"]["sum"] += round(sum_oa, 2)
@@ -483,6 +467,46 @@ class ReportOaAndOdApiView(APIView):
         data.append(rep)
         return JsonResponse(data, safe=False)
 
+
+class DetailOaAndOdApiView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        pk = request.GET.get("pk")
+
+        od = Index.objects.get(index="0д")
+        oa = Index.objects.get(index="0а")
+
+        all_event = Event.objects.filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False)
+
+        if Object.objects.filter(pk=pk).exists():
+            object = Object.objects.get(pk=pk)
+            all_events = all_event.filter(object=object)
+        elif Point.objects.filter(pk=pk).exists():
+            ips = Point.objects.get(pk=pk)
+            all_events = all_event.filter(ips=ips)
+        elif Circuit.objects.filter(pk=pk).exists():
+            circuit = Circuit.objects.get(pk=pk)
+            all_events = all_event.filter(circuit=circuit)
+
+        all_events = event_filter_date_from_date_to(all_events, date_from, date_to)
+        all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
+        data = []
+        content = {"id": None, "date_from": None, "date_to": None, "sum": 0, "count": 0}
+        total_data = copy.deepcopy(content)
+        for event in all_event_name:
+            for call in get_calls_list(all_events, event):
+                sum = get_period(call, date_to)
+                call_data = {"id": call.id, "date_from": call.date_from, "date_to": call.date_to, "sum": sum, "count": 1}
+                data.append(call_data)
+                total_data['sum'] += call_data['sum']
+                total_data['count'] += call_data['count']
+            total_data['date_from'] = "Итого:"
+            data.append(total_data)
+        return JsonResponse(data, safe=False)
 
 class WinnerReportAPIView(APIView):
     authentication_classes = (TokenAuthentication,)

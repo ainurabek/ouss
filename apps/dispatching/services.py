@@ -48,6 +48,18 @@ def get_event_name(event_object) -> str:
 
     return event_name
 
+def get_event_pk(event_object) -> str:
+
+    event_name = None
+
+    if event_object.object is not None:
+        event_name = event_object.object.pk
+    elif event_object.ips is not None:
+        event_name = event_object.ips.pk
+    elif event_object.circuit is not None:
+        event_name = event_object.circuit.pk
+
+    return event_name
 
 def get_event(event_object) -> Event:
     event = None
