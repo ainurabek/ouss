@@ -138,7 +138,6 @@ def get_report(request):
                 if amount_channels_RRL != 0:
                     total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_RRL, 2)
                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
-
             total['name'] = 'всего'
             total['date_from'] = 'кнл/час'
             total['color'] = '3'
@@ -438,12 +437,12 @@ class ReportOaAndOdApiView(APIView):
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
                 data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": None,
-                                       "total_sum": {"sum": sum_oa+sum_od, "count": count_oa + count_od, "color": None},
+                                       "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
                                        "oa": {"sum": sum_oa, "count": count_oa, "color": None},
                                        "od": {"sum": sum_od, "count": count_od, "color": None}})
                 outfit_data["oa"]["count"] += count_oa
                 outfit_data["od"]["count"] += count_od
-                outfit_data["oa"]["sum"] += round(sum_oa, 2)
+                outfit_data["oa"]["sum"] += sum_oa
                 outfit_data["od"]["sum"] += sum_od
 
                 outfit_data['total_sum']['sum'] = outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]
@@ -460,9 +459,15 @@ class ReportOaAndOdApiView(APIView):
             winners_oa = set_response_for_winners(winners_oa, "oa", data)
             winners_od = set_response_for_winners(winners_od, "od", data)
 
+
+            outfit_data["oa"]["sum"] = round(outfit_data["oa"]["sum"], 2)
+            outfit_data["od"]["sum"] = round(outfit_data["od"]["sum"],2)
+
             data.append(outfit_data)
+
         rep["oa"]["sum"] = round(rep["oa"]["sum"], 2)
         rep["od"]["sum"] = round(rep["od"]["sum"], 2)
+        rep["total_sum"]["sum"] = round(rep["total_sum"]["sum"], 2)
         data.append(rep)
         return JsonResponse(data, safe=False)
 

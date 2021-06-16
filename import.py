@@ -130,6 +130,13 @@ from apps.secondary.models import TypeStation, SecondaryBase
 
 # data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
 data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
+
+# for index, row in enumerate(data_second):
+#     try:
+#         Point.objects.get(point=row[1])
+#     except Point.DoesNotExist:
+#         print(row[0])
+
 # for row in data_type_station:
 #     if row[0] != 'id':
 #         type_station = TypeStation()
