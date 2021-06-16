@@ -1,13 +1,14 @@
 import csv, sys, os
 
 
+
 project_dir = "/home/ainura/Desktop/2020/KT/KT/project/"
 sys.path.append(project_dir)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
 import django
 
 django.setup()
-
+from apps.accounts.models import User
 from apps.opu.objects.models import Object, Transit, Bridge, Point, Outfit
 from apps.opu.circuits.service import create_circuit_transit
 # from apps.analysis.models import AmountChannelsKLSRRL
@@ -128,7 +129,7 @@ from apps.secondary.models import TypeStation, SecondaryBase
 #         Bridge.objects.create(object=obj, transit=tr)
 
 # data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
-data_second = csv.reader(open("/home/ainura/Desktop/DB/second2.csv"), delimiter=',')
+data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
 # for row in data_type_station:
 #     if row[0] != 'id':
 #         type_station = TypeStation()
@@ -141,9 +142,9 @@ for row in data_second:
         second.point = Point.objects.get(point=row[1])
         second.type_station = TypeStation.objects.get(name=row[2])
         second.administrative_division = row[3]
-        outfit = Outfit.objects.get(id=row[4])
+        second.year_of_launch = row[4]
+        outfit = Outfit.objects.get(id=row[5])
         second.outfit = outfit
-        second.year_of_launch = row[5]
         second.free_numbering = row[6]
         second.installed_value = row[7]
         second.active_value = row[8]
@@ -152,5 +153,5 @@ for row in data_second:
         second.GAS_numbering = row[11]
         second.GAS_return=row[12]
         second.comments=row[13]
-
+        second.created_by=User.objects.get(id=row[14])
         second.save()

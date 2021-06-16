@@ -462,21 +462,24 @@ class UncompletedEventList(ListFilterAPIView):
 @permission_classes([IsAuthenticated, ])
 def get_report_object(request):
     date = request.GET.get("date")
+
     index = request.GET.get("index")
 
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
+    all_event_names = all_events.order_by(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
+
     if index is not None and index != "":
         all_events = all_events.filter(index1__id=index)
 
-    all_event_names = all_events.order_by('ips_id', 'object_id', 'circuit_id', 'name').distinct('ips_id', 'object_id',
-                                                                                                'circuit_id', 'name')
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
-    outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
+    outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
     data = []
 
-    for type in type_journal:
+    for type in type_journal.iterator():
         data.append({"type_journal": type.type_journal.name,
                      "outfit": None,
                      "name": None,
@@ -487,7 +490,7 @@ def get_report_object(request):
                      "reason": None,
                      "comments1": None})
 
-        for out in outfits.filter(type_journal=type.type_journal):
+        for out in outfits.filter(type_journal=type.type_journal).iterator():
             data.append({"outfit": out.responsible_outfit.outfit,
                      "name": None,
                      "type_journal": None,
@@ -498,7 +501,8 @@ def get_report_object(request):
                      "reason": None,
                      "comments1": None})
 
-            for event in all_event_names.filter(responsible_outfit=out.responsible_outfit):
+            for event in all_event_names.filter(responsible_outfit=out.responsible_outfit,
+                                                type_journal=type.type_journal).iterator():
                 data.append({"outfit": None,
                              "name": get_event_name(event),
                              "type_journal": None,
@@ -509,7 +513,9 @@ def get_report_object(request):
                              "reason": None,
                              "comments1": None})
 
-                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, name= event.name).order_by('date_from'):
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit,
+                                              name=event.name, responsible_outfit=out.responsible_outfit,
+                                              type_journal=type.type_journal).order_by('date_from').iterator():
                     data.append({"outfit": None,
                                  "name": '-',
                                  "type_journal": None,

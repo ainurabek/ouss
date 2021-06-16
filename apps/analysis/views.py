@@ -478,6 +478,7 @@ class DetailOaAndOdApiView(APIView):
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         all_event = Event.objects.filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False)
+
         if Object.objects.filter(pk=pk).exists():
             object = Object.objects.get(pk=pk)
             all_events = all_event.filter(object=object)
@@ -487,6 +488,7 @@ class DetailOaAndOdApiView(APIView):
         elif Circuit.objects.filter(pk=pk).exists():
             circuit = Circuit.objects.get(pk=pk)
             all_events = all_event.filter(circuit=circuit)
+
         all_events = event_filter_date_from_date_to(all_events, date_from, date_to)
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
         data = []
