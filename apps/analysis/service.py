@@ -1,7 +1,7 @@
 from datetime import datetime
 from apps.analysis.models import Punkt5, TotalData, FormAnalysis, Punkt7
 from apps.dispatching.models import Event
-from apps.opu.objects.models import MainLineType, Object, IP, Outfit
+from apps.opu.objects.models import MainLineType, Outfit
 from django.utils.safestring import mark_safe
 from django import template
 from apps.dispatching.models import Reason, Index
@@ -9,9 +9,16 @@ from django.db.models import Q
 
 from apps.analysis.models import Form61KLS, Form61RRL
 
-from apps.dispatching.services import get_date_to
 
 register = template.Library()
+
+
+class DictWithRound(dict):
+
+    def __setitem__(self, key, value):
+        if isinstance(value, float):
+            value = round(value, 2)
+        super().__setitem__(key, value)
 
 
 def division(a: float, b: float) -> float:
@@ -38,6 +45,7 @@ def get_period(obj, date_to):
     period_of_time = (((date.total_seconds() / 60) * 100) / 60) / 100
     return round(period_of_time, 2)
 
+
 def get_date_from_ak(obj: Event, created_at: str):
     #для открытых
     data = obj.date_from
@@ -52,6 +60,7 @@ def get_date_from_ak(obj: Event, created_at: str):
             data = created_at + "T00:00:01"
 
     return data
+
 
 def get_period_ak(obj, date_from, date_to):
     date_from_date = datetime.strptime(date_from, '%Y-%m-%d')
@@ -192,7 +201,6 @@ def get_coefficient_rrl(downtime):
                             return 0
 
 
-
 def get_type_line(obj) -> str:
 
     if obj.object is not None:
@@ -201,7 +209,6 @@ def get_type_line(obj) -> str:
 
     elif obj.circuit is not None:
         return obj.circuit.id_object.type_line.main_line_type.name
-
 
 
 def get_calls_list(all_event, obj):
@@ -218,6 +225,7 @@ def get_amount_of_channels(obj):
         return obj.object.total_amount_channels
     elif obj.circuit is not None:
         return obj.circuit.id_object.total_amount_channels
+
 
 def get_period_date_to(call, date_to):
     if call.date_to is None:
@@ -236,6 +244,7 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
 
     if outfit is not None and outfit != '' and outfit != []:
         event = event.filter(responsible_outfit__in=outfit)
+
     if date_from is not None and date_to is None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None))
         event= event.filter(date_from__date__lte=date_from)
@@ -344,12 +353,9 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         else:
             punkt7 = Punkt7.objects.create(outfit=out, date_to=date_to, date_from=date_from,
                                            user=user, form_analysis=analysis_form, total_number_kls=out.total_number_kls,
-                                                   corresponding_norm_kls=out.corresponding_norm_kls, total_number_vls=out.total_number_vls,
-                                                   corresponding_norm_vls=out.corresponding_norm_vls,  total_number_rrl=out.total_number_rrl,
-                                                   corresponding_norm_rrl=out.corresponding_norm_rrl)
-
-
-
+                                           corresponding_norm_kls=out.corresponding_norm_kls, total_number_vls=out.total_number_vls,
+                                           corresponding_norm_vls=out.corresponding_norm_vls,  total_number_rrl=out.total_number_rrl,
+                                           corresponding_norm_rrl=out.corresponding_norm_rrl)
 
             TotalData.objects.create(punkt7=punkt7)
             update_percentage_compliance_and_coefficient(punkt7)
@@ -359,7 +365,6 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
             update_percentage_compliance_and_coefficient(punkt7.form_analysis.id_parent.punkt7)
             update_total_object(punkt7.form_analysis.id_parent.punkt7)
             update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
-
 
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=round(total_outfit_kls, 2),
                                        outfit_period_of_time_rrl=round(total_outfit_rrl, 2), outfit=out,
@@ -371,8 +376,6 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
     parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
     parent_obj.punkt5.save()
-
-
 
 
 def get_coefficient_punkt7_kls(percentage_compliance: int) -> int:
@@ -434,17 +437,23 @@ def update_downtime(punkt5: Punkt5):
     punkt5.downtime_rrl = division(punkt5.outfit_period_of_time_rrl, punkt5.length_rrl)
     punkt5.downtime_vls = division(punkt5.outfit_period_of_time_vls, punkt5.length_vls)
     punkt5.save()
+
+
 def update_coefficient(punkt5: Punkt5):
     punkt5.coefficient_kls = get_coefficient_kls(punkt5.downtime_kls)
     punkt5.coefficient_rrl = get_coefficient_rrl(punkt5.downtime_rrl)
     punkt5.coefficient_vls = get_coefficient_vls(punkt5.downtime_vls)
     punkt5.save()
+
+
 def update_total_coefficient(total_data: TotalData):
     punkt5 = total_data.punkt5
     total_data.total_coefficient = division((
             punkt5.coefficient_kls * total_data.kls + punkt5.coefficient_vls * total_data.vls +
             punkt5.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
+
+
 def update_republic_coefficient(punkt5: Punkt5):
     coefficient = 0
     for form in punkt5.form_analysis.formanalysis_set.all():
@@ -452,15 +461,20 @@ def update_republic_coefficient(punkt5: Punkt5):
             coefficient += form.punkt5.total_data5.total_coefficient
     punkt5.total_data5.total_coefficient = division(coefficient, punkt5.form_analysis.formanalysis_set.count() - 1)
     punkt5.total_data5.save()
+
+
 def update_type_line_value(total_data: TotalData):
     total_data.kls = division(total_data.punkt5.length_kls * 100, total_data.total_length)
     total_data.vls = division(total_data.punkt5.length_vls * 100, total_data.total_length)
     total_data.rrl = division(total_data.punkt5.length_rrl * 100, total_data.total_length)
     total_data.save()
+
+
 def update_total_length(punkt5: Punkt5):
     punkt5.total_data5.total_length = punkt5.length_vls + punkt5.length_kls + punkt5.length_rrl
     punkt5.total_data5.save()
     update_type_line_value(punkt5.total_data5)
+
 
 def update_length_and_outfit_period_of_time(form: FormAnalysis):
     outfit_period_of_time_kls = 0
@@ -485,6 +499,7 @@ def update_length_and_outfit_period_of_time(form: FormAnalysis):
     form.punkt5.length_vls = length_vls
     form.punkt5.save()
 
+
 def update_punkt5(punkt5: Punkt5, total_coefficient: float):
     update_downtime(punkt5)
     update_coefficient(punkt5)
@@ -504,6 +519,7 @@ def update_punkt5(punkt5: Punkt5, total_coefficient: float):
     update_analysis_form_coefficient(punkt5.form_analysis)
     update_analysis_form_coefficient(punkt5.form_analysis.id_parent)
 
+
 def delete_punkt5(punkt5: Punkt5):
     parent_analysis = punkt5.form_analysis.id_parent
     punkt5_rep = punkt5.form_analysis.id_parent.punkt5
@@ -520,24 +536,32 @@ def delete_punkt5(punkt5: Punkt5):
     update_total_object(parent_analysis.punkt7)
     update_total_coefficient_punkt7(parent_analysis.punkt7.total_data7)
     update_analysis_form_coefficient(parent_analysis)
+
+
 def update_analysis_form_coefficient(form_analysis: FormAnalysis):
     form_analysis.coefficient = division(form_analysis.punkt5.total_data5.total_coefficient +
                                          form_analysis.punkt7.total_data7.total_coefficient, 2)
     form_analysis.save()
+
 
 def update_percentage_compliance(punkt7: Punkt7):
     punkt7.percentage_compliance_kls = division(punkt7.corresponding_norm_kls, punkt7.total_number_kls) * 100
     punkt7.percentage_compliance_rrl = division(punkt7.corresponding_norm_rrl, punkt7.total_number_rrl) * 100
     punkt7.percentage_compliance_vls = division(punkt7.corresponding_norm_vls, punkt7.total_number_vls) * 100
     punkt7.save()
+
+
 def update_coefficient_punkt7(punkt7: Punkt7):
     punkt7.coefficient_kls = get_coefficient_punkt7_kls(punkt7.percentage_compliance_kls)
     punkt7.coefficient_vls = get_coefficient_punkt7_vls(punkt7.percentage_compliance_vls)
     punkt7.coefficient_rrl = get_coefficient_punkt7_rrl(punkt7.percentage_compliance_rrl)
     punkt7.save()
+
+
 def update_percentage_compliance_and_coefficient(punkt7: Punkt7):
     update_percentage_compliance(punkt7)
     update_coefficient_punkt7(punkt7)
+
 
 def update_type_line_value_punkt7(total_data: TotalData):
     total_data.kls = division(total_data.punkt7.total_number_kls * 100, total_data.total_length)
@@ -545,10 +569,12 @@ def update_type_line_value_punkt7(total_data: TotalData):
     total_data.rrl = division(total_data.punkt7.total_number_rrl * 100, total_data.total_length)
     total_data.save()
 
+
 def update_total_object(punkt7: Punkt7):
     punkt7.total_data7.total_length = punkt7.total_number_kls + punkt7.total_number_vls + punkt7.total_number_rrl
     punkt7.total_data7.save()
     update_type_line_value_punkt7(punkt7.total_data7)
+
 
 def update_total_coefficient_punkt7(total_data: TotalData):
     punkt7 = total_data.punkt7
@@ -556,6 +582,7 @@ def update_total_coefficient_punkt7(total_data: TotalData):
             punkt7.coefficient_kls * total_data.kls + punkt7.coefficient_vls * total_data.vls +
             punkt7.coefficient_rrl * total_data.rrl), 100)
     total_data.save()
+
 
 def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
     total_number_kls = 0
@@ -580,6 +607,7 @@ def update_republic_total_number_and_corresponding_norm(form: FormAnalysis):
     form.punkt7.corresponding_norm_vls = corresponding_norm_vls
     form.punkt7.save()
 
+
 def update_punkt7(punkt7: Punkt7):
     update_percentage_compliance_and_coefficient(punkt7)
     update_total_object(punkt7)
@@ -590,6 +618,7 @@ def update_punkt7(punkt7: Punkt7):
     update_total_coefficient_punkt7(punkt7.form_analysis.id_parent.punkt7.total_data7)
     update_analysis_form_coefficient(punkt7.form_analysis)
     update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
+
 
 def delete_punkt7(punkt7: Punkt7):
     rep_punkt7 = punkt7.form_analysis.id_parent.punkt7
@@ -608,7 +637,6 @@ def delete_punkt7(punkt7: Punkt7):
     update_total_length(analysis_form.punkt5)
     update_republic_coefficient(analysis_form.punkt5)
     update_analysis_form_coefficient(analysis_form)
-
 
 
 @register.simple_tag
@@ -639,7 +667,6 @@ def filter_event(events: Event, instance, index, outfit):
 
 def get_count_event(events: Event, event, index, outfit) -> int:
     return filter_event(events, event, index, outfit).count()
-
 
 
 def get_sum_period_of_time_event(events: Event, instance, index, outfit, date_to):
@@ -743,7 +770,6 @@ def get_date_to_ak(obj: Event, created_at: str):
     return data
 
 
-
 def get_amount(obj:Event):
     if obj.object is not None:
         return obj.object.object_channelKLSRRL.id, obj.object.object_channelKLSRRL.amount_channelsKLS, \
@@ -753,6 +779,7 @@ def get_amount(obj:Event):
                 obj.ips.point_channelKLSRRL.amount_channelsRRL
     if obj.circuit is not None:
         return  None, 1, 1
+
 
 def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method) -> Form61KLS:
     if not isinstance(outfit, list) and outfit is not None and outfit != '':
@@ -766,8 +793,10 @@ def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method)
         form61 = form61.filter(type_connection = type_connection)
     return form61
 
+
 def form61_kls_distinct(form61: Form61KLS, *args):
     return form61.order_by(*args).distinct(*args)
+
 
 def form61_rrl_filter(form61: Form61RRL, outfit, type_connection, type_equipment_rrl) -> Form61RRL:
     if not isinstance(outfit, list) and outfit is not None and outfit != '':
@@ -781,8 +810,10 @@ def form61_rrl_filter(form61: Form61RRL, outfit, type_connection, type_equipment
         form61 = form61.filter(type_connection = type_connection)
     return form61
 
+
 def form61_rrl_distinct(form61: Form61RRL, *args):
     return form61.order_by(*args).distinct(*args)
+
 
 def event_filter_date_from_date_to(event: Event, date_from, date_to) -> Event:
     if date_from is not None and date_to is None:

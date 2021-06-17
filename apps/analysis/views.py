@@ -2,7 +2,7 @@ import copy
 import os
 import random
 from rest_framework import viewsets, generics
-from rest_framework.generics import UpdateAPIView, ListAPIView, get_object_or_404, DestroyAPIView
+from rest_framework.generics import UpdateAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from apps.analysis.models import FormAnalysis, Punkt7, TotalData, Punkt5, Form61KLS, Form61RRL, TypeEquipment
@@ -10,12 +10,13 @@ from apps.analysis.serializers import FormAnalysisSerializer, FormAnalysisDetail
     Punkt5ListSerializer, Punkt5UpdateSerializer, Punkt7UpdateSerializer, FormAnalysisUpdateSerializer, \
     Punkt7ListSerializer, FormAnalysisCreateSerializer, Form61KLSCreateSerializer, Form61KLSSerializer,\
     Form61RRLCreateSerializer, Form61RRLSerializer, Form61RRLEditSerializer, TypeEquipmentSerializer
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 
 from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
-    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct, get_period_date_to, get_period_ak
+    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct, get_period_date_to, get_period_ak, \
+    DictWithRound
 from apps.dispatching.models import Event, HistoricalEvent, Index
 from apps.dispatching.services import get_event_name
 from rest_framework.response import Response
@@ -58,6 +59,7 @@ from apps.opu.objects.models import Object
 
 matplotlib.use('Agg')
 
+
 class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
     """сохранение количества каналов для Обьекта"""
     authentication_classes = (TokenAuthentication,)
@@ -82,15 +84,15 @@ def get_report(request):
 
     data = []
 
-    list_reason_typ_line = {
+    list_reason_typ_line = DictWithRound({
         "Откл. ЭЭКЛС": None, "Откл. ЭЭЦРРЛ": None, "ПВ аппаратурыКЛС": None,
         "ПВ аппаратурыЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
-        }
+        })
 
-    example = {'id': None, "name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
+    example = DictWithRound({'id': None, "name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
-    }
+    })
 
     for outfit in outfits:
         total_outfit = copy.deepcopy(example)
@@ -133,10 +135,10 @@ def get_report(request):
             total = copy.deepcopy(total_period_of_time)
             for i in total['period_of_time']:
                 if amount_channels_KLS != 0:
-                    total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_KLS, 2)
+                    total['period_of_time'][i] = total['period_of_time'][i] * amount_channels_KLS
                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
                 if amount_channels_RRL != 0:
-                    total['period_of_time'][i] = round(total['period_of_time'][i] * amount_channels_RRL, 2)
+                    total['period_of_time'][i] = total['period_of_time'][i] * amount_channels_RRL
                     total_outfit['period_of_time'][i] += total['period_of_time'][i]
             total['name'] = 'всего'
             total['date_from'] = 'кнл/час'
@@ -179,13 +181,13 @@ def get_report_analysis(request):
         order_date = "date_from" if order_date == "start" else "-date_from"
         all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
 
-    outfits = all_event_names.order_by("responsible_outfit").distinct("responsible_outfit")
+    outfits = all_events.order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = []
 
-    example = {"outfit": None, 'id': None, "name": None, "reason": None,
+    example = DictWithRound({"outfit": None, 'id': None, "name": None, "reason": None,
                "date_from": None,  "date_to": None, 'get_period':None, 'region': None,
-               "index1": None, "comments1": None}
+               "index1": None, "comments1": None})
 
     for out in outfits:
         out_data = example.copy()
@@ -203,7 +205,6 @@ def get_report_analysis(request):
                 call_data['id'] = None
                 call_data['name'] = '-'
                 call_data['reason'] = call.reason.name
-                # call_data['date_from'] = call.date_from
                 call_data['date_from'] = get_date_from_ak(call, date_from)
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
                 call_data['get_period'] = get_period_ak(call, date_from, date_to)
@@ -244,9 +245,9 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly]
+            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsAKOnly, SuperUser|IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, SuperUser|IngenerUser]
 
         return [permission() for permission in permission_classes]
 
@@ -374,7 +375,6 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
         delete_punkt7(instance)
 
 
-
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа"""
     authentication_classes = (TokenAuthentication,)
@@ -403,29 +403,29 @@ class ReportOaAndOdApiView(APIView):
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         data = []
 
-        winners_oa = {
+        winners_oa = DictWithRound({
             "first": {"value": 0, "index": None},
             "second": {"value": 0, "index": None},
             "third": {"value": 0, "index": None}
-        }
+        })
 
-        winners_od = {
+        winners_od = DictWithRound({
             "first": {"value": 0, "index": None},
             "second": {"value": 0, "index": None},
             "third": {"value": 0, "index": None}
-        }
-        rep = {
+        })
+        rep = DictWithRound({
             "outfit": None,
             "name": None, "pk":None,
             "oa": {"sum": 0, "count": 0},
             "od": {"sum": 0, "count": 0},
             "total_sum": {"sum": 0, "count": 0}
-        }
+        })
 
         for out in outfits:
             outfit = out.responsible_outfit
             data.append({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
-            outfit_data = {"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}}
+            outfit_data = DictWithRound({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}})
             for event in all_event_name.filter(responsible_outfit=outfit):
                 count_od = get_count_event(all_event, event, od, outfit)
                 count_oa = get_count_event(all_event, event, oa, outfit)
@@ -438,9 +438,9 @@ class ReportOaAndOdApiView(APIView):
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
                 data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": None,
-                                       "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
-                                       "oa": {"sum": sum_oa, "count": count_oa, "color": None},
-                                       "od": {"sum": sum_od, "count": count_od, "color": None}})
+                             "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
+                             "oa": {"sum": sum_oa, "count": count_oa, "color": None},
+                             "od": {"sum": sum_od, "count": count_od, "color": None}})
                 outfit_data["oa"]["count"] += count_oa
                 outfit_data["od"]["count"] += count_od
                 outfit_data["oa"]["sum"] += sum_oa
@@ -449,8 +449,8 @@ class ReportOaAndOdApiView(APIView):
                 outfit_data['total_sum']['sum'] = outfit_data["oa"]["sum"] + outfit_data["od"]["sum"]
                 outfit_data['total_sum']['count'] = outfit_data["oa"]["count"] + outfit_data["od"]["count"]
 
-            rep["oa"]["count"] +=  outfit_data["oa"]["count"]
-            rep["od"]["count"] +=  outfit_data["od"]["count"]
+            rep["oa"]["count"] += outfit_data["oa"]["count"]
+            rep["od"]["count"] += outfit_data["od"]["count"]
 
             rep["oa"]["sum"] += outfit_data["oa"]["sum"]
             rep["od"]["sum"] += outfit_data["od"]["sum"]
@@ -460,15 +460,8 @@ class ReportOaAndOdApiView(APIView):
             winners_oa = set_response_for_winners(winners_oa, "oa", data)
             winners_od = set_response_for_winners(winners_od, "od", data)
 
-
-            outfit_data["oa"]["sum"] = round(outfit_data["oa"]["sum"], 2)
-            outfit_data["od"]["sum"] = round(outfit_data["od"]["sum"],2)
-
             data.append(outfit_data)
 
-        rep["oa"]["sum"] = round(rep["oa"]["sum"], 2)
-        rep["od"]["sum"] = round(rep["od"]["sum"], 2)
-        rep["total_sum"]["sum"] = round(rep["total_sum"]["sum"], 2)
         data.append(rep)
         return JsonResponse(data, safe=False)
 
@@ -514,6 +507,7 @@ class DetailOaAndOdApiView(APIView):
             data.append(total_data)
         return JsonResponse(data, safe=False)
 
+
 class WinnerReportAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -535,7 +529,7 @@ class WinnerReportAPIView(APIView):
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
-        winners = {i.index: [{"name": None, "sum": 0, "count": 0} for _ in range(3)] for i in list_index}
+        winners = {i.index: [DictWithRound({"name": None, "sum": 0, "count": 0}) for _ in range(3)] for i in list_index}
         data = []
 
         for out in outfits:
@@ -587,6 +581,7 @@ class Form61KLSDeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
     queryset = Form61KLS.objects.all()
 
+
 class OrderKLSPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
@@ -599,10 +594,12 @@ class OrderKLSPhotoCreateView(APIView, PhotoCreateMixin):
         response = {"detail": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
+
 class OrderKLSPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
     model_for_delete = OrderKLSPhoto
+
 
 @permission_classes([IsAuthenticated,])
 def get_report_form61_kls(request):
@@ -616,7 +613,7 @@ def get_report_form61_kls(request):
     outfits = form61_kls_distinct(queryset, 'outfit')
 
     data = []
-    content = {
+    content = DictWithRound({
         'id': None,
         'name': None,
         'outfit': {'id': None, 'outfit': None, 'adding': None},
@@ -627,7 +624,7 @@ def get_report_form61_kls(request):
         'laying_method': [{'id': None, 'name': None}],
         'total_length_line': 0, 'total_length_cable': 0, 'above_ground': 0, 'under_ground': 0,
         'year_of_laying': None, 'color': None, 'form61_kls_order_photo': []
-    }
+    })
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
         total_outfit = copy.deepcopy(content)
@@ -682,21 +679,22 @@ def get_report_form61_kls(request):
                                                                        context={'request': request}).data
 
             data.append(form61_data)
-            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
-            total_outfit['total_length_cable'] += round(form61_data['total_length_cable'], 1)
-            total_outfit['above_ground'] += round(form61_data['above_ground'], 2)
-            total_outfit['under_ground'] += round(form61_data['under_ground'], 2)
+            total_outfit['total_length_line'] += form61_data['total_length_line']
+            total_outfit['total_length_cable'] += form61_data['total_length_cable']
+            total_outfit['above_ground'] += form61_data['above_ground']
+            total_outfit['under_ground'] += form61_data['under_ground']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
-        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 1)
-        total_rep['total_length_cable'] += round(total_outfit['total_length_cable'], 1)
-        total_rep['above_ground'] += round(total_outfit['above_ground'], 2)
-        total_rep['under_ground'] += round(total_outfit['under_ground'], 2)
+        total_rep['total_length_line'] += total_outfit['total_length_line']
+        total_rep['total_length_cable'] += total_outfit['total_length_cable']
+        total_rep['above_ground'] += total_outfit['above_ground']
+        total_rep['under_ground'] += total_outfit['under_ground']
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
+
 
 @permission_classes([IsAuthenticated,])
 def get_distance_length_kls(request, pk1, pk2):
@@ -753,6 +751,7 @@ def get_distance_length_kls(request, pk1, pk2):
         data.append({"image_name": image_name})
     return JsonResponse(data, safe=False)
 
+
 class TypeConnectionViewSet(viewsets.ModelViewSet):
     queryset = TypeConnection.objects.all().order_by('-id')
     serializer_class = TypeConnectionSerializer
@@ -783,7 +782,6 @@ class MethodLayingViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-
 class TypeCableViewSet(ModelViewSet):
     queryset = TypeCable.objects.all()
     serializer_class = TypeCableSerializer
@@ -796,6 +794,7 @@ class TypeCableViewSet(ModelViewSet):
             permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
 
 class TypeEquipmentViewSet(ModelViewSet):
     queryset = TypeEquipment.objects.all()
@@ -832,6 +831,7 @@ class Form61RRLList(viewsets.ModelViewSet):
                                                                                     'type_equipment', 'type_connection')
     serializer_class = Form61RRLSerializer
 
+
 class Form61RRLUpdateAPIView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
     queryset = Form61RRL.objects.all()
@@ -839,10 +839,12 @@ class Form61RRLUpdateAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
 
+
 class Form61RRLDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser|IngenerUser)
     queryset = Form61RRL.objects.all()
+
 
 class OrderRRLPhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)
@@ -856,10 +858,12 @@ class OrderRRLPhotoCreateView(APIView, PhotoCreateMixin):
         response = {"detail": "Изображение успешно добавлено"}
         return Response(response, status=status.HTTP_201_CREATED)
 
+
 class OrderRRLPhotoDeleteView(APIView, PhotoDeleteMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly,  SuperUser|IngenerUser)
     model_for_delete = OrderRRLPhoto
+
 
 @permission_classes([IsAuthenticated, ])
 def get_report_form61_rrl(request):
@@ -872,7 +876,7 @@ def get_report_form61_rrl(request):
     queryset = form61_rrl_filter(queryset, outfit, type_connection, type_equipment_rrl)
     outfits = form61_rrl_distinct(queryset, 'outfit')
     data = []
-    content = {
+    content = DictWithRound({
         'id': None,
         'name': None,
         'outfit': {'id': None, 'outfit': None, 'adding': None},
@@ -882,7 +886,7 @@ def get_report_form61_rrl(request):
         'number_trunk': 0, 'year_of_building': None,
         'type_connection': {'id': None, 'name': None},
         'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': []
-    }
+    })
     total_rep = copy.deepcopy(content)
     for outfit in outfits:
         total_outfit = copy.deepcopy(content)
@@ -921,13 +925,13 @@ def get_report_form61_rrl(request):
             form61_data['form61_rrl_order_photo'] = OrderRRLSerializer(form61.form61_rrl_order_photo.all(), many=True, context={'request': request}).data
             data.append(form61_data)
 
-            total_outfit['total_length_line'] += round(form61_data['total_length_line'], 1)
+            total_outfit['total_length_line'] += form61_data['total_length_line']
             if form61_data['number_trunk'] is not None:
                 total_outfit['number_trunk'] += form61_data['number_trunk']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
-        total_rep['total_length_line'] += round(total_outfit['total_length_line'], 1)
+        total_rep['total_length_line'] += total_outfit['total_length_line']
         total_rep['number_trunk'] += total_outfit['number_trunk']
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
