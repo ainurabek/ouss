@@ -617,6 +617,7 @@ class GOZListView(APIView):
             queryset = queryset.filter(id_outfit_id=outfit)
         obj_with_reserves = []
         test = []
+        print(queryset)
         for obj in queryset:
             if len(obj.bridges.all()) > 1: #если у каждого обьекта больше одной трассы, это значит, что у них есть еще и рез.трасса
                 pks = ''

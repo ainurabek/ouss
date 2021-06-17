@@ -35,10 +35,12 @@ class ObjectForm51Serializer(serializers.ModelSerializer):
     category = CategorySerializer()
     consumer = ConsumerSerializer()
     order_object_photo = OrderObjectPhotoSerializer(many=True)
+    point1 = PointForm51Serializer()
+    point2 = PointForm51Serializer()
 
     class Meta:
         model = Object
-        fields = ("name", "category", "bridges", "consumer", "comments", "order_object_photo")
+        fields = ("name", "point1", "point2", "category", "bridges", "consumer", "comments", "order_object_photo")
         depth = 1
 
 
