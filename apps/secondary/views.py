@@ -30,16 +30,6 @@ class TypeStationModelViewSet(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-class PointsByOutfittView(APIView):
-        authentication_classes = (TokenAuthentication,)
-        search_fields = ('name',)
-        serializer = PointList
-
-        def get(self, request, pk):
-            outfit = get_object_or_404(Outfit, pk=pk)
-            points = Point.objects.filter(id_outfit = outfit)
-            serializer = PointList(points, many=True).data
-            return Response(serializer)
 
 
 class BaseModelView(viewsets.ModelViewSet):

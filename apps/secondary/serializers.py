@@ -16,7 +16,6 @@ class SecondaryBaseSerializer(serializers.ModelSerializer):
     outfit = OutfitListSerializer()
     type_station = TypeStationSerializer()
 
-
     class Meta:
         model = SecondaryBase
         fields = ('id', 'point', 'outfit', 'type_station', 'year_of_launch', 'installed_value',

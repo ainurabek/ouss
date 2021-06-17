@@ -4,7 +4,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from apps.opu.form51.models import Form51
 from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
@@ -66,3 +66,9 @@ class Form51History(APIView):
                 continue
             data.append(a)
         return Response(data, status=status.HTTP_200_OK)
+
+class Form51DeleteAPIView(DestroyAPIView):
+    """Удаления Формы 5.1"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly|SuperUser, SuperUser|IngenerUser)
+    queryset = Form51

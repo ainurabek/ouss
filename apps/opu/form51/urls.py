@@ -11,6 +11,7 @@ urlpatterns = [
     path("list/", views.FormListAPIView.as_view()),
     path("api/update/<int:pk>/", views.Form51UpdateAPIView.as_view()),
     path("history/form51/<int:pk>/", views.Form51History.as_view(), name='form51_history'),
+    path("<int:pk>/delete/", views.Form51DeleteAPIView.as_view()),
     path('', include(router.urls))
 ]
 

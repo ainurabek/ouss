@@ -12,8 +12,6 @@ router.register('base', views.BaseModelView, basename='secondary_base')
 
 urlpatterns = [
 
-    path('points/<int:pk>/', views.PointsByOutfittView.as_view(), name='points_list'),
-
     path('', include(router.urls)),
 
 ]

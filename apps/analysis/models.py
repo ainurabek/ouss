@@ -5,6 +5,7 @@ from apps.opu.objects.models import Outfit, MainLineType
 from apps.opu.objects.models import Object, Point
 
 
+
 class FormAnalysis(models.Model):
     id_parent = models.ForeignKey("FormAnalysis", on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField("Название", max_length=255, blank=True, null=True)
@@ -240,3 +241,5 @@ class OrderRRLPhoto(models.Model):
     src = models.FileField('Схема', upload_to='files/', blank=True)
     form61_rrl = models.ForeignKey(Form61RRL, verbose_name="Распоряжение",
                                blank=True, null=True,  on_delete=models.CASCADE, related_name="form61_rrl_order_photo")
+
+

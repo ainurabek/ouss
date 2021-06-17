@@ -374,6 +374,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
         delete_punkt7(instance)
 
 
+
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа"""
     authentication_classes = (TokenAuthentication,)
@@ -497,16 +498,19 @@ class DetailOaAndOdApiView(APIView):
         all_events = event_filter_date_from_date_to(all_events, date_from, date_to)
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
         data = []
-        content = {"id": None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
+        content = {"id": None, "name":None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
         for event in all_event_name:
+            event_data = copy.deepcopy(content)
+            event_data['name'] = get_event_name(event)
+            data.append(event_data)
             for call in get_calls_list(all_events, event):
                 sum = get_period(call, date_to)
-                call_data = {"id": call.id, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
+                call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
                 data.append(call_data)
                 total_data['sum'] += call_data['sum']
                 total_data['count'] += call_data['count']
-            total_data['date_from'] = "Итого:"
+            total_data['name'] = "Итого:"
             data.append(total_data)
         return JsonResponse(data, safe=False)
 
