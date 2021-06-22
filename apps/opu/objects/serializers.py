@@ -240,7 +240,7 @@ class TransitDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transit
-        fields = ("id", "name", "trassa", "can_see")
+        fields = ("id", "name", "trassa", "can_see", "create_circuit_transit")
 
 
 

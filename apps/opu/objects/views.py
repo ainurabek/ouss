@@ -1,8 +1,10 @@
 from django.http import JsonResponse
 from rest_framework.viewsets import ModelViewSet
+
+from apps.opu.circuits.models import CircuitTransit
 from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
-    Category, AmountChannel, Consumer, Bug
+    Category, AmountChannel, Consumer, Bug, Transit
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -22,7 +24,7 @@ from apps.opu.objects.serializers import LPEditSerializer
 from apps.opu.objects.serializers import LPDetailSerializer
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.objects.services import get_type_of_trakt, check_parent_type_of_trakt, save_old_object, \
-    update_circuit, update_total_amount_channels
+    update_circuit, update_total_amount_channels, check_circuit_transit
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin, get_object_diff, \
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.circuits.service import create_circuit
@@ -62,7 +64,6 @@ class TPOListView(viewsets.ModelViewSet):
          TPOActivityLogUtil(self.request.user, instance.pk).tpo_create_action('tpo_created')
 
 
-
 class AmountChannelListAPIView(viewsets.ModelViewSet):
     queryset = AmountChannel.objects.all().order_by('value')
     serializer_class = AmountChannelListSerializer
@@ -75,10 +76,10 @@ class AmountChannelListAPIView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
     def perform_create(self, serializer):
          instance = serializer.save()
          instance.save()
-
 
 
 class TypeTraktListView(viewsets.ModelViewSet):
@@ -98,7 +99,6 @@ class TypeTraktListView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
          instance = serializer.save()
          instance.save()
-
 
 
 class OutfitsListView(viewsets.ModelViewSet):
@@ -154,6 +154,7 @@ class PointListView(viewsets.ModelViewSet):
             return PointListSerializer
         else:
             return PointCreateSerializer
+
     def perform_create(self, serializer):
         instance = serializer.save()
         create_point_KLSS_RRL_amount_channels(ips=instance)
@@ -280,6 +281,10 @@ class ObjectDetailView(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         self.permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
         instance = self.get_object()
+        if not check_circuit_transit([instance]):
+            return Response({"detail": "Удалить нельзя, объект участвует в транзите"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         for cir in instance.circuit_object_parent.filter(first=True):
             if instance.type_line.main_line_type.name == 'КЛС':
                 cir.point1.total_point_channels_KLS -=1
@@ -293,6 +298,8 @@ class ObjectDetailView(RetrieveDestroyAPIView):
                 cir.point2.save()
 
         self.perform_destroy(instance)
+        Transit.objects.filter(trassa=None).delete()
+        CircuitTransit.objects.filter(circuits=None).delete()
         update_total_amount_channels(instance=instance)
         response = {"detail": "Объект успешно удален"}
         return Response(response, status=status.HTTP_204_NO_CONTENT)

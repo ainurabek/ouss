@@ -31,6 +31,8 @@ class Circuit(models.Model):
 
 	trassa = models.ForeignKey("CircuitTransit", on_delete=models.SET_NULL, related_name="circuits", null=True)
 
+	is_modified = models.BooleanField(default=False)
+
 	class Meta:
 		verbose_name = 'Канал для Формы 5.3'
 		verbose_name_plural = 'Каналы для Формы 5.3'

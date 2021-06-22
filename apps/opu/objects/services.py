@@ -123,3 +123,10 @@ def create_object_KLSS_RRL_amount_channels(obj:Object):
 
 def create_point_KLSS_RRL_amount_channels(ips:Point):
     AmountChannelsKLSRRL.objects.create(ips=ips)
+
+
+def check_circuit_transit(trassa):
+    for obj in trassa:
+        if obj.circuit_object_parent.filter(is_modified=True).exists():
+            return False
+    return True

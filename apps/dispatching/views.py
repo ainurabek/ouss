@@ -638,6 +638,7 @@ class IndexModelViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
         return [permission() for permission in permission_classes]
 
+
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class EventUnknownCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -672,7 +673,7 @@ class DamageReportListAPIView(ListAPIView):
             return []
         queryset = Event.objects.\
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1",
-                  "circuit", "ips", ).\
+                  "circuit", "ips", "name").\
             filter(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
                    Q(object__tpo2__index="51"), Q(object__name__contains="K") | Q(object__name__contains="К"),
                    index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
@@ -703,12 +704,13 @@ class InternationalDamageReportListAPIView(ListAPIView):
         if date_from == "" or date_to == "":
             return []
         queryset = Event.objects. \
-            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1"). \
+            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name"). \
             exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
                     Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
                     Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
                     Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
-            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to). \
+            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
+            exclude("name"). \
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
         return queryset
