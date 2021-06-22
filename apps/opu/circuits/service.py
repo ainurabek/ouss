@@ -95,13 +95,61 @@ def create_circuit_transit(object_transit: Transit):
             for num in range(1, max_count.circuit_object_parent.count() + 1)
         }
         for key, transit in circuit_transits.items():
-            for obj in object_transit.trassa.all():
+            for obj in object_transit.trassa.all().iterator():
                 try:
                     circuit = obj.circuit_object_parent.get(num_circuit=key)
                     if circuit.trassa is not None:
                         circuit.trassa.delete()
+
                     circuit.trassa = transit
                     circuit.save()
+
                     transit.trassa.add(circuit)
                 except ObjectDoesNotExist:
                     pass
+
+
+def valid_for_deleted(transit: Transit, circuits_for_deleted: set) -> bool:
+    transit = set(transit.trassa.all())
+    for circuit in circuits_for_deleted:
+        if circuit.object in transit:
+            return False
+    return True
+
+
+def valid_for_add(circuits: set) -> bool:
+    for circuit in circuits:
+        if circuit.trassa is not None:
+            if circuit.trassa.trassa.count() > 1:
+                return False
+        else:
+            return False
+    return True
+
+
+def update_trassa_for_new_circuit(transit: CircuitTransit, circuits):
+    for circuit in circuits:
+        circuit.trassa.delete()
+        circuit.trassa = transit
+        circuit.save()
+
+
+def create_new_trassa(circuits):
+    for circuit in circuits:
+        obj_transit = circuit.object.circuit_object_parent.filter(is_modified=False).first().trassa.obj_trassa
+        circuit_transit = CircuitTransit.objects.create(obj_trassa=obj_transit)
+        circuit_transit.trassa.add(circuit)
+        circuit.trassa = circuit_transit
+        circuit.is_modified = False
+        circuit.save()
+
+
+def check_modified(transit: CircuitTransit):
+    if set(circuit.object for circuit in transit.trassa.all()) == set(transit.obj_trassa.trassa.all()):
+        for circuit in transit.trassa.all().iterator():
+            circuit.is_modified = False
+            circuit.save()
+    else:
+        for circuit in transit.trassa.all().iterator():
+            circuit.is_modified = True
+            circuit.save()
