@@ -232,4 +232,4 @@ class TechStopReportListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ("id", 'index1', "date_from", "date_to", 'object', 'circuit')
+        fields = ("id", 'index1', "reason", "date_from", "date_to", 'object', 'circuit')

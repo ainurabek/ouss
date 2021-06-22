@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from datetime import timedelta
 from rest_framework.generics import ListAPIView
 from apps.dispatching.models import Event
@@ -74,19 +74,13 @@ def get_event(event_object) -> Event:
     return event
 
 def get_date_to(obj: Event, created_at: str):
-    data = None
-    if obj.id_parent is not None:
-        data = obj.id_parent.date_to
-    if obj.date_to is not None:
-
-        if str(obj.date_to.date()) != created_at:
-            data = created_at + "T24:00:00"
-        else:
-            data = obj.date_to
-
-    else:
+    data = obj.date_to
+    if obj.date_to is None:
+        data = created_at + "T24:00:00"
+    elif obj.date_to.date() != datetime.strptime(created_at, '%Y-%m-%d').date():
         data = created_at + "T24:00:00"
     return data
+
 
 def event_form_customer_filter_date_from_date_to_and_customer(event: Event, date_from, date_to, customer) -> Event:
 
