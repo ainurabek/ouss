@@ -229,7 +229,8 @@ class InternationalDamageReportListSerializer(serializers.ModelSerializer):
 class TechStopReportListSerializer(serializers.ModelSerializer):
     object = EventObjFormCustSerializer()
     circuit = EventCircuitFormCustSerializer()
+    reason = ReasonSerializer
 
     class Meta:
         model = Event
-        fields = ("id", 'index1', "date_from", "date_to", 'object', 'circuit')
+        fields = ("id", 'index1', "reason", "date_from", "date_to", 'object', 'circuit')

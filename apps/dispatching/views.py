@@ -10,6 +10,7 @@ from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSer
 from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to, \
     event_form_customer_filter_date_from_date_to_and_customer
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
+from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
 
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
@@ -468,12 +469,12 @@ def get_report_object(request):
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
+    if index is not None and index != "":
+        all_events = all_events.filter(index1__id=index)
+
     all_event_names = all_events.order_by(
         "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
         "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
-
-    if index is not None and index != "":
-        all_events = all_events.filter(index1__id=index)
 
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
@@ -520,7 +521,7 @@ def get_report_object(request):
                                  "name": '-',
                                  "type_journal": None,
                                  "date_from": call.date_from,
-                                 "date_to": get_date_to(call, date),
+                                 "date_to": get_date_to_ak(call, date),
                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,

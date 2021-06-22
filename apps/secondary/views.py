@@ -34,7 +34,7 @@ class TypeStationModelViewSet(ModelViewSet):
 
 class BaseModelView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
-    queryset = SecondaryBase.objects.all().order_by('outfit').prefetch_related('point', 'outfit', 'type_station')
+    queryset = SecondaryBase.objects.all().order_by('point').prefetch_related('point', 'outfit', 'type_station')
     lookup_field = 'pk'
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filterset_fields = ('outfit', 'point', 'type_station')

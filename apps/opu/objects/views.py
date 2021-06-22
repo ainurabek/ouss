@@ -29,7 +29,7 @@ from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin, get_object_dif
 get_ip_diff, get_point_diff, get_outfit_diff
 from apps.opu.circuits.service import create_circuit
 from apps.opu.objects.serializers import ObjectEditSerializer, MainLineTypeListSerializer
-from apps.opu.objects.models import OrderObjectPhoto, MainLineType
+from apps.opu.objects.models import OrderObjectPhoto, MainLineType, Bridge
 from apps.opu.objects.services import create_form51
 from apps.opu.customer.models import Customer
 from apps.opu.objects.serializers import LineTypeCreateSerializer
@@ -620,20 +620,19 @@ class GOZListView(APIView):
     def get(self, request):
         outfit = self.request.query_params.get('outfit', None)
         queryset = Object.objects.filter(type_of_trakt__name="ПГ").order_by('name').prefetch_related('bridges__transit__trassa')
+
         if outfit is not None and outfit != "":
             queryset = queryset.filter(id_outfit_id=outfit)
-        obj_with_reserves = []
         test = []
-        print(queryset)
+        pks = []
         for obj in queryset:
-            if len(obj.bridges.all()) > 1: #если у каждого обьекта больше одной трассы, это значит, что у них есть еще и рез.трасса
-                pks = ''
-                for item in obj.transits.all():
-                    pks += str(item.id) #в стринг собираю айди трасс одного обьекта
-                if not pks in test: #если стринг с точно такими айди, то это значит повторяющиеся и их не добавляем
-                    test.append(pks)
-                    obj_with_reserves.append(obj)
-        serializer = GOZListSerializer(obj_with_reserves, many=True)
+            if len(obj.bridges.all()) > 1: #только те у которых по 2 трассы
+                for item in obj.transits.all(): #берем трассы каждого обьекта и перебираем
+                    if item.id not in pks: #похожие айди трасс не добавляем в pks
+                        pks.append(item.id)
+                        if obj not in test: #соответственно дальше добавляем сам обьект добавленных трасс, если такой обьект еще не добавлен в test
+                            test.append(obj)
+        serializer = GOZListSerializer(test, many=True)
         return Response(serializer.data)
 
 

@@ -42,7 +42,7 @@ class Form_Customer(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.customer.abr
+        return str(self.id)
 
 
 class OrderCusPhoto(models.Model):
