@@ -10,6 +10,7 @@ from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSer
 from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to, \
     event_form_customer_filter_date_from_date_to_and_customer
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
+from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
 
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
@@ -520,7 +521,7 @@ def get_report_object(request):
                                  "name": '-',
                                  "type_journal": None,
                                  "date_from": call.date_from,
-                                 "date_to": get_date_to(call, date),
+                                 "date_to": get_date_to_ak(call, date),
                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,
