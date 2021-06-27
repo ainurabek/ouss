@@ -62,6 +62,7 @@ urlpatterns = [
 
     #фильтры для отчета
     path("api/reports/", views.get_report_object),
+    path("api/reports/pdf/", views.get_report_pdf),
     #второй звонок
     path("api/event/calls/create/<int:pk>/", views.EventCallsCreateViewAPI.as_view()),
 
@@ -77,6 +78,7 @@ urlpatterns = [
  #создания событий по арендаторам
 
     path("api/tech_stop/report/", views.TechStopReportListAPIView.as_view()),
+
 
     path('', include(router.urls)),
 

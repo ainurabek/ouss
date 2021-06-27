@@ -1,9 +1,11 @@
 import datetime
+import pdfkit
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, DamageReportListSerializer, DamageUpdateSerializer, \
     InternationalDamageReportListSerializer, TechStopReportListSerializer
@@ -27,6 +29,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
+from django.template.loader import get_template
 
 
 class EventListAPIView(viewsets.ModelViewSet):
@@ -463,7 +466,6 @@ class UncompletedEventList(ListFilterAPIView):
 @permission_classes([IsAuthenticated, ])
 def get_report_object(request):
     date = request.GET.get("date")
-
     index = request.GET.get("index")
 
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
@@ -526,7 +528,85 @@ def get_report_object(request):
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,
                                  "comments1": call.comments1})
+
     return JsonResponse(data, safe=False)
+
+@permission_classes([IsAuthenticated, ])
+def get_report_pdf(request):
+    date = request.GET.get("date")
+    index = request.GET.get("index")
+
+    all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
+    all_events =all_events.filter(date_from__date__lte=date)
+
+    if index is not None and index != "":
+        all_events = all_events.filter(index1__id=index)
+
+    all_event_names = all_events.order_by(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
+
+    type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
+    outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
+    data = []
+
+    for type in type_journal.iterator():
+        data.append({"type_journal": type.type_journal.name,
+                     "outfit": None,
+                     "name": None,
+                     "date_from": None,
+                     "date_to": None,
+                     "region": None,
+                     "index1": None,
+                     "reason": None,
+                     "comments1": None})
+
+        for out in outfits.filter(type_journal=type.type_journal).iterator():
+            data.append({"outfit": out.responsible_outfit.outfit,
+                     "name": None,
+                     "type_journal": None,
+                     "date_from": None,
+                     "date_to": None,
+                     "region": None,
+                     "index1": None,
+                     "reason": None,
+                     "comments1": None})
+
+            for event in all_event_names.filter(responsible_outfit=out.responsible_outfit,
+                                                type_journal=type.type_journal).iterator():
+                data.append({"outfit": None,
+                             "name": get_event_name(event),
+                             "type_journal": None,
+                             "date_from": None,
+                             "date_to": None,
+                             "region": None,
+                             "index1": None,
+                             "reason": None,
+                             "comments1": None})
+
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit,
+                                              name=event.name, responsible_outfit=out.responsible_outfit,
+                                              type_journal=type.type_journal).order_by('date_from').iterator():
+                    data.append({"outfit": None,
+                                 "name": '-',
+                                 "type_journal": None,
+                                 "date_from": call.date_from,
+                                 "date_to": get_date_to_ak(call, date),
+                                 "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
+                                 "index1": call.index1.index,
+                                 "reason": call.reason.name,
+                                 "comments1": call.comments1})
+
+    template_name = 'pdf.html'
+    template = get_template(template_name)
+    html = template.render({'data': data, 'date':date, 'index':index})
+    pdf = pdfkit.from_string(html, False, options={})
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+
+    return response
+
 
 
 class OutfitWorkerGet(APIView):

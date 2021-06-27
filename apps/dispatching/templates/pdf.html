@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Отчет диспетчерской службы </title>
+        <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        </style>
+
+    </head>
+    <body>
+        <h2>Отчет ОПУ на {{date}} </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Вид журнала</th>
+                    <th>Предприятие</th>
+                    <th>Название</th>
+                    <th>Период</th>
+                    <th>Участки</th>
+                    <th>Индекс</th>
+                    <th>Причина</th>
+                    <th>Примечание</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+                <tr>
+                    <td>{{ d.type_journal }}</td>
+                    <td>{{ d.outfit }}</td>
+                    <td>{{ d.name }} </td>
+                    <td>{{ d.date_from }} - {{ d.date_to  }}  </td>
+                     <td>{{ d.region }}</td>
+                    <td>{{ d.index1 }}</td>
+                    <td>{{ d.reason }}  </td>
+                    <td>{{ d.comments1 }}  </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </body>
+</html>
