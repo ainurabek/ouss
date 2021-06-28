@@ -31,7 +31,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 from django.template.loader import get_template
 
-from project import settings
+
+from project.settings import BASE_DIR
 
 
 class EventListAPIView(viewsets.ModelViewSet):
@@ -602,11 +603,18 @@ def get_report_pdf(request):
     template_name = 'pdf.html'
     template = get_template(template_name)
     html = template.render({'data': data, 'date':date, 'index':index})
-    # os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
-    # WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
-    #                                    stdout=subprocess.PIPE).communicate()[0].strip()
+    if 'DYNO' in os.environ:
+        print('loading wkhtmltopdf path on heroku')
+        WKHTMLTOPDF_CMD = subprocess.Popen(
+            ['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf-pack')],
+            # Note we default to 'wkhtmltopdf' as the binary name
+            stdout=subprocess.PIPE).communicate()[0].strip()
+    else:
+        print('loading wkhtmltopdf path on localhost')
+        WKHTMLTOPDF_CMD = ('/usr/local/bin/wkhtmltopdf')
 
-    config = pdfkit.configuration(wkhtmltopdf='./bin/wkhtmltopdf')
+
+    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
     pdf = pdfkit.from_string(html, False, configuration=config, options={})
 
     response = HttpResponse(pdf, content_type='application/pdf')
