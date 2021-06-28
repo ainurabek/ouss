@@ -31,6 +31,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 from django.template.loader import get_template
 
+from ...project import settings
+
 
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
@@ -531,7 +533,7 @@ def get_report_object(request):
 
     return JsonResponse(data, safe=False)
 
-@permission_classes([IsAuthenticated, ])
+# @permission_classes([IsAuthenticated, ])
 def get_report_pdf(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
@@ -600,7 +602,8 @@ def get_report_pdf(request):
     template_name = 'pdf.html'
     template = get_template(template_name)
     html = template.render({'data': data, 'date':date, 'index':index})
-    pdf = pdfkit.from_string(html, False, options={})
+    config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_BIN)
+    pdf = pdfkit.from_string(html, False, configuration=config, options={})
 
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
