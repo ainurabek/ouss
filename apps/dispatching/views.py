@@ -1,5 +1,5 @@
 import datetime
-import subprocess, os, pdfkit, sys
+import subprocess, os, pdfkit
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -30,10 +30,6 @@ from rest_framework.response import Response
 from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 from django.template.loader import get_template
-
-
-from project.settings import BASE_DIR
-
 
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
@@ -607,11 +603,10 @@ def get_report_pdf(request):
         print('loading wkhtmltopdf path on heroku')
         WKHTMLTOPDF_CMD = subprocess.Popen(
             ['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf-pack')],
-            # Note we default to 'wkhtmltopdf' as the binary name
             stdout=subprocess.PIPE).communicate()[0].strip()
     else:
         print('loading wkhtmltopdf path on localhost')
-        WKHTMLTOPDF_CMD = ('/usr/local/bin/wkhtmltopdf')
+        WKHTMLTOPDF_CMD = ('/usr/local/bin/wkhtmltopdf/bin/wkhtmltopdf')
 
 
     config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
