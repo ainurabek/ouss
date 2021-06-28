@@ -31,7 +31,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.decorators import permission_classes
 from django.template.loader import get_template
 
-from ...project import settings
+from project import settings
 
 
 class EventListAPIView(viewsets.ModelViewSet):
