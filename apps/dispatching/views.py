@@ -1,7 +1,5 @@
 import datetime
-import subprocess
-import os
-import pdfkit
+import subprocess, os, pdfkit, sys
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -604,8 +602,10 @@ def get_report_pdf(request):
     template_name = 'pdf.html'
     template = get_template(template_name)
     html = template.render({'data': data, 'date':date, 'index':index})
+    os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
     WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
                                        stdout=subprocess.PIPE).communicate()[0].strip()
+
     config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
     pdf = pdfkit.from_string(html, False, configuration=config, options={})
 
