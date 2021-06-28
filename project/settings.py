@@ -200,7 +200,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-WKHTMLTOPDF_BIN = os.path.join(BASE_DIR, "wkhtmltopdf")
+WKHTMLTOPDF_BIN = ("/usr/local/bin/wkhtmltopdf")
 # WKHTMLTOPDF_BIN_OPTIONS = {
 #     'quiet': True,
 # }
