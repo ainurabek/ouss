@@ -602,11 +602,11 @@ def get_report_pdf(request):
     template_name = 'pdf.html'
     template = get_template(template_name)
     html = template.render({'data': data, 'date':date, 'index':index})
-    os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
-    WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
-                                       stdout=subprocess.PIPE).communicate()[0].strip()
+    # os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
+    # WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
+    #                                    stdout=subprocess.PIPE).communicate()[0].strip()
 
-    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
+    config = pdfkit.configuration(wkhtmltopdf='./bin/wkhtmltopdf')
     pdf = pdfkit.from_string(html, False, configuration=config, options={})
 
     response = HttpResponse(pdf, content_type='application/pdf')
