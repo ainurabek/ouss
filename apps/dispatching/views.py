@@ -602,7 +602,7 @@ def get_report_pdf(request):
     template_name = 'pdf.html'
     template = get_template(template_name)
     html = template.render({'data': data, 'date':date, 'index':index})
-    config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_BIN)
+    config = pdfkit.configuration(wkhtmltopdf='/app/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(html, False, configuration=config, options={})
 
     response = HttpResponse(pdf, content_type='application/pdf')

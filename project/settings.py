@@ -200,10 +200,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-WKHTMLTOPDF_BIN = ("/usr/local/bin/wkhtmltopdf")
-# WKHTMLTOPDF_BIN_OPTIONS = {
-#     'quiet': True,
-# }
 
 CORS_ORIGIN_ALLOW_ALL = True
 # Activate Django-Heroku.
