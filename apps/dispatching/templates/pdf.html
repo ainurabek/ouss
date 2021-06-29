@@ -24,10 +24,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Вид журнала</th>
-                    <th>Предприятие</th>
                     <th>Название</th>
-                    <th>Период</th>
+                    <th>Начало</th>
+                    <th>Конец</th>
                     <th>Участки</th>
                     <th>Индекс</th>
                     <th>Причина</th>
@@ -37,10 +36,62 @@
             <tbody>
             {% for d in data %}
                 <tr>
-                    <td>{{ d.type_journal }}</td>
-                    <td>{{ d.outfit }}</td>
-                    <td>{{ d.name }} </td>
-                    <td>{{ d.date_from }} - {{ d.date_to  }}  </td>
+                    <td>
+                        {% if d.name == "Телеграф" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "По системам" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Аренда" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "ГТС" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "ТВ и РВ" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Телефонограмма" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Стихия" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Прочее" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Автоматика" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "Ручные каналы" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "СПД" %}
+                            <i>{{ d.name }} </i></td>
+                        {% elif d.name == "ЧОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ТОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "НОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ИОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "БОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ЖОФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ООФ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ЦСП" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "РПО РМТР" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "БГТС" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "ОИТ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% elif d.name == "РЦТ" %}
+                            <mark>{{ d.name }} </mark></td>
+                        {% else %}
+                            <strong>{{ d.name }} </strong></td>
+                        {% endif %}
+
+                    <td>{{ d.date_from|date:"SHORT_DATETIME_FORMAT" }}</td>
+<!--                    <td>{{ d.date_to|time:"H:i" }} <br>-->
+<!--                        {{d.date_to|date:"d-m-Y"}}</td>-->
+
+                    <td>{{ d.date_to|date:"SHORT_DATETIME_FORMAT" }}</td>
                      <td>{{ d.region }}</td>
                     <td>{{ d.index1 }}</td>
                     <td>{{ d.reason }}  </td>

@@ -760,13 +760,17 @@ def get_winners(winners: list, name, sum_p, count):
 
     return winners
 
-
+import datetime as dt
 def get_date_to_ak(obj: Event, created_at: str):
     data = obj.date_to
     if obj.date_to is None:
-        data = created_at + "T24:00:00"
+        data = created_at + "T23:59:59"
+        data = dt.datetime.fromisoformat(data)
+
     elif obj.date_to.date() > datetime.strptime(created_at, '%Y-%m-%d').date():
-        data = created_at + "T24:00:00"
+        data = created_at + "T23:59:59"
+        data = dt.datetime.fromisoformat(data)
+
     return data
 
 

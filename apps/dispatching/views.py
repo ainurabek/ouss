@@ -1,4 +1,7 @@
 import datetime
+import copy
+import json
+from django.shortcuts import render
 import subprocess, os, pdfkit
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -534,7 +537,6 @@ def get_report_object(request):
 def get_report_pdf(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
-
     all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
@@ -550,55 +552,32 @@ def get_report_pdf(request):
     data = []
 
     for type in type_journal.iterator():
-        data.append({"type_journal": type.type_journal.name,
-                     "outfit": None,
-                     "name": None,
-                     "date_from": None,
-                     "date_to": None,
-                     "region": None,
-                     "index1": None,
-                     "reason": None,
-                     "comments1": None})
+        data.append({"name": type.type_journal.name})
 
         for out in outfits.filter(type_journal=type.type_journal).iterator():
-            data.append({"outfit": out.responsible_outfit.outfit,
-                     "name": None,
-                     "type_journal": None,
-                     "date_from": None,
-                     "date_to": None,
-                     "region": None,
-                     "index1": None,
-                     "reason": None,
-                     "comments1": None})
+            data.append({"name": out.responsible_outfit.outfit})
 
             for event in all_event_names.filter(responsible_outfit=out.responsible_outfit,
                                                 type_journal=type.type_journal).iterator():
-                data.append({"outfit": None,
-                             "name": get_event_name(event),
-                             "type_journal": None,
-                             "date_from": None,
-                             "date_to": None,
-                             "region": None,
-                             "index1": None,
-                             "reason": None,
-                             "comments1": None})
+                data.append({
+                             "name": get_event_name(event)})
 
                 for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit,
                                               name=event.name, responsible_outfit=out.responsible_outfit,
                                               type_journal=type.type_journal).order_by('date_from').iterator():
-                    data.append({"outfit": None,
-                                 "name": '-',
-                                 "type_journal": None,
+                    data.append({
+                                 "name": "",
                                  "date_from": call.date_from,
                                  "date_to": get_date_to_ak(call, date),
                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
                                  "index1": call.index1.index,
                                  "reason": call.reason.name,
-                                 "comments1": call.comments1})
+                                 "comments1": call.comments1 if call.comments1 is not None else ""})
 
     template_name = 'pdf.html'
     template = get_template(template_name)
-    html = template.render({'data': data, 'date':date, 'index':index})
+    html = template.render({"data": data, "date":date, "index":index})
+
     if 'DYNO' in os.environ:
         print('loading wkhtmltopdf path on heroku')
         WKHTMLTOPDF_CMD = subprocess.Popen(
@@ -616,6 +595,7 @@ def get_report_pdf(request):
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
 
     return response
+
 
 
 
