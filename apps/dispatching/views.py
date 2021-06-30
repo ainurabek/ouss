@@ -587,12 +587,10 @@ def get_report_pdf(request):
         print('loading wkhtmltopdf path on localhost')
         WKHTMLTOPDF_CMD = ('/usr/local/bin/wkhtmltopdf/bin/wkhtmltopdf')
 
-
     config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
     pdf = pdfkit.from_string(html, False, configuration=config, options={})
-
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="otchet/{}.pdf"'.format(date)
 
     return response
 
@@ -779,8 +777,8 @@ class InternationalDamageReportListAPIView(ListAPIView):
                     Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
                     Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
                     Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
-            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
-            exclude("name"). \
+            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to,
+                   name__isnull=True).\
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
         return queryset
