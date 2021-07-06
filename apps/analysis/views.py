@@ -98,7 +98,7 @@ def get_report(request):
                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
     })
 
-    for outfit in outfits:
+    for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(example)
         total_outfit['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
         out_data = copy.deepcopy(example)
@@ -106,7 +106,7 @@ def get_report(request):
         out_data['color'] = "1"
         data.append(out_data)
 
-        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit):
+        for event in all_event_name.filter(responsible_outfit=outfit.responsible_outfit).iterator():
             amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(event)
             event_data = copy.deepcopy(example)
             event_data['name'] = get_event_name(event)
@@ -115,7 +115,7 @@ def get_report(request):
             example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
             total_period_of_time = copy.deepcopy(example)
 
-            for call in get_calls_list(all_event, event):
+            for call in get_calls_list(all_event, event).iterator():
                 period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
@@ -169,7 +169,8 @@ def get_report_analysis(request):
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
-    all_events = Event.objects.defer('object__bridges', "circuit__trassa").filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4').\
+    all_events = Event.objects.defer('object__bridges', "circuit__trassa").filter(callsorevent=False).\
+        exclude(name__isnull=False, index1__index='4').\
         prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                          "index1", "reason")
 
@@ -205,7 +206,7 @@ def get_report_analysis(request):
             event_data['name'] = get_event_name(event)
             data.append(event_data)
 
-            for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from'):
+            for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from').iterator():
 
                 call_data = example.copy()
                 call_data['id'] = None
@@ -552,7 +553,7 @@ class WinnerReportAPIView(APIView):
         for out in outfits.iterator():
             outfit = out.responsible_outfit
             for index in list_index:
-                for event in all_event_name.filter(responsible_outfit=outfit, index1=index):
+                for event in all_event_name.filter(responsible_outfit=outfit, index1=index).iterator():
                     sum = get_sum_period_of_time_event(all_event, event, index, outfit, date_to)
                     count = get_count_event(all_event, event, index, outfit)
                     event_name = get_event_name(event)
