@@ -551,7 +551,7 @@ class WinnerReportAPIView(APIView):
 
         for out in outfits.iterator():
             outfit = out.responsible_outfit
-            for index in list_index.iterator():
+            for index in list_index:
                 for event in all_event_name.filter(responsible_outfit=outfit, index1=index):
                     sum = get_sum_period_of_time_event(all_event, event, index, outfit, date_to)
                     count = get_count_event(all_event, event, index, outfit)
