@@ -75,8 +75,12 @@ def get_report(request):
     date_to = request.GET.get("date_to")
     responsible_outfit = request.GET.getlist("responsible_outfit")
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры',
-                                                                                              'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).exclude(name__isnull=False)
+    all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+        filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры', 'Линейные ПВ',
+                                                                        'Хищения на ЛС', 'ПВ за счет стихии']).\
+        exclude(name__isnull=False).\
+        prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                         "index1", "reason")
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
 
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
@@ -165,7 +169,9 @@ def get_report_analysis(request):
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
-    all_events = Event.objects.filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4')
+    all_events = Event.objects.defer('object__bridges', "circuit__trassa").filter(callsorevent=False).exclude(name__isnull=False).exclude(index1__index='4').\
+        prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                         "index1", "reason")
 
     if index is not None and index != "":
         all_events = all_events.filter(index1__id=index)
@@ -189,11 +195,11 @@ def get_report_analysis(request):
                "date_from": None,  "date_to": None, 'get_period':None, 'region': None,
                "index1": None, "comments1": None})
 
-    for out in outfits:
+    for out in outfits.iterator():
         out_data = example.copy()
         out_data['outfit'] = out.responsible_outfit.outfit
         data.append(out_data)
-        for event in all_event_names.filter(responsible_outfit=out.responsible_outfit):
+        for event in all_event_names.filter(responsible_outfit=out.responsible_outfit).iterator():
             event_data = example.copy()
             event_data['id'] = event.id
             event_data['name'] = get_event_name(event)
@@ -390,10 +396,15 @@ class ReportOaAndOdApiView(APIView):
         oa = Index.objects.get(index="0а")
 
         if index is None or index == '':
-            all_event = Event.objects.filter(index1__in=[od, oa],  callsorevent=False).exclude(name__isnull=False)
+            all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+                filter(index1__in=[od, oa],  callsorevent=False).exclude(name__isnull=False).\
+                prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                                 "index1", "reason")
         elif index in [str(od.id), str(oa.id)]:
-            all_event = Event.objects.filter(index1=index,
-                                         callsorevent=False).exclude(name__isnull=False)
+            all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+                filter(index1=index, callsorevent=False).exclude(name__isnull=False).\
+                prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                                 "index1", "reason")
         else:
             data = {'detail': "Можно фильтровать только по индексу Од, Оа"}
             return Response(data, status.HTTP_403_FORBIDDEN)
@@ -422,11 +433,11 @@ class ReportOaAndOdApiView(APIView):
             "total_sum": {"sum": 0, "count": 0}
         })
 
-        for out in outfits:
+        for out in outfits.iterator():
             outfit = out.responsible_outfit
             data.append({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
             outfit_data = DictWithRound({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}})
-            for event in all_event_name.filter(responsible_outfit=outfit):
+            for event in all_event_name.filter(responsible_outfit=outfit).iterator():
                 count_od = get_count_event(all_event, event, od, outfit)
                 count_oa = get_count_event(all_event, event, oa, outfit)
 
@@ -476,7 +487,10 @@ class DetailOaAndOdApiView(APIView):
         pk = request.GET.get("pk")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
-        all_event = Event.objects.filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False)
+        all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+            filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False).\
+            prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                             "index1", "reason")
 
         if Object.objects.filter(pk=pk).exists():
             object = Object.objects.get(pk=pk)
@@ -493,11 +507,11 @@ class DetailOaAndOdApiView(APIView):
         data = []
         content = {"id": None, "name":None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
-        for event in all_event_name:
+        for event in all_event_name.iterator():
             event_data = copy.deepcopy(content)
             event_data['name'] = get_event_name(event)
             data.append(event_data)
-            for call in get_calls_list(all_events, event):
+            for call in get_calls_list(all_events, event).iterator():
                 sum = get_period(call, date_to)
                 call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
                 data.append(call_data)
@@ -525,16 +539,19 @@ class WinnerReportAPIView(APIView):
         else:
             list_index = [Index.objects.get(pk=index_id)]
 
-        all_event = Event.objects.filter(index1__in=list_index, callsorevent=False).exclude(name__isnull=False)
+        all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+            filter(index1__in=list_index, callsorevent=False).exclude(name__isnull=False).\
+            prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                             "index1", "reason")
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_event, "responsible_outfit")
         all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
         winners = {i.index: [DictWithRound({"name": None, "sum": 0, "count": 0}) for _ in range(3)] for i in list_index}
         data = []
 
-        for out in outfits:
+        for out in outfits.iterator():
             outfit = out.responsible_outfit
-            for index in list_index:
+            for index in list_index.iterator():
                 for event in all_event_name.filter(responsible_outfit=outfit, index1=index):
                     sum = get_sum_period_of_time_event(all_event, event, index, outfit, date_to)
                     count = get_count_event(all_event, event, index, outfit)
@@ -626,7 +643,7 @@ def get_report_form61_kls(request):
         'year_of_laying': None, 'color': None, 'form61_kls_order_photo': []
     })
     total_rep = copy.deepcopy(content)
-    for outfit in outfits:
+    for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
         out_data['outfit']['id'] = outfit.outfit.id
@@ -639,7 +656,7 @@ def get_report_form61_kls(request):
         out_data['color'] = "outfit"
 
         data.append(out_data)
-        for form61 in queryset.filter(outfit=outfit.outfit):
+        for form61 in queryset.filter(outfit=outfit.outfit).iterator():
             form61_data = copy.deepcopy(content)
             form61_data['id'] = form61.id
             form61_data['outfit']['id'] = form61.outfit.id
@@ -888,7 +905,7 @@ def get_report_form61_rrl(request):
         'total_length_line': 0, 'color': None, 'form61_rrl_order_photo': []
     })
     total_rep = copy.deepcopy(content)
-    for outfit in outfits:
+    for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
         out_data['outfit']['id'] = outfit.outfit.id
@@ -899,7 +916,7 @@ def get_report_form61_rrl(request):
         out_data['color'] = "outfit"
 
         data.append(out_data)
-        for form61 in queryset.filter(outfit=outfit.outfit):
+        for form61 in queryset.filter(outfit=outfit.outfit).iterator():
             form61_data = copy.deepcopy(content)
             form61_data['id'] = form61.id
             form61_data['outfit']['id'] = form61.outfit.id

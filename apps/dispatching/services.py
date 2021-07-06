@@ -33,8 +33,7 @@ def get_minus_date(days: int):
     return datetime.date.today() - timedelta(days=days)
 
 
-def get_event_name(event_object) -> str:
-
+def get_event_name(event_object: Event) -> str:
     event_name = None
 
     if event_object.object is not None:
@@ -43,11 +42,11 @@ def get_event_name(event_object) -> str:
         event_name = event_object.ips.name
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
-
     else:
         event_name = event_object.name
 
     return event_name
+
 
 def get_event_pk(event_object) -> str:
 
