@@ -550,6 +550,21 @@ def get_report_pdf(request):
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
     data = []
+    all_tj = TypeOfJournal.objects.all()
+    all_out = Outfit.objects.\
+        defer('adding', 'num_outfit', 'tpo', 'type_outfit__name',
+              'created_by', 'created_at', 'length_kls', 'length_vls',
+              'length_rrl', 'total_number_kls', 'corresponding_norm_kls', 'total_number_vls', 'corresponding_norm_vls',
+              'total_number_rrl', 'corresponding_norm_rrl')
+    objs = Object.objects.defer('id_parent', 'id_outfit', 'category', 'point1', 'point2',
+                  'type_of_trakt', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
+                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer')
+    ips = Point.objects.defer('point')
+    cirs = Circuit.objects.defer('num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
+                  'point1', 'point2', 'customer', 'object')
+    all_evs = all_events.defer('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
+              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
+                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
 
     for type in type_journal.iterator():
         data.append({"name": type.type_journal.name})
@@ -576,7 +591,8 @@ def get_report_pdf(request):
 
     template_name = 'pdf.html'
     template = get_template(template_name)
-    html = template.render({"data": data, "date":date, "index":index})
+    html = template.render({"data": data, "all_tj":all_tj, "all_out":all_out,
+                            "objs":objs, "ips":ips, "circ":cirs, "all_evs":all_evs, "date":date, "index":index})
 
     if 'DYNO' in os.environ:
         print('loading wkhtmltopdf path on heroku')
@@ -588,10 +604,13 @@ def get_report_pdf(request):
         WKHTMLTOPDF_CMD = ('/usr/local/bin/wkhtmltopdf/bin/wkhtmltopdf')
 
     config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
-    pdf = pdfkit.from_string(html, False, configuration=config, options={})
+    options = {
+        'margin-bottom': '10mm',
+        'footer-center': '[page]'
+    }
+    pdf = pdfkit.from_string(html, False, configuration=config, options=options)
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="otchet/{}.pdf"'.format(date)
-
+    response['Content-Disposition'] = 'attachment; filename="otchet-{}.pdf"'.format(date)
     return response
 
 

@@ -204,7 +204,7 @@ def get_report_analysis(request):
                 call_data = example.copy()
                 call_data['id'] = None
                 call_data['name'] = '-'
-                call_data['reason'] = call.reason.name
+                call_data['reason'] = call.reason.name if call.reason is not None else ""
                 call_data['date_from'] = get_date_from_ak(call, date_from)
                 call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
                 call_data['get_period'] = get_period_ak(call, date_from, date_to)

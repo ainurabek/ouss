@@ -10,13 +10,12 @@
           border-collapse: collapse;
           width: 100%;
           word-wrap: break-word;
-
         }
 
         td, th {
-          border: 1px solid #dddddd;
+          border: 1px solid #000000;
           text-align: left;
-          padding: 7px;
+          padding: 5px;
         }
 
         tr {
@@ -27,7 +26,6 @@
 
         thead {
             display: table-row-group;
-
         }
         </style>
 
@@ -50,58 +48,36 @@
             {% for d in data %}
                 <tr>
                     <td>
-                        {% if d.name == "Телеграф" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "По системам" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Аренда" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "ГТС" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "ТВ и РВ" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Телефонограмма" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Стихия" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Прочее" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Автоматика" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "Ручные каналы" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "СПД" %}
-                            <i>{{ d.name }} </i></td>
-                        {% elif d.name == "ЧОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ТОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "НОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ИОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "БОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ЖОФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ООФ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ЦСП" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "РПО РМТР" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "БГТС" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ОИТ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "РЦТ" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% elif d.name == "ЦКС" %}
-                            <mark>{{ d.name }} </mark></td>
-                        {% else %}
-                            <strong>{{ d.name }} </strong></td>
-                        {% endif %}
-
+                        {% for tj in all_tj %}
+                            {% if d.name == tj.name %}
+                                <i>{{ d.name }} </i>
+                            {% endif %}
+                        {% endfor %}
+                        {% for out in all_out %}
+                            {% if d.name == out.outfit %}
+                                <mark>{{ d.name }} </mark>
+                            {% endif %}
+                        {% endfor %}
+                        {% for obj in objs %}
+                            {% if d.name == obj.name %}
+                                <strong>{{ d.name }} </strong>
+                            {% endif %}
+                        {% endfor %}
+                        {% for ip in ips %}
+                            {% if d.name == ip.name %}
+                                <strong>{{ d.name }} </strong>
+                            {% endif %}
+                        {% endfor %}
+                        {% for cir in cirs %}
+                            {% if d.name == cir.name %}
+                                <strong>{{ d.name }} </strong>
+                            {% endif %}
+                        {% endfor %}
+                        {% for ev in all_evs %}
+                            {% if d.name == ev.name %}
+                                <strong>{{ d.name }} </strong>
+                            {% endif %}
+                        {% endfor %}
                     <td>{{ d.date_from|date:"SHORT_DATETIME_FORMAT" }}</td>
 <!--                    <td>{{ d.date_to|time:"H:i" }} <br>-->
 <!--                        {{d.date_to|date:"d-m-Y"}}</td>-->
