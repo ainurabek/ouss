@@ -1,7 +1,4 @@
 import datetime
-import copy
-import json
-from django.shortcuts import render
 import subprocess, os, pdfkit
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -762,10 +759,9 @@ class DamageReportListAPIView(ListAPIView):
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1",
                   "circuit", "ips", "name").\
             filter(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
-                   Q(object__tpo2__index="51"), Q(object__name__contains="K") | Q(object__name__contains="К"),
+                   Q(object__tpo2__index="51"), object__name__regex=r"^(?:K|К).[^-]+(?:-.[^-]+){0,1}\Z",
                    index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to).\
             prefetch_related("object", "responsible_outfit", "point1", "point2")
-
         if outfit != "":
             queryset = queryset.filter(responsible_outfit=outfit)
         return queryset

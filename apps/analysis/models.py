@@ -5,7 +5,6 @@ from apps.opu.objects.models import Outfit, MainLineType
 from apps.opu.objects.models import Object, Point
 
 
-
 class FormAnalysis(models.Model):
     id_parent = models.ForeignKey("FormAnalysis", on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField("Название", max_length=255, blank=True, null=True)
@@ -25,6 +24,7 @@ class FormAnalysis(models.Model):
     class Meta:
         verbose_name = "Средний Кеффициент"
         verbose_name_plural = "Средний Кеффициент"
+
 
 class AmountChannelsKLSRRL(models.Model):
     object = models.OneToOneField(Object, related_name = 'object_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
@@ -123,7 +123,6 @@ class Punkt7(models.Model):
         super().save(*args, **kwargs)
 
 
-
 class TotalData(models.Model):
     total_length = models.FloatField("Общая протяж. кан*км", default=0, blank=True, null=True)
     total_coefficient = models.FloatField("Коэффициент качества", default=0, blank=True, null=True)
@@ -154,8 +153,10 @@ class MethodLaying(models.Model):
     def __str__(self):
         return self.name
 
+
 class TypeCable(models.Model):
     name = models.CharField("Название", max_length=150)
+
     class Meta:
         verbose_name = "Тип кабеля"
         verbose_name_plural = "Тип кабеля"
@@ -163,8 +164,10 @@ class TypeCable(models.Model):
     def __str__(self):
         return self.name
 
+
 class TypeConnection(models.Model):
     name = models.CharField("Название", max_length=150)
+
     class Meta:
         verbose_name = "Тип связи"
         verbose_name_plural = "Тип связи"
@@ -172,8 +175,10 @@ class TypeConnection(models.Model):
     def __str__(self):
         return self.name
 
+
 class TypeEquipment(models.Model):
     name = models.CharField("Название", max_length=150)
+
     class Meta:
         verbose_name = "Тип аппаратуры"
         verbose_name_plural = "Тип аппаратуры"
@@ -201,7 +206,6 @@ class Form61KLS(models.Model):
                                    verbose_name="Тип Связи", related_name='form61_KLS_connection')
     outfit = models.ForeignKey(Outfit, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Предприятия", related_name='form61_KLS_out')
 
-
     def __str__(self):
         return f"{self.point1.name}-{self.point2.name}"
 
@@ -209,10 +213,12 @@ class Form61KLS(models.Model):
         verbose_name = "Форма 61 (ВОЛС)"
         verbose_name_plural = "Форма 61 (ВОЛС)"
 
+
 class OrderKLSPhoto(models.Model):
     src = models.FileField('Схема', upload_to='files/', blank=True)
     form61_kls = models.ForeignKey(Form61KLS, verbose_name="Распоряжение",
                                blank=True, null=True,  on_delete=models.CASCADE, related_name="form61_kls_order_photo")
+
 
 class Form61RRL(models.Model):
     point1 = models.ForeignKey(Point, related_name='form61_RRL_point', verbose_name='ИП от', on_delete=models.SET_NULL,
@@ -239,7 +245,5 @@ class Form61RRL(models.Model):
 
 class OrderRRLPhoto(models.Model):
     src = models.FileField('Схема', upload_to='files/', blank=True)
-    form61_rrl = models.ForeignKey(Form61RRL, verbose_name="Распоряжение",
-                               blank=True, null=True,  on_delete=models.CASCADE, related_name="form61_rrl_order_photo")
-
-
+    form61_rrl = models.ForeignKey(Form61RRL, verbose_name="Распоряжение", blank=True, null=True,
+                                   on_delete=models.CASCADE, related_name="form61_rrl_order_photo")

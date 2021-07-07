@@ -260,8 +260,12 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
 def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
-    all_event = Event.objects.filter(index1__index='1', callsorevent=False,
-                                     reason__name__in=['ПВ аппаратуры', 'Линейные ПВ', 'Хищения на ЛС']).exclude(name__isnull=False)
+    all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
+        filter(index1__index='1', callsorevent=False, reason__name__in=['ПВ аппаратуры', 'Линейные ПВ',
+                                                                        'Хищения на ЛС']).\
+        exclude(name__isnull=False).\
+        prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
+                         "index1", "reason")
 
     return event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, outfit)
 
@@ -286,14 +290,14 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     kls, rrl = get_type_line_vls_and_kls()
     total_rep_kls = 0
     total_rep_rrl = 0
-    for out in outfits:
+    for out in outfits.iterator():
         total_outfit_kls = 0
         total_outfit_rrl = 0
-        for event in all_event_name.filter(responsible_outfit=out):
+        for event in all_event_name.filter(responsible_outfit=out).iterator():
             total_event_kls = 0
             total_event_rrl = 0
             type_line = get_type_line(event)
-            for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit):
+            for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit).iterator():
                 period = get_period(call, date_to)
                 if call.ips is None:
                     if type_line == kls.name:
