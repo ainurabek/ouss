@@ -506,9 +506,6 @@ class DetailOaAndOdApiView(APIView):
         all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_events, "responsible_outfit")
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
-
-
-
         data = []
         content = {"id": None, "name":None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
