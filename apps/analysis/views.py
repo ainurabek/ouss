@@ -449,7 +449,7 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": None,
+                data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": event.responsible_outfit.pk,
                              "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
                              "oa": {"sum": sum_oa, "count": count_oa, "color": None},
                              "od": {"sum": sum_od, "count": count_od, "color": None}})
@@ -486,6 +486,7 @@ class DetailOaAndOdApiView(APIView):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
         pk = request.GET.get("pk")
+        responsible_outfit = request.GET.get("responsible_outfit")
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
@@ -494,30 +495,41 @@ class DetailOaAndOdApiView(APIView):
                              "index1", "reason")
 
         if Object.objects.filter(pk=pk).exists():
-            object = Object.objects.get(pk=pk)
-            all_events = all_event.filter(object=object)
-        elif Point.objects.filter(pk=pk).exists():
-            ips = Point.objects.get(pk=pk)
-            all_events = all_event.filter(ips=ips)
-        elif Circuit.objects.filter(pk=pk).exists():
-            circuit = Circuit.objects.get(pk=pk)
-            all_events = all_event.filter(circuit=circuit)
+            all_events = all_event.filter(object=pk).filter(responsible_outfit = responsible_outfit)
 
-        all_events = event_filter_date_from_date_to(all_events, date_from, date_to)
+        elif Point.objects.filter(pk=pk).exists():
+            all_events = all_event.filter(ips=pk).filter(responsible_outfit = responsible_outfit)
+
+        elif Circuit.objects.filter(pk=pk, ).exists():
+            all_events = all_event.filter(circuit=pk).filter(responsible_outfit = responsible_outfit)
+
+        all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
+        outfits = event_distinct(all_events, "responsible_outfit")
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
+
+
+
         data = []
         content = {"id": None, "name":None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
-        for event in all_event_name.iterator():
-            event_data = copy.deepcopy(content)
-            event_data['name'] = get_event_name(event)
-            data.append(event_data)
-            for call in get_calls_list(all_events, event).iterator():
-                sum = get_period(call, date_to)
-                call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
-                data.append(call_data)
-                total_data['sum'] += call_data['sum']
-                total_data['count'] += call_data['count']
+        for out in outfits.iterator():
+            out_data = copy.deepcopy(content)
+            out_data['name'] = out.responsible_outfit.outfit
+            out_data['sum'] = None
+            out_data['count'] = None
+            data.append(out_data)
+            for event in all_event_name.iterator():
+                event_data = copy.deepcopy(content)
+                event_data['name'] = get_event_name(event)
+                event_data['sum'] = None
+                event_data['count'] = None
+                data.append(event_data)
+                for call in get_calls_list(all_events, event).iterator():
+                    sum = get_period(call, date_to)
+                    call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
+                    data.append(call_data)
+                    total_data['sum'] += call_data['sum']
+                    total_data['count'] += call_data['count']
             total_data['name'] = "Итого:"
             data.append(total_data)
         return JsonResponse(data, safe=False)
