@@ -247,7 +247,7 @@ def event_filter_date_from_date_to_and_outfit(event: Event, date_from, date_to, 
 
     if date_from is not None and date_to is None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None))
-        event= event.filter(date_from__date__lte=date_from)
+        event = event.filter(date_from__date__lte=date_from)
     elif date_from is None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_to) | Q(date_to__date=None))
         event = event.filter(date_from__date__lte=date_to)

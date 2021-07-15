@@ -1,6 +1,8 @@
 import copy
 import os
 import random
+
+from django.core.paginator import Paginator, EmptyPage
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, get_object_or_404, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -51,8 +53,6 @@ from apps.analysis.serializers import OrderKLSSerializer
 from apps.analysis.serializers import OrderRRLSerializer
 
 from apps.dispatching.services import get_event_pk
-
-from apps.analysis.service import event_filter_date_from_date_to
 
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import Object
@@ -159,30 +159,39 @@ def get_report_analysis(request):
     """Отчет дисп.службы по разным индексам"""
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
-    index = request.GET.get("index")
+    index = request.GET.get("index", "")
     responsible_outfit = request.GET.getlist('responsible_outfit')
     order_name = request.GET.get("order_name", "")
     order_date = request.GET.get("order_date", "")
-
+    page_number = request.GET.get("page", 1)
     if order_name == "name":
         order_name = ["object__name", "ips__name", "name", "circuit__name"]
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
-    all_events = Event.objects.defer('object__bridges', "circuit__trassa").filter(callsorevent=False).\
-        exclude(name__isnull=False).exclude(index1__index='4').\
-        prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
-                         "index1", "reason")
 
-    if index is not None and index != "":
+    all_events = Event.objects.only("object__name", "circuit__name", "ips__name", "type_journal", "index1__name",
+                                    "reason__name", "point1__name", "point2__name", "period_of_time", "date_from",
+                                    "date_to", "responsible_outfit", "callsorevent").filter(callsorevent=False,
+                                                                                            name__isnull=True).\
+        exclude(index1__index='4').\
+
+
+    if index != "":
         all_events = all_events.filter(index1__id=index)
 
     all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
+    paginator = Paginator(all_events, 100)
 
+    try:
+        page = paginator.page(page_number)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+
+    all_events = all_events.filter(id__in=page.object_list)
     all_event_names = all_events.distinct('ips_id', 'object_id', 'circuit_id').order_by('ips_id', 'object_id', 'circuit_id')
 
-    if isinstance(order_name, list):
-        all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
+    all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
 
     if order_date != "":
         order_date = "date_from" if order_date == "start" else "-date_from"
@@ -190,34 +199,35 @@ def get_report_analysis(request):
 
     outfits = all_events.order_by("responsible_outfit").distinct("responsible_outfit")
 
-    data = []
+    data = {"count": paginator.num_pages, "result": []}
 
-    example = DictWithRound({"outfit": None, 'id': None, "name": None, "reason": None,
-               "date_from": None,  "date_to": None, 'get_period':None, 'region': None,
-               "index1": None, "comments1": None})
+    example = DictWithRound({"outfit": None, 'id': None, "name": None, "reason": None, "date_from": None,
+                             "date_to": None, 'get_period': None, 'region': None, "index1": None, "comments1": None})
 
     for out in outfits.iterator():
         out_data = example.copy()
         out_data['outfit'] = out.responsible_outfit.outfit
-        data.append(out_data)
+        data["result"].append(out_data)
         for event in all_event_names.filter(responsible_outfit=out.responsible_outfit).iterator():
             event_data = example.copy()
             event_data['id'] = event.id
             event_data['name'] = get_event_name(event)
-            data.append(event_data)
+            data["result"].append(event_data)
 
             for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from').iterator():
                 call_data = example.copy()
                 call_data['id'] = None
                 call_data['name'] = '-'
-                call_data['reason'] = call.reason.name if call.reason is not None else ""
+                call_data['reason'] = call.reason.name
                 call_data['date_from'] = get_date_from_ak(call, date_from)
-                call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and  date_to is  not None else get_date_to(call, date_to if date_to is not None else date_from)
+                call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and date_to is not None else get_date_to(call, date_to if date_to is not None else date_from)
                 call_data['get_period'] = get_period_ak(call, date_from, date_to)
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
-                data.append(call_data)
+
+                data["result"].append(call_data)
+
     return JsonResponse(data, safe=False)
 
 
