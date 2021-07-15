@@ -173,8 +173,7 @@ def get_report_analysis(request):
     all_events = Event.objects.only("object__name", "circuit__name", "ips__name", "type_journal", "index1__name",
                                     "reason__name", "point1__name", "point2__name", "period_of_time", "date_from",
                                     "date_to", "responsible_outfit", "callsorevent").filter(callsorevent=False,
-                                                                                            name__isnull=True).\
-        exclude(index1__index='4').\
+                                                                                            name__isnull=True).exclude(index1__index='4')
 
 
     if index != "":
