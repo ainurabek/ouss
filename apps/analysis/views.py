@@ -170,7 +170,7 @@ def get_report_analysis(request):
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
     all_events = Event.objects.defer('object__bridges', "circuit__trassa").filter(callsorevent=False).\
-        exclude(name__isnull=False, index1__index='4').\
+        exclude(name__isnull=False).exclude(index1__index='4').\
         prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                          "index1", "reason")
 
@@ -207,7 +207,6 @@ def get_report_analysis(request):
             data.append(event_data)
 
             for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from').iterator():
-
                 call_data = example.copy()
                 call_data['id'] = None
                 call_data['name'] = '-'
@@ -219,7 +218,6 @@ def get_report_analysis(request):
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
                 data.append(call_data)
-
     return JsonResponse(data, safe=False)
 
 
@@ -747,8 +745,8 @@ def get_distance_length_kls(request, pk1, pk2):
             finish_total = copy.deepcopy(content)
             finish_total['name'] = "Варианты:"
             finish_total['points'] = p
-            finish_total['sum_line'] = path_length
-            finish_total['sum_cable'] = path_length1
+            finish_total['sum_line'] = round(path_length, 2)
+            finish_total['sum_cable'] = round(path_length1, 2)
             data.append(finish_total)
         for p in nx.all_simple_edge_paths(g, source=point1.name, target=point2.name):
             for t in p:

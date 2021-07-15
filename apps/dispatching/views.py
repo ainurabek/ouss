@@ -607,7 +607,8 @@ def get_report_pdf(request):
     }
     pdf = pdfkit.from_string(html, False, configuration=config, options=options)
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="otchet-{}.pdf"'.format(date)
+    # response['Content-Disposition'] = 'attachment; filename="otchet-{}.pdf"'.format(date)
+    response['Content-Disposition'] = f'attachment; filename="otchet-{date}.pdf"'
     return response
 
 
