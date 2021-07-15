@@ -169,13 +169,13 @@ def get_report_analysis(request):
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
+
     all_events = Event.objects.only("object__name", "circuit__name", "ips__name", "type_journal", "index1__name",
                                     "reason__name", "point1__name", "point2__name", "period_of_time", "date_from",
                                     "date_to", "responsible_outfit", "callsorevent").filter(callsorevent=False,
                                                                                             name__isnull=True).\
         exclude(index1__index='4').\
-        prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
-                         "index1", "reason")
+
 
     if index != "":
         all_events = all_events.filter(index1__id=index)
@@ -215,7 +215,6 @@ def get_report_analysis(request):
             data["result"].append(event_data)
 
             for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from').iterator():
-
                 call_data = example.copy()
                 call_data['id'] = None
                 call_data['name'] = '-'
@@ -226,7 +225,9 @@ def get_report_analysis(request):
                 call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                 call_data['comments1'] = call.comments1
                 call_data['index1'] = call.index1.index
+
                 data["result"].append(call_data)
+
     return JsonResponse(data, safe=False)
 
 
@@ -754,8 +755,8 @@ def get_distance_length_kls(request, pk1, pk2):
             finish_total = copy.deepcopy(content)
             finish_total['name'] = "Варианты:"
             finish_total['points'] = p
-            finish_total['sum_line'] = path_length
-            finish_total['sum_cable'] = path_length1
+            finish_total['sum_line'] = round(path_length, 2)
+            finish_total['sum_cable'] = round(path_length1, 2)
             data.append(finish_total)
         for p in nx.all_simple_edge_paths(g, source=point1.name, target=point2.name):
             for t in p:

@@ -173,7 +173,7 @@ class Form61KLSCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form61KLS
         fields = ('outfit', 'point1', 'point2', 'total_length_line', 'total_length_cable', 'above_ground',
-                  'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection', 'src')
+                  'under_ground', 'year_of_laying', 'laying_method', 'type_cable', 'type_connection')
         depth = 1
 
 class Outfit61tSerializer(serializers.ModelSerializer):
