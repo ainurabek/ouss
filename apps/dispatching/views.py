@@ -90,9 +90,12 @@ class EventDetailAPIView(APIView):
 
     def get(self, request, pk=None):
         created_at = request.GET.get("created_at")
-        calls = Event.objects.get(pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
+        calls = get_object_or_404(Event, pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
         serializer = EventDetailSerializer(calls, many=True)
-        return Response(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 class EventIPCreateViewAPI(APIView):
