@@ -530,9 +530,9 @@ class DetailOaAndOdApiView(APIView):
                 data.append(event_data)
                 for call in get_calls_list(all_events, event).iterator():
                     sum = get_period(call, date_to)
-                    call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": sum, "count": 1}
+                    call_data = {"id": call.id, "name":None, "date_from": call.date_from, "date_to": call.date_to, 'index':call.index1.index, "sum": round(sum, 2), "count": 1}
                     data.append(call_data)
-                    total_data['sum'] += call_data['sum']
+                    total_data['sum'] += round(call_data['sum'], 2)
                     total_data['count'] += call_data['count']
             total_data['name'] = "Итого:"
             data.append(total_data)

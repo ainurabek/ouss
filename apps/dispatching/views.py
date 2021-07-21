@@ -333,29 +333,32 @@ class EventDeleteAPIView(DestroyAPIView):
     lookup_field = 'pk'
 
     def perform_destroy(self, instance):
+
         if instance.id_parent is None:
             instance.delete()
             return
         all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
         instance.delete()
         i = 0
+        if len(all_calls) >= 1:
+            while i < (len(all_calls) - 1):
+                all_calls[i + 1].date_to = all_calls[i].date_from
+                all_calls[i + 1].save()
+                i += 1
+            all_calls[0].date_to = None
+            all_calls[0].save()
+            instance.id_parent.date_from = all_calls.last().date_from
 
-        while i < (len(all_calls) - 1):
-            all_calls[i + 1].date_to = all_calls[i].date_from
-            all_calls[i + 1].save()
-            i += 1
-        all_calls[0].date_to = None
-        all_calls[0].save()
-        instance.id_parent.date_from = all_calls.last().date_from
-
-        if len(all_calls) == 1:
-            instance.id_parent.date_to = None
+            if len(all_calls) == 1:
+                instance.id_parent.date_to = None
+            else:
+                instance.id_parent.date_to = all_calls[0].date_from
+            instance.id_parent.index1 = all_calls[0].index1
+            instance.id_parent.created_at = all_calls[0].created_at
+            instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
+            instance.id_parent.save()
         else:
-            instance.id_parent.date_to = all_calls[0].date_from
-        instance.id_parent.index1 = all_calls[0].index1
-        instance.id_parent.created_at = all_calls[0].created_at
-        instance.id_parent.responsible_outfit = all_calls[0].responsible_outfit
-        instance.id_parent.save()
+            instance.id_parent.delete()
 
 
 @permission_classes([IsAuthenticated,])
