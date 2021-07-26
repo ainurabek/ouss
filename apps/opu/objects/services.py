@@ -1,4 +1,3 @@
-from apps.opu.circuits.models import Circuit
 from apps.opu.objects.models import TypeOfTrakt, Object, Point
 
 from apps.opu.form51.models import Form51
@@ -51,41 +50,10 @@ def update_circuit(old_obj, obj: Object):
             circuit.save()
 
     if obj_point1 != obj.point1.point or obj_point2 != obj.point2.point:
-
-        if obj.type_line.main_line_type.name == 'КЛС':
-            for circuit in obj.circuit_object_parent.all():
-                if circuit.first:
-                    circuit.point1.total_point_channels_KLS -= 1
-                    circuit.point1.save()
-                    circuit.point2.total_point_channels_KLS -= 1
-                    circuit.point2.save()
-                    circuit.point1 = obj.point1
-                    circuit.point2 = obj.point2
-                    circuit.save()
-                    circuit.point1.total_point_channels_KLS += 1
-                    circuit.point1.save()
-                    circuit.point2.total_point_channels_KLS += 1
-                    circuit.point2.save()
-        elif obj.type_line.main_line_type.name == 'ЦРРЛ':
-            for circuit in obj.circuit_object_parent.all():
-
-                if circuit.first:
-                    circuit.point1.total_point_channels_RRL -= 1
-                    circuit.point1.save()
-                    circuit.point2.total_point_channels_RRL -= 1
-                    circuit.point2.save()
-                    circuit.point1 = obj.point1
-                    circuit.point2 = obj.point2
-                    circuit.save()
-                    circuit.point1.total_point_channels_RRL += 1
-                    circuit.point1.save()
-                    circuit.point2.total_point_channels_RRL += 1
-                    circuit.point2.save()
-        else:
-            for circuit in obj.circuit_object_parent.all():
-                circuit.point1 = obj.point1
-                circuit.point2 = obj.point2
-                circuit.save()
+        for circuit in obj.circuit_object_parent.all():
+            circuit.point1 = obj.point1
+            circuit.point2 = obj.point2
+            circuit.save()
 
 
 def get_count_active_channels(instance: Object):
@@ -117,11 +85,11 @@ def create_form51(obj:Object):
     Form51LogUtil(instance.created_by.user, instance.pk).form51_create_action('form51_created')
 
 
-def create_object_KLSS_RRL_amount_channels(obj:Object):
+def create_object_KLSS_RRL_amount_channels(obj: Object):
     AmountChannelsKLSRRL.objects.create(object=obj)
 
 
-def create_point_KLSS_RRL_amount_channels(ips:Point):
+def create_point_KLSS_RRL_amount_channels(ips: Point):
     AmountChannelsKLSRRL.objects.create(ips=ips)
 
 

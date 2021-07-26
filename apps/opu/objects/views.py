@@ -77,10 +77,6 @@ class AmountChannelListAPIView(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def perform_create(self, serializer):
-         instance = serializer.save()
-         instance.save()
-
 
 class TypeTraktListView(viewsets.ModelViewSet):
     queryset = TypeOfTrakt.objects.all().order_by('-id')
@@ -95,10 +91,6 @@ class TypeTraktListView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
-
-    def perform_create(self, serializer):
-         instance = serializer.save()
-         instance.save()
 
 
 class OutfitsListView(viewsets.ModelViewSet):
@@ -284,19 +276,6 @@ class ObjectDetailView(RetrieveDestroyAPIView):
         if not check_circuit_transit([instance]):
             return Response({"detail": "Удалить нельзя, объект участвует в транзите"},
                             status=status.HTTP_403_FORBIDDEN)
-
-        for cir in instance.circuit_object_parent.filter(first=True):
-            if instance.type_line.main_line_type.name == 'КЛС':
-                cir.point1.total_point_channels_KLS -=1
-                cir.point1.save()
-                cir.point2.total_point_channels_KLS -= 1
-                cir.point2.save()
-            elif instance.type_line.main_line_type.name == 'ЦРРЛ':
-                cir.point1.total_point_channels_RRL -=1
-                cir.point1.save()
-                cir.point2.total_point_channels_RRL -= 1
-                cir.point2.save()
-
         self.perform_destroy(instance)
         Transit.objects.filter(trassa=None).delete()
         CircuitTransit.objects.filter(circuits=None).delete()
@@ -339,8 +318,8 @@ class ObjectCreateView(APIView):
             # if instance.type_of_trakt.name == 'ПГ':
             instance.total_amount_channels = instance.amount_channels.value
             instance.save()
-            create_object_KLSS_RRL_amount_channels(obj = instance)
-            create_form51(obj = instance)
+            create_object_KLSS_RRL_amount_channels(obj=instance)
+            create_form51(obj=instance)
             # create_circuit(obj=instance, request=request)
 
             create_circuit(instance, self.request)
@@ -406,10 +385,6 @@ class TypeOfLocationAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-
-
 
 class MainLineTypeList(ListAPIView):
     """Список главных типов линии"""
@@ -439,10 +414,6 @@ class LineTypeAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-
-
 
 class CategoryAPIVIew(ModelViewSet):
     serializer_class = CategorySerializer
@@ -458,10 +429,6 @@ class CategoryAPIVIew(ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-
-
 
 class ConsumerModelViewSet(ModelViewSet):
     serializer_class = ConsumerSerializer
@@ -476,10 +443,6 @@ class ConsumerModelViewSet(ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-
 
 
 class ObjectHistory(APIView):
@@ -612,7 +575,6 @@ class BugModelViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user.profile)
 
 
-from collections import Counter
 class GOZListView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, )
