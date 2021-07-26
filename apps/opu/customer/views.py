@@ -38,7 +38,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 class CustomerHistory(APIView):
 	authentication_classes = (TokenAuthentication,)
-	permission_classes = (IsAuthenticated, IsPervichkaOnly, )
+	permission_classes = (IsAuthenticated, )
 
 	def get(self, request, pk):
 		customer = Customer.objects.get(pk=pk)

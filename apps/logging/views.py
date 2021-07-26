@@ -8,18 +8,14 @@ from knox.auth import TokenAuthentication
 from rest_framework.response import Response
 
 from apps.logging.models import ActivityLogModel
-
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser
-
 from apps.logging.serializers import ActivityLogSerializer
-from django.db.models import Q
-
-
+from apps.accounts.permissions import IngenerUser
 
 
 class ActivityLogAPIVIew(ListAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  IsPervichkaOnly | SuperUser)
+    permission_classes = (IsAuthenticated,  IsPervichkaOnly | SuperUser,  SuperUser | IngenerUser)
     serializer_class = ActivityLogSerializer
 
     def get_queryset(self):

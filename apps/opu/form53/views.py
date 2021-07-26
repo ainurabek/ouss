@@ -179,7 +179,7 @@ class Schema53PhotoDeleteView(APIView, PhotoDeleteMixin):
 
 class Form53History(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly, )
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         form53 = Form53.objects.get(pk=pk)

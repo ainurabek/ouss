@@ -161,7 +161,7 @@ class OrderCusPhotoDeleteView(APIView, PhotoDeleteMixin):
 
 class FormCustomerHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
         form_customer = Form_Customer.objects.get(pk=pk)
