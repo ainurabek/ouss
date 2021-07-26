@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from apps.analysis.service import get_period, get_calls_list, \
     update_punkt5, delete_punkt5, update_punkt7, delete_punkt7, create_form_analysis_and_punkt5_punkt7, event_distinct, \
     event_filter_date_from_date_to_and_outfit, get_count_event, get_sum_period_of_time_event, determine_the_winner, \
-    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct, get_period_date_to, get_period_ak, \
+    set_response_for_winners, get_winners, form61_rrl_filter, form61_rrl_distinct, get_period_ak, \
     DictWithRound
 from apps.dispatching.models import Event, HistoricalEvent, Index
 from apps.dispatching.services import get_event_name
@@ -71,14 +71,13 @@ class AmountChannelsObjectKLSRRLAPIView(UpdateAPIView):
 @permission_classes([IsAuthenticated,])
 def get_report(request):
     """ Форма анализа"""
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
-    responsible_outfit = request.GET.getlist("responsible_outfit")
+    date_from = request.GET.get("date_from", None)
+    date_to = request.GET.get("date_to", date_from)
+    responsible_outfit = request.GET.getlist("responsible_outfit", None)
 
     all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-        filter(index1__index='1', callsorevent=False, reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры', 'Линейные ПВ',
-                                                                        'Хищения на ЛС', 'ПВ за счет стихии']).\
-        exclude(name__isnull=False).\
+        filter(index1__index='1', name__isnull=True, callsorevent=False,
+               reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры', 'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).\
         prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                          "index1", "reason")
     all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)
@@ -93,14 +92,13 @@ def get_report(request):
         "ПВ аппаратурыЦРРЛ": None, "Линейные ПВКЛС": None, "Линейные ПВЦРРЛ": None,
         "Хищения на ЛСКЛС": None, "Хищения на ЛСЦРРЛ": None, "ПВ за счет стихииКЛС": None, 'ПВ за счет стихииЦРРЛ': None
         })
-
-    example = DictWithRound({'id': None, "name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": list_reason_typ_line.copy(),
+    example = DictWithRound({'id': None, "name": None, "date_from": None, "date_to": None, "comments": None, "period_of_time": copy.deepcopy(list_reason_typ_line),
                'color': None, "amount_of_channels": {"КЛС": None, "ЦРРЛ": None}
     })
 
     for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(example)
-        total_outfit['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
+        total_outfit['period_of_time'] = DictWithRound.fromkeys(list_reason_typ_line, 0)
         out_data = copy.deepcopy(example)
         out_data['name'] = outfit.responsible_outfit.outfit
         out_data['color'] = "1"
@@ -112,10 +110,11 @@ def get_report(request):
             event_data['name'] = get_event_name(event)
             event_data['id'] = amount_channels_id
             data.append(event_data)
-            example['period_of_time'] = dict.fromkeys(list_reason_typ_line, 0)
+            example['period_of_time'] = DictWithRound.fromkeys(list_reason_typ_line, 0)
             total_period_of_time = copy.deepcopy(example)
+            total_event = copy.deepcopy(example)
 
-            for call in get_calls_list(all_event, event).iterator():
+            for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit).order_by('date_from').iterator():
                 period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
@@ -123,12 +122,16 @@ def get_report(request):
                 if amount_channels_KLS != 0:
                     call_data['period_of_time'][call.reason.name+'КЛС'] = period
                     total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
+                    total_event['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
+                    total_outfit['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
 
                 if amount_channels_RRL != 0:
                     call_data['period_of_time'][call.reason.name+'ЦРРЛ'] = period
                     total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
+                    total_event['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
+                    total_outfit['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
 
-                call_data['amount_of_channels']['КЛС']= amount_channels_KLS
+                call_data['amount_of_channels']['КЛС'] = amount_channels_KLS
                 call_data['amount_of_channels']['ЦРРЛ'] = amount_channels_RRL
                 call_data['comments'] = call.comments1
                 data.append(call_data)
@@ -136,18 +139,10 @@ def get_report(request):
             total_period_of_time['date_from'] = 'час'
             total_period_of_time['color'] = '2'
             data.append(total_period_of_time)
-            total = copy.deepcopy(total_period_of_time)
-            for i in total['period_of_time']:
-                if amount_channels_KLS != 0:
-                    total['period_of_time'][i] = total['period_of_time'][i] * amount_channels_KLS
-                    total_outfit['period_of_time'][i] += total['period_of_time'][i]
-                if amount_channels_RRL != 0:
-                    total['period_of_time'][i] = total['period_of_time'][i] * amount_channels_RRL
-                    total_outfit['period_of_time'][i] += total['period_of_time'][i]
-            total['name'] = 'всего'
-            total['date_from'] = 'кнл/час'
-            total['color'] = '3'
-            data.append(total)
+            total_event['name'] = 'всего'
+            total_event['date_from'] = 'кнл/час'
+            total_event['color'] = '3'
+            data.append(total_event)
         total_outfit['name'] = 'Общий итог'
         total_outfit['color'] = '4'
         data.append(total_outfit)
@@ -169,13 +164,10 @@ def get_report_analysis(request):
     else:
         order_name = ["-object__name", "-ips__name", "-name", "-circuit__name"]
 
-
     all_events = Event.objects.only("object__name", "circuit__name", "ips__name", "type_journal", "index1__name",
                                     "reason__name", "point1__name", "point2__name", "period_of_time", "date_from",
                                     "date_to", "responsible_outfit", "callsorevent").filter(callsorevent=False,
                                                                                             name__isnull=True).exclude(index1__index='4')
-
-
     if index != "":
         all_events = all_events.filter(index1__id=index)
 
@@ -396,21 +388,21 @@ class ReportOaAndOdApiView(APIView):
 
     def get(self, request):
         date_from = request.GET.get("date_from")
-        date_to = request.GET.get("date_to")
+        date_to = request.GET.get("date_to", date_from)
         responsible_outfit = request.GET.getlist("responsible_outfit")
-        index = request.GET.get("index")
+        index = request.GET.get("index", "")
 
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
 
-        if index is None or index == '':
+        if index == '':
             all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-                filter(index1__in=[od, oa],  callsorevent=False).exclude(name__isnull=False).\
+                filter(index1__in=[od, oa], callsorevent=False, name__isnull=True).\
                 prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                                  "index1", "reason")
         elif index in [str(od.id), str(oa.id)]:
             all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-                filter(index1=index, callsorevent=False).exclude(name__isnull=False).\
+                filter(index1=index, callsorevent=False, name__isnull=True).\
                 prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                                  "index1", "reason")
         else:
@@ -436,15 +428,20 @@ class ReportOaAndOdApiView(APIView):
         rep = DictWithRound({
             "outfit": None,
             "name": None, "pk":None,
-            "oa": {"sum": 0, "count": 0},
-            "od": {"sum": 0, "count": 0},
-            "total_sum": {"sum": 0, "count": 0}
+            "oa": DictWithRound({"sum": 0, "count": 0}),
+            "od": DictWithRound({"sum": 0, "count": 0}),
+            "total_sum": DictWithRound({"sum": 0, "count": 0})
         })
 
         for out in outfits.iterator():
             outfit = out.responsible_outfit
-            data.append({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": None, "count": None}, "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
-            outfit_data = DictWithRound({"outfit": outfit.outfit, "name": None, "pk":None, "total_sum": {"sum": 0, "count": 0}, "oa": {"sum": 0, "count": 0}, "od": {"sum": 0, "count": 0}})
+            data.append({"outfit": outfit.outfit, "name": None, "pk": None,
+                         "total_sum": {"sum": None, "count": None},
+                         "oa": {"sum": None, "count": None}, "od": {"sum": None, "count": None}})
+            outfit_data = DictWithRound({"outfit": outfit.outfit, "name": None, "pk": None,
+                                         "total_sum": DictWithRound({"sum": 0, "count": 0}),
+                                         "oa": DictWithRound({"sum": 0, "count": 0}),
+                                         "od": DictWithRound({"sum": 0, "count": 0})})
             for event in all_event_name.filter(responsible_outfit=outfit).iterator():
                 count_od = get_count_event(all_event, event, od, outfit)
                 count_oa = get_count_event(all_event, event, oa, outfit)
@@ -458,8 +455,8 @@ class ReportOaAndOdApiView(APIView):
 
                 data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": event.responsible_outfit.pk,
                              "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
-                             "oa": {"sum": sum_oa, "count": count_oa, "color": None},
-                             "od": {"sum": sum_od, "count": count_od, "color": None}})
+                             "oa": {"sum": round(sum_oa, 2), "count": count_oa, "color": None},
+                             "od": {"sum": round(sum_od, 2), "count": count_od, "color": None}})
                 outfit_data["oa"]["count"] += count_oa
                 outfit_data["od"]["count"] += count_od
                 outfit_data["oa"]["sum"] += sum_oa
@@ -514,7 +511,7 @@ class DetailOaAndOdApiView(APIView):
         outfits = event_distinct(all_events, "responsible_outfit")
         all_event_name = event_distinct(all_events, "ips_id", "object_id", "circuit_id")
         data = []
-        content = {"id": None, "name":None, "date_from": None, "date_to": None, 'index':None, "sum": 0, "count": 0}
+        content = {"id": None, "name": None, "date_from": None, "date_to": None, 'index': None, "sum": 0, "count": 0}
         total_data = copy.deepcopy(content)
         for out in outfits.iterator():
             out_data = copy.deepcopy(content)

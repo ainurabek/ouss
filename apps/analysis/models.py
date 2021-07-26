@@ -27,8 +27,8 @@ class FormAnalysis(models.Model):
 
 
 class AmountChannelsKLSRRL(models.Model):
-    object = models.OneToOneField(Object, related_name = 'object_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
-    ips = models.OneToOneField(Point, related_name = 'point_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
+    object = models.OneToOneField(Object, related_name='object_channelKLSRRL', on_delete=models.CASCADE, blank=True, null=True)
+    ips = models.OneToOneField(Point, related_name='point_channel', on_delete=models.CASCADE, blank=True, null=True)
     amount_channelsKLS = models.IntegerField("КЛС каналы", default=0, blank=True, null=True)
     amount_channelsRRL = models.IntegerField("ЦРРЛ каналы", default=0,  blank=True, null=True)
 

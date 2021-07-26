@@ -55,18 +55,6 @@ def create_circuit(obj: Object, request):
             transit.trassa.add(c)
             c.id_object.add(obj)
 
-        if active == 1:
-            if obj.type_line.main_line_type.name == 'КЛС':
-                obj.point1.total_point_channels_KLS += obj.amount_channels.value
-                obj.point1.save()
-                obj.point2.total_point_channels_KLS += obj.amount_channels.value
-                obj.point2.save()
-            elif obj.type_line.main_line_type.name == 'ЦРРЛ':
-                obj.point1.total_point_channels_RRL += obj.amount_channels.value
-                obj.point1.save()
-                obj.point2.total_point_channels_RRL += obj.amount_channels.value
-                obj.point2.save()
-
         #чтобы добавлять каналы в список всех каналов id_parent
         id_parent = obj.id_parent
         while True:

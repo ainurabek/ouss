@@ -9,7 +9,6 @@ from sortedm2m.fields import SortedManyToManyField
 from simple_history.models import HistoricalRecords
 
 
-
 class Bug(models.Model):
 	text = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -140,8 +139,6 @@ class Point(models.Model):
 	tpo = models.ForeignKey(TPO, related_name='point_tpo', on_delete=models.CASCADE, blank=True, null=True)
 	region = models.CharField('Район', max_length=550, blank=True, null=True)
 	type_equipment = models.CharField('Тип оборудования', max_length=550, blank=True, null=True)
-	total_point_channels_KLS = models.IntegerField("Значение_КЛС", default=0)
-	total_point_channels_RRL = models.IntegerField("Значение_ЦРРЛ", default=0)
 	history = HistoricalRecords(related_name='history_point_log')
 
 	def __str__(self):
@@ -198,7 +195,6 @@ class Object(models.Model):
 	consumer = models.ForeignKey(Consumer, related_name='obj_consumer', on_delete=models.SET_NULL, blank=True, null=True)
 	is_transit = models.BooleanField(default=False)  # if True - то его компоненты участвуют в транзите, при измнении, эти компоненты перезапишутся
 	history = HistoricalRecords(related_name='history_object_log')
-
 
 	class Meta:
 		verbose_name = 'Линия передачи/Обьект/Тракт'
