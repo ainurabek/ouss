@@ -259,7 +259,7 @@ class FormAnalysisAPIViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, SuperUser | IsAKOnly]
+            permission_classes = [IsAuthenticated,]
         else:
             permission_classes = [IsAuthenticated, SuperUser | IsAKOnly, SuperUser|IngenerUser]
 
@@ -392,7 +392,7 @@ class Punkt7DeleteAPIView(generics.DestroyAPIView):
 class ReportOaAndOdApiView(APIView):
     """Отчет по Од, Оа"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly)
+    permission_classes = (IsAuthenticated,  SuperUser|IsAKOnly, SuperUser | IngenerUser)
 
     def get(self, request):
         date_from = request.GET.get("date_from")

@@ -484,7 +484,7 @@ class ConsumerModelViewSet(ModelViewSet):
 
 class ObjectHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         object = Object.objects.get(pk=pk)
@@ -505,7 +505,7 @@ class ObjectHistory(APIView):
 
 class IPHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         ip = IP.objects.get(pk=pk)
@@ -526,7 +526,7 @@ class IPHistory(APIView):
 
 class PointHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         point = Point.objects.get(pk=pk)
@@ -547,7 +547,7 @@ class PointHistory(APIView):
 
 class OutfitHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         outfit = Outfit.objects.get(pk=pk)
@@ -606,7 +606,7 @@ class BugModelViewSet(viewsets.ModelViewSet):
     queryset = Bug.objects.all().order_by('-id')
     serializer_class = BugSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user.profile)
@@ -615,7 +615,7 @@ class BugModelViewSet(viewsets.ModelViewSet):
 from collections import Counter
 class GOZListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         outfit = self.request.query_params.get('outfit', None)
@@ -638,6 +638,6 @@ class GOZListView(APIView):
 
 class GOZUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
     queryset = Object.objects.all()
     serializer_class = GOZUpdateSerializer

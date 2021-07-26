@@ -1,4 +1,3 @@
-
 from rest_framework import status
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -49,7 +48,7 @@ class Form51UpdateAPIView(UpdateAPIView):
 
 class Form51History(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly, )
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         form51 = Form51.objects.get(pk=pk)

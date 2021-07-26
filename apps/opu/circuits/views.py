@@ -73,7 +73,7 @@ class CircuitDetailView(generics.RetrieveAPIView):
 
 class CircuitHistory(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, pk):
         circuit = Circuit.objects.get(pk=pk)
