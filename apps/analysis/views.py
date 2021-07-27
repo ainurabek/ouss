@@ -114,7 +114,7 @@ def get_report(request):
             total_period_of_time = copy.deepcopy(example)
             total_event = copy.deepcopy(example)
 
-            for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit).order_by('date_from').iterator():
+            for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit, responsible_outfit=outfit.responsible_outfit).order_by('date_from').iterator():
                 period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
@@ -180,44 +180,50 @@ def get_report_analysis(request):
         page = paginator.page(paginator.num_pages)
 
     all_events = all_events.filter(id__in=page.object_list)
-    all_event_names = all_events.distinct('ips_id', 'object_id', 'circuit_id').order_by('ips_id', 'object_id', 'circuit_id')
-
+    all_event_names = all_events.order_by(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
+        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
     all_event_names = all_events.filter(id__in=all_event_names).order_by(*order_name)
+
+    type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
+    outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit",
+                                                                                      "type_journal")
 
     if order_date != "":
         order_date = "date_from" if order_date == "start" else "-date_from"
         all_event_names = all_events.filter(id__in=all_event_names).order_by(order_date)
 
-    outfits = all_events.order_by("responsible_outfit").distinct("responsible_outfit")
 
     data = {"count": paginator.num_pages, "result": []}
 
     example = DictWithRound({"outfit": None, 'id': None, "name": None, "reason": None, "date_from": None,
                              "date_to": None, 'get_period': None, 'region': None, "index1": None, "comments1": None})
+    for type in type_journal.iterator():
+        type_data = example.copy()
+        type_data['outfit'] = type.type_journal.name
+        data["result"].append(type_data)
+        for out in outfits.filter(type_journal=type.type_journal).iterator():
+            out_data = example.copy()
+            out_data['outfit'] = out.responsible_outfit.outfit
+            data["result"].append(out_data)
+            for event in all_event_names.filter(responsible_outfit=out.responsible_outfit, type_journal=type.type_journal).iterator():
+                event_data = example.copy()
+                event_data['id'] = event.id
+                event_data['name'] = get_event_name(event)
+                data["result"].append(event_data)
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, responsible_outfit=out.responsible_outfit, type_journal=type.type_journal).order_by('date_from').iterator():
+                    call_data = example.copy()
+                    call_data['id'] = None
+                    call_data['name'] = '-'
+                    call_data['reason'] = call.reason.name
+                    call_data['date_from'] = get_date_from_ak(call, date_from)
+                    call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and date_to is not None else get_date_to(call, date_to if date_to is not None else date_from)
+                    call_data['get_period'] = get_period_ak(call, date_from, date_to)
+                    call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
+                    call_data['comments1'] = call.comments1
+                    call_data['index1'] = call.index1.index
 
-    for out in outfits.iterator():
-        out_data = example.copy()
-        out_data['outfit'] = out.responsible_outfit.outfit
-        data["result"].append(out_data)
-        for event in all_event_names.filter(responsible_outfit=out.responsible_outfit).iterator():
-            event_data = example.copy()
-            event_data['id'] = event.id
-            event_data['name'] = get_event_name(event)
-            data["result"].append(event_data)
-
-            for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit).order_by('date_from').iterator():
-                call_data = example.copy()
-                call_data['id'] = None
-                call_data['name'] = '-'
-                call_data['reason'] = call.reason.name
-                call_data['date_from'] = get_date_from_ak(call, date_from)
-                call_data['date_to'] = get_date_to_ak(call, date_to) if date_from is not None and date_to is not None else get_date_to(call, date_to if date_to is not None else date_from)
-                call_data['get_period'] = get_period_ak(call, date_from, date_to)
-                call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
-                call_data['comments1'] = call.comments1
-                call_data['index1'] = call.index1.index
-
-                data["result"].append(call_data)
+                    data["result"].append(call_data)
 
     return JsonResponse(data, safe=False)
 
@@ -453,7 +459,7 @@ class ReportOaAndOdApiView(APIView):
                 winners_oa = determine_the_winner(winners_oa, sum_oa, winner_index)
                 winners_od = determine_the_winner(winners_od, sum_od, winner_index)
 
-                data.append({"name": get_event_name(event), "pk":get_event_pk(event), "outfit": event.responsible_outfit.pk,
+                data.append({"name": get_event_name(event), "pk":event.pk, "outfit": event.responsible_outfit.pk,
                              "total_sum": {"sum": round(sum_oa+sum_od, 2), "count": count_oa + count_od, "color": None},
                              "oa": {"sum": round(sum_oa, 2), "count": count_oa, "color": None},
                              "od": {"sum": round(sum_od, 2), "count": count_od, "color": None}})
@@ -498,14 +504,9 @@ class DetailOaAndOdApiView(APIView):
             prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                              "index1", "reason")
 
-        if Object.objects.filter(pk=pk).exists():
-            all_events = all_event.filter(object=pk).filter(responsible_outfit = responsible_outfit)
-
-        elif Point.objects.filter(pk=pk).exists():
-            all_events = all_event.filter(ips=pk).filter(responsible_outfit = responsible_outfit)
-
-        elif Circuit.objects.filter(pk=pk, ).exists():
-            all_events = all_event.filter(circuit=pk).filter(responsible_outfit = responsible_outfit)
+        event = Event.objects.get(pk=pk)
+        all_events = all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit,
+                                      responsible_outfit = event.responsible_outfit, type_journal=event.type_journal)
 
         all_events = event_filter_date_from_date_to_and_outfit(all_events, date_from, date_to, responsible_outfit)
         outfits = event_distinct(all_events, "responsible_outfit")
@@ -519,7 +520,7 @@ class DetailOaAndOdApiView(APIView):
             out_data['sum'] = None
             out_data['count'] = None
             data.append(out_data)
-            for event in all_event_name.iterator():
+            for event in all_event_name.filter(responsible_outfit=out.responsible_outfit).iterator():
                 event_data = copy.deepcopy(content)
                 event_data['name'] = get_event_name(event)
                 event_data['sum'] = None

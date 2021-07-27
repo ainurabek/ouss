@@ -288,7 +288,7 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
         for event in all_event_name.filter(responsible_outfit=out).iterator():
             amount_channels_id, amount_channels_KLS, amount_channels_RRL = get_amount(event)
 
-            for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit).iterator():
+            for call in all_event.filter(object=event.object, ips=event.ips, circuit=event.circuit, responsible_outfit=out).iterator():
                 period = get_period(call, date_to)
                 if amount_channels_KLS != 0:
                     total_outfit_kls += period * amount_channels_KLS
@@ -757,11 +757,15 @@ def get_amount(obj: Event):
     if obj.object is not None:
         return obj.object.object_channelKLSRRL.id, obj.object.object_channelKLSRRL.amount_channelsKLS, \
                obj.object.object_channelKLSRRL.amount_channelsRRL
-    if obj.ips is not None:
-        return obj.ips.point_channel.id, obj.ips.point_channel.amount_channelsKLS, \
-                    obj.ips.point_channel.amount_channelsRRL
-    if obj.circuit is not None:
-        return None, 1, 1
+    elif obj.ips is not None:
+       return obj.ips.point_channel.id, obj.ips.point_channel.amount_channelsKLS, \
+                        obj.ips.point_channel.amount_channelsRRL
+    elif obj.circuit is not None:
+        if obj.circuit.object is not None:
+            if obj.circuit.object.type_line.main_line_type.name == 'КЛС':
+                return None, 1, 0
+            else:
+                return None, 0, 1
 
 
 def form61_kls_filter(form61: Form61KLS, outfit, type_connection, laying_method) -> Form61KLS:

@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Отчет диспетчерской службы </title>
         <style>
+
         table {
           font-family: times new roman;
           border-collapse: collapse;
@@ -26,13 +27,26 @@
 
         thead {
             display: table-row-group;
+
         }
+        tr.header-tr {
+        border:0px;
+        text-align:center;
+        width:500px;}
+
+
         </style>
 
     </head>
     <body>
-        <h2>Отчет ОПУ на {{date}} </h2>
         <table>
+            <thead class="header-info" style="display: table-header-group;">
+                <tr class="header-tr">
+                    <th class="header-th" style="border:0px; text-align:center;">
+                        <div class="header">Отчет ОПУ на {{date}}</div>
+                    </th>
+                </tr>
+            </thead>
             <thead>
                 <tr>
                     <th>Название</th>
