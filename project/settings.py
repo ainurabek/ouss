@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sortedm2m',
+    'django_crontab',
 
     'apps.opu.objects.apps.ObjectsConfig',
     'apps.accounts',
@@ -204,3 +205,8 @@ AUTHENTICATION_BACKENDS = (
 CORS_ORIGIN_ALLOW_ALL = True
 # Activate Django-Heroku.
 django_heroku.settings(locals())
+
+
+CRONJOBS = [
+    ('0 0 1 1 *', 'project.cron.clear_db')
+]
