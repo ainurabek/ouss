@@ -70,9 +70,10 @@ def get_report_secondary(request):
 
     data = []
     content = DictWithRound({
+        'name':None,
         'id': None,
-        'point': {'id': None, 'point': None, 'name': None},
-        'outfit': {'id': None, 'outfit': None, 'adding': None},
+        # 'point': {'id': None, 'point': None, 'name': None},
+        # 'outfit': {'id': None, 'outfit': None, 'adding': None},
         'type_station': {'id': None, 'name': None},
         'year_of_launch': None,
         'installed_value': None,
@@ -85,9 +86,7 @@ def get_report_secondary(request):
     for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
-        out_data['outfit']['id'] = outfit.outfit.id
-        out_data['outfit']['outfit'] = outfit.outfit.outfit
-        out_data['outfit']['adding'] = outfit.outfit.adding
+        out_data['name'] = outfit.outfit.adding
         out_data['KT_numbering'] = None
         out_data['color'] = "outfit"
 
@@ -95,12 +94,10 @@ def get_report_secondary(request):
         for second in queryset.filter(outfit=outfit.outfit).iterator():
             second_data = copy.deepcopy(content)
             second_data['id'] = second.id
-            second_data['outfit']['id'] = second.outfit.id
-            second_data['outfit']['outfit'] = second.outfit.outfit
-            second_data['outfit']['adding'] = second.outfit.adding
-            second_data['point']['id'] = second.point.id
-            second_data['point']['point'] = second.point.point
-            second_data['point']['name'] = second.point.name
+            second_data['name'] = second.point.name
+            # second_data['point']['id'] = second.point.id
+            # second_data['point']['point'] = second.point.point
+            # second_data['point']['name'] = second.point.name
             second_data['type_station']['id'] = second.type_station.id if second.type_station is not None else ''
             second_data['type_station']['name'] = second.type_station.name if second.type_station is not None else ''
             second_data['year_of_launch'] = second.year_of_launch
