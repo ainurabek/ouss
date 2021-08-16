@@ -1,35 +1,35 @@
 import datetime
-import subprocess, os, pdfkit
+import os
+import pdfkit
+import subprocess
 from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
-from rest_framework.views import APIView
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django_filters.rest_framework import DjangoFilterBackend
+from knox.auth import TokenAuthentication
+from rest_framework import status
+from rest_framework import viewsets, generics
+from rest_framework.decorators import permission_classes
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from .models import TypeOfJournal, Comments, Reason, Index, Event
+from .serializers import EventCreateSerializer, EventDetailSerializer
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, DamageReportListSerializer, DamageUpdateSerializer, \
     InternationalDamageReportListSerializer, TechStopReportListSerializer
-from .services import get_minus_date, ListFilterAPIView, get_event_name, get_date_to, \
+from .services import get_minus_date, ListFilterAPIView, get_event_name, \
     event_form_customer_filter_date_from_date_to_and_customer
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
-
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
-from .serializers import EventCreateSerializer, EventDetailSerializer
-from rest_framework import viewsets, generics
-
 from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 
-from .models import TypeOfJournal, Comments, Reason, Index, Event
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from knox.auth import TokenAuthentication
-from rest_framework.decorators import permission_classes
-from django.template.loader import get_template
 
 class EventListAPIView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
@@ -59,7 +59,7 @@ class EventListAPIView(viewsets.ModelViewSet):
         responsible_outfit = self.request.query_params.get('responsible_outfit', None)
         index1 = self.request.query_params.get('index1', None)
         name = self.request.query_params.get('name', None)
-    #фильтр по хвостам + за сегодня
+    # фильтр по хвостам + за сегодня
 
         queryset = self.queryset.filter(date_from__date__lte=created_at).order_by('-date_from')
 
@@ -73,10 +73,12 @@ class EventListAPIView(viewsets.ModelViewSet):
             queryset = queryset.filter(index1=index1)
         if name is not None and name != '':
             queryset = queryset.filter(name=name)
-        queryset = queryset.filter(Q(date_to__date=created_at) | Q(date_to__date=None)|Q(date_from__date=created_at)) | (queryset.exclude(index1__index='4', date_to__date__lt=created_at).filter(date_from__date__lt=created_at))
+        queryset = queryset.filter(Q(date_to__date=created_at) | Q(date_to__date=None) | Q(date_from__date=created_at)) \
+                   |(queryset.exclude(index1__index='4', date_to__date__lt=created_at)
+                      .filter(date_from__date__lt=created_at))
         return queryset
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, **kwargs):
         calls = Event.objects.get(pk=pk).event_id_parent.all().order_by("-date_from")
 
         serializer = self.get_serializer(calls, many=True)
@@ -100,7 +102,7 @@ class EventDetailAPIView(APIView):
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,   SuperUser|IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
     """Создания Event"""
     def post(self, request, pk):
@@ -175,7 +177,7 @@ class CircuitParentList(APIView):
 
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,   SuperUser|IsDispOnly, SuperUser|IngenerUser )
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
     """Создания Event"""
 
@@ -219,7 +221,7 @@ class EventCircuitCreateViewAPI(APIView):
 
 class EventObjectCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
     """Создания Event"""
 
     def post(self, request, pk):
@@ -268,7 +270,7 @@ class EventObjectCreateViewAPI(APIView):
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, SuperUser|IngenerUser,)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser,)
 
     """Создания Event"""
 
@@ -327,7 +329,7 @@ class EventUpdateAPIView(UpdateAPIView):
 class EventDeleteAPIView(DestroyAPIView):
     """Удаление события  по звонкам"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser | IsDispOnly, SuperUser | IngenerUser, DateCheck)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser, DateCheck)
 
     queryset = Event.objects.all()
     lookup_field = 'pk'
@@ -608,8 +610,13 @@ def get_report_pdf(request):
 
     config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
     options = {
-        'margin-bottom': '10mm',
-        'footer-center': '[page]'
+        'margin-bottom': '20mm',
+        'footer-center': '[page]',
+        'header-left': 'Отчет ОПУ за ' + date,
+        'header-spacing':2,
+        'header-font-size':'12',
+        'header-font-name':'Times New Roman'
+
     }
     pdf = pdfkit.from_string(html, False, configuration=config, options=options)
     response = HttpResponse(pdf, content_type='application/pdf')
@@ -647,7 +654,7 @@ class OutfitWorkerCreateView(generics.CreateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
 
 class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
@@ -656,13 +663,13 @@ class OutfitWorkerEditView(generics.RetrieveUpdateAPIView):
     queryset = OutfitWorker.objects.all()
     serializer_class = OutfitWorkerCreateSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly,  SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
 
 class OutfitWorkerDeleteAPIView(DestroyAPIView):
     """Удаления"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
     queryset = OutfitWorker.objects.all().order_by('id')
     lookup_field = 'pk'
 
@@ -678,7 +685,7 @@ class CommentModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -694,7 +701,7 @@ class TypeJournalModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -710,7 +717,7 @@ class ReasonModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser]
 
         return [permission() for permission in permission_classes]
 
@@ -726,14 +733,14 @@ class IndexModelViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly,  SuperUser|IngenerUser]
+            permission_classes = [IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser]
         return [permission() for permission in permission_classes]
 
 
 #Создание произвольного события. Будут показываться список произвольных событий, где поле name !=None. Ainur
 class EventUnknownCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser|IsDispOnly, IngenerUser|SuperUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
     """Создания Unknown Event"""
 
     def post(self, request):
@@ -776,7 +783,7 @@ class DamageReportListAPIView(ListAPIView):
 
 class DamageUpdateAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,  SuperUser | IsDispOnly, SuperUser|IngenerUser)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
     queryset = Event.objects.filter(callsorevent=False)
     serializer_class = DamageUpdateSerializer
     lookup_field = "pk"

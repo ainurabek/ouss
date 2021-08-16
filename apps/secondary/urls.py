@@ -11,6 +11,7 @@ router.register('type_station', views.TypeStationModelViewSet, basename='type_st
 router.register('base', views.BaseModelView, basename='secondary_base')
 
 urlpatterns = [
+    path("list/", views.get_report_secondary),
 
     path('', include(router.urls)),
 

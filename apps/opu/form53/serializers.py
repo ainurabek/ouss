@@ -3,7 +3,7 @@ from apps.opu.form53.models import Form53, Order53Photo, Schema53Photo
 from apps.opu.circuits.models import Circuit
 from apps.opu.objects.serializers import CategorySerializer
 
-
+from apps.opu.circuits.serializers import CustomerSerializer
 
 
 class Order53PhotoSerializer(serializers.ModelSerializer):
@@ -48,10 +48,11 @@ class Form53CreateSerializer(serializers.ModelSerializer):
 
 class CircuitForm53(serializers.ModelSerializer):
     category = CategorySerializer()
+    customer= CustomerSerializer()
 
     class Meta:
         model = Circuit
-        fields = ('id', 'name',  'num_circuit', 'category', 'num_order', 'comments',)
+        fields = ('id', 'name',  'customer', 'num_circuit', 'category', 'num_order', 'comments',)
 
 
 class Form53Serializer(serializers.ModelSerializer):

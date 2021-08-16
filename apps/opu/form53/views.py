@@ -92,9 +92,9 @@ class Form53ListAPIView(APIView):
         example = {
             'id': None, 'circuit': {
                 'id': None, 'name': None,  'num_circuit': None, 'category': {},
-                'num_order': None, 'comments': None, 'bridges': [],
+                'num_order': None, 'customer':None, 'comments': None, 'bridges': [],
             },
-            'order53_photo': [], 'schema53_photo': [], 'comments': None, 'object_id': None
+            'order53_photo': [], 'comments': None, 'object_id': None
         }
 
         if len(queryset) != 0:
