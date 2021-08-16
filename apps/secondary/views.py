@@ -86,7 +86,7 @@ def get_report_secondary(request):
     for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
-        out_data['name'] = outfit.outfit.adding
+        out_data['name'] = outfit.outfit.outfit
         out_data['KT_numbering'] = None
         out_data['color'] = "outfit"
 
