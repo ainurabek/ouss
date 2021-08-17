@@ -96,7 +96,7 @@ class Event(models.Model):
     callsorevent = models.BooleanField(default=True)
     history = HistoricalRecords(related_name='history_log')
     period_of_time = models.FloatField(default=0, blank=True, null=True)
-    calculate = models.BooleanField(default=True)
+    bypass = models.BooleanField(default=False)
     arrival_date = models.DateTimeField("Дата приезда бригады", blank=True, null=True)
     downtime = models.CharField("Длителность простоя", max_length=150, blank=True, null=True)
 
@@ -111,7 +111,7 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         event_index = {"1": True, "0д": True, "0а": True, "0тв": True}
-        if event_index.get(self.index1.index) and self.calculate:
+        if event_index.get(self.index1.index) and not self.bypass:
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
                 total_seconds = date.total_seconds()

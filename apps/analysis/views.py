@@ -110,7 +110,7 @@ def get_report(request):
 
             for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit, responsible_outfit=outfit.responsible_outfit).order_by('date_from').iterator():
                 period = 0
-                if call.calculate:
+                if not call.bypass:
                     period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from

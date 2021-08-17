@@ -122,7 +122,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'name', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'calculate')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
 
         depth = 2
 
@@ -157,7 +157,7 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'name', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'calculate')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
         depth = 2
 
 
@@ -181,7 +181,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'name', 'calculate')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'name', 'bypass')
 
 
 class ReportSerializer(serializers.ModelSerializer):
