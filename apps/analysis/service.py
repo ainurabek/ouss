@@ -257,7 +257,7 @@ def calls_filter_for_punkt5(date_from, date_to, outfit):
     """Фильтрация событии по дате и по предприятию """
 
     all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-        filter(index1__index='1', callsorevent=False, name__isnull=True,
+        filter(index1__index='1', callsorevent=False, name__isnull=True, calculate=True,
                reason__name__in=['ПВ аппаратуры', 'Линейные ПВ', 'Хищения на ЛС']).\
         prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                          "index1", "reason")
