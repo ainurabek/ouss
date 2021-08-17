@@ -558,18 +558,18 @@ def get_report_pdf(request):
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
     data = []
-    all_tj = TypeOfJournal.objects.all()
+    all_tj = TypeOfJournal.objects.all().order_by("name").distinct("name")
     all_out = Outfit.objects.\
         defer('adding', 'num_outfit', 'tpo', 'type_outfit__name',
               'created_by', 'created_at', 'length_kls', 'length_vls',
               'length_rrl', 'total_number_kls', 'corresponding_norm_kls', 'total_number_vls', 'corresponding_norm_vls',
-              'total_number_rrl', 'corresponding_norm_rrl')
+              'total_number_rrl', 'corresponding_norm_rrl').order_by("outfit").distinct("outfit")
     objs = Object.objects.defer('id_parent', 'id_outfit', 'category', 'point1', 'point2',
                   'type_of_trakt', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer')
-    ips = Point.objects.defer('point')
+                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer').order_by("name").distinct("name")
+    ips = Point.objects.defer('point').order_by("name").distinct("name")
     cirs = Circuit.objects.defer('num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
-                  'point1', 'point2', 'customer', 'object')
+                  'point1', 'point2', 'customer', 'object').order_by("name").distinct("name")
     all_evs = all_events.defer('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
