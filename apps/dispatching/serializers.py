@@ -118,12 +118,11 @@ class EventCreateSerializer(serializers.ModelSerializer):
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
 
-
     class Meta:
         model = Event
-        fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
+        fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
+                  'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'name', 'customer',  'created_at',
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
 
         depth = 2
 
@@ -156,10 +155,9 @@ class CallsCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'name', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1',
-                  'point2')
+        fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
+                  'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'name', 'customer',  'created_at',
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
         depth = 2
 
 
@@ -179,12 +177,11 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
 
-
     class Meta:
         model = Event
-        fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
-              'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2', 'name')
+        fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
+                  'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'customer',  'created_at',
+                  'time_created_at', 'created_by', 'point1', 'point2', 'name', 'bypass')
 
 
 class ReportSerializer(serializers.ModelSerializer):
@@ -225,6 +222,7 @@ class InternationalDamageReportListSerializer(serializers.ModelSerializer):
         model = Event
         fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "comments1", "ips", "object",
                   "circuit", "point1", "point2")
+
 
 class TechStopReportListSerializer(serializers.ModelSerializer):
     object = EventObjFormCustSerializer()

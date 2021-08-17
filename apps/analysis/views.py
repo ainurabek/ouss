@@ -1,7 +1,6 @@
 import copy
 import os
 import random
-
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework import viewsets, generics
 from rest_framework.generics import UpdateAPIView, get_object_or_404, DestroyAPIView
@@ -51,11 +50,6 @@ from apps.opu.services import create_photo
 from apps.opu.services import PhotoCreateMixin, PhotoDeleteMixin
 from apps.analysis.serializers import OrderKLSSerializer
 from apps.analysis.serializers import OrderRRLSerializer
-
-from apps.dispatching.services import get_event_pk
-
-from apps.opu.circuits.models import Circuit
-from apps.opu.objects.models import Object
 
 matplotlib.use('Agg')
 
@@ -115,7 +109,9 @@ def get_report(request):
             total_event = copy.deepcopy(example)
 
             for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit, responsible_outfit=outfit.responsible_outfit).order_by('date_from').iterator():
-                period = get_period(call, date_to)
+                period = 0
+                if not call.bypass:
+                    period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = call.date_to

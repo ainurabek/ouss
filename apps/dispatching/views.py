@@ -124,7 +124,7 @@ class EventIPCreateViewAPI(APIView):
                                          reason=event.reason, comments1=event.comments1, ips=event.ips,
                                          responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                          customer=event.customer, created_by=event.created_by,
-                                         contact_name=event.contact_name, )
+                                         contact_name=event.contact_name, bypass=event.bypass)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,7 +138,7 @@ class EventIPCreateViewAPI(APIView):
                                  reason=event.reason, comments1=event.comments1, ips=event.ips,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by,
-                                 contact_name=event.contact_name,)
+                                 contact_name=event.contact_name, bypass=event.bypass)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -200,10 +200,11 @@ class EventCircuitCreateViewAPI(APIView):
                                          reason=event.reason, comments1=event.comments1, circuit=event.circuit,
                                          responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                          customer=event.customer, created_by=event.created_by,
-                                         contact_name=event.contact_name,
+                                         contact_name=event.contact_name, bypass=event.bypass
                                          )
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = EventCreateSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save(circuit=circuit, created_by=self.request.user.profile)
@@ -214,6 +215,7 @@ class EventCircuitCreateViewAPI(APIView):
                                  reason=event.reason, comments1=event.comments1, circuit=event.circuit,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 bypass=event.bypass
                                  )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -244,7 +246,7 @@ class EventObjectCreateViewAPI(APIView):
                                          reason=event.reason, comments1=event.comments1, object=event.object,
                                          responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                          customer=event.customer, created_by=event.created_by,
-                                         contact_name=event.contact_name,
+                                         contact_name=event.contact_name, bypass=event.bypass
                                          )
 
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -261,6 +263,7 @@ class EventObjectCreateViewAPI(APIView):
                                  reason=event.reason, comments1=event.comments1, object=event.object,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
+                                 bypass=event.bypass
                                  )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)

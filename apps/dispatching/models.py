@@ -1,7 +1,4 @@
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-
 from apps.accounts.models import Profile
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
@@ -96,7 +93,7 @@ class Event(models.Model):
     callsorevent = models.BooleanField(default=True)
     history = HistoricalRecords(related_name='history_log')
     period_of_time = models.FloatField(default=0, blank=True, null=True)
-
+    bypass = models.BooleanField(default=False)
     arrival_date = models.DateTimeField("Дата приезда бригады", blank=True, null=True)
     downtime = models.CharField("Длителность простоя", max_length=150, blank=True, null=True)
 
@@ -111,12 +108,13 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         event_index = {"1": True, "0д": True, "0а": True, "0тв": True}
-        if event_index.get(self.index1.index):
+        if event_index.get(self.index1.index) and not self.bypass:
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
                 total_seconds = date.total_seconds()
                 self.period_of_time = round((((total_seconds / 60) * 100) / 60) / 100, 2)
                 hour = int(total_seconds//3600)
+
                 if hour != 0:
                     self.downtime = f"{int(hour)}ч {int((total_seconds-(hour*3600)) // 60)}мин"
                 else:
