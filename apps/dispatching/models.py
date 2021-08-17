@@ -117,6 +117,7 @@ class Event(models.Model):
                 total_seconds = date.total_seconds()
                 self.period_of_time = round((((total_seconds / 60) * 100) / 60) / 100, 2)
                 hour = int(total_seconds//3600)
+
                 if hour != 0:
                     self.downtime = f"{int(hour)}ч {int((total_seconds-(hour*3600)) // 60)}мин"
                 else:
