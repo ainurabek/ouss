@@ -67,8 +67,8 @@ def get_report_secondary(request):
     content = DictWithRound({
         'name':None,
         'id': None,
-        # 'point': {'id': None, 'point': None, 'name': None},
-        # 'outfit': {'id': None, 'outfit': None, 'adding': None},
+        'point': {'id': None, 'point': None, 'name': None},
+        'outfit': {'id': None, 'outfit': None, 'adding': None},
         'type_station': {'id': None, 'name': None},
         'year_of_launch': None,
         'installed_value': None,
@@ -82,6 +82,9 @@ def get_report_secondary(request):
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
+        out_data['outfit']['id'] = outfit.outdit.id
+        out_data['outfit']['outfit'] = outfit.outdit.outfit
+        out_data['outfit']['adding'] = outfit.outdit.adding
         out_data['KT_numbering'] = None
         out_data['color'] = "outfit"
 
@@ -90,9 +93,12 @@ def get_report_secondary(request):
             second_data = copy.deepcopy(content)
             second_data['id'] = second.id
             second_data['name'] = second.point.name
-            # second_data['point']['id'] = second.point.id
-            # second_data['point']['point'] = second.point.point
-            # second_data['point']['name'] = second.point.name
+            second_data['outfit']['id'] = second.outdit.id
+            second_data['outfit']['outfit'] = second.outdit.outfit
+            second_data['outfit']['adding'] = second.outdit.adding
+            second_data['point']['id'] = second.point.id
+            second_data['point']['point'] = second.point.point
+            second_data['point']['name'] = second.point.name
             second_data['type_station']['id'] = second.type_station.id if second.type_station is not None else ''
             second_data['type_station']['name'] = second.type_station.name if second.type_station is not None else ''
             second_data['year_of_launch'] = second.year_of_launch
@@ -127,6 +133,8 @@ def get_report_118(request):
     content = DictWithRound({
         'name':None,
         'id': None,
+        'outfit': {'id': None, 'outfit': None, 'adding': None},
+        'region':None,
         'code': None,
         'main_num': None,
         'first_redirection': None,
@@ -137,12 +145,19 @@ def get_report_118(request):
     for outfit in outfits.iterator():
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
+        out_data['outfit']['id'] = outfit.outdit.id
+        out_data['outfit']['outfit'] = outfit.outdit.outfit
+        out_data['outfit']['adding'] = outfit.outdit.adding
         out_data['color'] = "outfit"
         data.append(out_data)
         for a in queryset.filter(outfit=outfit.outfit).iterator():
             ambul_data = copy.deepcopy(content)
             ambul_data['id'] = a.id
             ambul_data['name'] = a.region
+            ambul_data['outfit']['id'] = a.outdit.id
+            ambul_data['outfit']['outfit'] = a.outdit.outfit
+            ambul_data['outfit']['adding'] = a.outdit.adding
+            ambul_data['region']= a.region
             ambul_data['code'] = a.code
             ambul_data['main_num'] = a.main_num
             ambul_data['first_redirection'] = a.first_redirection
