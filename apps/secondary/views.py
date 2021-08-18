@@ -3,23 +3,18 @@ from rest_framework.decorators import permission_classes
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 import copy
-from rest_framework.response import Response
 from knox.auth import TokenAuthentication
-from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404, UpdateAPIView
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
-from apps.secondary.models import TypeStation, SecondaryBase
-from apps.secondary.serializers import TypeStationSerializer, SecondaryBaseSerializer, SecondaryBaseCreateSerializer
+from apps.secondary.models import TypeStation, SecondaryBase, AmbulanceNumsBase
+from apps.secondary.serializers import TypeStationSerializer, SecondaryBaseSerializer, SecondaryBaseCreateSerializer, \
+    AmbulBaseCreateSerializer, AmbulBaseSerializer
 from apps.accounts.permissions import IsVtorichkaOnly, SuperUser, IngenerUser
-from apps.opu.objects.models import Outfit, Point
-from apps.opu.objects.serializers import PointList
-
-from apps.secondary.service import secondary_filter, secondary_distinct
-
+from apps.secondary.service import secondary_filter, secondary_distinct, ambul_filter, ambul_distinct
 from apps.analysis.service import DictWithRound
+
+
 
 
 class TypeStationModelViewSet(ModelViewSet):
@@ -120,3 +115,57 @@ def get_report_secondary(request):
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
     return JsonResponse(data, safe=False)
+
+@permission_classes([IsAuthenticated,])
+def get_report_118(request):
+    outfit = request.GET.get("outfit")
+    queryset = AmbulanceNumsBase.objects.all().order_by('outfit')
+    queryset = ambul_filter(queryset, outfit)
+    outfits = ambul_distinct(queryset, 'outfit')
+
+    data = []
+    content = DictWithRound({
+        'name':None,
+        'id': None,
+        'code': None,
+        'main_num': None,
+        'first_redirection': None,
+        'second_redirection': None,
+        'third_redirection': None,
+        'comments': None, 'color': None
+    })
+    for outfit in outfits.iterator():
+        out_data = copy.deepcopy(content)
+        out_data['name'] = outfit.outfit.outfit
+        out_data['color'] = "outfit"
+        data.append(out_data)
+        for a in queryset.filter(outfit=outfit.outfit).iterator():
+            ambul_data = copy.deepcopy(content)
+            ambul_data['id'] = a.id
+            ambul_data['name'] = a.region
+            ambul_data['code'] = a.code
+            ambul_data['main_num'] = a.main_num
+            ambul_data['first_redirection'] = a.first_redirection
+            ambul_data['second_redirection'] = a.second_redirection
+            ambul_data['third_redirection'] = a.third_redirection
+            ambul_data['comments'] = a.comments
+            data.append(ambul_data)
+    return JsonResponse(data, safe=False)
+
+class AmbulBaseUpdateDelete(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    queryset = AmbulanceNumsBase.objects.all().order_by('outfit')
+    lookup_field = 'pk'
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return AmbulBaseSerializer
+        else:
+            return AmbulBaseCreateSerializer
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action =='retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsVtorichkaOnly | SuperUser, IngenerUser | SuperUser]
+        return [permission() for permission in permission_classes]

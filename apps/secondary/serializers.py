@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.secondary.models import TypeStation
 from apps.opu.objects.serializers import OutfitListSerializer, PointList, PointListSerializer
-from apps.secondary.models import SecondaryBase
+from apps.secondary.models import SecondaryBase, AmbulanceNumsBase
 
 from apps.opu.objects.models import Outfit, Point
 
@@ -35,4 +35,23 @@ class SecondaryBaseCreateSerializer(serializers.ModelSerializer):
         model = SecondaryBase
         fields = ('id', 'point', 'outfit', 'type_station', 'year_of_launch', 'installed_value',
                   'active_value', 'active_numbering', 'free_numbering', 'GAS_numbering', 'GAS_return', 'KT_numbering', 'comments', 'administrative_division')
+        depth = 1
+
+class AmbulBaseSerializer(serializers.ModelSerializer):
+    outfit = OutfitListSerializer()
+
+    class Meta:
+        model = AmbulanceNumsBase
+        fields = ('id', 'outfit', 'code', 'main_num', 'first_redirection',
+                  'second_redirection', 'third_redirection', 'comments')
+        depth = 1
+
+class AmbulBaseCreateSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Outfit.objects.all())
+
+    class Meta:
+        model = AmbulanceNumsBase
+        fields = ('id', 'outfit', 'code', 'main_num', 'first_redirection',
+                  'second_redirection', 'third_redirection', 'comments')
         depth = 1

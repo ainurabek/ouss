@@ -1,4 +1,5 @@
-from apps.secondary.models import SecondaryBase
+from apps.secondary.models import SecondaryBase, AmbulanceNumsBase
+
 
 
 def secondary_filter(secondary: SecondaryBase, outfit, type_station, point) -> SecondaryBase:
@@ -13,3 +14,11 @@ def secondary_filter(secondary: SecondaryBase, outfit, type_station, point) -> S
 
 def secondary_distinct(secondary: SecondaryBase, *args):
     return secondary.order_by(*args).distinct(*args)
+
+def ambul_filter(ambul: AmbulanceNumsBase, outfit) -> AmbulanceNumsBase:
+    if outfit is not None and outfit != '':
+        ambul = ambul.filter(outfit=outfit)
+    return ambul
+
+def ambul_distinct(ambul: AmbulanceNumsBase, *args):
+    return ambul.order_by(*args).distinct(*args)

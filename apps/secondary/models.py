@@ -41,4 +41,23 @@ class SecondaryBase(models.Model):
         ordering = ('id',)
         get_latest_by = ('id')
 
+class AmbulanceNumsBase(models.Model):
+    '''База вторичной сети Для 118'''
+    outfit = models.ForeignKey(Outfit, related_name='ambul_out', on_delete=models.SET_NULL, blank=True, null=True)
+    region = models.CharField('Район', max_length=500, null=True, blank=True)
+    code = models.CharField('Код',  max_length=500, blank=True, null=True)
+    main_num = models.CharField('Главный номер', max_length=1500, blank=True, null=True)
+    first_redirection= models.CharField('Первая переадресация', max_length=5500, null=True, blank=True)
+    second_redirection = models.CharField('Вторая переадресация', max_length=5500, blank=True, null=True)
+    third_redirection = models.CharField('Третья переадресация', max_length=5500, null=True, blank=True)
+    comments = models.CharField('Примечание', max_length=1500, null=True, blank=True)
+    created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateField('Дата создания', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'База тел.номеров 118'
+        verbose_name_plural = 'База тел.номеров 118'
+        ordering = ('id',)
+        get_latest_by = ('id')
+
 

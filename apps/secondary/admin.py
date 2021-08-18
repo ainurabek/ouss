@@ -3,6 +3,7 @@ from apps.secondary.models import *
 
 admin.site.register(TypeStation)
 admin.site.register(SecondaryBase)
+admin.site.register(AmbulanceNumsBase)
 
 
 
