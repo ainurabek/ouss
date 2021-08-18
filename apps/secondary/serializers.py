@@ -42,7 +42,7 @@ class AmbulBaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AmbulanceNumsBase
-        fields = ('id', 'outfit', 'code', 'main_num', 'first_redirection',
+        fields = ('id', 'outfit', 'region', 'code', 'main_num', 'first_redirection',
                   'second_redirection', 'third_redirection', 'comments')
         depth = 1
 
@@ -52,6 +52,6 @@ class AmbulBaseCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AmbulanceNumsBase
-        fields = ('id', 'outfit', 'code', 'main_num', 'first_redirection',
+        fields = ('id', 'outfit', 'region', 'code', 'main_num', 'first_redirection',
                   'second_redirection', 'third_redirection', 'comments')
         depth = 1
