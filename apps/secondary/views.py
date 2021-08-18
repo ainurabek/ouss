@@ -82,9 +82,9 @@ def get_report_secondary(request):
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
-        out_data['outfit']['id'] = outfit.outdit.id
-        out_data['outfit']['outfit'] = outfit.outdit.outfit
-        out_data['outfit']['adding'] = outfit.outdit.adding
+        out_data['outfit']['id'] = outfit.outfit.id
+        out_data['outfit']['outfit'] = outfit.outfit.outfit
+        out_data['outfit']['adding'] = outfit.outfit.adding
         out_data['KT_numbering'] = None
         out_data['color'] = "outfit"
 
@@ -93,9 +93,9 @@ def get_report_secondary(request):
             second_data = copy.deepcopy(content)
             second_data['id'] = second.id
             second_data['name'] = second.point.name
-            second_data['outfit']['id'] = second.outdit.id
-            second_data['outfit']['outfit'] = second.outdit.outfit
-            second_data['outfit']['adding'] = second.outdit.adding
+            second_data['outfit']['id'] = second.outfit.id
+            second_data['outfit']['outfit'] = second.outfit.outfit
+            second_data['outfit']['adding'] = second.outfit.adding
             second_data['point']['id'] = second.point.id
             second_data['point']['point'] = second.point.point
             second_data['point']['name'] = second.point.name
@@ -145,18 +145,18 @@ def get_report_118(request):
     for outfit in outfits.iterator():
         out_data = copy.deepcopy(content)
         out_data['name'] = outfit.outfit.outfit
-        out_data['outfit']['id'] = outfit.outdit.id
-        out_data['outfit']['outfit'] = outfit.outdit.outfit
-        out_data['outfit']['adding'] = outfit.outdit.adding
+        out_data['outfit']['id'] = outfit.outfit.id
+        out_data['outfit']['outfit'] = outfit.outfit.outfit
+        out_data['outfit']['adding'] = outfit.outfit.adding
         out_data['color'] = "outfit"
         data.append(out_data)
         for a in queryset.filter(outfit=outfit.outfit).iterator():
             ambul_data = copy.deepcopy(content)
             ambul_data['id'] = a.id
             ambul_data['name'] = a.region
-            ambul_data['outfit']['id'] = a.outdit.id
-            ambul_data['outfit']['outfit'] = a.outdit.outfit
-            ambul_data['outfit']['adding'] = a.outdit.adding
+            ambul_data['outfit']['id'] = a.outfit.id
+            ambul_data['outfit']['outfit'] = a.outfit.outfit
+            ambul_data['outfit']['adding'] = a.outfit.adding
             ambul_data['region']= a.region
             ambul_data['code'] = a.code
             ambul_data['main_num'] = a.main_num
