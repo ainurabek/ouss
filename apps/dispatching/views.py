@@ -558,38 +558,31 @@ def get_report_pdf(request):
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
     data = []
-    all_tj = TypeOfJournal.objects.all().order_by("name").distinct("name")
-    all_out = Outfit.objects.\
-        defer('adding', 'num_outfit', 'tpo', 'type_outfit__name',
-              'created_by', 'created_at', 'length_kls', 'length_vls',
-              'length_rrl', 'total_number_kls', 'corresponding_norm_kls', 'total_number_vls', 'corresponding_norm_vls',
-              'total_number_rrl', 'corresponding_norm_rrl').order_by("outfit").distinct("outfit")
-    objs = Object.objects.defer('id_parent', 'id_outfit', 'category', 'point1', 'point2',
-                  'type_of_trakt', 'tpo1', 'tpo2', 'comments', 'customer', 'type_line', 'our',
-                  "ip_object",  'amount_channels', "total_amount_channels",'order_object_photo', 'consumer').order_by("name").distinct("name")
-    ips = Point.objects.defer('point').order_by("name").distinct("name")
-    cirs = Circuit.objects.defer('num_circuit', 'category', 'num_order', 'comments', 'trassa', 'first',
-                  'point1', 'point2', 'customer', 'object').order_by("name").distinct("name")
+
     all_evs = all_events.defer('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
                  'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
 
     for type in type_journal.iterator():
-        data.append({"name": type.type_journal.name})
+        data.append({"name": type.type_journal.name,
+                     "color":1})
 
         for out in outfits.filter(type_journal=type.type_journal).iterator():
-            data.append({"name": out.responsible_outfit.outfit})
+            data.append({"name": out.responsible_outfit.outfit,
+                         "color":2})
 
             for event in all_event_names.filter(responsible_outfit=out.responsible_outfit,
                                                 type_journal=type.type_journal).iterator():
                 data.append({
-                             "name": get_event_name(event)})
+                             "name": get_event_name(event),
+                            "color":3})
 
                 for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit,
                                               name=event.name, responsible_outfit=out.responsible_outfit,
                                               type_journal=type.type_journal).order_by('date_from').iterator():
                     data.append({
                                  "name": "",
+                                "color":4,
                                  "date_from": call.date_from,
                                  "date_to": get_date_to_ak(call, date),
                                  "region": call.point1.name + " - " + call.point2.name if call.point1 is not None else "",
@@ -599,8 +592,7 @@ def get_report_pdf(request):
 
     template_name = 'pdf.html'
     template = get_template(template_name)
-    html = template.render({"data": data, "all_tj":all_tj, "all_out":all_out,
-                            "objs":objs, "ips":ips, "circ":cirs, "all_evs":all_evs, "date":date, "index":index})
+    html = template.render({"data": data, "all_evs":all_evs, "date":date, "index":index})
 
     if 'DYNO' in os.environ:
         print('loading wkhtmltopdf path on heroku')

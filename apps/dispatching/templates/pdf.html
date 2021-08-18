@@ -49,36 +49,18 @@
             {% for d in data %}
                 <tr>
                     <td>
-                        {% for tj in all_tj %}
-                            {% if d.name == tj.name %}
-                                <i>{{ d.name }} </i>
-                            {% endif %}
-                        {% endfor %}
-                        {% for out in all_out %}
-                            {% if d.name == out.outfit %}
-                                <mark>{{ d.name }} </mark>
-                            {% endif %}
-                        {% endfor %}
-                        {% for obj in objs %}
-                            {% if d.name == obj.name %}
-                                <strong>{{ d.name }} </strong>
-                            {% endif %}
-                        {% endfor %}
-                        {% for ip in ips %}
-                            {% if d.name == ip.name %}
-                                <strong>{{ d.name }} </strong>
-                            {% endif %}
-                        {% endfor %}
-                        {% for cir in cirs %}
-                            {% if d.name == cir.name %}
-                                <strong>{{ d.name }} </strong>
-                            {% endif %}
-                        {% endfor %}
-                        {% for ev in all_evs %}
-                            {% if d.name == ev.name %}
-                                <strong>{{ d.name }} </strong>
-                            {% endif %}
-                        {% endfor %}
+                       {% if d.color == 1 %}
+                            <i>{{ d.name }} </i>
+                        {% endif %}
+                        {% if d.color == 2 %}
+                            <mark>{{ d.name }} </mark>
+                        {% endif %}
+                        {% if d.color == 3 %}
+                            <strong>{{ d.name }} </strong>
+                        {% endif %}
+                        {% if d.color == 4 %}
+                            <strong>{{ d.name }} </strong>
+                        {% endif %}
                     <td>{{ d.date_from|date:"SHORT_DATETIME_FORMAT" }}</td>
 <!--                    <td>{{ d.date_to|time:"H:i" }} <br>-->
 <!--                        {{d.date_to|date:"d-m-Y"}}</td>-->
