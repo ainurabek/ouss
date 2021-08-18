@@ -193,7 +193,8 @@ def get_report_analysis(request):
     data = {"count": paginator.num_pages, "result": []}
 
     example = DictWithRound({"outfit": None, 'id': None, "name": None, "reason": None, "date_from": None,
-                             "date_to": None, 'get_period': None, 'region': None, "index1": None, "comments1": None})
+                             "date_to": None, 'get_period': None, 'region': None, "index1": None, "comments1": None,
+                             "bypass": None})
     for type in type_journal.iterator():
         type_data = example.copy()
         type_data['outfit'] = type.type_journal.name
@@ -218,6 +219,7 @@ def get_report_analysis(request):
                     call_data['region'] = call.point1.point + " - " + call.point2.point if call.point1 is not None else ""
                     call_data['comments1'] = call.comments1
                     call_data['index1'] = call.index1.index
+                    call_data['bypass'] = call.bypass
 
                     data["result"].append(call_data)
 
