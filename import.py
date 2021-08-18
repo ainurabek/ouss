@@ -128,7 +128,7 @@ from apps.secondary.models import TypeStation, SecondaryBase
 #         tr.trassa.add(obj)
 #         Bridge.objects.create(object=obj, transit=tr)
 
-# data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
+data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
 data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
 
 # for index, row in enumerate(data_second):
@@ -137,11 +137,11 @@ data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimite
 #     except Point.DoesNotExist:
 #         print(row[0])
 
-# for row in data_type_station:
-#     if row[0] != 'id':
-#         type_station = TypeStation()
-#         type_station.name = row[1]
-#         type_station.save()
+for row in data_type_station:
+    if row[0] != 'id':
+        type_station = TypeStation()
+        type_station.name = row[1]
+        type_station.save()
 
 for row in data_second:
     if row[0] != 'id':

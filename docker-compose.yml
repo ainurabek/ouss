@@ -1,50 +1,50 @@
 version: '3.3'
 
 services:
-#  nginx:
-#    build: ./nginx
-#    volumes:
-#      - static_volume:/code/staticfiles
-#      - media_volume:/code/mediafiles
-#    ports:
-#      - 8000:80
-#    depends_on:
-#      - web
-#  db:
-#    image: postgres
-#
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data/
-#    environment:
-#      - POSTGRES_DB=telekom
-#      - POSTGRES_USER=ainura
-#      - POSTGRES_PASSWORD=ainura123
-#    restart: "on-failure"
-#  web:
-#    build: .
-#    command:
-#      bash -c "python manage.py migrate --no-input
-#      && python manage.py collectstatic --no-input
-#      && gunicorn project.wsgi:application --bind 0.0.0.0:8001"
-#
-#    volumes:
-#      - static_volume:/code/staticfiles
-#      - media_volume:/code/mediafiles
-#
-#    ports:
-#      - 8001:8001
-#    depends_on:
-#      - db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/code/staticfiles
+      - media_volume:/code/mediafiles
+    ports:
+      - 8000:80
+    depends_on:
+      - web
+  db:
+    image: postgres
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=telekom
+      - POSTGRES_USER=ainura
+      - POSTGRES_PASSWORD=ainura123
+    restart: "on-failure"
+  web:
+    build: .
+    command:
+      bash -c "python manage.py migrate --no-input
+      && python manage.py collectstatic --no-input
+      && gunicorn project.wsgi:application --bind 0.0.0.0:8001"
+
+    volumes:
+      - static_volume:/code/staticfiles
+      - media_volume:/code/mediafiles
+
+    ports:
+      - 8001:8001
+    depends_on:
+      - db
   front:
     image: abilst/docker_nginx:latest
-#    ports:
-#      - 8080:80
-#    depends_on:
-#      - web
-#
-#
-#volumes:
-#  postgres_data:
-#  static_volume:
-#  media_volume:
+    ports:
+      - 8080:80
+    depends_on:
+      - web
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
 
