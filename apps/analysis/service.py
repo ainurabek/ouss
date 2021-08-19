@@ -278,8 +278,6 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
     else:
         outfits = Outfit.objects.filter(outfit__in=['ЧОФ', 'НОФ', 'ТОФ', 'ИОФ', 'ЖОФ', 'ООФ', 'БОФ', 'БГТС', 'ЦСП'])
     all_event_name = event_distinct(all_event, "ips_id", "object_id", "circuit_id")
-    total_rep_kls = 0
-    total_rep_rrl = 0
 
     for out in outfits.iterator():
         total_outfit_kls = 0
@@ -295,8 +293,6 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
                 if amount_channels_RRL != 0:
                     total_outfit_rrl += period * amount_channels_RRL
 
-        total_rep_kls += total_outfit_kls
-        total_rep_rrl += total_outfit_rrl
         #####################################################################################################
         analysis_form = FormAnalysis.objects.create(outfit=out, date_from=date_from,
                                                     date_to=date_to, user=user, id_parent=parent_obj)
@@ -347,14 +343,12 @@ def create_form_analysis_and_punkt5_punkt7(date_from, date_to, outfit, punkt7_AK
 
         punkt5 = Punkt5.objects.create(outfit_period_of_time_kls=round(total_outfit_kls, 2),
                                        outfit_period_of_time_rrl=round(total_outfit_rrl, 2), outfit=out,
-                                       length_kls=out.length_kls, length_vls = out.length_vls, length_rrl = out.length_rrl,
+                                       length_kls=out.length_kls, length_vls=out.length_vls, length_rrl=out.length_rrl,
                                        date_from=date_from, date_to=date_to, user=user, form_analysis=analysis_form)
         TotalData.objects.create(punkt5=punkt5)
         update_analysis_form_coefficient(punkt7.form_analysis)
         update_analysis_form_coefficient(punkt7.form_analysis.id_parent)
-    parent_obj.punkt5.outfit_period_of_time_kls += total_rep_kls
-    parent_obj.punkt5.outfit_period_of_time_rrl += total_rep_rrl
-    parent_obj.punkt5.save()
+        update_punkt5(punkt5=punkt5, total_coefficient=0)
 
 
 def get_coefficient_punkt7_kls(percentage_compliance: int) -> int:
