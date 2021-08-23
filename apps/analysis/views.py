@@ -109,23 +109,23 @@ def get_report(request):
             total_event = copy.deepcopy(example)
 
             for call in all_event.filter(ips=event.ips, object=event.object, circuit=event.circuit, responsible_outfit=outfit.responsible_outfit).order_by('date_from').iterator():
-                period = 0
-                if not call.bypass:
-                    period = get_period(call, date_to)
+                period = get_period(call, date_to)
                 call_data = copy.deepcopy(example)
                 call_data['date_from'] = call.date_from
                 call_data['date_to'] = call.date_to
                 if amount_channels_KLS != 0:
                     call_data['period_of_time'][call.reason.name+'КЛС'] = period
-                    total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
-                    total_event['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
-                    total_outfit['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
+                    if not call.bypass:
+                        total_period_of_time['period_of_time'][call.reason.name + 'КЛС'] += period
+                        total_event['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
+                        total_outfit['period_of_time'][call.reason.name + 'КЛС'] += period * amount_channels_KLS
 
                 if amount_channels_RRL != 0:
-                    call_data['period_of_time'][call.reason.name+'ЦРРЛ'] = period
-                    total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
-                    total_event['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
-                    total_outfit['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
+                    if not call.bypass:
+                        call_data['period_of_time'][call.reason.name+'ЦРРЛ'] = period
+                        total_period_of_time['period_of_time'][call.reason.name + 'ЦРРЛ'] += period
+                        total_event['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
+                        total_outfit['period_of_time'][call.reason.name + 'ЦРРЛ'] += period * amount_channels_RRL
 
                 call_data['amount_of_channels']['КЛС'] = amount_channels_KLS
                 call_data['amount_of_channels']['ЦРРЛ'] = amount_channels_RRL
