@@ -108,7 +108,7 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         event_index = {"1": True, "0д": True, "0а": True, "0тв": True}
-        if event_index.get(self.index1.index) and not self.bypass:
+        if event_index.get(self.index1.index):
             if self.date_from is not None and self.date_to is not None:
                 date = (self.date_to) - (self.date_from)
                 total_seconds = date.total_seconds()
