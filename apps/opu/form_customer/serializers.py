@@ -1,18 +1,10 @@
 from rest_framework import serializers
-
 from apps.opu.form_customer.models import Form_Customer, Signalization, OrderCusPhoto
 from apps.opu.objects.models import Object, Point
-from apps.opu.objects.serializers import TransitSerializer
 from apps.opu.circuits.models import Circuit
-
 from apps.opu.customer.models import Customer
-
 from apps.opu.objects.serializers import BridgeListSerializer
-
-from apps.opu.circuits.serializers import TransitCircSerializer
-
 from apps.opu.circuits.serializers import CircuitTrassaerializer
-
 from apps.opu.objects.serializers import TPOSerializer, PointList, OutfitListSerializer, CategorySerializer
 
 
@@ -88,6 +80,7 @@ class FormCustomerSerializer(serializers.ModelSerializer):
     order_cust_photo = OrderCusPhotoSerializer(many=True)
     point1 = PointSerializer()
     point2 = PointSerializer()
+
     class Meta:
         model = Form_Customer
         fields = ("id", "circuit", "object", "amount_flow", "signalization",
@@ -114,11 +107,11 @@ class AllObjectFormSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     customer = CustomerFormSerializer()
 
-
     class Meta:
         model = Object
         fields = ('id', 'name', 'id_outfit', 'category', 'point1', 'point2', 'tpo1', 'tpo2', 'customer', 'bridges')
         depth = 1
+
 
 class CircuitFormList(serializers.ModelSerializer):
     point1 = PointList()
@@ -144,6 +137,7 @@ class EventObjFormCustSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', 'name', 'customer', 'form_customer', 'bridges')
         depth = 1
+
 
 class EventCircuitFormCustSerializer(serializers.ModelSerializer):
     form_customer= FormCustomerSerializer()
