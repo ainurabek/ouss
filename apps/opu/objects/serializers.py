@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Object, TPO, Outfit, TypeOfLocation, Point, IP, LineType, TypeOfTrakt, Category, OutfitWorker, \
-    AmountChannel, OrderObjectPhoto, Consumer, Bug, MainLineType, Transit, Bridge
+    AmountChannel, OrderObjectPhoto, Consumer, Bug, MainLineType, Transit, Bridge, IPTV
 from ..customer.models import Customer
 from ..customer.serializers import CustomerSerializer
 
@@ -508,3 +508,8 @@ class TransitCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transit
         fields = ("id", "name", "trassa", "create_circuit_transit")
+
+class IPTVSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IPTV
+        fields = ('id', 'outfit', 'name', 'num_channel', 'ip_address', 'resource', 'comments')

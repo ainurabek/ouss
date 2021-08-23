@@ -13,8 +13,7 @@ from apps.opu.objects.models import Object, Transit, Bridge, Point, Outfit
 from apps.opu.circuits.service import create_circuit_transit
 # from apps.analysis.models import AmountChannelsKLSRRL
 from apps.dispatching.models import Event
-from apps.secondary.models import TypeStation, SecondaryBase
-
+from apps.secondary.models import TypeStation, SecondaryBase, AmbulanceNumsBase
 
 #добавить все задействованные каналы к ипам обьектов
 # all_pg = Object.objects.filter(type_of_trakt__name='ПГ')
@@ -129,6 +128,7 @@ from apps.secondary.models import TypeStation, SecondaryBase
 #         Bridge.objects.create(object=obj, transit=tr)
 
 data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
+data_ambul = csv.reader(open("/code/db/ambul.csv"), delimiter=',')
 data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
 
 # for index, row in enumerate(data_second):
@@ -143,22 +143,35 @@ for row in data_type_station:
         type_station.name = row[1]
         type_station.save()
 
-for row in data_second:
-    if row[0] != 'id':
-        second = SecondaryBase()
-        second.point = Point.objects.get(point=row[1])
-        second.type_station = TypeStation.objects.get(name=row[2])
-        second.administrative_division = row[3]
-        second.year_of_launch = row[4]
-        outfit = Outfit.objects.get(id=row[5])
-        second.outfit = outfit
-        second.free_numbering = row[6]
-        second.installed_value = row[7]
-        second.active_value = row[8]
-        second.active_numbering=row[9]
-        second.KT_numbering=row[10]
-        second.GAS_numbering = row[11]
-        second.GAS_return=row[12]
-        second.comments=row[13]
-        second.created_by=User.objects.get(id=row[14])
-        second.save()
+# for row in data_ambul:
+#     if row[0] != 'id':
+#         ambul = AmbulanceNumsBase()
+#         ambul.outfit = Outfit.objects.get(id=row[1])
+#         ambul.region = row[2]
+#         ambul.code = row[3]
+#         ambul.main_num = row[4]
+#         ambul.first_redirection=row[5]
+#         ambul.second_redirection = row[6]
+#         ambul.third_redirection = row[7]
+#         ambul.comments = row[8]
+#         ambul.save()
+
+# for row in data_second:
+#     if row[0] != 'id':
+#         second = SecondaryBase()
+#         second.point = Point.objects.get(point=row[1])
+#         second.type_station = TypeStation.objects.get(name=row[2])
+#         second.administrative_division = row[3]
+#         second.year_of_launch = row[4]
+#         outfit = Outfit.objects.get(id=row[5])
+#         second.outfit = outfit
+#         second.free_numbering = row[6]
+#         second.installed_value = row[7]
+#         second.active_value = row[8]
+#         second.active_numbering=row[9]
+#         second.KT_numbering=row[10]
+#         second.GAS_numbering = row[11]
+#         second.GAS_return=row[12]
+#         second.comments=row[13]
+#         second.created_by=User.objects.get(id=row[14])
+#         second.save()

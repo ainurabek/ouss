@@ -23,6 +23,7 @@ router.register('type-of-location', views.TypeOfLocationAPIVIew, basename='type_
 router.register('consumer', views.ConsumerModelViewSet, basename='consumer')
 router.register('amount_channels', views.AmountChannelListAPIView, basename='amount_channels')
 router.register('bug', views.BugModelViewSet, basename='bug')
+router.register('iptv', views.IPTVView, basename='iptv')
 
 
 urlpatterns = [
