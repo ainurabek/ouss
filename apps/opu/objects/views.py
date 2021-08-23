@@ -4,7 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 from apps.opu.circuits.models import CircuitTransit
 from apps.opu.circuits.serializers import CategorySerializer
 from apps.opu.objects.models import Object, TPO, Outfit, Point, IP, TypeOfTrakt, TypeOfLocation, LineType, \
-    Category, AmountChannel, Consumer, Bug, Transit
+    Category, AmountChannel, Consumer, Bug, Transit, IPTV
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveDestroyAPIView, get_object_or_404, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -15,7 +15,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer
+    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer, IPTVSerializer
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -603,3 +603,22 @@ class GOZUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
     queryset = Object.objects.all()
     serializer_class = GOZUpdateSerializer
+
+class IPTVView(viewsets.ModelViewSet):
+    queryset = IPTV.objects.all().order_by('name')
+    serializer_class = IPTVSerializer
+    lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
+
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action =='retrieve':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
+
+        return [permission() for permission in permission_classes]
+
+    def perform_create(self, serializer):
+         instance = serializer.save()
+         instance.save()

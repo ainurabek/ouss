@@ -73,9 +73,9 @@ def get_event(event_object) -> Event:
 def get_date_to(obj: Event, created_at: str):
     data = obj.date_to
     if obj.date_to is None:
-        data = created_at + "T23:59:59"
+        data = created_at + "T00:00:00"
     elif obj.date_to.date() != dt.strptime(created_at, '%Y-%m-%d').date():
-        data = created_at + "T23:59:59"
+        data = created_at + "T00:00:00"
     return data
 
 

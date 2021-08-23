@@ -237,3 +237,22 @@ class Transit(models.Model):
 class Bridge(models.Model):
 	object = models.ForeignKey(Object, related_name="bridges", on_delete=models.CASCADE)
 	transit = models.ForeignKey(Transit, related_name="can_see", on_delete=models.CASCADE)
+
+
+class IPTV(models.Model):
+	outfit = models.ForeignKey(Outfit, related_name='tv_out', on_delete=models.SET_NULL, blank=True, null=True)
+	name = models.CharField('Название', max_length=500, blank=True, null=True)
+	num_channel = models.CharField('Номер канала', max_length=500, blank=True, null=True)
+	ip_address = models.CharField('IP', max_length=500, blank=True, null=True)
+	resource = models.CharField('Ресурс', max_length=1500, blank=True, null=True)
+	comments = models.CharField('Примечание', max_length=1500, blank=True, null=True)
+
+
+
+	class Meta:
+		verbose_name = 'Каналы IPTV'
+		verbose_name_plural = 'Каналы IPTV'
+		ordering = ('id',)
+
+	def __str__(self):
+		return self.name
