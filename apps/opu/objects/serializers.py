@@ -510,6 +510,7 @@ class TransitCreateSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "trassa", "create_circuit_transit")
 
 class IPTVSerializer(serializers.ModelSerializer):
+    outfit = OutfitListSerializer()
     class Meta:
         model = IPTV
         fields = ('id', 'outfit', 'name', 'num_channel', 'ip_address', 'resource', 'comments')
