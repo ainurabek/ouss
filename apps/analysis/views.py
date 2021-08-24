@@ -70,7 +70,7 @@ def get_report(request):
     responsible_outfit = request.GET.getlist("responsible_outfit", None)
 
     all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-        filter(index1__index='1', name__isnull=True, callsorevent=False,
+        filter(index1__index='1', callsorevent=False, iptv__isnull=True, name__isnull=True,
                reason__name__in=['Откл. ЭЭ', 'ПВ аппаратуры', 'Линейные ПВ', 'Хищения на ЛС', 'ПВ за счет стихии']).\
         prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                          "index1", "reason")
@@ -163,7 +163,9 @@ def get_report_analysis(request):
     all_events = Event.objects.only("object__name", "circuit__name", "ips__name", "type_journal", "index1__name",
                                     "reason__name", "point1__name", "point2__name", "period_of_time", "date_from",
                                     "date_to", "responsible_outfit", "callsorevent").filter(callsorevent=False,
-                                                                                            name__isnull=True).exclude(index1__index='4')
+                                                                                            iptv__isnull=True,
+                                                                                            name__isnull=True).\
+                                   exclude(index1__index='4')
     if index != "":
         all_events = all_events.filter(index1__id=index)
 
@@ -401,7 +403,7 @@ class ReportOaAndOdApiView(APIView):
 
         if index == '':
             all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-                filter(index1__in=[od, oa], callsorevent=False, name__isnull=True).\
+                filter(index1__in=[od, oa], callsorevent=False, iptv__isnull=True, name__isnull=True).\
                 prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                                  "index1", "reason")
         elif index in [str(od.id), str(oa.id)]:
@@ -498,7 +500,7 @@ class DetailOaAndOdApiView(APIView):
         od = Index.objects.get(index="0д")
         oa = Index.objects.get(index="0а")
         all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-            filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False).\
+            filter(index1__in=[od, oa], callsorevent=False).exclude(name__isnull=False, iptv__isnull=False).\
             prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                              "index1", "reason")
 
@@ -553,7 +555,7 @@ class WinnerReportAPIView(APIView):
             list_index = [Index.objects.get(pk=index_id)]
 
         all_event = Event.objects.defer('object__bridges', "circuit__trassa").\
-            filter(index1__in=list_index, callsorevent=False).exclude(name__isnull=False).\
+            filter(index1__in=list_index, callsorevent=False).exclude(name__isnull=False, iptv__isnull=False).\
             prefetch_related("object", "responsible_outfit", "point1", "point2", "circuit", "ips", "type_journal",
                              "index1", "reason")
         all_event = event_filter_date_from_date_to_and_outfit(all_event, date_from, date_to, responsible_outfit)

@@ -27,7 +27,7 @@ from .services import get_minus_date, ListFilterAPIView, get_event_name, \
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
-from ..opu.objects.models import Object, OutfitWorker, Outfit, Point
+from ..opu.objects.models import Object, OutfitWorker, Outfit, Point, IPTV
 from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
 
 
@@ -86,19 +86,16 @@ class EventListAPIView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class EventDetailAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, pk=None):
-        created_at = request.GET.get("created_at")
-        calls = get_object_or_404(Event, pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
-        serializer = EventDetailSerializer(calls, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
+# class EventDetailAPIView(APIView):
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#
+#     def get(self, request, pk=None):
+#         created_at = request.GET.get("created_at")
+#         calls = get_object_or_404(Event, pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
+#         serializer = EventDetailSerializer(calls, many=True)
+#
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -269,7 +266,57 @@ class EventObjectCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class EventIPTVCreateViewAPI(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
 
+    """Создания Event"""
+    def post(self, request, pk):
+        data = request.data
+        iptv = IPTV.objects.get(pk=pk)
+        created_events = Event.objects.filter(iptv=iptv, callsorevent=True).exclude(index1__index='4')
+        if created_events.exists():
+            if data['create_new_call'] == False:
+                message = {"detail": 'По такому IPTV уже существует событие'}
+                return Response(message, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = EventCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    event = serializer.save(iptv=iptv, created_by=self.request.user.profile)
+                    Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                         time_created_at=event.time_created_at,
+                                         date_from=event.date_from, index1=event.index1,
+                                         type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                         reason=event.reason, comments1=event.comments1, iptv=event.iptv,
+                                         responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                         customer=event.customer, created_by=event.created_by,
+                                         contact_name=event.contact_name, bypass=event.bypass)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = EventCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            event = serializer.save(iptv=iptv, created_by=self.request.user.profile)
+            Event.objects.create(id_parent=event, callsorevent=False, created_at=event.created_at,
+                                 time_created_at=event.time_created_at,
+                                 date_from=event.date_from, index1=event.index1,
+                                 type_journal=event.type_journal, point1=event.point1, point2=event.point2,
+                                 reason=event.reason, comments1=event.comments1, iptv=event.iptv,
+                                 responsible_outfit=event.responsible_outfit, send_from=event.send_from,
+                                 customer=event.customer, created_by=event.created_by,
+                                 contact_name=event.contact_name, bypass=event.bypass)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class IPTVParentList(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk):
+        iptv = IPTV.objects.get(pk=pk)
+        created_events = Event.objects.filter(iptv=iptv, callsorevent=True).exclude(index1__index='4')
+        serializer = EventListSerializer(created_events, many=True).data
+        return Response(serializer)
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -485,8 +532,8 @@ def get_report_object(request):
         all_events = all_events.filter(index1__id=index)
 
     all_event_names = all_events.order_by(
-        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
-        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
+        "ips_id", "object_id", "circuit_id", "iptv_id", "name", "responsible_outfit", "type_journal").distinct(
+        "ips_id", "object_id", "circuit_id",  "iptv_id", "name", "responsible_outfit", "type_journal")
 
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
@@ -526,7 +573,7 @@ def get_report_object(request):
                              "reason": None,
                              "comments1": None})
 
-                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit,
+                for call in all_events.filter(object=event.object, ips=event.ips, circuit=event.circuit, iptv=event.iptv,
                                               name=event.name, responsible_outfit=out.responsible_outfit,
                                               type_journal=type.type_journal).order_by('date_from').iterator():
                     data.append({"outfit": None,
@@ -552,8 +599,8 @@ def get_report_pdf(request):
         all_events = all_events.filter(index1__id=index)
 
     all_event_names = all_events.order_by(
-        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal").distinct(
-        "ips_id", "object_id", "circuit_id", "name", "responsible_outfit", "type_journal")
+        "ips_id", "object_id", "circuit_id", "iptv_id","name", "responsible_outfit", "type_journal").distinct(
+        "ips_id", "object_id", "circuit_id", "iptv_id", "name", "responsible_outfit", "type_journal")
 
     type_journal = all_event_names.order_by("type_journal").distinct("type_journal")
     outfits = all_event_names.order_by("responsible_outfit", "type_journal").distinct("responsible_outfit", "type_journal")
@@ -561,7 +608,7 @@ def get_report_pdf(request):
 
     all_evs = all_events.defer('id', 'type_journal',  'date_from', 'date_to', 'contact_name',
               'reason', 'index1', 'comments1', 'responsible_outfit', 'send_from',
-                 'object', 'circuit', 'ips', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
+                 'object', 'circuit', 'ips', 'iptv', 'customer',  'created_at', 'time_created_at', 'created_by', 'point1', 'point2')
 
     for type in type_journal.iterator():
         data.append({"name": type.type_journal.name,

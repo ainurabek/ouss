@@ -42,6 +42,8 @@ def get_event_name(event_object: Event) -> str:
         event_name = event_object.ips.name
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
+    elif event_object.iptv is not None:
+        event_name = event_object.iptv.name
     else:
         event_name = event_object.name
 
@@ -56,6 +58,8 @@ def get_event_pk(event_object) -> str:
         event_name = event_object.ips.pk
     elif event_object.circuit is not None:
         event_name = event_object.circuit.pk
+    elif event_object.iptv is not None:
+        event_name = event_object.iptv.pk
     return event_name
 
 def get_event(event_object) -> Event:
@@ -66,6 +70,8 @@ def get_event(event_object) -> Event:
         event = event_object.ips
     elif event_object.circuit is not None:
         event = event_object.circuit
+    elif event_object.iptv is not None:
+        event = event_object.iptv
     elif event_object.name is not None:
         event = event_object
     return event

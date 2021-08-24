@@ -22,7 +22,7 @@ urlpatterns = [
     path('api/list/', views.EventListAPIView.as_view({'get': 'list'}), name="api_list_event"),
     path('api/detail/<int:pk>/', views.EventListAPIView.as_view({'get': 'retrieve'}), name="api_detail_event"),
     # path('api/list/', views.event_list, name="api_list_event"),
-    path('api/detail/<int:pk>/', views.EventDetailAPIView.as_view(), name="api_detail_event"),
+    # path('api/detail/<int:pk>/', views.EventDetailAPIView.as_view(), name="api_detail_event"),
     path("api/event/edit/<int:pk>/", views.EventUpdateAPIView.as_view()),
     path("api/event/delete/<int:pk>/", views.EventDeleteAPIView.as_view()),
 
@@ -35,6 +35,9 @@ urlpatterns = [
     #if objects
 
     path("api/event/objects/create/<int:pk>/", views.EventObjectCreateViewAPI.as_view()),
+    #if iptv
+
+    path("api/event/iptv/create/<int:pk>/", views.EventIPTVCreateViewAPI.as_view()),
 
     #outfit_worker
     path("api/outfit_worker/", views.OutfitWorkerAPIView.as_view()),
@@ -71,6 +74,7 @@ urlpatterns = [
     path("api/event/point/parents/<int:pk>/", views.PointParentList.as_view()),
     path("api/event/object/parents/<int:pk>/", views.ObjectParentList.as_view()),
     path("api/event/circuit/parents/<int:pk>/", views.CircuitParentList.as_view()),
+    path("api/event/iptv/parents/<int:pk>/", views.IPTVParentList.as_view()),
 
     path("api/damage/report/", views.DamageReportListAPIView.as_view()),
     path("api/damage/report/<int:pk>/", views.DamageUpdateAPIView.as_view()),

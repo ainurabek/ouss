@@ -3,7 +3,7 @@ from apps.accounts.models import Profile
 from apps.opu.circuits.models import Circuit
 from apps.opu.customer.models import Customer
 
-from apps.opu.objects.models import Outfit, Object, IP, Point
+from apps.opu.objects.models import Outfit, Object, IP, Point, IPTV
 
 from apps.opu.objects.models import Outfit, Object, IP, OutfitWorker
 
@@ -11,7 +11,6 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
-from apps.opu.form_customer.models import Form_Customer
 
 User = get_user_model()
 
@@ -86,6 +85,7 @@ class Event(models.Model):
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='event_obj', verbose_name="КО",  null=True, blank=True)
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE, related_name='event_cir', verbose_name="Каналы", null=True, blank=True)
     ips = models.ForeignKey(Point, on_delete=models.CASCADE, verbose_name="ИПы", related_name='event_ips', null=True, blank=True)
+    iptv = models.ForeignKey(IPTV, on_delete=models.CASCADE, verbose_name="Каналы IPTV", related_name='event_iptv', null=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name="Арендаторы", on_delete=models.CASCADE, null=True, blank=True)
     point1 = models.ForeignKey(Point, verbose_name="Ип от", on_delete=models.SET_NULL, related_name="point1_event", null=True, blank=True)
     point2 = models.ForeignKey(Point, verbose_name="Ип до", on_delete=models.SET_NULL, related_name="point2_event", null=True, blank=True)

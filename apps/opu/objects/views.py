@@ -610,7 +610,6 @@ class IPTVView(viewsets.ModelViewSet):
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
 
-
     def get_permissions(self):
         if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
