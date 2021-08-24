@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import Circuit, CircuitTransit
 from ..customer.models import Customer
 from ..objects.models import Category, Object, Point
-from ..objects.serializers import ObjectSerializer, CategorySerializer
+from ..objects.serializers import CategorySerializer
 
 User = get_user_model()
 
@@ -40,8 +40,7 @@ class CircuitTrassaerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CircuitTransit
-        fields = ("id", "trassa")
-
+        fields = ("id", "trassa", "reverse_circuits")
 
 
 class CircuitList(serializers.ModelSerializer):
@@ -113,4 +112,4 @@ class CircuitUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CircuitTransit
-        fields = ("trassa", )
+        fields = ("trassa", "reverse_circuits")

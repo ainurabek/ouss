@@ -108,16 +108,17 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         event_index = {"1": True, "0д": True, "0а": True, "0тв": True}
-        if event_index.get(self.index1.index):
-            if self.date_from is not None and self.date_to is not None:
-                date = (self.date_to) - (self.date_from)
-                total_seconds = date.total_seconds()
-                self.period_of_time = round((((total_seconds / 60) * 100) / 60) / 100, 2)
-                hour = int(total_seconds//3600)
 
-                if hour != 0:
-                    self.downtime = f"{int(hour)}ч {int((total_seconds-(hour*3600)) // 60)}мин"
-                else:
-                    self.downtime = f"{int((total_seconds - (hour * 3600)) // 60)}мин"
+        if self.date_from is not None and self.date_to is not None:
+            date = (self.date_to) - (self.date_from)
+            total_seconds = date.total_seconds()
+            if event_index.get(self.index1.index):
+                self.period_of_time = round((((total_seconds / 60) * 100) / 60) / 100, 2)
+            hour = int(total_seconds//3600)
+
+            if hour != 0:
+                self.downtime = f"{int(hour)}ч {int((total_seconds-(hour*3600)) // 60)}мин"
+            else:
+                self.downtime = f"{int((total_seconds - (hour * 3600)) // 60)}мин"
 
         super().save(*args, **kwargs)
