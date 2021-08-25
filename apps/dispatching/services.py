@@ -43,7 +43,7 @@ def get_event_name(event_object: Event) -> str:
     elif event_object.circuit is not None:
         event_name = event_object.circuit.name
     elif event_object.iptv is not None:
-        event_name = event_object.iptv.name
+        event_name = str(event_object.iptv.num_channel) + ' ' + 'канал' + ' - ' + event_object.iptv.name
     else:
         event_name = event_object.name
 

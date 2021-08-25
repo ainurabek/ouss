@@ -81,7 +81,7 @@ urlpatterns = [
     path("api/international/damage/report/", views.InternationalDamageReportListAPIView.as_view()),
  #создания событий по арендаторам
 
-    path("api/tech_stop/report/", views.TechStopReportListAPIView.as_view()),
+    path("api/tech_stop/report/", views.get_tech_stop_report),
 
 
     path('', include(router.urls)),

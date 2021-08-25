@@ -36,7 +36,7 @@ services:
 #    depends_on:
 #      - db
   front:
-    image: abilst/docker_nginx:latest
+    image: abilst/docker_nginx:test
     ports:
       - 8080:80
 #    depends_on:

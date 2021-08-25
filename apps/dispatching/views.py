@@ -27,6 +27,7 @@ from .services import get_minus_date, ListFilterAPIView, get_event_name, \
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
+from ..opu.form_customer.models import Form_Customer
 from ..opu.objects.models import Object, OutfitWorker, Outfit, Point, IPTV
 from ..opu.objects.serializers import OutfitWorkerListSerializer, OutfitWorkerCreateSerializer
 
@@ -849,24 +850,80 @@ class InternationalDamageReportListAPIView(ListAPIView):
                     Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
                     Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
             filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to,
-                   name__isnull=True).\
+                   name__isnull=True, iptv__isnull=True).\
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
 
         return queryset
 
+@permission_classes([IsAuthenticated, ])
+def get_tech_stop_report(request):
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    customer = request.GET.get("customer")
+    if date_from == "" or date_to == "":
+        return []
 
-class TechStopReportListAPIView(ListAPIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, )
-    serializer_class = TechStopReportListSerializer
+    objs1 = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, object__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+    circs = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, circuit__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+    queryset = objs1|circs
+    #это список событий, у которых 1 и есть форма арендаторов и отфильтрованы по датам и арендатору
+    objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
 
-    def get_queryset(self):
-        date_from = self.request.query_params.get("date_from")
-        date_to = self.request.query_params.get("date_to")
-        customer = self.request.query_params.get("customer")
-        queryset = Event.objects.filter(index1__index="1", callsorevent=False).filter(Q(object__form_customer__isnull=False)|Q(circuit__form_customer__isnull=False)).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
-        queryset = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
-        return queryset
+    #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
+    objects = []
+    circuits = []
+    for obj in objs:
+        if obj.object is not None:
+            if obj.object.id_parent:
+                objects.append(obj.object) #добавляем обьекты у которых есть родители, т.е. они ПГ. Не нужно в его группе искать еще других обьектов у которых ФА
+            for child in obj.object.parents.all():
+                objects.append(child) #добавляем всех детей обьекта
+            for cir in obj.object.circ_obj.filter(form_customer__circuit__id_object=obj.object):
+                circuits.append(cir) #добавляем каналы, у которых обьекты == обьекту
+        if obj.circuit is not None:
+            circuits.append(obj.circuit) #добавляем каналы у которых ФА
+
+    data2=[]
+    for d in objects:
+        if objs.filter(object=d).exists():
+                date_from= objs.get(object=d).date_from
+                date_to=objs.get(object=d).date_to
+                reason=objs.get(object=d).comments1
+        elif objs.filter(object=d.id_parent).exists():
+                date_from = objs.get(object=d.id_parent).date_from
+                date_to=objs.get(object=d.id_parent).date_to
+                reason=objs.get(object=d.id_parent).comments1
+        data2.append({
+            "name": d.name,
+            "date_from": date_from,
+            "date_to": date_to,
+            "reason": reason,
+            "customer": d.customer.abr if d.customer is not None else "",
+            "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
+            "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
+            "point1": d.point1.point if d.point1 is not None else "",
+            "point2": d.point2.point if d.point2 is not None else ""})
+
+    for d in circuits:
+        if objs.filter(circuit=d).exists():
+            date_from = objs.get(circuit=d).date_from
+            date_to = objs.get(circuit=d).date_to
+            reason = objs.get(circuit=d).comments1
+        elif objs.filter(object__circ_obj=d).exists():
+            date_from = objs.get(object__circ_obj=d).date_from
+            date_to = objs.get(object__circ_obj=d).date_to
+            reason = objs.get(object__circ_obj=d).comments1
+        data2.append({
+            "name": d.name,
+            "date_from":date_from,
+            "date_to": date_to,
+            "reason": reason,
+            "customer": d.customer.abr if d.customer is not None else "",
+            "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
+            "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
+            "point1": d.point1.point if d.point1 is not None else "",
+            "point2": d.point2.point if d.point2 is not None else ""})
+    return JsonResponse(data2, safe=False)
 
 
 

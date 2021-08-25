@@ -118,7 +118,7 @@ class Form53ListAPIView(APIView):
             response_data = Form53Serializer(form53, context={'request': request}).data
             response_data['circuit'] = CircuitForm53(form53.circuit, context={'request': request}).data
             response_data['circuit']['bridges'] = [
-                {'transit': {'name': None, "reverse_circuit": form53.circuit.trassa.reverse_circuit, 'trassa':
+                {'transit': {'name': None, "reverse_circuits": form53.circuit.trassa.reverse_circuits, 'trassa':
                     TransitCircSerializer(circuit_trassa, many=True, context={'request': request}).data}}
             ]
             response_data['object_id'] = form53.circuit.object.id

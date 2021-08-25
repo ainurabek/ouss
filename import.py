@@ -9,7 +9,7 @@ import django
 
 django.setup()
 from apps.accounts.models import User
-from apps.opu.objects.models import Object, Transit, Bridge, Point, Outfit
+from apps.opu.objects.models import Object, Transit, Bridge, Point, Outfit, IPTV
 from apps.opu.circuits.service import create_circuit_transit
 # from apps.analysis.models import AmountChannelsKLSRRL
 from apps.dispatching.models import Event
@@ -127,21 +127,36 @@ from apps.secondary.models import TypeStation, SecondaryBase, AmbulanceNumsBase
 #         tr.trassa.add(obj)
 #         Bridge.objects.create(object=obj, transit=tr)
 
-data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
-data_ambul = csv.reader(open("/code/db/ambul.csv"), delimiter=',')
-data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
+# data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
+# data_ambul = csv.reader(open("/code/db/ambul.csv"), delimiter=',')
+# data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
+# data_iptv = csv.reader(open("/code/db/iptv.csv"), delimiter=',')
+data_iptv = csv.reader(open("/home/ainura/Desktop/DB/iptv.csv"), delimiter=',')
 
 # for index, row in enumerate(data_second):
 #     try:
 #         Point.objects.get(point=row[1])
 #     except Point.DoesNotExist:
 #         print(row[0])
-
-for row in data_type_station:
-    if row[0] != 'id':
-        type_station = TypeStation()
-        type_station.name = row[1]
-        type_station.save()
+for row in data_iptv:
+    iptv = IPTV()
+    iptv.num_channel = row[0]
+    iptv.save()
+# for row in data_iptv:
+#     if row[0] != 'id':
+#         iptv = IPTV()
+#         iptv.num_channel = row[1]
+#         iptv.name = row[2]
+#         iptv.ip_address = row[3]
+#         iptv.resource = row[4]
+#         iptv.comments = row[5]
+#         iptv.outfit = Outfit.objects.get(id=row[6])
+#         iptv.save()
+# for row in data_type_station:
+#     if row[0] != 'id':
+#         type_station = TypeStation()
+#         type_station.name = row[1]
+#         type_station.save()
 
 # for row in data_ambul:
 #     if row[0] != 'id':

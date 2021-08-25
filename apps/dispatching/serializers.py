@@ -236,7 +236,7 @@ class InternationalDamageReportListSerializer(serializers.ModelSerializer):
 class TechStopReportListSerializer(serializers.ModelSerializer):
     object = EventObjFormCustSerializer()
     circuit = EventCircuitFormCustSerializer()
-    reason = ReasonSerializer
+    reason = ReasonSerializer()
 
     class Meta:
         model = Event

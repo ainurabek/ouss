@@ -514,3 +514,10 @@ class IPTVSerializer(serializers.ModelSerializer):
     class Meta:
         model = IPTV
         fields = ('id', 'outfit', 'name', 'num_channel', 'ip_address', 'resource', 'comments')
+
+class IPTVCreateSerializer(serializers.ModelSerializer):
+    outfit = serializers.PrimaryKeyRelatedField(
+        read_only=False, allow_null=True, queryset=Outfit.objects.all())
+    class Meta:
+        model = IPTV
+        fields = ('id', 'outfit', 'name', 'num_channel', 'ip_address', 'resource', 'comments')

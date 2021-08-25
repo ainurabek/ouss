@@ -15,7 +15,7 @@ from apps.opu.objects.serializers import LPSerializer, TPOSerializer, \
     ObjectSerializer, LPCreateSerializer, \
     ObjectCreateSerializer, IPCreateSerializer, ObjectListSerializer, \
     ObjectFilterSerializer, TraktListSerializer, AllObjectSerializer, TypeOfTraktSerializer, TypeOfLocationSerializer, \
-    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer, IPTVSerializer
+    LineTypeSerializer, AmountChannelListSerializer, ConsumerSerializer, BugSerializer, IPTVSerializer, IPTVCreateSerializer
 from rest_framework import viewsets, status, generics
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -605,7 +605,7 @@ class GOZUpdateAPIView(UpdateAPIView):
     serializer_class = GOZUpdateSerializer
 
 class IPTVView(viewsets.ModelViewSet):
-    queryset = IPTV.objects.all().order_by('name')
+    queryset = IPTV.objects.all().order_by('id')
     serializer_class = IPTVSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
@@ -617,6 +617,12 @@ class IPTVView(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser]
 
         return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action =='retrieve':
+            return IPTVSerializer
+        else:
+            return IPTVCreateSerializer
 
     def perform_create(self, serializer):
          instance = serializer.save()
