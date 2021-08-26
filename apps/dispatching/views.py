@@ -875,13 +875,17 @@ def get_tech_stop_report(request):
     for obj in objs:
         if obj.object is not None:
             if obj.object.id_parent:
-                objects.append(obj.object) #добавляем обьекты у которых есть родители, т.е. они ПГ. Не нужно в его группе искать еще других обьектов у которых ФА
-            for child in obj.object.parents.all():
-                objects.append(child) #добавляем всех детей обьекта
+                if Form_Customer.objects.filter(object=obj.object).exists():
+                    obj_form = Form_Customer.objects.get(object=obj.object).object
+                    objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
+            for child in obj.object.parents.filter(form_customer__object__id_parent=obj.object):
+                objects.append(child) #добавляем всех детей обьекта, у которых есть ФА
             for cir in obj.object.circ_obj.filter(form_customer__circuit__id_object=obj.object):
-                circuits.append(cir) #добавляем каналы, у которых обьекты == обьекту
+                circuits.append(cir) #добавляем каналы, у которых есть ФА и обьекты == обьекту
         if obj.circuit is not None:
-            circuits.append(obj.circuit) #добавляем каналы у которых ФА
+            if Form_Customer.objects.filter(circuit=obj.circuit).exists():
+                circuit_form = Form_Customer.objects.get(circuit=obj.circuit).circuit
+                circuits.append(circuit_form) #добавляем каналы у которых ФА
 
     data2=[]
     for d in objects:
