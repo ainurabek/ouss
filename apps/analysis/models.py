@@ -234,6 +234,7 @@ class Form61RRL(models.Model):
                                         verbose_name="Тип Связи", related_name='form61_RRL_connection')
     number_trunk = models.IntegerField("Количество стволов", default=0, blank=True, null=True)
     year_of_building = models.CharField("Год постройки", max_length=255, blank=True, null=True)
+    traffic_capacity = models.CharField("Пропускная способность", max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.point1.name}-{self.point2.name}"

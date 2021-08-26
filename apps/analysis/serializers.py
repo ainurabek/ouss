@@ -240,7 +240,7 @@ class Form61RRLCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk',
+        fields = ('outfit', 'point1', 'point2', 'total_length_line', 'traffic_capacity', 'type_equipment_rrl', 'type_connection', 'number_trunk',
                   'year_of_building')
         depth = 1
 
@@ -255,7 +255,7 @@ class Form61RRLSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ("id", 'outfit', 'point1', 'point2', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk', 'year_of_building',
+        fields = ("id", 'outfit', 'point1', 'point2', 'total_length_line', 'traffic_capacity', 'type_equipment_rrl', 'type_connection', 'number_trunk', 'year_of_building',
                   'form61_rrl_order_photo')
 
 class Form61RRLEditSerializer(serializers.ModelSerializer):
@@ -269,5 +269,5 @@ class Form61RRLEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form61RRL
-        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'type_connection', 'number_trunk', 'year_of_building')
+        fields = ('outfit', 'total_length_line', 'type_equipment_rrl', 'traffic_capacity', 'type_connection', 'number_trunk', 'year_of_building')
         depth = 1
