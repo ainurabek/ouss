@@ -241,3 +241,11 @@ class TechStopReportListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ("id", 'index1', "reason", "date_from", "date_to", 'object', 'circuit')
+
+class IPTVReportListSerializer(serializers.ModelSerializer):
+    iptv = IPTVSerializer()
+    reason = ReasonSerializer()
+
+    class Meta:
+        model = Event
+        fields = ("id", "date_from", "date_to", "reason", "comments1", 'iptv')

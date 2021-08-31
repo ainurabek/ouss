@@ -95,3 +95,11 @@ def event_form_customer_filter_date_from_date_to_and_customer(event: Event, date
 
 
     return event
+
+def event_iptv_filter_date_from_date_to(event: Event, date_from, date_to) -> Event:
+
+    if date_from is not None and date_to is not None:
+        event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
+
+
+    return event

@@ -2,6 +2,7 @@ import datetime
 import os
 import pdfkit
 import subprocess
+import operator
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -21,9 +22,9 @@ from .models import TypeOfJournal, Comments, Reason, Index, Event
 from .serializers import EventCreateSerializer, EventDetailSerializer
 from .serializers import EventListSerializer, CommentsSerializer, TypeJournalSerializer, \
     ReasonSerializer, IndexSerializer, CallsCreateSerializer, DamageReportListSerializer, DamageUpdateSerializer, \
-    InternationalDamageReportListSerializer, TechStopReportListSerializer
+    InternationalDamageReportListSerializer, IPTVReportListSerializer
 from .services import get_minus_date, ListFilterAPIView, get_event_name, \
-    event_form_customer_filter_date_from_date_to_and_customer
+    event_form_customer_filter_date_from_date_to_and_customer, event_iptv_filter_date_from_date_to
 from ..accounts.permissions import SuperUser, IsDispOnly, IngenerUser, DateCheck
 from ..analysis.service import get_date_to_ak
 from ..opu.circuits.models import Circuit
@@ -866,7 +867,7 @@ def get_tech_stop_report(request):
     objs1 = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, object__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
     circs = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, circuit__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
     queryset = objs1|circs
-    #это список событий, у которых 1 и есть форма арендаторов и отфильтрованы по датам и арендатору
+    #это список событий, у которых 1 и созданы через обьекты и каналы и отфильтрованы по датам и арендатору
     objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
 
     #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
@@ -877,32 +878,44 @@ def get_tech_stop_report(request):
             if obj.object.id_parent:
                 if Form_Customer.objects.filter(object=obj.object).exists():
                     obj_form = Form_Customer.objects.get(object=obj.object).object
-                    objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
+                    if not obj_form in objects:
+                        objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
             for child in obj.object.parents.filter(form_customer__object__id_parent=obj.object):
-                objects.append(child) #добавляем всех детей обьекта, у которых есть ФА
+                if not child in objects:
+                    objects.append(child) #добавляем всех детей обьекта, у которых есть ФА
             for cir in obj.object.circ_obj.filter(form_customer__circuit__id_object=obj.object):
-                circuits.append(cir) #добавляем каналы, у которых есть ФА и обьекты == обьекту
+                if not cir in circuits:
+                    circuits.append(cir) #добавляем каналы, у которых есть ФА и обьекты == обьекту
+
         if obj.circuit is not None:
             if Form_Customer.objects.filter(circuit=obj.circuit).exists():
                 circuit_form = Form_Customer.objects.get(circuit=obj.circuit).circuit
-                circuits.append(circuit_form) #добавляем каналы у которых ФА
+                if not circuit_form in circuits:
+                    circuits.append(circuit_form) #добавляем каналы у которых ФА
+
 
     data2=[]
     for d in objects:
         if objs.filter(object=d).exists():
-                date_from= objs.get(object=d).date_from
-                date_to=objs.get(object=d).date_to
-                reason=objs.get(object=d).comments1
+            for df in objs.filter(object=d):
+                date_from = df.date_from
+            for dt in objs.filter(object=d):
+                date_to = dt.date_to
+            for r in objs.filter(object=d):
+                reason = r.comments1
         elif objs.filter(object=d.id_parent).exists():
-                date_from = objs.get(object=d.id_parent).date_from
-                date_to=objs.get(object=d.id_parent).date_to
-                reason=objs.get(object=d.id_parent).comments1
+            for df in objs.filter(object=d.id_parent):
+                date_from = df.date_from
+            for dt in objs.filter(object=d.id_parent):
+                date_to = dt.date_to
+            for r in objs.filter(object=d.id_parent):
+                reason = r.comments1
         data2.append({
             "name": d.name,
             "date_from": date_from,
             "date_to": date_to,
             "reason": reason,
-            "customer": d.customer.abr if d.customer is not None else "",
+            "customer": d.customer.customer if d.customer is not None else "",
             "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
             "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
             "point1": d.point1.point if d.point1 is not None else "",
@@ -910,24 +923,46 @@ def get_tech_stop_report(request):
 
     for d in circuits:
         if objs.filter(circuit=d).exists():
-            date_from = objs.get(circuit=d).date_from
-            date_to = objs.get(circuit=d).date_to
-            reason = objs.get(circuit=d).comments1
+            for df in objs.filter(circuit=d):
+                date_from = df.date_from
+            for dt in objs.filter(circuit=d):
+                date_to = dt.date_to
+            for r in objs.filter(circuit=d):
+                reason = r.comments1
         elif objs.filter(object__circ_obj=d).exists():
-            date_from = objs.get(object__circ_obj=d).date_from
-            date_to = objs.get(object__circ_obj=d).date_to
-            reason = objs.get(object__circ_obj=d).comments1
+            for df in objs.filter(object__circ_obj=d):
+                date_from = df.date_from
+            for dt in objs.filter(object__circ_obj=d):
+                date_to = dt.date_to
+            for r in objs.filter(object__circ_obj=d):
+                reason = r.comments1
         data2.append({
             "name": d.name,
             "date_from":date_from,
             "date_to": date_to,
             "reason": reason,
-            "customer": d.customer.abr if d.customer is not None else "",
+            "customer": d.customer.customer if d.customer is not None else "",
             "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
             "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
             "point1": d.point1.point if d.point1 is not None else "",
             "point2": d.point2.point if d.point2 is not None else ""})
+    data2.sort(key=operator.itemgetter('name'))
     return JsonResponse(data2, safe=False)
 
 
+class IPTVReportListAPIView(ListAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = IPTVReportListSerializer
 
+    def get_queryset(self):
+        date_from = self.request.query_params.get("date_from", "")
+        date_to = self.request.query_params.get("date_to", "")
+        if date_from == "" or date_to == "":
+            return []
+        queryset = Event.objects. \
+            defer("type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name"). \
+            filter(callsorevent=False, name__isnull=True, object__isnull=True, ips__isnull=True, circuit__isnull=True).\
+            prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+        queryset=event_iptv_filter_date_from_date_to(queryset, date_from, date_to)
+        return queryset

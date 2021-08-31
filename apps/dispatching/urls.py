@@ -82,6 +82,7 @@ urlpatterns = [
  #создания событий по арендаторам
 
     path("api/tech_stop/report/", views.get_tech_stop_report),
+    path("api/iptv/report/", views.IPTVReportListAPIView.as_view()),
 
 
     path('', include(router.urls)),
