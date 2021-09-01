@@ -53,7 +53,7 @@ class CircuitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circuit
-        fields = ( 'id', 'trassa', 'customer')
+        fields = ( 'id', 'name', 'trassa', 'customer')
 
 
 class ObjectFormCustomer(serializers.ModelSerializer):
