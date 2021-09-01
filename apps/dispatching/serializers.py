@@ -54,6 +54,11 @@ class EventObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', "name", 'id_outfit', 'point1', 'point2', 'type_line', 'amount_channels')
 
+class EventObjectSerializer2(serializers.ModelSerializer):
+
+    class Meta:
+        model = Object
+        fields = ('id', "name")
 
 class EventDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -95,12 +100,13 @@ class EventListSerializer(serializers.ModelSerializer):
     iptv = IPTVSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
+    object_reports = EventObjectSerializer2(many=True)
 
    
     class Meta:
         model = Event
         fields = ('id', "object", "ips", "circuit", "iptv", "index1", "date_from", "date_to", 'created_at', 'time_created_at', 'name',
-                  "responsible_outfit")
+                  "responsible_outfit", 'object_reports')
         depth=1
 
 
@@ -123,12 +129,14 @@ class EventCreateSerializer(serializers.ModelSerializer):
         read_only=False, allow_null=True, queryset=Point.objects.all(), allow_empty=True)
     contact_name = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=OutfitWorker.objects.all())
+    object_reports = serializers.PrimaryKeyRelatedField(
+        read_only=False, many=True, queryset=Object.objects.all())
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'iptv', 'name', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass', 'object_reports')
 
         depth = 2
 
@@ -160,12 +168,14 @@ class CallsCreateSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Circuit.objects.all(), allow_null=True)
     iptv = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=IPTV.objects.all(), allow_null=True)
+    object_reports = serializers.PrimaryKeyRelatedField(
+        read_only=False, many=True, queryset=Object.objects.all())
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal', 'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'iptv', 'name', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'bypass', 'object_reports')
         depth = 2
 
 
@@ -185,12 +195,13 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
+    object_reports = EventObjectSerializer2(many=True)
 
     class Meta:
         model = Event
         fields = ('id', 'type_journal',  'date_from', 'date_to', 'contact_name', 'reason', 'index1', 'comments1',
                   'responsible_outfit', 'send_from', 'object', 'circuit', 'ips', 'iptv', 'customer',  'created_at',
-                  'time_created_at', 'created_by', 'point1', 'point2', 'name', 'bypass')
+                  'time_created_at', 'created_by', 'point1', 'point2', 'name', 'bypass', 'object_reports')
 
 
 class ReportSerializer(serializers.ModelSerializer):

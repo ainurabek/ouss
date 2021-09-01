@@ -96,6 +96,7 @@ class Event(models.Model):
     bypass = models.BooleanField(default=False)
     arrival_date = models.DateTimeField("Дата приезда бригады", blank=True, null=True)
     downtime = models.CharField("Длителность простоя", max_length=150, blank=True, null=True)
+    object_reports = models.ManyToManyField(Object, related_name="obj_reports", blank=True, null=True)
 
     class Meta:
         verbose_name = 'Журнал событий'
