@@ -351,6 +351,9 @@ class EventCallsCreateViewAPI(APIView):
         if serializer.is_valid():
             instance = serializer.save(id_parent=event, created_by=self.request.user.profile,
                                        callsorevent=False)
+            for pk in request.data["object_reports"]:
+                obj = Object.objects.get(id=pk)
+                instance.object_reports.add(obj)
             all_calls = event.event_id_parent.all().order_by('-date_from')
             i = 0
             while i < (len(all_calls) -1):
@@ -875,98 +878,98 @@ class InternationalDamageReportListAPIView(ListAPIView):
 
         return queryset
 
-@permission_classes([IsAuthenticated, ])
-def get_tech_stop_report(request):
-    date_from = request.GET.get("date_from", "")
-    date_to = request.GET.get("date_to", "")
-    customer = request.GET.get("customer")
-    if date_from == "" or date_to == "":
-        return []
-
-    objs1 = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, object__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
-    circs = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, circuit__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
-    queryset = objs1|circs
-    #это список событий, у которых 1 и созданы через обьекты и каналы и отфильтрованы по датам и арендатору
-    objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
-
-    #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
-    objects = []
-    circuits = []
-    for obj in objs:
-        if obj.object is not None:
-            if obj.object.id_parent:
-                if Form_Customer.objects.filter(object=obj.object).exists():
-                    obj_form = Form_Customer.objects.get(object=obj.object).object
-                    if not obj_form in objects:
-                        objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
-            for child in obj.object.parents.filter(form_customer__object__id_parent=obj.object):
-                if not child in objects:
-                    objects.append(child) #добавляем всех детей обьекта, у которых есть ФА
-            for cir in obj.object.circ_obj.filter(form_customer__circuit__id_object=obj.object):
-                if not cir in circuits:
-                    circuits.append(cir) #добавляем каналы, у которых есть ФА и обьекты == обьекту
-
-        if obj.circuit is not None:
-            if Form_Customer.objects.filter(circuit=obj.circuit).exists():
-                circuit_form = Form_Customer.objects.get(circuit=obj.circuit).circuit
-                if not circuit_form in circuits:
-                    circuits.append(circuit_form) #добавляем каналы у которых ФА
-
-
-    data2=[]
-    for d in objects:
-        if objs.filter(object=d).exists():
-            for df in objs.filter(object=d):
-                date_from = df.date_from
-            for dt in objs.filter(object=d):
-                date_to = dt.date_to
-            for r in objs.filter(object=d):
-                reason = r.comments1
-        elif objs.filter(object=d.id_parent).exists():
-            for df in objs.filter(object=d.id_parent):
-                date_from = df.date_from
-            for dt in objs.filter(object=d.id_parent):
-                date_to = dt.date_to
-            for r in objs.filter(object=d.id_parent):
-                reason = r.comments1
-        data2.append({
-            "name": d.name,
-            "date_from": date_from,
-            "date_to": date_to,
-            "reason": reason,
-            "customer": d.customer.customer if d.customer is not None else "",
-            "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
-            "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
-            "point1": d.point1.point if d.point1 is not None else "",
-            "point2": d.point2.point if d.point2 is not None else ""})
-
-    for d in circuits:
-        if objs.filter(circuit=d).exists():
-            for df in objs.filter(circuit=d):
-                date_from = df.date_from
-            for dt in objs.filter(circuit=d):
-                date_to = dt.date_to
-            for r in objs.filter(circuit=d):
-                reason = r.comments1
-        elif objs.filter(object__circ_obj=d).exists():
-            for df in objs.filter(object__circ_obj=d):
-                date_from = df.date_from
-            for dt in objs.filter(object__circ_obj=d):
-                date_to = dt.date_to
-            for r in objs.filter(object__circ_obj=d):
-                reason = r.comments1
-        data2.append({
-            "name": d.name,
-            "date_from":date_from,
-            "date_to": date_to,
-            "reason": reason,
-            "customer": d.customer.customer if d.customer is not None else "",
-            "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
-            "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
-            "point1": d.point1.point if d.point1 is not None else "",
-            "point2": d.point2.point if d.point2 is not None else ""})
-    data2.sort(key=operator.itemgetter('name'))
-    return JsonResponse(data2, safe=False)
+# @permission_classes([IsAuthenticated, ])
+# def get_tech_stop_report(request):
+#     date_from = request.GET.get("date_from", "")
+#     date_to = request.GET.get("date_to", "")
+#     customer = request.GET.get("customer")
+#     if date_from == "" or date_to == "":
+#         return []
+#
+#     objs1 = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, object__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+#     circs = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, circuit__isnull=False).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+#     queryset = objs1|circs
+#     #это список событий, у которых 1 и созданы через обьекты и каналы и отфильтрованы по датам и арендатору
+#     objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
+#
+#     #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
+#     objects = []
+#     circuits = []
+#     for obj in objs:
+#         if obj.object is not None:
+#             if obj.object.id_parent:
+#                 if Form_Customer.objects.filter(object=obj.object).exists():
+#                     obj_form = Form_Customer.objects.get(object=obj.object).object
+#                     if not obj_form in objects:
+#                         objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
+#             for child in obj.object.parents.filter(form_customer__object__id_parent=obj.object):
+#                 if not child in objects:
+#                     objects.append(child) #добавляем всех детей обьекта, у которых есть ФА
+#             for cir in obj.object.circ_obj.filter(form_customer__circuit__id_object=obj.object):
+#                 if not cir in circuits:
+#                     circuits.append(cir) #добавляем каналы, у которых есть ФА и обьекты == обьекту
+#
+#         if obj.circuit is not None:
+#             if Form_Customer.objects.filter(circuit=obj.circuit).exists():
+#                 circuit_form = Form_Customer.objects.get(circuit=obj.circuit).circuit
+#                 if not circuit_form in circuits:
+#                     circuits.append(circuit_form) #добавляем каналы у которых ФА
+#
+#
+#     data2=[]
+#     for d in objects:
+#         if objs.filter(object=d).exists():
+#             for df in objs.filter(object=d):
+#                 date_from = df.date_from
+#             for dt in objs.filter(object=d):
+#                 date_to = dt.date_to
+#             for r in objs.filter(object=d):
+#                 reason = r.comments1
+#         elif objs.filter(object=d.id_parent).exists():
+#             for df in objs.filter(object=d.id_parent):
+#                 date_from = df.date_from
+#             for dt in objs.filter(object=d.id_parent):
+#                 date_to = dt.date_to
+#             for r in objs.filter(object=d.id_parent):
+#                 reason = r.comments1
+#         data2.append({
+#             "name": d.name,
+#             "date_from": date_from,
+#             "date_to": date_to,
+#             "reason": reason,
+#             "customer": d.customer.customer if d.customer is not None else "",
+#             "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
+#             "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
+#             "point1": d.point1.point if d.point1 is not None else "",
+#             "point2": d.point2.point if d.point2 is not None else ""})
+#
+#     for d in circuits:
+#         if objs.filter(circuit=d).exists():
+#             for df in objs.filter(circuit=d):
+#                 date_from = df.date_from
+#             for dt in objs.filter(circuit=d):
+#                 date_to = dt.date_to
+#             for r in objs.filter(circuit=d):
+#                 reason = r.comments1
+#         elif objs.filter(object__circ_obj=d).exists():
+#             for df in objs.filter(object__circ_obj=d):
+#                 date_from = df.date_from
+#             for dt in objs.filter(object__circ_obj=d):
+#                 date_to = dt.date_to
+#             for r in objs.filter(object__circ_obj=d):
+#                 reason = r.comments1
+#         data2.append({
+#             "name": d.name,
+#             "date_from":date_from,
+#             "date_to": date_to,
+#             "reason": reason,
+#             "customer": d.customer.customer if d.customer is not None else "",
+#             "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
+#             "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
+#             "point1": d.point1.point if d.point1 is not None else "",
+#             "point2": d.point2.point if d.point2 is not None else ""})
+#     data2.sort(key=operator.itemgetter('name'))
+#     return JsonResponse(data2, safe=False)
 
 
 class IPTVReportListAPIView(ListAPIView):
@@ -985,3 +988,57 @@ class IPTVReportListAPIView(ListAPIView):
             prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
         queryset=event_iptv_filter_date_from_date_to(queryset, date_from, date_to)
         return queryset
+
+@permission_classes([IsAuthenticated, ])
+def get_tech_stop_report(request):
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    customer = request.GET.get("customer")
+    if date_from == "" or date_to == "":
+        return []
+
+    queryset = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, iptv__isnull=True).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
+    objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
+
+    #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
+    objects = []
+    for obj in objs:
+        if obj.object_reports is not None:
+            all_objects_report = obj.object_reports.all()
+            for report in all_objects_report:
+                if Form_Customer.objects.filter(object=report.object).exists():
+                    obj_form = Form_Customer.objects.get(object=report.object).object
+                    if not obj_form in objects:
+                        objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
+
+    print(objects)
+    data2=[]
+    # for d in objects:
+    #     if objs.filter(object=d).exists():
+    #         for df in objs.filter(object=d):
+    #             date_from = df.date_from
+    #         for dt in objs.filter(object=d):
+    #             date_to = dt.date_to
+    #         for r in objs.filter(object=d):
+    #             reason = r.comments1
+    #     elif objs.filter(object=d.id_parent).exists():
+    #         for df in objs.filter(object=d.id_parent):
+    #             date_from = df.date_from
+    #         for dt in objs.filter(object=d.id_parent):
+    #             date_to = dt.date_to
+    #         for r in objs.filter(object=d.id_parent):
+    #             reason = r.comments1
+    #     data2.append({
+    #         "name": d.name,
+    #         "date_from": date_from,
+    #         "date_to": date_to,
+    #         "reason": reason,
+    #         "customer": d.customer.customer if d.customer is not None else "",
+    #         "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
+    #         "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
+    #         "point1": d.point1.point if d.point1 is not None else "",
+    #         "point2": d.point2.point if d.point2 is not None else ""})
+
+
+    data2.sort(key=operator.itemgetter('name'))
+    return JsonResponse(data2, safe=False)

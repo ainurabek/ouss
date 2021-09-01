@@ -54,12 +54,6 @@ class EventObjectSerializer(serializers.ModelSerializer):
         model = Object
         fields = ('id', "name", 'id_outfit', 'point1', 'point2', 'type_line', 'amount_channels')
 
-class EventObjectSerializer2(serializers.ModelSerializer):
-
-    class Meta:
-        model = Object
-        fields = ('id', "name")
-
 class EventDetailObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Object
@@ -100,7 +94,7 @@ class EventListSerializer(serializers.ModelSerializer):
     iptv = IPTVSerializer()
     index1 = serializers.SlugRelatedField(slug_field='index', read_only=True)
     responsible_outfit = serializers.SlugRelatedField(slug_field="outfit", read_only=True)
-    object_reports = EventObjectSerializer2(many=True)
+    object_reports = EventObjectSerializer(many=True)
 
    
     class Meta:
@@ -195,7 +189,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
     point1 = PointList()
     point2 = PointList()
     contact_name=OutfitWorkerListSerializer()
-    object_reports = EventObjectSerializer2(many=True)
+    object_reports = EventObjectSerializer(many=True)
 
     class Meta:
         model = Event

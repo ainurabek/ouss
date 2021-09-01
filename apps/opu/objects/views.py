@@ -260,7 +260,7 @@ class ObjectListView(APIView):
 
     def get(self, request, pk):
         obj = get_object_or_404(Object, pk=pk)
-        childs = obj.parents.all()
+        childs = obj.parents.all().order_by('name')
         serializer = TraktListSerializer(childs, many=True).data
         return Response(serializer)
 
