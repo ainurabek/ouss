@@ -224,7 +224,7 @@ class EventCircuitCreateViewAPI(APIView):
                                  reason=event.reason, comments1=event.comments1, circuit=event.circuit,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
-                                 bypass=event.bypass, object_reports=event.object_reports
+                                 bypass=event.bypass
                                  )
             for pk in request.data["object_reports"]:
                 obj = Object.objects.get(id=pk)
@@ -258,7 +258,7 @@ class EventObjectCreateViewAPI(APIView):
                                          reason=event.reason, comments1=event.comments1, object=event.object,
                                          responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                          customer=event.customer, created_by=event.created_by,
-                                         contact_name=event.contact_name, bypass=event.bypass, object_reports=event.object_reports
+                                         contact_name=event.contact_name, bypass=event.bypass
                                          )
                     for pk in request.data["object_reports"]:
                         obj = Object.objects.get(id=pk)
@@ -278,7 +278,7 @@ class EventObjectCreateViewAPI(APIView):
                                  reason=event.reason, comments1=event.comments1, object=event.object,
                                  responsible_outfit=event.responsible_outfit, send_from=event.send_from,
                                  customer=event.customer, created_by=event.created_by, contact_name=event.contact_name,
-                                 bypass=event.bypass, object_reports=event.object_reports
+                                 bypass=event.bypass
                                  )
             for pk in request.data["object_reports"]:
                 obj = Object.objects.get(id=pk)
@@ -1002,18 +1002,27 @@ def get_tech_stop_report(request):
 
     #это список обьектов и каналов, у которых есть ФА или у детей есть ФА
     objects = []
+    data2 = []
     for obj in objs:
         if obj.object_reports is not None:
             all_objects_report = obj.object_reports.all()
-            print(all_objects_report)
             for report in all_objects_report:
-                if Form_Customer.objects.filter(object=report.object).exists():
-                    obj_form = Form_Customer.objects.get(object=report.object).object
-                    if not obj_form in objects:
-                        objects.append(obj_form) #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
+                if Form_Customer.objects.filter(object=report).exists():
+                    obj_form = Form_Customer.objects.get(object=report).object
+                    data2.append({
+                        "name": get_event_name(obj),
+                        "date_from": '-',
+                        "date_to": '-',
+                        "reason": '-',
+                        "customer": obj_form.customer.customer if obj_form.customer is not None else "",
+                        "amount_flow": obj_form.form_customer.amount_flow if obj_form.form_customer is not None else "",
+                        "type_of_using": obj_form.form_customer.type_of_using if obj_form.form_customer is not None else "",
+                        "point1": obj_form.point1.point if obj_form.point1 is not None else "",
+                        "point2": obj_form.point2.point if obj_form.point2 is not None else ""})
+                    #добавляем обьекты у которых есть родители, т.е. они ПГ и есть у них ФА. Не нужно в его группе искать еще других обьектов у которых ФА
 
-    print(objects)
-    data2=[]
+
+
     # for d in objects:
     #     if objs.filter(object=d).exists():
     #         for df in objs.filter(object=d):
@@ -1029,16 +1038,7 @@ def get_tech_stop_report(request):
     #             date_to = dt.date_to
     #         for r in objs.filter(object=d.id_parent):
     #             reason = r.comments1
-    #     data2.append({
-    #         "name": d.name,
-    #         "date_from": date_from,
-    #         "date_to": date_to,
-    #         "reason": reason,
-    #         "customer": d.customer.customer if d.customer is not None else "",
-    #         "amount_flow": d.form_customer.amount_flow if d.form_customer is not None else "",
-    #         "type_of_using": d.form_customer.type_of_using if d.form_customer is not None else "",
-    #         "point1": d.point1.point if d.point1 is not None else "",
-    #         "point2": d.point2.point if d.point2 is not None else ""})
+
 
 
     data2.sort(key=operator.itemgetter('name'))
