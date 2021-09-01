@@ -1005,6 +1005,7 @@ def get_tech_stop_report(request):
     for obj in objs:
         if obj.object_reports is not None:
             all_objects_report = obj.object_reports.all()
+            print(all_objects_report)
             for report in all_objects_report:
                 if Form_Customer.objects.filter(object=report.object).exists():
                     obj_form = Form_Customer.objects.get(object=report.object).object
