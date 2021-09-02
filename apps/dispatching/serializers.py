@@ -226,16 +226,13 @@ class DamageUpdateSerializer(serializers.ModelSerializer):
 
 
 class InternationalDamageReportListSerializer(serializers.ModelSerializer):
-    ips = PointListSerializer()
-    object = EventObjectSerializer()
-    circuit = EventCircuitSerializer()
     point1 = PointList()
     point2 = PointList()
+    reason = ReasonSerializer()
 
     class Meta:
         model = Event
-        fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "comments1", "ips", "object",
-                  "circuit", "point1", "point2")
+        fields = ("id", "date_from", "date_to", "downtime", "comments1", "arrival_date", "point1", "point2", "reason")
 
 
 class TechStopReportListSerializer(serializers.ModelSerializer):
