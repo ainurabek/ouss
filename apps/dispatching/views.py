@@ -855,28 +855,36 @@ class DamageUpdateAPIView(UpdateAPIView):
     lookup_field = "pk"
 
 
-class InternationalDamageReportListAPIView(ListAPIView):
+class InternationalDamageReportListAPIView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = InternationalDamageReportListSerializer
 
-    def get_queryset(self):
+    def get(self, request):
         date_from = self.request.query_params.get("date_from", "")
         date_to = self.request.query_params.get("date_to", "")
-
         if date_from == "" or date_to == "":
-            return []
-        queryset = Event.objects. \
-            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name"). \
-            exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
-                    Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
-                    Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
-                    Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
-            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to,
-                   name__isnull=True, iptv__isnull=True).\
-            prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
-        return queryset
+            return Response([])
+        # exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
+        # Q(object__tpo2__index="51")
 
+        queryset = Event.objects. \
+            defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name",
+                  "object", "circuit", "ips"). \
+            exclude(object_reports__isnull=True). \
+            filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to,
+                   name__isnull=True, iptv__isnull=True).prefetch_related("responsible_outfit", "point1", "point2", "object_reports")
+        # queryset = Event.objects.
+        data = []
+
+        for event in queryset:
+            for obj in event.object_reports.exclude(Q(tpo1__index="35") | Q(tpo1__index="51") |
+                                                    Q(tpo2__index="35") | Q(tpo2__index="51")):
+                event = InternationalDamageReportListSerializer(event).data
+                event["name"] = obj.name
+                data.append(event)
+        return Response(data)
+
+            
 class IPTVReportListAPIView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
