@@ -872,7 +872,8 @@ class InternationalDamageReportListAPIView(APIView):
                   "object", "circuit", "ips"). \
             exclude(object_reports__isnull=True). \
             filter(index1__index="1", callsorevent=False, date_to__date__gte=date_from, date_to__date__lte=date_to,
-                   name__isnull=True, iptv__isnull=True).prefetch_related("responsible_outfit", "point1", "point2", "object_reports")
+                   name__isnull=True, iptv__isnull=True).\
+            prefetch_related("responsible_outfit", "point1", "point2", "object_reports")
         # queryset = Event.objects.
         data = []
 
