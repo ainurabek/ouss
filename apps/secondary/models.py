@@ -27,12 +27,14 @@ class SecondaryBase(models.Model):
     active_numbering = models.CharField('Задействованная нумерация', max_length=1500, null=True, blank=True)
     free_numbering = models.CharField('Свободная нумерация', max_length=2500, blank=True, null=True)
     GAS_numbering = models.CharField('Выделенная ГАС нумерация', max_length=2500, null=True, blank=True)
-    GAS_return = models.CharField('Возврат в ГАС', max_length=2500, null=True, blank=True)
-    KT_numbering = models.FloatField('Нумерация КТ', default=0, null=True, blank=True)
+    KT_numbering = models.IntegerField('Нумерация КТ', default=0, null=True, blank=True)
     comments = models.CharField('Примечание', max_length=1500, null=True, blank=True)
     created_by = models.ForeignKey(Profile, verbose_name='ФИО диспетчера', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateField('Дата создания', blank=True, null=True)
     administrative_division = models.CharField('Примечание', max_length=2500, null=True, blank=True)
+    zone_code = models.CharField('Зон код АВ', max_length=2500, null=True, blank=True)
+    inner_zone_code = models.CharField('Внутризон. Код АВ', max_length=2500, null=True, blank=True)
+    amount_of_numbers = models.IntegerField("Количество выделенных номеров", default=0, blank=True, null=True)
 
 
     class Meta:

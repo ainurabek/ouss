@@ -129,19 +129,21 @@ from apps.secondary.models import TypeStation, SecondaryBase, AmbulanceNumsBase
 
 # data_type_station = csv.reader(open("/code/db/type_station.csv"), delimiter=',')
 # data_ambul = csv.reader(open("/code/db/ambul.csv"), delimiter=',')
-# data_second = csv.reader(open("/home/ainura/Desktop/DB/vtorichka.csv"), delimiter=',')
+data_second = csv.reader(open("/code/db/second.csv"), delimiter=',')
 # data_iptv = csv.reader(open("/code/db/iptv.csv"), delimiter=',')
-data_iptv = csv.reader(open("/home/ainura/Desktop/DB/iptv.csv"), delimiter=',')
+# data_iptv = csv.reader(open("/home/ainura/Desktop/DB/iptv.csv"), delimiter=',')
+# data_second = csv.reader(open("/home/ainura/Desktop/DB/second.csv"), delimiter=',')
+
 
 # for index, row in enumerate(data_second):
 #     try:
 #         Point.objects.get(point=row[1])
 #     except Point.DoesNotExist:
 #         print(row[0])
-for row in data_iptv:
-    iptv = IPTV()
-    iptv.num_channel = row[0]
-    iptv.save()
+# for row in data_iptv:
+#     iptv = IPTV()
+#     iptv.num_channel = row[0]
+#     iptv.save()
 # for row in data_iptv:
 #     if row[0] != 'id':
 #         iptv = IPTV()
@@ -171,22 +173,22 @@ for row in data_iptv:
 #         ambul.comments = row[8]
 #         ambul.save()
 
-# for row in data_second:
-#     if row[0] != 'id':
-#         second = SecondaryBase()
-#         second.point = Point.objects.get(point=row[1])
-#         second.type_station = TypeStation.objects.get(name=row[2])
-#         second.administrative_division = row[3]
-#         second.year_of_launch = row[4]
-#         outfit = Outfit.objects.get(id=row[5])
-#         second.outfit = outfit
-#         second.free_numbering = row[6]
-#         second.installed_value = row[7]
-#         second.active_value = row[8]
-#         second.active_numbering=row[9]
-#         second.KT_numbering=row[10]
-#         second.GAS_numbering = row[11]
-#         second.GAS_return=row[12]
-#         second.comments=row[13]
-#         second.created_by=User.objects.get(id=row[14])
-#         second.save()
+for row in data_second:
+    if row[0] != 'id':
+        second = SecondaryBase()
+        second.point = Point.objects.get(name=row[1])
+        if TypeStation.objects.filter(name=row[2]).exists():
+            for ts in TypeStation.objects.filter(name=row[2]):
+                second.type_station=ts
+        else:
+            second.type_station = ''
+        second.outfit = Outfit.objects.get(outfit=row[3])
+        second.administrative_division = row[4]
+        second.year_of_launch = row[5]
+        second.free_numbering = row[6]
+        second.installed_value = row[7]
+        second.active_value = row[8]
+        second.active_numbering=row[9]
+        second.KT_numbering=row[10]
+        second.GAS_numbering = row[13]
+        second.save()
