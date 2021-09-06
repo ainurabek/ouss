@@ -132,6 +132,8 @@ from apps.secondary.models import TypeStation, SecondaryBase, AmbulanceNumsBase
 data_second = csv.reader(open("/code/db/second.csv"), delimiter=',')
 # data_iptv = csv.reader(open("/code/db/iptv.csv"), delimiter=',')
 # data_iptv = csv.reader(open("/home/ainura/Desktop/DB/iptv.csv"), delimiter=',')
+# data_second = csv.reader(open("/home/ainura/Desktop/DB/second.csv"), delimiter=',')
+
 
 # for index, row in enumerate(data_second):
 #     try:
@@ -175,9 +177,12 @@ for row in data_second:
     if row[0] != 'id':
         second = SecondaryBase()
         second.point = Point.objects.get(name=row[1])
-        second.type_station = TypeStation.objects.get(name=row[2])
-        outfit = Outfit.objects.get(outfit=row[3])
-        second.outfit = outfit
+        if TypeStation.objects.filter(name=row[2]).exists():
+            for ts in TypeStation.objects.filter(name=row[2]):
+                second.type_station=ts
+        else:
+            second.type_station = ''
+        second.outfit = Outfit.objects.get(outfit=row[3])
         second.administrative_division = row[4]
         second.year_of_launch = row[5]
         second.free_numbering = row[6]
@@ -185,9 +190,5 @@ for row in data_second:
         second.active_value = row[8]
         second.active_numbering=row[9]
         second.KT_numbering=row[10]
-        second.zone_code = row[11]
-        second.inner_zone_code = row[12]
         second.GAS_numbering = row[13]
-        second.amount_of_numbers=row[14]
-        second.comments=row[15]
         second.save()

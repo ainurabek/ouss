@@ -74,7 +74,7 @@ def get_report_secondary(request):
         'installed_value': None,
         'active_value': None,
         'active_numbering': None,
-        'free_numbering': None, 'GAS_numbering': None, 'GAS_return': None, 'KT_numbering': 0,
+        'free_numbering': None, 'GAS_numbering': None, 'zone_code':None, 'inner_zone_code':None, 'amount_of_numbers': 0, 'KT_numbering': 0,
         'comments': None, 'color': None, 'administrative_division': None
     })
     total_rep = copy.deepcopy(content)
@@ -86,19 +86,20 @@ def get_report_secondary(request):
         out_data['outfit']['outfit'] = outfit.outfit.outfit
         out_data['outfit']['adding'] = outfit.outfit.adding
         out_data['KT_numbering'] = None
+        out_data['amount_of_numbers'] = None
         out_data['color'] = "outfit"
 
         data.append(out_data)
         for second in queryset.filter(outfit=outfit.outfit).iterator():
             second_data = copy.deepcopy(content)
             second_data['id'] = second.id
-            second_data['name'] = second.point.name
+            second_data['name'] = second.point.name if second.point is not None else ''
             second_data['outfit']['id'] = second.outfit.id
             second_data['outfit']['outfit'] = second.outfit.outfit
             second_data['outfit']['adding'] = second.outfit.adding
             second_data['point']['id'] = second.point.id
             second_data['point']['point'] = second.point.point
-            second_data['point']['name'] = second.point.name
+            second_data['point']['name'] = second.point.name if second.point is not None else ''
             second_data['type_station']['id'] = second.type_station.id if second.type_station is not None else ''
             second_data['type_station']['name'] = second.type_station.name if second.type_station is not None else ''
             second_data['year_of_launch'] = second.year_of_launch
@@ -107,16 +108,20 @@ def get_report_secondary(request):
             second_data['active_numbering'] = second.active_numbering
             second_data['free_numbering'] = second.free_numbering
             second_data['GAS_numbering'] = second.GAS_numbering
-            second_data['GAS_return'] = second.GAS_return
+            second_data['amount_of_numbers'] = second.amount_of_numbers
             second_data['comments'] = second.comments
             second_data['administrative_division'] = second.administrative_division
             second_data['KT_numbering'] = second.KT_numbering
+            second_data['zone_code'] = second.zone_code
+            second_data['inner_zone_code'] = second.inner_zone_code
             data.append(second_data)
             total_outfit['KT_numbering'] += second_data['KT_numbering']
+            total_outfit['amount_of_numbers'] += second_data['amount_of_numbers']
         total_outfit['name'] = 'ИТОГО за ПРЕДПРИЯТИЕ:'
         total_outfit['color'] = 'Total_outfit'
         data.append(total_outfit)
         total_rep['KT_numbering'] += total_outfit['KT_numbering']
+        total_rep['amount_of_numbers'] += total_outfit['amount_of_numbers']
     total_rep['name'] = 'ИТОГО за РЕСПУБЛИКУ:'
     total_rep['color'] = 'Total_country'
     data.append(total_rep)
