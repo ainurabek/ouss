@@ -208,5 +208,6 @@ django_heroku.settings(locals())
 
 
 CRONJOBS = [
-    ('0 0 1 1 *', 'project.cron.clear_db')
+    ('0 0 1 1 *', 'project.cron.clear_db'),
+    ('0 0 1 1 *', 'project.cron.clear_activity_logs')
 ]

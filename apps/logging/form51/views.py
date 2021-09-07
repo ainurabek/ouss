@@ -1,7 +1,7 @@
 # coding: utf-8
 from apps.accounts.models import Profile
 from apps.logging.models import ActivityLogModel
-from .constants import FORM51_LOG_DESCRIPTIONS
+from .constants import FORM51_LOG_DESCRIPTIONS, FORM51_LOG_DELETE_DESCRIPTIONS
 from apps.opu.form51.models import Form51
 from datetime import datetime
 
@@ -17,6 +17,17 @@ class Form51LogUtil:
         ActivityLogModel.objects.create(
             action_by=self.action_by,
             action_description=FORM51_LOG_DESCRIPTIONS[action]
+                               % (
+                                  self.action_applied_to_object.object.name,
+                                  self.action_applied_to_object.object.id_outfit.outfit,
+                                  ),
+            action_time=self.action_time
+        )
+
+    def form51_delete_action(self, action):
+        ActivityLogModel.objects.create(
+            action_by=self.action_by,
+            action_description=FORM51_LOG_DELETE_DESCRIPTIONS[action]
                                % (
                                   self.action_applied_to_object.object.name,
                                   self.action_applied_to_object.object.id_outfit.outfit,

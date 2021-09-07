@@ -140,6 +140,13 @@ class Form53DeleteAPIView(DestroyAPIView):
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form53
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        Form53LogUtil(self.request.user, instance.pk).obj_delete_action(
+            'form53_deleted')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class Order53PhotoCreateView(APIView, PhotoCreateMixin):
     authentication_classes = (TokenAuthentication,)

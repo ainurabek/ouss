@@ -36,7 +36,7 @@ from apps.opu.objects.serializers import LineTypeCreateSerializer
 from apps.opu.objects.services import create_object_KLSS_RRL_amount_channels, create_point_KLSS_RRL_amount_channels
 from apps.opu.objects.serializers import GOZListSerializer
 from apps.opu.objects.serializers import GOZUpdateSerializer
-from apps.logging.objects.views import ObjectActivityLogUtil, TPOActivityLogUtil,  OutfitActivityLogUtil, PointActivityLogUtil
+from apps.logging.objects.views import ObjectActivityLogUtil,PointActivityLogUtil
 
 from apps.opu.form_customer.serializers import AllObjectFormSerializer
 
@@ -61,7 +61,6 @@ class TPOListView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
          instance = serializer.save()
          instance.save()
-         TPOActivityLogUtil(self.request.user, instance.pk).tpo_create_action('tpo_created')
 
 
 class AmountChannelListAPIView(viewsets.ModelViewSet):
@@ -120,7 +119,6 @@ class OutfitsListView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user.profile)
         instance.save()
-        OutfitActivityLogUtil(self.request.user, instance.pk).obj_create_action('outfit_created')
 
 
 class PointListView(viewsets.ModelViewSet):
@@ -152,6 +150,13 @@ class PointListView(viewsets.ModelViewSet):
         create_point_KLSS_RRL_amount_channels(ips=instance)
         PointActivityLogUtil(self.request.user, instance.pk).obj_create_action('point_created')
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        PointActivityLogUtil(self.request.user, instance.pk).obj_delete_action('point_deleted')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 class IPCreateView(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -163,7 +168,6 @@ class IPCreateView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             instance.save()
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -197,6 +201,12 @@ class LPListView(viewsets.ModelViewSet):
             return LPSerializer
         elif self.action == "retrieve":
             return LPDetailSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        ObjectActivityLogUtil(request.user, instance.pk).object_delete_action('object_deleted')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LPCreateView(generics.CreateAPIView):
@@ -273,9 +283,11 @@ class ObjectDetailView(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         self.permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
         instance = self.get_object()
+
         if not check_circuit_transit([instance]):
             return Response({"detail": "Удалить нельзя, объект участвует в транзите"},
                             status=status.HTTP_403_FORBIDDEN)
+        ObjectActivityLogUtil(request.user, instance.pk).object_delete_action('object_deleted')
         self.perform_destroy(instance)
         Transit.objects.filter(trassa=None).delete()
         CircuitTransit.objects.filter(circuits=None).delete()

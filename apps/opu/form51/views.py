@@ -9,6 +9,8 @@ from apps.opu.form51.serializers import Form51CreateSerializer, Form51Serializer
 from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.form51.service import get_form51_diff
 
+from apps.logging.form51.views import Form51LogUtil
+
 
 class FormListAPIView(ListAPIView):
     """Список Формы 5.1"""
@@ -71,3 +73,10 @@ class Form51DeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly|SuperUser, SuperUser|IngenerUser)
     queryset = Form51
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        Form51LogUtil(self.request.user, instance.pk).form51_delete_action(
+            'form51_deleted')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)

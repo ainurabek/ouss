@@ -22,7 +22,7 @@ from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
 
 from apps.logging.form_customer.views import FormCustomerCircuitLogUtil, \
-    FormCustomerObjectLogUtil, FormCustomerIPLogUtil
+    FormCustomerObjectLogUtil
 
 
 class SignalizationView(viewsets.ModelViewSet):
@@ -135,6 +135,15 @@ class FormCustomerDeleteAPIView(DestroyAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser)
     queryset = Form_Customer.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if Circuit.objects.filter(form_customer__pk=instance.pk).exists():
+            FormCustomerCircuitLogUtil(request.user, instance.pk).obj_delete_action('form_customer_circuit_deleted')
+        else:
+            FormCustomerObjectLogUtil(request.user, instance.pk).obj_delete_action('form_customer_object_deleted')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OrderCusPhotoCreateView(APIView, PhotoCreateMixin):

@@ -82,22 +82,9 @@ class EventListAPIView(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None, **kwargs):
         calls = Event.objects.get(pk=pk).event_id_parent.all().order_by("-date_from")
-
         serializer = self.get_serializer(calls, many=True)
-
         return Response(serializer.data)
 
-
-# class EventDetailAPIView(APIView):
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-#
-#     def get(self, request, pk=None):
-#         created_at = request.GET.get("created_at")
-#         calls = get_object_or_404(Event, pk=pk).event_id_parent.filter(date_from__date__lte=created_at).order_by("-date_from")
-#         serializer = EventDetailSerializer(calls, many=True)
-#
-#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class EventIPCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -283,7 +270,6 @@ class EventObjectCreateViewAPI(APIView):
             for pk in request.data["object_reports"]:
                 obj = Object.objects.get(id=pk)
                 ev.object_reports.add(obj)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -381,7 +367,6 @@ class EventUpdateAPIView(UpdateAPIView):
     serializer_class = EventCreateSerializer
 
     def perform_update(self, serializer):
-
         instance = serializer.save(created_by=self.request.user.profile)
         instance.id_parent.save()
         all_calls = instance.id_parent.event_id_parent.all().order_by('-date_from')
@@ -612,7 +597,7 @@ def get_report_object(request):
 
     return JsonResponse(data, safe=False)
 
-# @permission_classes([IsAuthenticated, ])
+@permission_classes([IsAuthenticated, ])
 def get_report_pdf(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
@@ -913,7 +898,35 @@ def get_tech_stop_report(request):
     queryset = Event.objects.filter(index1__index="1", callsorevent=False, name__isnull=True, iptv__isnull=True).prefetch_related("object", "circuit", "ips", "responsible_outfit", "point1", "point2")
     objs = event_form_customer_filter_date_from_date_to_and_customer(queryset, date_from, date_to, customer)
     data = []
+
     for obj in objs:
+        if Form_Customer.objects.filter(object=obj.object).exists():
+            obj_rep = Form_Customer.objects.get(object=obj.object).object
+            if obj_rep:
+                data.append({
+                    "name": obj_rep.name,
+                    "date_from": obj.date_from,
+                    "date_to": obj.date_to,
+                    "reason": obj.comments1,
+                    "customer": obj_rep.customer.customer if obj_rep.customer is not None else "",
+                    "amount_flow": obj_rep.form_customer.amount_flow if obj_rep.form_customer is not None else "",
+                    "type_of_using": obj_rep.form_customer.type_of_using if obj_rep.form_customer is not None else "",
+                    "point1": obj_rep.point1.point if obj_rep.point1 is not None else "",
+                    "point2": obj_rep.point2.point if obj_rep.point2 is not None else ""})
+        if Form_Customer.objects.filter(circuit=obj.circuit).exists():
+            for cir in Form_Customer.objects.filter(circuit=obj.circuit):
+                if cir.circuit is not None:
+                    data.append({
+                        "name": cir.circuit.name,
+                        "date_from": obj.date_from,
+                        "date_to": obj.date_to,
+                        "reason": obj.comments1,
+                        "customer": cir.circuit.customer.customer if cir.circuit.customer is not None else "",
+                        "amount_flow": cir.circuit.form_customer.amount_flow if cir.circuit.form_customer is not None else "",
+                        "type_of_using": cir.circuit.form_customer.type_of_using if cir.circuit.form_customer is not None else "",
+                        "point1": cir.circuit.point1.point if cir.circuit.point1 is not None else "",
+                        "point2": cir.circuit.point2.point if cir.circuit.point2 is not None else ""})
+
         if obj.object_reports is not None:
             all_object_reports = obj.object_reports.all()
             for report in all_object_reports:
@@ -929,31 +942,5 @@ def get_tech_stop_report(request):
                         "type_of_using": obj_rep.form_customer.type_of_using if obj_rep.form_customer is not None else "",
                         "point1": obj_rep.point1.point if obj_rep.point1 is not None else "",
                         "point2": obj_rep.point2.point if obj_rep.point2 is not None else ""})
-        if Form_Customer.objects.filter(object=obj.object).exists() or Form_Customer.objects.filter(circuit=obj.circuit).exists():
-            obj_rep = Form_Customer.objects.get(object=obj.object).object
-            cir_rep = Form_Customer.objects.get(circuit=obj.circuit).circuit
-            if obj_rep:
-                data.append({
-                    "name": obj_rep.name,
-                    "date_from": obj.date_from,
-                    "date_to": obj.date_to,
-                    "reason": obj.comments1,
-                    "customer": obj_rep.customer.customer if obj_rep.customer is not None else "",
-                    "amount_flow": obj_rep.form_customer.amount_flow if obj_rep.form_customer is not None else "",
-                    "type_of_using": obj_rep.form_customer.type_of_using if obj_rep.form_customer is not None else "",
-                    "point1": obj_rep.point1.point if obj_rep.point1 is not None else "",
-                    "point2": obj_rep.point2.point if obj_rep.point2 is not None else ""})
-            if cir_rep:
-                data.append({
-                    "name": cir_rep.name,
-                    "date_from": obj.date_from,
-                    "date_to": obj.date_to,
-                    "reason": obj.comments1,
-                    "customer": cir_rep.customer.customer if cir_rep.customer is not None else "",
-                    "amount_flow": cir_rep.form_customer.amount_flow if cir_rep.form_customer is not None else "",
-                    "type_of_using": cir_rep.form_customer.type_of_using if cir_rep.form_customer is not None else "",
-                    "point1": cir_rep.point1.point if cir_rep.point1 is not None else "",
-                    "point2": cir_rep.point2.point if cir_rep.point2 is not None else ""})
     data.sort(key=operator.itemgetter('name'))
-
     return JsonResponse(data, safe=False)

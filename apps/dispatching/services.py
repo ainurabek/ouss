@@ -17,7 +17,6 @@ class ListFilterAPIView(ListAPIView):
             queryset = self.queryset.filter(created_at__gte=week)
 
         else:
-
             if date_to == "" and date_from != '':
                 queryset = self.queryset.filter(created_at=date_from)
             elif date_to != '' and date_from == '':
@@ -25,7 +24,6 @@ class ListFilterAPIView(ListAPIView):
             else:
                 if date_to != '' and date_from != '':
                     queryset = self.queryset.filter(created_at__gte=date_from, created_at__lte=date_to)
-
         return queryset
 
 
@@ -35,7 +33,6 @@ def get_minus_date(days: int):
 
 def get_event_name(event_object: Event) -> str:
     event_name = None
-
     if event_object.object is not None:
         event_name = event_object.object.name
     elif event_object.ips is not None:
@@ -46,7 +43,6 @@ def get_event_name(event_object: Event) -> str:
         event_name = str(event_object.iptv.num_channel) + ' ' + 'канал' + ' - ' + event_object.iptv.name
     else:
         event_name = event_object.name
-
     return event_name
 
 
@@ -86,20 +82,13 @@ def get_date_to(obj: Event, created_at: str):
 
 
 def event_form_customer_filter_date_from_date_to_and_customer(event: Event, date_from, date_to, customer) -> Event:
-
     if customer is not None and customer != '':
         event = event.filter(Q(object__customer=customer)|Q(circuit__customer=customer))
-
     if date_from is not None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
-
-
     return event
 
 def event_iptv_filter_date_from_date_to(event: Event, date_from, date_to) -> Event:
-
     if date_from is not None and date_to is not None:
         event = event.filter(Q(date_to__date__gte=date_from) | Q(date_to__date=None), date_from__date__lte=date_to)
-
-
     return event
