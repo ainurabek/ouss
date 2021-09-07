@@ -103,6 +103,11 @@ class TransitCreateAPIView(CreateAPIView):
             if not check_circuit_transit(new_trassa):
                 return Response({"detail": "Транзит провести нельзя, оконечный объект трассы участвует в транзите"},
                                 status=status.HTTP_403_FORBIDDEN)
+            for obj in new_trassa:
+                for bridge in obj.bridges.filter(transit__create_circuit_transit=True):
+                    bridge.transit.create_circuit_transit = False
+                    bridge.transit.save()
+
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -160,7 +165,12 @@ class RetrieveUpdateDelete(RetrieveUpdateDestroyAPIView):
         if self.request.data["create_circuit_transit"]:
             create_circuit_transit(trassa)
             for deleted_object in prev_trassa - set(trassa.trassa.all()):
-                deleted_object.circuit_object_parent.update(is_modified=False)
+                for circuit in deleted_object.circuit_object_parent.all():
+                    circuit_transit = CircuitTransit.objects.create()
+                    circuit_transit.trassa.add(circuit)
+                    circuit.trassa = circuit_transit
+                    circuit.is_modified = False
+                    circuit.save()
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
