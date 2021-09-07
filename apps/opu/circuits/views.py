@@ -89,13 +89,13 @@ class DeleteCircuitTrassa(APIView):
         circuit = get_object_or_404(Circuit, pk=circuit_pk)
         transit = get_object_or_404(CircuitTransit, pk=transit_pk)
         not_modified_circuit = circuit.object.circuit_object_parent.filter(is_modified=False).first()
-        if not circuit or transit.obj_trassa == not_modified_circuit.trassa.obj_trassa:
+        if not not_modified_circuit or transit.obj_trassa == not_modified_circuit.trassa.obj_trassa:
             return Response([], status=status.HTTP_200_OK)
         response = []
 
         for obj in not_modified_circuit.trassa.obj_trassa.trassa.all():
             try:
-                response.append(TransitCircSerializer(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit)))
+                response.append(TransitCircSerializer(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit)).data)
             except ObjectDoesNotExist:
                 pass
 
