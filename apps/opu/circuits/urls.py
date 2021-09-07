@@ -13,8 +13,8 @@ urlpatterns = [
     path('detail/<int:pk>/', CircuitDetailView.as_view(), name='circuit_detail'),
     path("history/circuit/<int:pk>/", CircuitHistory.as_view(), name='circuit_history'),
     path("trassa/update/<int:pk>/", UpdateCircuitAPIView.as_view()),
-    path("trassa/add/<int:circuit_pk>/<int:transit_pk>", AddCircuitTrassa.as_view()),
-    path("trassa/delete/<int:circuit_pk>/<int:transit_pk>", DeleteCircuitTrassa.as_view()),
+    path("trassa/add/<int:circuit_pk>/<int:transit_pk>/", AddCircuitTrassa.as_view()),
+    path("trassa/delete/<int:circuit_pk>/<int:transit_pk>/", DeleteCircuitTrassa.as_view()),
     path('', include(router.urls))
 
 ]
