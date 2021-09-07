@@ -97,39 +97,27 @@ def create_circuit_transit(object_transit: Transit):
                     pass
 
 
-def valid_for_deleted(transit: Transit, circuits_for_deleted: set) -> bool:
-    transit = set(transit.trassa.all())
-    for circuit in circuits_for_deleted:
-        if circuit.object in transit:
-            return False
-    return True
-
-
-def valid_for_add(circuits: set) -> bool:
-    for circuit in circuits:
-        if circuit.trassa is not None:
-            if circuit.trassa.trassa.count() > 1:
-                return False
-        else:
-            return False
-    return True
-
-
 def update_trassa_for_new_circuit(transit: CircuitTransit, circuits):
     for circuit in circuits:
-        circuit.trassa.delete()
+        if circuit:
+            circuit.trassa.delete()
         circuit.trassa = transit
         circuit.save()
 
 
 def create_new_trassa(circuits):
     for circuit in circuits:
-        obj_transit = circuit.object.circuit_object_parent.filter(is_modified=False).first().trassa.obj_trassa
-        circuit_transit = CircuitTransit.objects.create(obj_trassa=obj_transit)
-        circuit_transit.trassa.add(circuit)
-        circuit.trassa = circuit_transit
-        circuit.is_modified = False
-        circuit.save()
+        not_modified_circuit = circuit.object.circuit_object_parent.filter(is_modified=False).first()
+        if not_modified_circuit and not_modified_circuit.trassa.obj_trassa != circuit.trassa.obj_trassa:
+            circuit_transit = CircuitTransit.objects.create(obj_trassa=not_modified_circuit.trassa.obj_trassa)
+            for obj in not_modified_circuit.trassa.obj_trassa.trassa.all().iterator():
+                try:
+                    circuit_transit.trassa.add(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit))
+                except ObjectDoesNotExist:
+                    pass
+            circuit.trassa = circuit_transit
+            circuit.is_modified = False
+            circuit.save()
 
 
 def check_modified(transit: CircuitTransit):

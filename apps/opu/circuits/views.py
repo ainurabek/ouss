@@ -1,14 +1,15 @@
-from rest_framework.generics import UpdateAPIView
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.generics import UpdateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
-from apps.opu.circuits.serializers import CircuitList, CircuitEdit, CircuitDetail, CircuitUpdateSerializer
+from apps.opu.circuits.serializers import CircuitEdit, CircuitDetail, CircuitUpdateSerializer, \
+    TransitCircSerializer
 from rest_framework import generics, status
 from apps.opu.circuits.models import Circuit, CircuitTransit
 from rest_framework.views import APIView
 from apps.accounts.permissions import IsPervichkaOnly, IngenerUser, SuperUser
-from apps.opu.circuits.service import get_circuit_diff, valid_for_deleted, valid_for_add, update_trassa_for_new_circuit, \
-    create_new_trassa, check_modified
+from apps.opu.circuits.service import get_circuit_diff, update_trassa_for_new_circuit, create_new_trassa, check_modified
 from apps.opu.circuits.service import update_circuit_active
 from apps.opu.objects.models import Object
 
@@ -20,8 +21,8 @@ class CircuitListViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, pk):
-        circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'id_object', 'customer',
-                                                                         'category')
+        circuits = Object.objects.get(pk=pk).circ_obj.all().prefetch_related('point1', 'point2', 'object', 'id_object',
+                                                                             'customer', 'category')
         serializer = CircuitFormList(circuits, many=True)
         return Response(serializer.data)
 
@@ -67,7 +68,43 @@ class CircuitHistory(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class AddCircuitTrassa(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, circuit_pk, transit_pk):
+        circuit = get_object_or_404(Circuit, pk=circuit_pk)
+        transit = get_object_or_404(CircuitTransit, pk=transit_pk)
+        if circuit.trassa == transit:
+            return Response([], status=status.HTTP_200_OK)
+        response = [TransitCircSerializer(cir).data for cir in circuit.trassa.trassa.all()]
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class DeleteCircuitTrassa(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, circuit_pk, transit_pk):
+        circuit = get_object_or_404(Circuit, pk=circuit_pk)
+        transit = get_object_or_404(CircuitTransit, pk=transit_pk)
+        not_modified_circuit = circuit.object.circuit_object_parent.filter(is_modified=False).first()
+        if not circuit or transit.obj_trassa == not_modified_circuit.trassa.obj_trassa:
+            return Response([], status=status.HTTP_200_OK)
+        response = []
+
+        for obj in not_modified_circuit.trassa.obj_trassa.trassa.all():
+            try:
+                response.append(TransitCircSerializer(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit)))
+            except ObjectDoesNotExist:
+                pass
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class UpdateCircuitAPIView(UpdateAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
     queryset = CircuitTransit.objects.all()
     serializer_class = CircuitUpdateSerializer
 
@@ -81,14 +118,6 @@ class UpdateCircuitAPIView(UpdateAPIView):
         new_trassa = set(Circuit.objects.get(id=pk) for pk in self.request.data["trassa"])
         circuit_for_delete_in_trassa = prev_trassa - new_trassa
         new_circuit_in_trassa = new_trassa - prev_trassa
-
-        if not valid_for_deleted(instance.obj_trassa, circuit_for_delete_in_trassa):
-            return Response({"detail": "Порядок транзита не позволяет провести рассоединение"},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        if not valid_for_add(new_circuit_in_trassa):
-            return Response({"detail": "Транзит провести нельзя, объект трассы участвует в другом транзите"},
-                            status=status.HTTP_403_FORBIDDEN)
 
         self.perform_update(serializer)
         update_trassa_for_new_circuit(instance, new_circuit_in_trassa)
