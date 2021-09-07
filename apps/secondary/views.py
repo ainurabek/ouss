@@ -81,10 +81,10 @@ def get_report_secondary(request):
     for outfit in outfits.iterator():
         total_outfit = copy.deepcopy(content)
         out_data = copy.deepcopy(content)
-        out_data['name'] = outfit.outfit.outfit
-        out_data['outfit']['id'] = outfit.outfit.id
-        out_data['outfit']['outfit'] = outfit.outfit.outfit
-        out_data['outfit']['adding'] = outfit.outfit.adding
+        out_data['name'] = outfit.outfit.outfit if outfit.outfit is not None else ''
+        out_data['outfit']['id'] = outfit.outfit.id if outfit.outfit is not None else ''
+        out_data['outfit']['outfit'] = outfit.outfit.outfit if outfit.outfit is not None else ''
+        out_data['outfit']['adding'] = outfit.outfit.adding if outfit.outfit is not None else ''
         out_data['KT_numbering'] = None
         out_data['amount_of_numbers'] = None
         out_data['color'] = "outfit"
@@ -94,11 +94,11 @@ def get_report_secondary(request):
             second_data = copy.deepcopy(content)
             second_data['id'] = second.id
             second_data['name'] = second.point.name if second.point is not None else ''
-            second_data['outfit']['id'] = second.outfit.id
-            second_data['outfit']['outfit'] = second.outfit.outfit
-            second_data['outfit']['adding'] = second.outfit.adding
-            second_data['point']['id'] = second.point.id
-            second_data['point']['point'] = second.point.point
+            second_data['outfit']['id'] = second.outfit.id if outfit.outfit is not None else ''
+            second_data['outfit']['outfit'] = second.outfit.outfit if outfit.outfit is not None else ''
+            second_data['outfit']['adding'] = second.outfit.adding if outfit.outfit is not None else ''
+            second_data['point']['id'] = second.point.id if second.point is not None else ''
+            second_data['point']['point'] = second.point.point if second.point is not None else ''
             second_data['point']['name'] = second.point.name if second.point is not None else ''
             second_data['type_station']['id'] = second.type_station.id if second.type_station is not None else ''
             second_data['type_station']['name'] = second.type_station.name if second.type_station is not None else ''

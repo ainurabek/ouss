@@ -909,18 +909,20 @@ def get_tech_stop_report(request):
 
     for obj in objs:
         if Form_Customer.objects.filter(object=obj.object).exists():
-            obj_rep = Form_Customer.objects.get(object=obj.object).object
-            if obj_rep:
-                data.append({
-                    "name": obj_rep.name,
-                    "date_from": obj.date_from,
-                    "date_to": obj.date_to,
-                    "reason": obj.comments1,
-                    "customer": obj_rep.customer.customer if obj_rep.customer is not None else "",
-                    "amount_flow": obj_rep.form_customer.amount_flow if obj_rep.form_customer is not None else "",
-                    "type_of_using": obj_rep.form_customer.type_of_using if obj_rep.form_customer is not None else "",
-                    "point1": obj_rep.point1.point if obj_rep.point1 is not None else "",
-                    "point2": obj_rep.point2.point if obj_rep.point2 is not None else ""})
+            for fc_obj in Form_Customer.objects.filter(object=obj.object):
+                if fc_obj.object is not None:
+                    data.append({
+                        "name": fc_obj.object.name,
+                        "date_from": obj.date_from,
+                        "date_to": obj.date_to,
+                        "reason": obj.comments1,
+                        "customer": fc_obj.object.customer.customer if fc_obj.object.customer is not None else "",
+                        "amount_flow": fc_obj.object.form_customer.amount_flow if fc_obj.object.form_customer is not None else "",
+                        "type_of_using": fc_obj.object.form_customer.type_of_using if fc_obj.object.form_customer is not None else "",
+                        "point1": fc_obj.object.point1.point if fc_obj.object.point1 is not None else "",
+                        "point2": fc_obj.object.point2.point if fc_obj.object.point2 is not None else ""})
+
+
         if Form_Customer.objects.filter(circuit=obj.circuit).exists():
             for cir in Form_Customer.objects.filter(circuit=obj.circuit):
                 if cir.circuit is not None:
