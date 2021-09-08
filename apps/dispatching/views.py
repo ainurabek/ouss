@@ -534,7 +534,7 @@ def get_report_object(request):
     date = request.GET.get("date")
     index = request.GET.get("index")
 
-    all_events = Event.objects.filter(Q(date_to__date__gte=date) |Q(date_to__date = None), callsorevent=False).exclude(index1__index='4')
+    all_events = Event.objects.filter(Q(date_to__date__gte=date) | Q(date_to__date=None), callsorevent=False).exclude(index1__index='4')
     all_events =all_events.filter(date_from__date__lte=date)
 
     if index is not None and index != "":
@@ -824,8 +824,9 @@ class DamageReportListAPIView(ListAPIView):
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1",
                   "circuit", "ips", "name").\
             filter(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
-                   Q(object__tpo2__index="51"), Q(date_to__date__lte=date_to) | Q(date_to=None),
-                   date_to__date__gte=date_from, object__name__regex=r"^(?:K|К).[^-]+(?:-.[^-]+){0,1}\Z",
+                   Q(object__tpo2__index="51"), Q(date_to__isnull=True) | Q(date_to__date__lte=date_to),
+                   Q(date_to__date__gte=date_from) | Q(date_to__isnull=True), date_from__date__lte=date_to,
+                   object__name__regex=r"^(?:K|К).[^-]+(?:-.[^-]+){0,1}\Z",
                    index1__index="1", callsorevent=False, date_to__date__lte=date_to).\
             prefetch_related("object", "responsible_outfit", "point1", "point2")
         if outfit != "":
@@ -850,17 +851,15 @@ class InternationalDamageReportListAPIView(APIView):
         date_to = self.request.query_params.get("date_to", "")
         if date_from == "" or date_to == "":
             return Response([])
-        # exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
-        # Q(object__tpo2__index="51")
-
         queryset = Event.objects. \
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name"). \
             exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
                     Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
                     Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
                     Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
-            filter(Q(date_to__date__lte=date_to) | Q(date_to=None), index1__index="1", callsorevent=False,
-                   date_to__date__gte=date_from, name__isnull=True, iptv__isnull=True).\
+            filter(Q(date_to__isnull=True) | Q(date_to__date__lte=date_to),
+                   Q(date_to__date__gte=date_from) | Q(date_to__isnull=True), date_from__date__lte=date_to,
+                   index1__index="1", callsorevent=False, name__isnull=True, iptv__isnull=True).\
             prefetch_related("responsible_outfit", "point1", "point2", "object_reports", "object", "circuit", "ips")
         data = []
 
@@ -873,9 +872,9 @@ class InternationalDamageReportListAPIView(APIView):
                 data.append(event)
                 flag = False
             if flag:
-                event = InternationalDamageReportListSerializer(event).data
-                event["name"] = get_event_name(event)
-                data.append(event)
+                serializer = InternationalDamageReportListSerializer(event).data
+                serializer["name"] = get_event_name(event)
+                data.append(serializer)
         return Response(data)
 
             
