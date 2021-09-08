@@ -853,28 +853,29 @@ class InternationalDamageReportListAPIView(APIView):
             return Response([])
         queryset = Event.objects. \
             defer("reason", "type_journal", "created_by", "contact_name", "send_from", "customer", "index1", "name"). \
+            filter(Q(date_to__isnull=True) | Q(date_to__date__lte=date_to),
+                   Q(date_to__date__gte=date_from) | Q(date_to__isnull=True), date_from__date__lte=date_to,
+                   index1__index="1", callsorevent=False, name__isnull=True, iptv__isnull=True). \
+            prefetch_related("responsible_outfit", "point1", "point2", "object_reports", "object", "circuit", "ips")
+
+        inter_queryset = queryset. \
             exclude(Q(object__tpo1__index="35") | Q(object__tpo1__index="51") | Q(object__tpo2__index="35") |
                     Q(object__tpo2__index="51") | Q(ips__tpo__index="35") | Q(ips__tpo__index="51") |
                     Q(circuit__point1__tpo__index="35") | Q(circuit__point2__tpo__index="35") |
-                    Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51")). \
-            filter(Q(date_to__isnull=True) | Q(date_to__date__lte=date_to),
-                   Q(date_to__date__gte=date_from) | Q(date_to__isnull=True), date_from__date__lte=date_to,
-                   index1__index="1", callsorevent=False, name__isnull=True, iptv__isnull=True).\
-            prefetch_related("responsible_outfit", "point1", "point2", "object_reports", "object", "circuit", "ips")
+                    Q(circuit__point1__tpo__index="51") | Q(circuit__point2__tpo__index="51"))
         data = []
 
         for event in queryset:
-            flag = True
             for obj in event.object_reports.exclude(Q(tpo1__index="35") | Q(tpo1__index="51") |
                                                     Q(tpo2__index="35") | Q(tpo2__index="51")):
                 event = InternationalDamageReportListSerializer(event).data
                 event["name"] = obj.name
                 data.append(event)
-                flag = False
-            if flag:
-                serializer = InternationalDamageReportListSerializer(event).data
-                serializer["name"] = get_event_name(event)
-                data.append(serializer)
+
+        for event in inter_queryset:
+            serializer = InternationalDamageReportListSerializer(event).data
+            serializer["name"] = get_event_name(event)
+            data.append(serializer)
         return Response(data)
 
             
