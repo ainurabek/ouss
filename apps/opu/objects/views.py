@@ -617,7 +617,7 @@ class GOZUpdateAPIView(UpdateAPIView):
     serializer_class = GOZUpdateSerializer
 
 class IPTVView(viewsets.ModelViewSet):
-    queryset = IPTV.objects.all().order_by('id')
+    queryset = IPTV.objects.all().order_by('num_channel')
     serializer_class = IPTVSerializer
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
