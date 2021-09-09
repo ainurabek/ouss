@@ -99,10 +99,12 @@ def create_circuit_transit(object_transit: Transit):
 
 def update_trassa_for_new_circuit(transit: CircuitTransit, circuits):
     for circuit in circuits:
-        if circuit:
-            circuit.trassa.delete()
-        circuit.trassa = transit
-        circuit.save()
+        if not circuit.trassa:
+            circuit.trassa = transit
+            circuit.save()
+        elif circuit.trassa != transit:
+            circuit.trassa = transit
+            circuit.save()
 
 
 def create_new_trassa(circuits):

@@ -165,12 +165,14 @@ class RetrieveUpdateDelete(RetrieveUpdateDestroyAPIView):
         if self.request.data["create_circuit_transit"]:
             create_circuit_transit(trassa)
             for deleted_object in prev_trassa - set(trassa.trassa.all()):
+
                 for circuit in deleted_object.circuit_object_parent.all():
-                    circuit_transit = CircuitTransit.objects.create()
-                    circuit_transit.trassa.add(circuit)
-                    circuit.trassa = circuit_transit
-                    circuit.is_modified = False
-                    circuit.save()
+                    if not circuit.trassa or circuit.trassa.obj_trassa == instance:
+                        circuit_transit = CircuitTransit.objects.create()
+                        circuit_transit.trassa.add(circuit)
+                        circuit.trassa = circuit_transit
+                        circuit.is_modified = False
+                        circuit.save()
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
@@ -181,13 +183,19 @@ class RetrieveUpdateDelete(RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance):
         if instance.create_circuit_transit:
+            if not check_circuit_transit(instance.trassa.all()):
+                return Response({"detail": "Удалить нельзя, объекты участвуют в транзите"},
+                                status=status.HTTP_403_FORBIDDEN)
+
             for obj in instance.trassa.all().iterator():
+
                 for circuit in obj.circuit_object_parent.all():
-                    circuit_transit = CircuitTransit.objects.create()
-                    circuit_transit.trassa.add(circuit)
-                    circuit.trassa = circuit_transit
-                    circuit.is_modified = False
-                    circuit.save()
+                    if not circuit.trassa or circuit.trassa.obj_trassa == instance:
+                        circuit_transit = CircuitTransit.objects.create()
+                        circuit_transit.trassa.add(circuit)
+                        circuit.trassa = circuit_transit
+                        circuit.is_modified = False
+                        circuit.save()
         instance.delete()
 
 
