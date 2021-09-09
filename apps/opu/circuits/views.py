@@ -75,7 +75,11 @@ class AddCircuitTrassa(APIView):
     def get(self, request, circuit_pk, transit_pk):
         circuit = get_object_or_404(Circuit, pk=circuit_pk)
         transit = get_object_or_404(CircuitTransit, pk=transit_pk)
-        if circuit.trassa == transit:
+        if not circuit.trassa or not circuit.trassa.obj_trassa:
+            return Response({f"detail": f"Транзит {circuit.object.name} не создан"},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        if circuit.trassa.obj_trassa == transit.obj_trassa:
             return Response([], status=status.HTTP_200_OK)
         response = [TransitCircSerializer(cir).data for cir in circuit.trassa.trassa.all()]
         return Response(response, status=status.HTTP_200_OK)
@@ -92,7 +96,6 @@ class DeleteCircuitTrassa(APIView):
         if not not_modified_circuit or transit.obj_trassa == not_modified_circuit.trassa.obj_trassa:
             return Response([], status=status.HTTP_200_OK)
         response = []
-
         for obj in not_modified_circuit.trassa.obj_trassa.trassa.all():
             try:
                 response.append(TransitCircSerializer(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit)).data)
@@ -123,7 +126,7 @@ class UpdateCircuitAPIView(UpdateAPIView):
         update_trassa_for_new_circuit(instance, new_circuit_in_trassa)
         create_new_trassa(circuit_for_delete_in_trassa)
         check_modified(instance)
-
+        CircuitTransit.objects.filter(circuits=None).delete()
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.

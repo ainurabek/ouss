@@ -46,3 +46,7 @@ class CircuitTransit(models.Model):
 	trassa = SortedManyToManyField(Circuit, related_name="transits", blank=True)
 	obj_trassa = models.ForeignKey(Transit, related_name="circuit_transit", on_delete=models.CASCADE, blank=True, null=True)
 	reverse_circuits = models.CharField(max_length=350, blank=True, null=True)
+
+	class Meta:
+		verbose_name = 'Транзит'
+		verbose_name_plural = 'Транзиты'
