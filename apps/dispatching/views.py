@@ -168,6 +168,7 @@ class CircuitParentList(APIView):
         serializer = EventListSerializer(created_events, many=True).data
         return Response(serializer)
 
+
 class EventCircuitCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
@@ -273,6 +274,7 @@ class EventObjectCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class EventIPTVCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, SuperUser|IsDispOnly, IngenerUser|SuperUser)
@@ -315,6 +317,7 @@ class EventIPTVCreateViewAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class IPTVParentList(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -324,6 +327,7 @@ class IPTVParentList(APIView):
         created_events = Event.objects.filter(iptv=iptv, callsorevent=True).exclude(index1__index='4')
         serializer = EventListSerializer(created_events, many=True).data
         return Response(serializer)
+
 
 class EventCallsCreateViewAPI(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -674,8 +678,6 @@ def get_report_pdf(request):
     # response['Content-Disposition'] = 'attachment; filename="otchet-{}.pdf"'.format(date)
     response['Content-Disposition'] = f'attachment; filename="otchet-{date}.pdf"'
     return response
-
-
 
 
 class OutfitWorkerGet(APIView):

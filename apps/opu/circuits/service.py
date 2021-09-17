@@ -108,18 +108,23 @@ def update_trassa_for_new_circuit(transit: CircuitTransit, circuits):
 
 
 def create_new_trassa(circuits):
+    prev = set()
     for circuit in circuits:
-        not_modified_circuit = circuit.object.circuit_object_parent.filter(is_modified=False).first()
-        if not_modified_circuit and not_modified_circuit.trassa.obj_trassa != circuit.trassa.obj_trassa:
-            circuit_transit = CircuitTransit.objects.create(obj_trassa=not_modified_circuit.trassa.obj_trassa)
-            for obj in not_modified_circuit.trassa.obj_trassa.trassa.all().iterator():
-                try:
-                    circuit_transit.trassa.add(obj.circuit_object_parent.get(num_circuit=circuit.num_circuit))
-                except ObjectDoesNotExist:
-                    pass
-            circuit.trassa = circuit_transit
-            circuit.is_modified = False
-            circuit.save()
+        if circuit not in prev:
+            not_modified_circuit = circuit.object.circuit_object_parent.filter(is_modified=False).first()
+            if not_modified_circuit and not_modified_circuit.trassa.obj_trassa != circuit.trassa.obj_trassa:
+                circuit_transit = CircuitTransit.objects.create(obj_trassa=not_modified_circuit.trassa.obj_trassa)
+                for obj in not_modified_circuit.trassa.obj_trassa.trassa.all().iterator():
+                    try:
+                        circuit = obj.circuit_object_parent.get(num_circuit=circuit.num_circuit)
+                        circuit_transit.trassa.add(circuit)
+                        circuit.trassa = circuit_transit
+                        circuit.is_modified = False
+                        circuit.save()
+                        prev.add(circuit)
+                    except ObjectDoesNotExist:
+                        pass
+
 
 
 def check_modified(transit: CircuitTransit):
