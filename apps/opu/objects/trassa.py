@@ -17,6 +17,8 @@ from apps.opu.objects.models import Object, Point, Transit, Bridge
 from apps.opu.objects.serializers import PointList, ObjectListSerializer
 from apps.opu.objects.services import check_circuit_transit
 
+from apps.accounts.permissions import SuperUser, IngenerUser
+
 
 class PointListTrassa(ListAPIView):
     """Список ИП для создания трассы"""
@@ -54,7 +56,7 @@ class ObjectList(APIView):
 class PGCircuitListView(APIView):
     """Выбор PG для создания трассы circuits"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsPervichkaOnly,)
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def get(self, request, pk):
         obj = Object.objects.get(pk=pk)
@@ -94,6 +96,7 @@ class CircuitListTrassa(ListAPIView):
 class TransitCreateAPIView(CreateAPIView):
     queryset = Transit.objects.all()
     serializer_class = TransitCreateSerializer
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -124,6 +127,7 @@ class RetrieveUpdateDelete(RetrieveUpdateDestroyAPIView):
     queryset = Transit.objects.all()
     lookup_field = "pk"
     serializer_class = TransitCreateSerializer
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

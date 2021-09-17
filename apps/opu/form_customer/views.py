@@ -8,8 +8,6 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import UpdateAPIView, DestroyAPIView, ListAPIView
 from apps.opu.customer.models import Customer
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
 from apps.opu.form_customer.models import Form_Customer, OrderCusPhoto
 from apps.opu.form_customer.serializers import FormCustomerCreateSerializer, FormCustomerSerializer, \
     CircuitListSerializer, SignalizationSerializer, PointSerializer
@@ -20,7 +18,6 @@ from apps.accounts.permissions import IsPervichkaOnly, SuperUser, IngenerUser
 from apps.opu.services import PhotoDeleteMixin, PhotoCreateMixin, ListWithPKMixin, create_photo
 from apps.opu.form_customer.service import get_form_customer_diff
 from apps.opu.form_customer.models import Signalization
-
 from apps.logging.form_customer.views import FormCustomerCircuitLogUtil, \
     FormCustomerObjectLogUtil
 
