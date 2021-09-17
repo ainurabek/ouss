@@ -50,7 +50,7 @@ class BaseModelView(viewsets.ModelViewSet):
         if self.action == 'list' or self.action =='retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
-            permission_classes = [IsAuthenticated, IsVtorichkaOnly | SuperUser, IngenerUser | SuperUser]
+            permission_classes = [IsAuthenticated, IsVtorichkaOnly|SuperUser, IngenerUser|SuperUser]
         return [permission() for permission in permission_classes]
 
 @permission_classes([IsAuthenticated,])

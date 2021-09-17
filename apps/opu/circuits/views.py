@@ -70,7 +70,7 @@ class CircuitHistory(APIView):
 
 class AddCircuitTrassa(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def get(self, request, circuit_pk, transit_pk):
         circuit = get_object_or_404(Circuit, pk=circuit_pk)
@@ -87,7 +87,7 @@ class AddCircuitTrassa(APIView):
 
 class DeleteCircuitTrassa(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
 
     def get(self, request, circuit_pk, transit_pk):
         circuit = get_object_or_404(Circuit, pk=circuit_pk)
@@ -107,7 +107,7 @@ class DeleteCircuitTrassa(APIView):
 
 class UpdateCircuitAPIView(UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsPervichkaOnly | SuperUser, IngenerUser | SuperUser)
     queryset = CircuitTransit.objects.all()
     serializer_class = CircuitUpdateSerializer
 
