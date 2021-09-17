@@ -114,7 +114,7 @@ DATABASES = {
         'NAME': 'telekom',
         'USER': 'ainura',
         'PASSWORD': 'ainura123',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': '5432',
 
     }
