@@ -922,7 +922,8 @@ def get_tech_stop_report(request):
                         "amount_flow": fc_obj.object.form_customer.amount_flow if fc_obj.object.form_customer is not None else "",
                         "type_of_using": fc_obj.object.form_customer.type_of_using if fc_obj.object.form_customer is not None else "",
                         "point1": fc_obj.object.point1.point if fc_obj.object.point1 is not None else "",
-                        "point2": fc_obj.object.point2.point if fc_obj.object.point2 is not None else ""})
+                        "point2": fc_obj.object.point2.point if fc_obj.object.point2 is not None else "",
+                        "downtime":obj.downtime})
 
 
         if Form_Customer.objects.filter(circuit=obj.circuit).exists():
@@ -937,7 +938,8 @@ def get_tech_stop_report(request):
                         "amount_flow": cir.circuit.form_customer.amount_flow if cir.circuit.form_customer is not None else "",
                         "type_of_using": cir.circuit.form_customer.type_of_using if cir.circuit.form_customer is not None else "",
                         "point1": cir.circuit.point1.point if cir.circuit.point1 is not None else "",
-                        "point2": cir.circuit.point2.point if cir.circuit.point2 is not None else ""})
+                        "point2": cir.circuit.point2.point if cir.circuit.point2 is not None else "",
+                        "downtime":obj.downtime})
 
         if obj.object_reports is not None:
             all_object_reports = obj.object_reports.all()
@@ -953,6 +955,7 @@ def get_tech_stop_report(request):
                         "amount_flow": obj_rep.form_customer.amount_flow if obj_rep.form_customer is not None else "",
                         "type_of_using": obj_rep.form_customer.type_of_using if obj_rep.form_customer is not None else "",
                         "point1": obj_rep.point1.point if obj_rep.point1 is not None else "",
-                        "point2": obj_rep.point2.point if obj_rep.point2 is not None else ""})
+                        "point2": obj_rep.point2.point if obj_rep.point2 is not None else "",
+                        "downtime":obj.downtime})
     data.sort(key=operator.itemgetter('name'))
     return JsonResponse(data, safe=False)

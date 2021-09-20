@@ -250,4 +250,4 @@ class IPTVReportListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ("id", "date_from", "date_to", "reason", "comments1", 'iptv')
+        fields = ("id", "date_from", "date_to", "reason", "comments1", 'iptv', "downtime")

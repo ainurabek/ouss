@@ -28,7 +28,7 @@ class SignalizationView(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
 
     def get_permissions(self):
-        if self.action == 'list' or 'retrieve':
+        if self.action == 'list' or self.action == 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]

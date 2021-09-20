@@ -25,11 +25,12 @@ class CustomerViewSet(viewsets.ModelViewSet):
 	filterset_fields =  ('customer', 'abr', 'adding', 'diapozon')
 
 	def get_permissions(self):
-		if self.action == 'list' or 'retrieve':
+		if self.action == 'list' or self.action == 'retrieve':
 			permission_classes = [IsAuthenticated, ]
 		else:
-			permission_classes = [IsAuthenticated, IsPervichkaOnly | SuperUser, SuperUser | IngenerUser]
+			permission_classes = [IsAuthenticated, SuperUser | IsPervichkaOnly, IngenerUser | SuperUser]
 		return [permission() for permission in permission_classes]
+
 
 	def perform_create(self, serializer):
 		instance = serializer.save()
